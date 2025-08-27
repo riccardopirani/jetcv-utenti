@@ -1,0 +1,99 @@
+{
+  "@@locale": "en",
+  "appTitle": "JetCV",
+  "personalInformation": "Personal Information",
+  "yourProfile": "Your Profile",
+  "enterYourPersonalInfo": "Enter your personal information",
+  "personalData": "Personal Data",
+  "contactInformation": "Contact Information",
+  "address": "Address",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "gender": "Gender",
+  "dateOfBirth": "Date of Birth (dd/mm/yyyy)",
+  "email": "Email",
+  "phone": "Phone",
+  "addressField": "Address",
+  "city": "City",
+  "state": "State/Province",
+  "postalCode": "Postal Code",
+  "country": "Country",
+  "selectPhoto": "Select Profile Photo",
+  "takePhoto": "Take Photo",
+  "chooseFromGallery": "Choose from Gallery",
+  "cancel": "Cancel",
+  "addPhoto": "Add Photo",
+  "replacePhoto": "Replace Photo",
+  "uploading": "Uploading...",
+  "saveInformation": "Save Information",
+  "saving": "Saving...",
+  "firstNameRequired": "First name is required",
+  "lastNameRequired": "Last name is required",
+  "genderRequired": "Gender is required",
+  "emailRequired": "Email is required",
+  "validEmailRequired": "Enter a valid email",
+  "phoneRequired": "Phone is required",
+  "addressRequired": "Address is required",
+  "cityRequired": "City is required",
+  "stateRequired": "State/Province is required",
+  "postalCodeRequired": "Postal code is required",
+  "countryRequired": "Country is required",
+  "validDateRequired": "Enter a valid date of birth",
+  "dateFormatRequired": "Format required: dd/mm/yyyy",
+  "invalidDate": "Invalid date",
+  "invalidDay": "Invalid day (01-31)",
+  "invalidMonth": "Invalid month (01-12)",
+  "invalidYear": "Invalid year (1900-{currentYear})",
+  "@invalidYear": {
+    "placeholders": {
+      "currentYear": {
+        "type": "int"
+      }
+    }
+  },
+  "inexistentDate": "Non-existent date (e.g., 29/02 in non-leap year)",
+  "searchCountry": "Search country...",
+  "selectCountry": "Select country",
+  "noCountryFound": "No country found",
+  "fileTooLarge": "File is too large. Maximum 5MB allowed.",
+  "unsupportedFormat": "Unsupported file format. Use JPG, PNG or WebP.",
+  "imageSelectionError": "Error during image selection: {error}",
+  "@imageSelectionError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profilePictureUploaded": "Profile picture uploaded successfully!",
+  "uploadError": "Upload error: {error}",
+  "@uploadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "photoUploadError": "Error uploading photo: {error}. Personal data will still be saved.",
+  "@photoUploadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "informationSaved": "Personal information saved successfully!",
+  "informationSavedWithPhotoError": "Personal information saved successfully! (Note: profile picture was not uploaded)",
+  "saveError": "Save error: {error}",
+  "@saveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "languageSettings": "Language Settings",
+  "selectLanguage": "Select Language",
+  "languageChanged": "Language changed successfully",
+  "language": "Language"
+}
