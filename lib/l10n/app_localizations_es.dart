@@ -204,4 +204,307 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get language => 'Idioma';
+
+  @override
+  String get home => 'Inicio';
+
+  @override
+  String get cv => 'CV';
+
+  @override
+  String get profile => 'Perfil';
+
+  @override
+  String get welcome => 'Bienvenido,';
+
+  @override
+  String get verifiedOnBlockchain => 'Cuenta verificada en blockchain';
+
+  @override
+  String get quickActions => 'Acciones rápidas';
+
+  @override
+  String get newCV => 'Nuevo CV';
+
+  @override
+  String get createYourDigitalCV => 'Crea tu CV digital';
+
+  @override
+  String get viewCV => 'Ver CV';
+
+  @override
+  String get yourDigitalCV => 'Tu CV digital';
+
+  @override
+  String get cvViewInDevelopment => 'Vista CV - En desarrollo';
+
+  @override
+  String get user => 'Usuario';
+
+  @override
+  String loginError(String error) {
+    return 'Error de inicio de sesión: $error';
+  }
+
+  @override
+  String googleAuthError(String error) {
+    return 'Error de autenticación con Google: $error';
+  }
+
+  @override
+  String get signInToAccount => 'Inicia sesión en tu cuenta';
+
+  @override
+  String get enterEmail => 'Ingresa tu email';
+
+  @override
+  String get enterValidEmail => 'Ingresa un email válido';
+
+  @override
+  String get password => 'Contraseña';
+
+  @override
+  String get enterPassword => 'Ingresa tu contraseña';
+
+  @override
+  String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get signIn => 'Iniciar sesión';
+
+  @override
+  String get or => 'o';
+
+  @override
+  String get continueWithGoogle => 'Continuar con Google';
+
+  @override
+  String get noAccount => '¿No tienes una cuenta? ';
+
+  @override
+  String get signUp => 'Registrarse';
+
+  @override
+  String get mustAcceptTerms => 'Debes aceptar los términos y condiciones';
+
+  @override
+  String get confirmEmail => 'Confirmar email';
+
+  @override
+  String get emailConfirmationSent =>
+      'Te enviamos un email de confirmación. Haz clic en el enlace del email para activar tu cuenta.';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get registrationCompleted => 'Registro completado';
+
+  @override
+  String get accountCreatedSuccess =>
+      '¡Cuenta creada exitosamente! Puedes empezar a usar JetCV.';
+
+  @override
+  String get start => 'Comenzar';
+
+  @override
+  String get createAccount => 'Crea tu cuenta';
+
+  @override
+  String get startJourney => 'Comienza tu viaje con JetCV';
+
+  @override
+  String get fullName => 'Nombre completo';
+
+  @override
+  String get enterFullName => 'Ingresa tu nombre completo';
+
+  @override
+  String get nameMinLength => 'El nombre debe tener al menos 2 caracteres';
+
+  @override
+  String get createSecurePassword => 'Crea una contraseña segura';
+
+  @override
+  String get passwordMinLength =>
+      'La contraseña debe tener al menos 6 caracteres';
+
+  @override
+  String get confirmPassword => 'Confirmar contraseña';
+
+  @override
+  String get confirmYourPassword => 'Confirma tu contraseña';
+
+  @override
+  String get passwordsDontMatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get acceptTerms => 'Acepto los ';
+
+  @override
+  String get termsAndConditions => 'Términos y Condiciones';
+
+  @override
+  String get and => ' y la ';
+
+  @override
+  String get privacyPolicy => 'Política de Privacidad';
+
+  @override
+  String get haveAccount => '¿Ya tienes una cuenta? ';
+
+  @override
+  String errorLabel(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get emailSent => '¡Email enviado!';
+
+  @override
+  String get passwordForgotten => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get resetInstructionsSent =>
+      'Enviamos instrucciones para restablecer la contraseña a tu email';
+
+  @override
+  String get dontWorryReset =>
+      '¡No te preocupes! Ingresa tu email y te enviaremos un enlace para restablecer la contraseña';
+
+  @override
+  String get sendResetEmail => 'Enviar email de restablecimiento';
+
+  @override
+  String get checkEmailInstructions =>
+      'Revisa tu email y haz clic en el enlace para restablecer la contraseña. Si no ves el email, revisa también la carpeta de spam.';
+
+  @override
+  String get backToLogin => 'Volver al Login';
+
+  @override
+  String get rememberPassword => '¿Recuerdas tu contraseña? ';
+
+  @override
+  String get saveErrorGeneric => 'Error al guardar';
+
+  @override
+  String get blockchainPowered => 'Impulsado por Blockchain';
+
+  @override
+  String get digitalCVTitle => 'Tu CV digital\nverificado en blockchain';
+
+  @override
+  String get digitalCVDescription =>
+      'Crea, gestiona y comparte tu currículum vitae con la seguridad y autenticidad garantizadas por la tecnología blockchain.';
+
+  @override
+  String get mainFeatures => 'Características principales';
+
+  @override
+  String get blockchainVerification => 'Verificación Blockchain';
+
+  @override
+  String get blockchainVerificationDesc =>
+      'Tus datos son inmutables y verificables en la blockchain';
+
+  @override
+  String get secureSharing => 'Compartir Seguro';
+
+  @override
+  String get secureSharingDesc =>
+      'Comparte tu CV con un enlace seguro y rastreable';
+
+  @override
+  String get realTimeUpdates => 'Actualizaciones en Tiempo Real';
+
+  @override
+  String get realTimeUpdatesDesc =>
+      'Edita y actualiza tu CV en cualquier momento';
+
+  @override
+  String get jetcvInNumbers => 'JetCV en números';
+
+  @override
+  String get cvsCreated => 'CVs Creados';
+
+  @override
+  String get activeUsers => 'Usuarios Activos';
+
+  @override
+  String get security => 'Seguridad';
+
+  @override
+  String get readyToStart => '¿Listo para empezar?';
+
+  @override
+  String get createFirstCV =>
+      'Crea tu primer CV digital en blockchain en solo unos minutos';
+
+  @override
+  String get createYourCV => 'Crea tu CV';
+
+  @override
+  String get signInToYourAccount => 'Inicia sesión en tu cuenta';
+
+  @override
+  String get shareCV => 'Compartir CV';
+
+  @override
+  String get shareText => 'Compartir';
+
+  @override
+  String get cvLanguage => 'Idioma CV';
+
+  @override
+  String get personalInfo => 'Información Personal';
+
+  @override
+  String get age => 'edad';
+
+  @override
+  String get contactInfo => 'Información de Contacto';
+
+  @override
+  String get languages => 'Idiomas';
+
+  @override
+  String get skills => 'Habilidades';
+
+  @override
+  String get attitudes => 'Actitudes';
+
+  @override
+  String get languagesPlaceholder =>
+      'Tus competencias lingüísticas se mostrarán aquí';
+
+  @override
+  String get attitudesPlaceholder =>
+      'Tus actitudes y habilidades blandas se mostrarán aquí';
+
+  @override
+  String get cvShared => '¡Enlace del CV copiado al portapapeles!';
+
+  @override
+  String shareError(Object error) {
+    return 'Error al compartir: $error';
+  }
+
+  @override
+  String get years => 'años';
+
+  @override
+  String get born => 'nacido';
+
+  @override
+  String get bornFemale => 'nacida';
+
+  @override
+  String get blockchainCertified => 'Certificado Blockchain';
+
+  @override
+  String get cvSerial => 'Serial CV';
+
+  @override
+  String get verifiedCV => 'CV Verificado';
 }

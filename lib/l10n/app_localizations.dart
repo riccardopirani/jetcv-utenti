@@ -469,6 +469,570 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @cv.
+  ///
+  /// In en, this message translates to:
+  /// **'CV'**
+  String get cv;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome,'**
+  String get welcome;
+
+  /// No description provided for @verifiedOnBlockchain.
+  ///
+  /// In en, this message translates to:
+  /// **'Account verified on blockchain'**
+  String get verifiedOnBlockchain;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActions;
+
+  /// No description provided for @newCV.
+  ///
+  /// In en, this message translates to:
+  /// **'New CV'**
+  String get newCV;
+
+  /// No description provided for @createYourDigitalCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your digital CV'**
+  String get createYourDigitalCV;
+
+  /// No description provided for @viewCV.
+  ///
+  /// In en, this message translates to:
+  /// **'View CV'**
+  String get viewCV;
+
+  /// No description provided for @yourDigitalCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Your digital CV'**
+  String get yourDigitalCV;
+
+  /// No description provided for @cvViewInDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'CV View - In development'**
+  String get cvViewInDevelopment;
+
+  /// No description provided for @user.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get user;
+
+  /// No description provided for @loginError.
+  ///
+  /// In en, this message translates to:
+  /// **'Login error: {error}'**
+  String loginError(String error);
+
+  /// No description provided for @googleAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Google authentication error: {error}'**
+  String googleAuthError(String error);
+
+  /// No description provided for @signInToAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your account'**
+  String get signInToAccount;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get enterEmail;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get enterValidEmail;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterPassword;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get or;
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? '**
+  String get noAccount;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// No description provided for @mustAcceptTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'You must accept the terms and conditions'**
+  String get mustAcceptTerms;
+
+  /// No description provided for @confirmEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm email'**
+  String get confirmEmail;
+
+  /// No description provided for @emailConfirmationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent you a confirmation email. Click the link in the email to activate your account.'**
+  String get emailConfirmationSent;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @registrationCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration completed'**
+  String get registrationCompleted;
+
+  /// No description provided for @accountCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully! You can start using JetCV.'**
+  String get accountCreatedSuccess;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get createAccount;
+
+  /// No description provided for @startJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your journey with JetCV'**
+  String get startJourney;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get enterFullName;
+
+  /// No description provided for @nameMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameMinLength;
+
+  /// No description provided for @createSecurePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a secure password'**
+  String get createSecurePassword;
+
+  /// No description provided for @passwordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMinLength;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your password'**
+  String get confirmYourPassword;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords don\'t match'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @acceptTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I accept the '**
+  String get acceptTerms;
+
+  /// No description provided for @termsAndConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and Conditions'**
+  String get termsAndConditions;
+
+  /// No description provided for @and.
+  ///
+  /// In en, this message translates to:
+  /// **' and the '**
+  String get and;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @haveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get haveAccount;
+
+  /// No description provided for @errorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorLabel(String error);
+
+  /// No description provided for @emailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Email sent!'**
+  String get emailSent;
+
+  /// No description provided for @passwordForgotten.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get passwordForgotten;
+
+  /// No description provided for @resetInstructionsSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent password reset instructions to your email'**
+  String get resetInstructionsSent;
+
+  /// No description provided for @dontWorryReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t worry! Enter your email and we\'ll send you a password reset link'**
+  String get dontWorryReset;
+
+  /// No description provided for @sendResetEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset email'**
+  String get sendResetEmail;
+
+  /// No description provided for @checkEmailInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email and click the link to reset your password. If you don\'t see the email, also check your spam folder.'**
+  String get checkEmailInstructions;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Login'**
+  String get backToLogin;
+
+  /// No description provided for @rememberPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember your password? '**
+  String get rememberPassword;
+
+  /// No description provided for @saveErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Save error'**
+  String get saveErrorGeneric;
+
+  /// No description provided for @blockchainPowered.
+  ///
+  /// In en, this message translates to:
+  /// **'Blockchain Powered'**
+  String get blockchainPowered;
+
+  /// No description provided for @digitalCVTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your digital CV\nverified on blockchain'**
+  String get digitalCVTitle;
+
+  /// No description provided for @digitalCVDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, manage and share your curriculum vitae with the security and authenticity guaranteed by blockchain technology.'**
+  String get digitalCVDescription;
+
+  /// No description provided for @mainFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Features'**
+  String get mainFeatures;
+
+  /// No description provided for @blockchainVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Blockchain Verification'**
+  String get blockchainVerification;
+
+  /// No description provided for @blockchainVerificationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is immutable and verifiable on the blockchain'**
+  String get blockchainVerificationDesc;
+
+  /// No description provided for @secureSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Sharing'**
+  String get secureSharing;
+
+  /// No description provided for @secureSharingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your CV with a secure and traceable link'**
+  String get secureSharingDesc;
+
+  /// No description provided for @realTimeUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-Time Updates'**
+  String get realTimeUpdates;
+
+  /// No description provided for @realTimeUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit and update your CV at any time'**
+  String get realTimeUpdatesDesc;
+
+  /// No description provided for @jetcvInNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'JetCV in numbers'**
+  String get jetcvInNumbers;
+
+  /// No description provided for @cvsCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'CVs Created'**
+  String get cvsCreated;
+
+  /// No description provided for @activeUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Users'**
+  String get activeUsers;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @readyToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to get started?'**
+  String get readyToStart;
+
+  /// No description provided for @createFirstCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first digital CV on blockchain in just a few minutes'**
+  String get createFirstCV;
+
+  /// No description provided for @createYourCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your CV'**
+  String get createYourCV;
+
+  /// No description provided for @signInToYourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your account'**
+  String get signInToYourAccount;
+
+  /// No description provided for @shareCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Share CV'**
+  String get shareCV;
+
+  /// No description provided for @shareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareText;
+
+  /// No description provided for @cvLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'CV Language'**
+  String get cvLanguage;
+
+  /// No description provided for @personalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInfo;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'age'**
+  String get age;
+
+  /// No description provided for @contactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInfo;
+
+  /// No description provided for @languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get languages;
+
+  /// No description provided for @skills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get skills;
+
+  /// No description provided for @attitudes.
+  ///
+  /// In en, this message translates to:
+  /// **'Attitudes'**
+  String get attitudes;
+
+  /// No description provided for @languagesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your language skills will be displayed here'**
+  String get languagesPlaceholder;
+
+  /// No description provided for @attitudesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your attitudes and soft skills will be displayed here'**
+  String get attitudesPlaceholder;
+
+  /// No description provided for @cvShared.
+  ///
+  /// In en, this message translates to:
+  /// **'CV link copied to clipboard!'**
+  String get cvShared;
+
+  /// No description provided for @shareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sharing: {error}'**
+  String shareError(Object error);
+
+  /// No description provided for @years.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get years;
+
+  /// No description provided for @born.
+  ///
+  /// In en, this message translates to:
+  /// **'born'**
+  String get born;
+
+  /// No description provided for @bornFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'born'**
+  String get bornFemale;
+
+  /// No description provided for @blockchainCertified.
+  ///
+  /// In en, this message translates to:
+  /// **'Blockchain Certified'**
+  String get blockchainCertified;
+
+  /// No description provided for @cvSerial.
+  ///
+  /// In en, this message translates to:
+  /// **'CV Serial'**
+  String get cvSerial;
+
+  /// No description provided for @verifiedCV.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified CV'**
+  String get verifiedCV;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -30,7 +31,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     try {
       await SupabaseAuth.resetPassword(_emailController.text.trim());
-      
+
       setState(() {
         _emailSent = true;
         _isLoading = false;
@@ -39,11 +40,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       setState(() {
         _isLoading = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Errore: ${e.toString()}'),
+            content:
+                Text(AppLocalizations.of(context)!.errorLabel(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -89,21 +91,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      _emailSent ? 'Email inviata!' : 'Password dimenticata?',
+                      _emailSent
+                          ? AppLocalizations.of(context)!.emailSent
+                          : AppLocalizations.of(context)!.passwordForgotten,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _emailSent 
-                          ? 'Abbiamo inviato le istruzioni per resettare la password alla tua email'
-                          : 'Non preoccuparti! Inserisci la tua email e ti invieremo un link per resettare la password',
+                      _emailSent
+                          ? AppLocalizations.of(context)!.resetInstructionsSent
+                          : AppLocalizations.of(context)!.dontWorryReset,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                          ),
                     ),
                   ],
                 ),
@@ -116,10 +123,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Email',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        AppLocalizations.of(context)!.email,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -128,7 +136,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         textInputAction: TextInputAction.done,
                         onFieldSubmitted: (_) => _resetPassword(),
                         decoration: InputDecoration(
-                          hintText: 'Inserisci la tua email',
+                          hintText: AppLocalizations.of(context)!.enterEmail,
                           prefixIcon: const Icon(Icons.email_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -149,10 +157,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Inserisci la tua email';
+                            return AppLocalizations.of(context)!.enterEmail;
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return 'Inserisci una email valida';
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
+                            return AppLocalizations.of(context)!
+                                .enterValidEmail;
                           }
                           return null;
                         },
@@ -163,7 +173,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _resetPassword,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -181,11 +192,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   ),
                                 )
                               : Text(
-                                  'Invia email di reset',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  AppLocalizations.of(context)!.sendResetEmail,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                         ),
                       ),
@@ -197,10 +211,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(
@@ -212,7 +232,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Controlla la tua casella email e clicca sul link per resettare la password. Se non vedi l\'email, controlla anche la cartella spam.',
+                        AppLocalizations.of(context)!.checkEmailInstructions,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -225,7 +245,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -238,11 +259,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Torna al Login',
+                      AppLocalizations.of(context)!.backToLogin,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ),
@@ -253,7 +274,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Ricordi la password? ',
+                      AppLocalizations.of(context)!.rememberPassword,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
@@ -265,11 +286,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         );
                       },
                       child: Text(
-                        'Accedi',
+                        AppLocalizations.of(context)!.signIn,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ),
                   ],

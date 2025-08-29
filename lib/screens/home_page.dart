@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -20,8 +20,14 @@ class HomePage extends StatelessWidget {
                 stops: const [0.0, 0.3, 0.7, 1.0],
                 colors: [
                   Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-                  Theme.of(context).colorScheme.secondary.withValues(alpha: 0.08),
-                  Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.05),
+                  Theme.of(context)
+                      .colorScheme
+                      .secondary
+                      .withValues(alpha: 0.08),
+                  Theme.of(context)
+                      .colorScheme
+                      .tertiary
+                      .withValues(alpha: 0.05),
                   Colors.transparent,
                 ],
               ),
@@ -38,7 +44,10 @@ class HomePage extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -55,7 +64,10 @@ class HomePage extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Theme.of(context).colorScheme.secondary.withValues(alpha: 0.08),
+                    Theme.of(context)
+                        .colorScheme
+                        .secondary
+                        .withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -72,7 +84,10 @@ class HomePage extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.06),
+                    Theme.of(context)
+                        .colorScheme
+                        .tertiary
+                        .withValues(alpha: 0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -119,7 +134,10 @@ class AppHeader extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
             border: Border(
               bottom: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -141,7 +159,10 @@ class AppHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -157,9 +178,9 @@ class AppHeader extends StatelessWidget {
                   Text(
                     'JetCV',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                   ),
                 ],
               ),
@@ -170,10 +191,16 @@ class AppHeader extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.2),
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -225,30 +252,33 @@ class HeroSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Blockchain Powered',
+                  AppLocalizations.of(context)!.blockchainPowered,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Il tuo CV digitale\nverificato su blockchain',
+            AppLocalizations.of(context)!.digitalCVTitle,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.2,
-            ),
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                ),
           ),
           const SizedBox(height: 16),
           Text(
-            'Crea, gestisci e condividi il tuo curriculum vitae con la sicurezza e l\'autenticità garantite dalla tecnologia blockchain.',
+            AppLocalizations.of(context)!.digitalCVDescription,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              height: 1.5,
-            ),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.7),
+                  height: 1.5,
+                ),
           ),
           const SizedBox(height: 32),
           Container(
@@ -309,32 +339,33 @@ class FeatureSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Funzionalità principali',
+            AppLocalizations.of(context)!.mainFeatures,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 24),
           Column(
             children: [
               FeatureCard(
                 icon: Icons.verified,
-                title: 'Verifica Blockchain',
-                description: 'I tuoi dati sono immutabili e verificabili sulla blockchain',
+                title: AppLocalizations.of(context)!.blockchainVerification,
+                description:
+                    AppLocalizations.of(context)!.blockchainVerificationDesc,
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 16),
               FeatureCard(
                 icon: Icons.share,
-                title: 'Condivisione Sicura',
-                description: 'Condividi il tuo CV con un link sicuro e tracciabile',
+                title: AppLocalizations.of(context)!.secureSharing,
+                description: AppLocalizations.of(context)!.secureSharingDesc,
                 color: Theme.of(context).colorScheme.secondary,
               ),
               const SizedBox(height: 16),
               FeatureCard(
                 icon: Icons.update,
-                title: 'Aggiornamenti in Tempo Reale',
-                description: 'Modifica e aggiorna il tuo CV in qualsiasi momento',
+                title: AppLocalizations.of(context)!.realTimeUpdates,
+                description: AppLocalizations.of(context)!.realTimeUpdatesDesc,
                 color: Theme.of(context).colorScheme.tertiary,
               ),
             ],
@@ -423,15 +454,18 @@ class FeatureCard extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                          ),
                     ),
                   ],
                 ),
@@ -463,7 +497,10 @@ class StatsSection extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: [
                   Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
-                  Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                  Theme.of(context)
+                      .colorScheme
+                      .secondary
+                      .withValues(alpha: 0.8),
                   Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.9),
                 ],
               ),
@@ -474,7 +511,10 @@ class StatsSection extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -488,7 +528,7 @@ class StatsSection extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'JetCV in numeri',
+                  AppLocalizations.of(context)!.jetcvInNumbers,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -507,7 +547,7 @@ class StatsSection extends StatelessWidget {
                     Expanded(
                       child: StatItem(
                         value: '10K+',
-                        label: 'CV Creati',
+                        label: AppLocalizations.of(context)!.cvsCreated,
                       ),
                     ),
                     Container(
@@ -528,7 +568,7 @@ class StatsSection extends StatelessWidget {
                     Expanded(
                       child: StatItem(
                         value: '5K+',
-                        label: 'Utenti Attivi',
+                        label: AppLocalizations.of(context)!.activeUsers,
                       ),
                     ),
                     Container(
@@ -549,7 +589,7 @@ class StatsSection extends StatelessWidget {
                     Expanded(
                       child: StatItem(
                         value: '99%',
-                        label: 'Sicurezza',
+                        label: AppLocalizations.of(context)!.security,
                       ),
                     ),
                   ],
@@ -628,18 +668,21 @@ class CallToActionSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Pronto a iniziare?',
+            AppLocalizations.of(context)!.readyToStart,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Crea il tuo primo CV digitale su blockchain in pochi minuti',
+            AppLocalizations.of(context)!.createFirstCV,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.7),
+                ),
           ),
           const SizedBox(height: 32),
           SizedBox(
@@ -662,11 +705,11 @@ class CallToActionSection extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                'Crea il tuo CV',
+                AppLocalizations.of(context)!.createYourCV,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
           ),
@@ -693,11 +736,11 @@ class CallToActionSection extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Accedi al tuo account',
+                AppLocalizations.of(context)!.signInToYourAccount,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
           ),

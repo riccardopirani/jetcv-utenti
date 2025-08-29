@@ -3,7 +3,7 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page.dart';
-
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -35,12 +35,12 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _signUp() async {
     if (_isLoading) return; // Prevent multiple calls
-    
+
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Devi accettare i termini e condizioni'),
+          content: Text(AppLocalizations.of(context)!.mustAcceptTerms),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -71,19 +71,20 @@ class _SignupPageState extends State<SignupPage> {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: const Text('Conferma email'),
-              content: const Text(
-                'Ti abbiamo inviato un\'email di conferma. Clicca sul link nell\'email per attivare il tuo account.',
+              title: Text(AppLocalizations.of(context)!.confirmEmail),
+              content: Text(
+                AppLocalizations.of(context)!.emailConfirmationSent,
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
                     );
                   },
-                  child: const Text('OK'),
+                  child: Text(AppLocalizations.of(context)!.ok),
                 ),
               ],
             ),
@@ -94,19 +95,20 @@ class _SignupPageState extends State<SignupPage> {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: const Text('Registrazione completata'),
-              content: const Text(
-                'Account creato con successo! Puoi iniziare a usare JetCV.',
+              title: Text(AppLocalizations.of(context)!.registrationCompleted),
+              content: Text(
+                AppLocalizations.of(context)!.accountCreatedSuccess,
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const AuthenticatedHomePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const AuthenticatedHomePage()),
                     );
                   },
-                  child: const Text('Inizia'),
+                  child: Text(AppLocalizations.of(context)!.start),
                 ),
               ],
             ),
@@ -150,7 +152,8 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Errore durante l\'autenticazione con Google: ${e.toString()}'),
+            content: Text(
+                AppLocalizations.of(context)!.googleAuthError(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -211,18 +214,21 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Crea il tuo account',
+                      AppLocalizations.of(context)!.createAccount,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Inizia il tuo viaggio con JetCV',
+                      AppLocalizations.of(context)!.startJourney,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                          ),
                     ),
                   ],
                 ),
@@ -234,10 +240,10 @@ class _SignupPageState extends State<SignupPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Nome completo',
+                      AppLocalizations.of(context)!.fullName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -245,7 +251,7 @@ class _SignupPageState extends State<SignupPage> {
                       textInputAction: TextInputAction.next,
                       textCapitalization: TextCapitalization.words,
                       decoration: InputDecoration(
-                        hintText: 'Inserisci il tuo nome completo',
+                        hintText: AppLocalizations.of(context)!.enterFullName,
                         prefixIcon: const Icon(Icons.person_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -266,20 +272,20 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Inserisci il tuo nome completo';
+                          return AppLocalizations.of(context)!.enterFullName;
                         }
                         if (value.length < 2) {
-                          return 'Il nome deve avere almeno 2 caratteri';
+                          return AppLocalizations.of(context)!.nameMinLength;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Email',
+                      AppLocalizations.of(context)!.email,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -287,7 +293,7 @@ class _SignupPageState extends State<SignupPage> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        hintText: 'Inserisci la tua email',
+                        hintText: AppLocalizations.of(context)!.enterEmail,
                         prefixIcon: const Icon(Icons.email_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -308,20 +314,21 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Inserisci la tua email';
+                          return AppLocalizations.of(context)!.enterEmail;
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                          return 'Inserisci una email valida';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value)) {
+                          return AppLocalizations.of(context)!.enterValidEmail;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Password',
+                      AppLocalizations.of(context)!.password,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -329,7 +336,8 @@ class _SignupPageState extends State<SignupPage> {
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        hintText: 'Crea una password sicura',
+                        hintText:
+                            AppLocalizations.of(context)!.createSecurePassword,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -338,7 +346,9 @@ class _SignupPageState extends State<SignupPage> {
                             });
                           },
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                         ),
                         border: OutlineInputBorder(
@@ -360,20 +370,21 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Inserisci una password';
+                          return AppLocalizations.of(context)!.enterPassword;
                         }
                         if (value.length < 6) {
-                          return 'La password deve avere almeno 6 caratteri';
+                          return AppLocalizations.of(context)!
+                              .passwordMinLength;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Conferma password',
+                      AppLocalizations.of(context)!.confirmPassword,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -381,16 +392,20 @@ class _SignupPageState extends State<SignupPage> {
                       obscureText: _obscureConfirmPassword,
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
-                        hintText: 'Conferma la tua password',
+                        hintText:
+                            AppLocalizations.of(context)!.confirmYourPassword,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
                             });
                           },
                           icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                         ),
                         border: OutlineInputBorder(
@@ -412,10 +427,12 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Conferma la tua password';
+                          return AppLocalizations.of(context)!
+                              .confirmYourPassword;
                         }
                         if (value != _passwordController.text) {
-                          return 'Le password non coincidono';
+                          return AppLocalizations.of(context)!
+                              .passwordsDontMatch;
                         }
                         return null;
                       },
@@ -439,19 +456,26 @@ class _SignupPageState extends State<SignupPage> {
                               text: TextSpan(
                                 style: Theme.of(context).textTheme.bodySmall,
                                 children: [
-                                  const TextSpan(text: 'Accetto i '),
                                   TextSpan(
-                                    text: 'Termini e Condizioni',
+                                      text: AppLocalizations.of(context)!
+                                          .acceptTerms),
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)!
+                                        .termsAndConditions,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  const TextSpan(text: ' e la '),
                                   TextSpan(
-                                    text: 'Privacy Policy',
+                                      text: AppLocalizations.of(context)!.and),
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)!
+                                        .privacyPolicy,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -468,7 +492,8 @@ class _SignupPageState extends State<SignupPage> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signUp,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -486,11 +511,14 @@ class _SignupPageState extends State<SignupPage> {
                                 ),
                               )
                             : Text(
-                                'Crea account',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                AppLocalizations.of(context)!.createAccount,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                       ),
                     ),
@@ -499,21 +527,33 @@ class _SignupPageState extends State<SignupPage> {
                       children: [
                         Expanded(
                           child: Divider(
-                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'oppure',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
+                            AppLocalizations.of(context)!.or,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
                           ),
                         ),
                         Expanded(
                           child: Divider(
-                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                       ],
@@ -522,7 +562,9 @@ class _SignupPageState extends State<SignupPage> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: (_isLoading || _isGoogleLoading) ? null : _signUpWithGoogle,
+                        onPressed: (_isLoading || _isGoogleLoading)
+                            ? null
+                            : _signUpWithGoogle,
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -546,10 +588,11 @@ class _SignupPageState extends State<SignupPage> {
                                 height: 20,
                               ),
                         label: Text(
-                          'Continua con Google',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          AppLocalizations.of(context)!.continueWithGoogle,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                     ),
@@ -558,7 +601,7 @@ class _SignupPageState extends State<SignupPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Hai già un account? ',
+                          AppLocalizations.of(context)!.haveAccount,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
@@ -570,11 +613,14 @@ class _SignupPageState extends State<SignupPage> {
                             );
                           },
                           child: Text(
-                            'Accedi',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            AppLocalizations.of(context)!.signIn,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ],

@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:convert';
 
 /// Service for user-related database operations
 class UserService {
@@ -22,9 +22,11 @@ class UserService {
         // User not found
         return null;
       } else {
-        throw Exception('Edge Function error ${response.status}: ${response.data}');
+        throw Exception(
+            'Edge Function error ${response.status}: ${response.data}');
       }
     } catch (e) {
+      debugPrint('❌ UserService.getUserById error: $e');
       return null;
     }
   }
@@ -33,10 +35,11 @@ class UserService {
   static Future<UserModel?> getCurrentUser() async {
     try {
       final session = _client.auth.currentSession;
-      if (session?.user?.id == null) return null;
-      
-      return await getUserById(session!.user.id);
+      if (session == null || session.user.id.isEmpty) return null;
+
+      return await getUserById(session.user.id);
     } catch (e) {
+      debugPrint('❌ UserService.getCurrentUser error: $e');
       return null;
     }
   }
@@ -45,7 +48,8 @@ class UserService {
   /// Uses PATCH method and supports only allowed fields from the API whitelist
   /// Only updates changed, non-empty fields and automatically calculates profileCompleted
   /// Returns a map with success status and profileCompleted indicator
-  static Future<Map<String, dynamic>> updateUser(String userId, Map<String, dynamic> updates) async {
+  static Future<Map<String, dynamic>> updateUser(
+      String userId, Map<String, dynamic> updates) async {
     try {
       // Get current session for authorization
       final session = _client.auth.currentSession;
@@ -56,14 +60,14 @@ class UserService {
           'message': 'Valid user session required',
         };
       }
-      
+
       // Prepare the body with idUser, e and updates
       final body = {
         'idUser': userId,
         'type': 'user',
         ...updates,
       };
-      
+
       final response = await _client.functions.invoke(
         'updateUserProfile',
         body: body,
@@ -113,10 +117,13 @@ class UserService {
         return {
           'success': false,
           'error': 'Edge Function error ${response.status}',
-          'message': response.data != null ? response.data.toString() : 'Server error occurred',
+          'message': response.data != null
+              ? response.data.toString()
+              : 'Server error occurred',
         };
       }
     } catch (e) {
+      debugPrint('❌ UserService.updateUser error: $e');
       return {
         'success': false,
         'error': 'Client Error',
