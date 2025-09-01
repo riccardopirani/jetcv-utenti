@@ -15,7 +15,391 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
-import 'package:jetcv__utenti/widgets/language_selector.dart';
+
+import 'package:jetcv__utenti/services/locale_service.dart';
+
+// Lista ridotta delle nazionalità più comuni
+const Map<String, Map<String, String>> NATIONALITIES = {
+  'it': {
+    'it': 'Italiana',
+    'fr': 'Francese',
+    'de': 'Tedesca',
+    'es': 'Spagnola',
+    'pt': 'Portoghese',
+    'en': 'Inglese',
+    'us': 'Statunitense',
+    'ca': 'Canadese',
+    'au': 'Australiana',
+    'gb': 'Britannica',
+    'ie': 'Irlandese',
+    'ch': 'Svizzera',
+    'at': 'Austriaca',
+    'be': 'Belga',
+    'nl': 'Olandese',
+    'dk': 'Danese',
+    'se': 'Svedese',
+    'no': 'Norvegese',
+    'fi': 'Finlandese',
+    'pl': 'Polacca',
+    'cz': 'Ceca',
+    'sk': 'Slovacca',
+    'hu': 'Ungherese',
+    'ro': 'Rumena',
+    'bg': 'Bulgaro',
+    'hr': 'Croata',
+    'si': 'Slovena',
+    'rs': 'Serba',
+    'gr': 'Greca',
+    'tr': 'Turca',
+    'il': 'Israeliana',
+    'ru': 'Russa',
+    'ua': 'Ucraina',
+    'cn': 'Cinese',
+    'jp': 'Giapponese',
+    'kr': 'Sudcoreana',
+    'in': 'Indiana',
+    'br': 'Brasiliana',
+    'ar': 'Argentina',
+    'mx': 'Messicana',
+    'za': 'Sudafricana',
+  },
+  'en': {
+    'it': 'Italian',
+    'fr': 'French',
+    'de': 'German',
+    'es': 'Spanish',
+    'pt': 'Portuguese',
+    'en': 'English',
+    'us': 'American',
+    'ca': 'Canadian',
+    'au': 'Australian',
+    'gb': 'British',
+    'ie': 'Irish',
+    'ch': 'Swiss',
+    'at': 'Austrian',
+    'be': 'Belgian',
+    'nl': 'Dutch',
+    'dk': 'Danish',
+    'se': 'Swedish',
+    'no': 'Norwegian',
+    'fi': 'Finnish',
+    'pl': 'Polish',
+    'cz': 'Czech',
+    'sk': 'Slovak',
+    'hu': 'Hungarian',
+    'ro': 'Romanian',
+    'bg': 'Bulgarian',
+    'hr': 'Croatian',
+    'si': 'Slovenian',
+    'rs': 'Serbian',
+    'gr': 'Greek',
+    'tr': 'Turkish',
+    'il': 'Israeli',
+    'ru': 'Russian',
+    'ua': 'Ukrainian',
+    'cn': 'Chinese',
+    'jp': 'Japanese',
+    'kr': 'South Korean',
+    'in': 'Indian',
+    'br': 'Brazilian',
+    'ar': 'Argentine',
+    'mx': 'Mexican',
+    'za': 'South African',
+  },
+  'es': {
+    'it': 'Italiana',
+    'fr': 'Francesa',
+    'de': 'Alemana',
+    'es': 'Española',
+    'pt': 'Portuguesa',
+    'en': 'Inglesa',
+    'us': 'Estadounidense',
+    'ca': 'Canadiense',
+    'au': 'Australiana',
+    'gb': 'Británica',
+    'ie': 'Irlandesa',
+    'ch': 'Suiza',
+    'at': 'Austriaca',
+    'be': 'Belga',
+    'nl': 'Holandesa',
+    'dk': 'Danesa',
+    'se': 'Sueca',
+    'no': 'Noruega',
+    'fi': 'Finlandesa',
+    'pl': 'Polaca',
+    'cz': 'Checa',
+    'sk': 'Eslovaca',
+    'hu': 'Húngara',
+    'ro': 'Rumana',
+    'bg': 'Búlgara',
+    'hr': 'Croata',
+    'si': 'Eslovena',
+    'rs': 'Serbia',
+    'gr': 'Griega',
+    'tr': 'Turca',
+    'il': 'Israelí',
+    'ru': 'Rusa',
+    'ua': 'Ucraniana',
+    'cn': 'China',
+    'jp': 'Japonesa',
+    'kr': 'Surcoreana',
+    'in': 'India',
+    'br': 'Brasileña',
+    'ar': 'Argentina',
+    'mx': 'Mexicana',
+    'za': 'Sudafricana',
+  },
+  'fr': {
+    'it': 'Italienne',
+    'fr': 'Française',
+    'de': 'Allemande',
+    'es': 'Espagnole',
+    'pt': 'Portugaise',
+    'en': 'Anglaise',
+    'us': 'Américaine',
+    'ca': 'Canadienne',
+    'au': 'Australienne',
+    'gb': 'Britannique',
+    'ie': 'Irlandaise',
+    'ch': 'Suisse',
+    'at': 'Autrichienne',
+    'be': 'Belge',
+    'nl': 'Néerlandaise',
+    'dk': 'Danoise',
+    'se': 'Suédoise',
+    'no': 'Norvégienne',
+    'fi': 'Finlandaise',
+    'pl': 'Polonaise',
+    'cz': 'Tchèque',
+    'sk': 'Slovaque',
+    'hu': 'Hongroise',
+    'ro': 'Roumaine',
+    'bg': 'Bulgare',
+    'hr': 'Croate',
+    'si': 'Slovène',
+    'rs': 'Serbe',
+    'gr': 'Grecque',
+    'tr': 'Turque',
+    'il': 'Israélienne',
+    'ru': 'Russe',
+    'ua': 'Ukrainienne',
+    'cn': 'Chinoise',
+    'jp': 'Japonaise',
+    'kr': 'Sud-Coréenne',
+    'in': 'Indienne',
+    'br': 'Brésilienne',
+    'ar': 'Argentine',
+    'mx': 'Mexicaine',
+    'za': 'Sud-Africaine',
+  },
+  'de': {
+    'it': 'Italienisch',
+    'fr': 'Französisch',
+    'de': 'Deutsch',
+    'es': 'Spanisch',
+    'pt': 'Portugiesisch',
+    'en': 'Englisch',
+    'us': 'Amerikanisch',
+    'ca': 'Kanadisch',
+    'au': 'Australisch',
+    'gb': 'Britisch',
+    'ie': 'Irisch',
+    'ch': 'Schweizerisch',
+    'at': 'Österreichisch',
+    'be': 'Belgisch',
+    'nl': 'Niederländisch',
+    'dk': 'Dänisch',
+    'se': 'Schwedisch',
+    'no': 'Norwegisch',
+    'fi': 'Finnisch',
+    'pl': 'Polnisch',
+    'cz': 'Tschechisch',
+    'sk': 'Slowakisch',
+    'hu': 'Ungarisch',
+    'ro': 'Rumänisch',
+    'bg': 'Bulgarisch',
+    'hr': 'Kroatisch',
+    'si': 'Slowenisch',
+    'rs': 'Serbisch',
+    'gr': 'Griechisch',
+    'tr': 'Türkisch',
+    'il': 'Israelisch',
+    'ru': 'Russisch',
+    'ua': 'Ukrainisch',
+    'cn': 'Chinesisch',
+    'jp': 'Japanisch',
+    'kr': 'Südkoreanisch',
+    'in': 'Indisch',
+    'br': 'Brasilianisch',
+    'ar': 'Argentinisch',
+    'mx': 'Mexikanisch',
+    'za': 'Südafrikanisch',
+  },
+};
+
+// Lista delle lingue più comuni con codici ISO 639-1 e emoji
+const Map<String, Map<String, String>> LANGUAGES = {
+  'it': {
+    'it': '🇮🇹 Italiano',
+    'en': '🇬🇧 Inglese',
+    'fr': '🇫🇷 Francese',
+    'de': '🇩🇪 Tedesco',
+    'es': '🇪🇸 Spagnolo',
+    'pt': '🇵🇹 Portoghese',
+    'ru': '🇷🇺 Russo',
+    'zh': '🇨🇳 Cinese',
+    'ja': '🇯🇵 Giapponese',
+    'ko': '🇰🇷 Coreano',
+    'ar': '🇸🇦 Arabo',
+    'hi': '🇮🇳 Hindi',
+    'nl': '🇳🇱 Olandese',
+    'sv': '🇸🇪 Svedese',
+    'no': '🇳🇴 Norvegese',
+    'da': '🇩🇰 Danese',
+    'fi': '🇫🇮 Finlandese',
+    'pl': '🇵🇱 Polacco',
+    'cs': '🇨🇿 Ceco',
+    'sk': '🇸🇰 Slovacco',
+    'hu': '🇭🇺 Ungherese',
+    'ro': '🇷🇴 Rumeno',
+    'bg': '🇧🇬 Bulgaro',
+    'hr': '🇭🇷 Croato',
+    'sl': '🇸🇮 Sloveno',
+    'sr': '🇷🇸 Serbo',
+    'el': '🇬🇷 Greco',
+    'tr': '🇹🇷 Turco',
+    'he': '🇮🇱 Ebraico',
+    'uk': '🇺🇦 Ucraino',
+  },
+  'en': {
+    'it': '🇮🇹 Italian',
+    'en': '🇬🇧 English',
+    'fr': '🇫🇷 French',
+    'de': '🇩🇪 German',
+    'es': '🇪🇸 Spanish',
+    'pt': '🇵🇹 Portuguese',
+    'ru': '🇷🇺 Russian',
+    'zh': '🇨🇳 Chinese',
+    'ja': '🇯🇵 Japanese',
+    'ko': '🇰🇷 Korean',
+    'ar': '🇸🇦 Arabic',
+    'hi': '🇮🇳 Hindi',
+    'nl': '🇳🇱 Dutch',
+    'sv': '🇸🇪 Swedish',
+    'no': '🇳🇴 Norwegian',
+    'da': '🇩🇰 Danish',
+    'fi': '🇫🇮 Finnish',
+    'pl': '🇵🇱 Polish',
+    'cs': '🇨🇿 Czech',
+    'sk': '🇸🇰 Slovak',
+    'hu': '🇭🇺 Hungarian',
+    'ro': '🇷🇴 Romanian',
+    'bg': '🇧🇬 Bulgarian',
+    'hr': '🇭🇷 Croatian',
+    'sl': '🇸🇮 Slovenian',
+    'sr': '🇷🇸 Serbian',
+    'el': '🇬🇷 Greek',
+    'tr': '🇹🇷 Turkish',
+    'he': '🇮🇱 Hebrew',
+    'uk': '🇺🇦 Ukrainian',
+  },
+  'es': {
+    'it': '🇮🇹 Italiano',
+    'en': '🇬🇧 Inglés',
+    'fr': '🇫🇷 Francés',
+    'de': '🇩🇪 Alemán',
+    'es': '🇪🇸 Español',
+    'pt': '🇵🇹 Portugués',
+    'ru': '🇷🇺 Ruso',
+    'zh': '🇨🇳 Chino',
+    'ja': '🇯🇵 Japonés',
+    'ko': '🇰🇷 Coreano',
+    'ar': '🇸🇦 Árabe',
+    'hi': '🇮🇳 Hindi',
+    'nl': '🇳🇱 Holandés',
+    'sv': '🇸🇪 Sueco',
+    'no': '🇳🇴 Noruego',
+    'da': '🇩🇰 Danés',
+    'fi': '🇫🇮 Finlandés',
+    'pl': '🇵🇱 Polaco',
+    'cs': '🇨🇿 Checo',
+    'sk': '🇸🇰 Eslovaco',
+    'hu': '🇭🇺 Húngaro',
+    'ro': '🇷🇴 Rumano',
+    'bg': '🇧🇬 Búlgaro',
+    'hr': '🇭🇷 Croata',
+    'sl': '🇸🇮 Esloveno',
+    'sr': '🇷🇸 Serbio',
+    'el': '🇬🇷 Griego',
+    'tr': '🇹🇷 Turco',
+    'he': '🇮🇱 Hebreo',
+    'uk': '🇺🇦 Ucraniano',
+  },
+  'fr': {
+    'it': '🇮🇹 Italien',
+    'en': '🇬🇧 Anglais',
+    'fr': '🇫🇷 Français',
+    'de': '🇩🇪 Allemand',
+    'es': '🇪🇸 Espagnol',
+    'pt': '🇵🇹 Portugais',
+    'ru': '🇷🇺 Russe',
+    'zh': '🇨🇳 Chinois',
+    'ja': '🇯🇵 Japonais',
+    'ko': '🇰🇷 Coréen',
+    'ar': '🇸🇦 Arabe',
+    'hi': '🇮🇳 Hindi',
+    'nl': '🇳🇱 Néerlandais',
+    'sv': '🇸🇪 Suédois',
+    'no': '🇳🇴 Norvégien',
+    'da': '🇩🇰 Danois',
+    'fi': '🇫🇮 Finlandais',
+    'pl': '🇵🇱 Polonais',
+    'cs': '🇨🇿 Tchèque',
+    'sk': '🇸🇰 Slovaque',
+    'hu': '🇭🇺 Hongrois',
+    'ro': '🇷🇴 Roumain',
+    'bg': '🇧🇬 Bulgare',
+    'hr': '🇭🇷 Croate',
+    'sl': '🇸🇮 Slovène',
+    'sr': '🇷🇸 Serbe',
+    'el': '🇬🇷 Grec',
+    'tr': '🇹🇷 Turc',
+    'he': '🇮🇱 Hébreu',
+    'uk': '🇺🇦 Ukrainien',
+  },
+  'de': {
+    'it': '🇮🇹 Italienisch',
+    'en': '🇬🇧 Englisch',
+    'fr': '🇫🇷 Französisch',
+    'de': '🇩🇪 Deutsch',
+    'es': '🇪🇸 Spanisch',
+    'pt': '🇵🇹 Portugiesisch',
+    'ru': '🇷🇺 Russisch',
+    'zh': '🇨🇳 Chinesisch',
+    'ja': '🇯🇵 Japanisch',
+    'ko': '🇰🇷 Koreanisch',
+    'ar': '🇸🇦 Arabisch',
+    'hi': '🇮🇳 Hindi',
+    'nl': '🇳🇱 Niederländisch',
+    'sv': '🇸🇪 Schwedisch',
+    'no': '🇳🇴 Norwegisch',
+    'da': '🇩🇰 Dänisch',
+    'fi': '🇫🇮 Finnisch',
+    'pl': '🇵🇱 Polnisch',
+    'cs': '🇨🇿 Tschechisch',
+    'sk': '🇸🇰 Slowakisch',
+    'hu': '🇭🇺 Ungarisch',
+    'ro': '🇷🇴 Rumänisch',
+    'bg': '🇧🇬 Bulgarisch',
+    'hr': '🇭🇷 Kroatisch',
+    'sl': '🇸🇮 Slowenisch',
+    'sr': '🇷🇸 Serbisch',
+    'el': '🇬🇷 Griechisch',
+    'tr': '🇹🇷 Türkisch',
+    'he': '🇮🇱 Hebräisch',
+    'uk': '🇺🇦 Ukrainisch',
+  },
+};
 
 class PhoneInputFormatter extends TextInputFormatter {
   @override
@@ -159,7 +543,8 @@ class PersonalInfoPage extends StatefulWidget {
   State<PersonalInfoPage> createState() => _PersonalInfoPageState();
 }
 
-class _PersonalInfoPageState extends State<PersonalInfoPage> {
+class _PersonalInfoPageState extends State<PersonalInfoPage>
+    with WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers per i campi del form
@@ -183,26 +568,274 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   Uint8List? _selectedImageBytes; // For web compatibility
   bool _isUploadingImage = false; // Track upload state
   bool _isSaving = false;
+  // Paese - NEW IMPLEMENTATION
   List<CountryModel> _countries = [];
-  List<CountryModel> _filteredCountries = [];
+  bool _showCountryDropdown = false;
   final TextEditingController _countrySearchController =
       TextEditingController();
-  bool _showCountryDropdown = false;
+  final FocusNode _countrySearchFocusNode = FocusNode();
+  List<CountryModel> _filteredCountries = [];
   final ImagePicker _picker = ImagePicker();
+
+  // Nazionalità
+  // Nationality dropdown state - NEW IMPLEMENTATION WITH SEARCH
+  List<String> _selectedNationalities = [];
+  bool _showNationalityDropdown = false;
+  final TextEditingController _nationalitySearchController =
+      TextEditingController();
+  final FocusNode _nationalitySearchFocusNode = FocusNode();
+  List<String> _filteredNationalities = [];
+
+  // Lingue parlate - NEW IMPLEMENTATION
+  List<String> _selectedLanguages = [];
+  bool _showLanguageDropdown = false;
+  final TextEditingController _languageSearchController =
+      TextEditingController();
+  final FocusNode _languageSearchFocusNode = FocusNode();
+  List<String> _filteredLanguages = [];
+
+  // Lingua App (i18n) - NEW IMPLEMENTATION
+  bool _showLanguageAppDropdown = false;
+  final TextEditingController _languageAppSearchController =
+      TextEditingController();
+  final FocusNode _languageAppSearchFocusNode = FocusNode();
+  List<Locale> _filteredLocalesApp = [];
 
   @override
   void initState() {
     super.initState();
     _loadCurrentUser();
     _loadCountries();
-    _initializeFormData();
+
+    // Listen for language changes to save languageCodeApp on-demand
+    LocaleService.instance.addListener(_onLanguageChanged);
+
+    // Listen for app lifecycle changes to refresh data when returning to foreground
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> _loadCurrentUser() async {
     try {
       _currentUser = await UserService.getCurrentUser();
+      // Update form fields with fresh data from database
+      if (_currentUser != null) {
+        _populateFormFields(_currentUser!);
+      }
     } catch (e) {
       debugPrint('Errore nel caricamento utente corrente: $e');
+    }
+  }
+
+  /// Populate form fields with user data
+  void _populateFormFields(UserModel user) {
+    if (mounted) {
+      setState(() {
+        // Basic info
+        _firstNameController.text = user.firstName ?? '';
+        _lastNameController.text = user.lastName ?? '';
+        _emailController.text = user.email ?? '';
+        _phoneController.text = user.phone ?? '';
+
+        // Address info
+        _addressController.text = user.address ?? '';
+        _cityController.text = user.city ?? '';
+        _stateController.text = user.state ?? '';
+        _postalCodeController.text = user.postalCode ?? '';
+
+        // Other fields
+        _selectedGender = user.gender;
+        _selectedCountryCode = user.countryCode ?? 'it';
+        _dateOfBirth = user.dateOfBirth;
+        if (user.dateOfBirth != null) {
+          _dateOfBirthController.text =
+              '${user.dateOfBirth!.day.toString().padLeft(2, '0')}/${user.dateOfBirth!.month.toString().padLeft(2, '0')}/${user.dateOfBirth!.year}';
+        }
+
+        // Profile picture
+        _profilePicture = user.profilePicture;
+
+        // Multi-select fields
+        _selectedNationalities = user.nationalityCodes ?? [];
+        _selectedLanguages = user.languageCodes ?? [];
+
+        // Initialize filters for dropdowns
+        _initializeNationalityFilter();
+        _initializeLanguageFilter();
+      });
+    }
+  }
+
+  /// Refresh data from database
+  Future<void> _refreshData() async {
+    await _loadCurrentUser();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Refresh data when app comes back to foreground
+    if (state == AppLifecycleState.resumed) {
+      _refreshData();
+    }
+  }
+
+  /// Called when the app language changes to save languageCodeApp immediately
+  void _onLanguageChanged() {
+    _saveLanguageCodeApp();
+    // Rebuild the UI to reflect language changes
+    if (mounted) {
+      setState(() {
+        // This will trigger rebuild with new localized texts
+      });
+    }
+  }
+
+  /// Get localized text based on current locale
+  String _getLocalizedText(String key) {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+
+    switch (key) {
+      case 'nationality_section':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Nazionalità';
+          case 'en':
+            return 'Nationality';
+          case 'es':
+            return 'Nacionalidad';
+          case 'fr':
+            return 'Nationalité';
+          case 'de':
+            return 'Staatsangehörigkeit';
+          default:
+            return 'Nationality';
+        }
+      case 'nationality_label':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Nazionalità';
+          case 'en':
+            return 'Nationality';
+          case 'es':
+            return 'Nacionalidad';
+          case 'fr':
+            return 'Nationalité';
+          case 'de':
+            return 'Staatsangehörigkeit';
+          default:
+            return 'Nationality';
+        }
+      case 'select_nationality':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Seleziona nazionalità';
+          case 'en':
+            return 'Select nationalities';
+          case 'es':
+            return 'Seleccionar nacionalidades';
+          case 'fr':
+            return 'Sélectionner les nationalités';
+          case 'de':
+            return 'Staatsangehörigkeiten auswählen';
+          default:
+            return 'Select nationalities';
+        }
+      case 'search_nationality':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Cerca nazionalità...';
+          case 'en':
+            return 'Search nationality...';
+          case 'es':
+            return 'Buscar nacionalidad...';
+          case 'fr':
+            return 'Rechercher nationalité...';
+          case 'de':
+            return 'Staatsangehörigkeit suchen...';
+          default:
+            return 'Cerca nazionalità...';
+        }
+      case 'no_nationality_found':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Nessuna nazionalità trovata';
+          case 'en':
+            return 'No nationality found';
+          case 'es':
+            return 'No se encontró nacionalidad';
+          case 'fr':
+            return 'Aucune nationalité trouvée';
+          case 'de':
+            return 'Keine Staatsangehörigkeit gefunden';
+          default:
+            return 'Nessuna nazionalità trovata';
+        }
+      case 'search_languages':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Cerca lingue...';
+          case 'en':
+            return 'Search languages...';
+          case 'es':
+            return 'Buscar idiomas...';
+          case 'fr':
+            return 'Rechercher langues...';
+          case 'de':
+            return 'Sprachen suchen...';
+          default:
+            return 'Cerca lingue...';
+        }
+      case 'no_languages_found':
+        switch (currentLanguage) {
+          case 'it':
+            return 'Nessuna lingua trovata';
+          case 'en':
+            return 'No languages found';
+          case 'es':
+            return 'No se encontraron idiomas';
+          case 'fr':
+            return 'Aucune langue trouvée';
+          case 'de':
+            return 'Keine Sprachen gefunden';
+          default:
+            return 'Nessuna lingua trovata';
+        }
+      default:
+        return key; // fallback to key if not found
+    }
+  }
+
+  /// Save languageCodeApp immediately when language changes
+  Future<void> _saveLanguageCodeApp() async {
+    try {
+      final currentUser = await UserService.getCurrentUser();
+      if (currentUser == null) return;
+
+      final currentLanguageCode =
+          LocaleService.instance.currentLocale?.languageCode ?? 'en';
+
+      // Only save if the language actually changed
+      if (currentUser.languageCodeApp != currentLanguageCode) {
+        final updateData = {
+          'languageCodeApp': currentLanguageCode,
+        };
+
+        // Call the updateUserProfile Edge Function
+        final result = await UserService.updateUser(
+          currentUser.idUser,
+          updateData,
+        );
+
+        if (result['success'] == true) {
+          debugPrint('✅ Language code saved: $currentLanguageCode');
+        } else {
+          debugPrint('⚠️ Failed to save language code: ${result['message']}');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving language code: $e');
     }
   }
 
@@ -213,27 +846,34 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         _countries = countries;
         _filteredCountries = countries;
       });
-      _updateCountryTextField();
     } catch (e) {
       // Errore nel caricamento paesi gestito silenziosamente
     }
   }
 
-  void _updateCountryTextField() {
-    if (_selectedCountryCode != null && _countries.isNotEmpty) {
-      final selectedCountry = _countries.firstWhere(
-        (country) => country.code == _selectedCountryCode,
-        orElse: () => CountryModel(
-          code: '',
-          name: '',
-          createdAt: DateTime.now(),
-          emoji: null,
-        ),
-      );
-      if (selectedCountry.code.isNotEmpty) {
-        _countrySearchController.text = selectedCountry.name;
+  // NEW COUNTRY DROPDOWN FUNCTIONS - SINGLE SELECTION LIKE NATIONALITY
+  void _toggleCountryDropdown() {
+    setState(() {
+      _showCountryDropdown = !_showCountryDropdown;
+      if (_showCountryDropdown) {
+        _initializeCountryFilter();
+        // Set focus on search field when opening
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _countrySearchFocusNode.requestFocus();
+        });
       }
-    }
+    });
+  }
+
+  void _closeCountryDropdown() {
+    setState(() {
+      _showCountryDropdown = false;
+    });
+  }
+
+  void _initializeCountryFilter() {
+    _filteredCountries = _countries;
+    _countrySearchController.clear();
   }
 
   void _filterCountries(String query) {
@@ -242,7 +882,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         _filteredCountries = _countries;
       } else {
         _filteredCountries = _countries.where((country) {
-          return country.name.toLowerCase().contains(query.toLowerCase());
+          return country.name.toLowerCase().contains(query.toLowerCase()) ||
+              country.code.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
@@ -251,53 +892,204 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   void _selectCountry(CountryModel country) {
     setState(() {
       _selectedCountryCode = country.code;
-      _countrySearchController.text = country.name;
-      _showCountryDropdown = false;
+      // Clear search text and reset filter after selection
+      _countrySearchController.clear();
+      _initializeCountryFilter();
+    });
+
+    // Close dropdown after selection
+    _closeCountryDropdown();
+  }
+
+  // NEW NATIONALITY DROPDOWN FUNCTIONS
+  void _toggleNationalityDropdown() {
+    setState(() {
+      _showNationalityDropdown = !_showNationalityDropdown;
+      if (_showNationalityDropdown) {
+        _initializeNationalityFilter();
+        // Set focus on search field when opening
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _nationalitySearchFocusNode.requestFocus();
+        });
+      }
     });
   }
 
-  void _initializeFormData() {
-    if (widget.initialUser != null) {
-      final user = widget.initialUser!;
+  void _closeNationalityDropdown() {
+    setState(() {
+      _showNationalityDropdown = false;
+    });
+  }
 
-      // Inferisci firstName e lastName dal fullName se valorizzato
-      if (user.firstName != null && user.lastName != null) {
-        _firstNameController.text = user.firstName!;
-        _lastNameController.text = user.lastName!;
-      } else if (user.fullName != null) {
-        final nameParts = user.fullName!.trim().split(' ');
-        if (nameParts.length >= 2) {
-          _firstNameController.text = _capitalizeWords(nameParts[0]);
-          _lastNameController.text =
-              _capitalizeWords(nameParts.sublist(1).join(' '));
-        } else if (nameParts.isNotEmpty) {
-          _firstNameController.text = _capitalizeWords(nameParts[0]);
-        }
-      }
+  void _initializeNationalityFilter() {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final nationalitiesForLanguage =
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+    _filteredNationalities = nationalitiesForLanguage.keys.toList();
+    _nationalitySearchController.clear();
+  }
 
-      // Popola gli altri campi
-      _emailController.text = user.email ?? '';
-      _phoneController.text = user.phone ?? '';
-      _addressController.text = user.address ?? '';
-      _cityController.text = user.city ?? '';
-      _stateController.text = user.state ?? '';
-      _postalCodeController.text = user.postalCode ?? '';
-      _dateOfBirth = user.dateOfBirth;
-      if (user.dateOfBirth != null) {
-        _dateOfBirthController.text =
-            '${user.dateOfBirth!.day.toString().padLeft(2, '0')}/${user.dateOfBirth!.month.toString().padLeft(2, '0')}/${user.dateOfBirth!.year}';
+  void _filterNationalities(String query) {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final nationalitiesForLanguage =
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+
+    setState(() {
+      if (query.isEmpty) {
+        _filteredNationalities = nationalitiesForLanguage.keys.toList();
+      } else {
+        _filteredNationalities = nationalitiesForLanguage.keys.where((code) {
+          final name = nationalitiesForLanguage[code] ?? '';
+          return name.toLowerCase().contains(query.toLowerCase()) ||
+              code.toLowerCase().contains(query.toLowerCase());
+        }).toList();
       }
-      _selectedGender = user.gender;
-      _selectedCountryCode = user.countryCode ?? 'it'; // Default to Italy
-      _profilePicture = user.profilePicture;
-    } else {
-      // Se non c'è un utente iniziale, imposta l'Italia come paese predefinito
-      _selectedCountryCode = 'it';
-    }
+    });
+  }
+
+  void _toggleNationality(String nationalityCode) {
+    setState(() {
+      if (_selectedNationalities.contains(nationalityCode)) {
+        _selectedNationalities.remove(nationalityCode);
+      } else {
+        _selectedNationalities.add(nationalityCode);
+      }
+      // Clear search text and reset filter after selection
+      _nationalitySearchController.clear();
+      _initializeNationalityFilter();
+    });
+
+    // Close dropdown after selection
+    _closeNationalityDropdown();
+  }
+
+  // NEW LANGUAGE DROPDOWN FUNCTIONS - IDENTICAL TO NATIONALITY
+  void _toggleLanguageDropdown() {
+    setState(() {
+      _showLanguageDropdown = !_showLanguageDropdown;
+      if (_showLanguageDropdown) {
+        _initializeLanguageFilter();
+        // Set focus on search field when opening
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _languageSearchFocusNode.requestFocus();
+        });
+      }
+    });
+  }
+
+  void _closeLanguageDropdown() {
+    setState(() {
+      _showLanguageDropdown = false;
+    });
+  }
+
+  void _initializeLanguageFilter() {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+    _filteredLanguages = languagesForLanguage.keys.toList();
+    _languageSearchController.clear();
+  }
+
+  void _filterLanguages(String query) {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+
+    setState(() {
+      if (query.isEmpty) {
+        _filteredLanguages = languagesForLanguage.keys.toList();
+      } else {
+        _filteredLanguages = languagesForLanguage.keys.where((code) {
+          final name = languagesForLanguage[code] ?? '';
+          return name.toLowerCase().contains(query.toLowerCase()) ||
+              code.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
+  void _toggleLanguage(String languageCode) {
+    setState(() {
+      if (_selectedLanguages.contains(languageCode)) {
+        _selectedLanguages.remove(languageCode);
+      } else {
+        _selectedLanguages.add(languageCode);
+      }
+      // Clear search text and reset filter after selection
+      _languageSearchController.clear();
+      _initializeLanguageFilter();
+    });
+
+    // Close dropdown after selection
+    _closeLanguageDropdown();
+  }
+
+  // NEW LANGUAGE APP DROPDOWN FUNCTIONS - SINGLE SELECTION LIKE COUNTRY
+  void _toggleLanguageAppDropdown() {
+    setState(() {
+      _showLanguageAppDropdown = !_showLanguageAppDropdown;
+      if (_showLanguageAppDropdown) {
+        _initializeLanguageAppFilter();
+        // Set focus on search field when opening
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _languageAppSearchFocusNode.requestFocus();
+        });
+      }
+    });
+  }
+
+  void _closeLanguageAppDropdown() {
+    setState(() {
+      _showLanguageAppDropdown = false;
+    });
+  }
+
+  void _initializeLanguageAppFilter() {
+    _filteredLocalesApp = LocaleService.fullyTranslatedLocales;
+    _languageAppSearchController.clear();
+  }
+
+  void _filterLanguageApp(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredLocalesApp = LocaleService.fullyTranslatedLocales;
+      } else {
+        _filteredLocalesApp =
+            LocaleService.fullyTranslatedLocales.where((locale) {
+          final displayName =
+              LocaleService.instance.getLanguageName(locale.languageCode);
+          return displayName.toLowerCase().contains(query.toLowerCase()) ||
+              locale.languageCode.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
+  void _selectLanguageApp(Locale locale) {
+    // Change the app language
+    LocaleService.instance.setLocale(locale);
+
+    setState(() {
+      // Clear search text and reset filter after selection
+      _languageAppSearchController.clear();
+      _initializeLanguageAppFilter();
+    });
+
+    // Close dropdown after selection
+    _closeLanguageAppDropdown();
   }
 
   @override
   void dispose() {
+    // Remove language change listener
+    LocaleService.instance.removeListener(_onLanguageChanged);
+
+    // Remove app lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
+
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
@@ -308,10 +1100,17 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     _postalCodeController.dispose();
     _dateOfBirthController.dispose();
     _countrySearchController.dispose();
+    _countrySearchFocusNode.dispose();
+    _nationalitySearchController.dispose();
+    _nationalitySearchFocusNode.dispose();
+    _languageSearchController.dispose();
+    _languageSearchFocusNode.dispose();
+    _languageAppSearchController.dispose();
+    _languageAppSearchFocusNode.dispose();
     super.dispose();
   }
 
-  String _capitalizeWords(String text) {
+  String _toTitleCase(String text) {
     if (text.isEmpty) return text;
     return text.split(' ').map((word) {
       if (word.isEmpty) return word;
@@ -353,6 +1152,18 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     setState(() {
       _dateOfBirth = parsedDate;
     });
+  }
+
+  void _onEmailChanged(String value) {
+    final lowercased = value.toLowerCase();
+    if (lowercased != value) {
+      final cursorPosition = _emailController.selection.start;
+      _emailController.text = lowercased;
+      // Mantieni la posizione del cursore
+      _emailController.selection = TextSelection.collapsed(
+        offset: cursorPosition.clamp(0, lowercased.length),
+      );
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -611,10 +1422,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       final updateData = <String, dynamic>{};
 
       if (_firstNameController.text.isNotEmpty) {
-        updateData['firstName'] = _firstNameController.text.trim();
+        updateData['firstName'] =
+            _toTitleCase(_firstNameController.text.trim());
       }
       if (_lastNameController.text.isNotEmpty) {
-        updateData['lastName'] = _lastNameController.text.trim();
+        updateData['lastName'] = _toTitleCase(_lastNameController.text.trim());
       }
       if (_emailController.text.isNotEmpty) {
         updateData['email'] = _emailController.text.trim().toLowerCase();
@@ -623,16 +1435,17 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         updateData['phone'] = _phoneController.text.trim();
       }
       if (_addressController.text.isNotEmpty) {
-        updateData['address'] = _addressController.text.trim();
+        updateData['address'] = _toTitleCase(_addressController.text.trim());
       }
       if (_cityController.text.isNotEmpty) {
-        updateData['city'] = _cityController.text.trim();
+        updateData['city'] = _toTitleCase(_cityController.text.trim());
       }
       if (_stateController.text.isNotEmpty) {
-        updateData['state'] = _stateController.text.trim();
+        updateData['state'] = _toTitleCase(_stateController.text.trim());
       }
       if (_postalCodeController.text.isNotEmpty) {
-        updateData['postalCode'] = _postalCodeController.text.trim();
+        updateData['postalCode'] =
+            _postalCodeController.text.trim().toUpperCase();
       }
       if (_dateOfBirth != null) {
         updateData['dateOfBirth'] =
@@ -644,6 +1457,14 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       if (_selectedCountryCode != null) {
         updateData['countryCode'] = _selectedCountryCode;
       }
+      if (_selectedNationalities.isNotEmpty) {
+        updateData['nationalityCodes'] = _selectedNationalities;
+      }
+
+      if (_selectedLanguages.isNotEmpty) {
+        updateData['languageCodes'] = _selectedLanguages;
+      }
+
       // Profile picture update is handled by the Edge Function, so we don't pass it here
 
       // Ottieni l'utente corrente per l'ID
@@ -729,418 +1550,465 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
           if (_showCountryDropdown) {
             setState(() {
               _showCountryDropdown = false;
-              _updateCountryTextField();
             });
           }
           // Hide keyboard
           FocusScope.of(context).unfocus();
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Intestazione
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.secondary,
+          child: RefreshIndicator(
+            onRefresh: _refreshData,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Intestazione
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context).colorScheme.secondary,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person_outline,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.yourProfile,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    Text(
+                                      AppLocalizations.of(context)!
+                                          .enterYourPersonalInfo,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.9),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.person_outline,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context)!.yourProfile,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                  Text(
-                                    AppLocalizations.of(context)!
-                                        .enterYourPersonalInfo,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.9),
-                                        ),
+
+                    const SizedBox(height: 32),
+
+                    // Foto profilo
+                    Center(
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: _showImageSourceDialog,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(60),
+                                border: Border.all(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.3),
+                                  width: 3,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    spreadRadius: 2,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Foto profilo
-                  Center(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: _showImageSourceDialog,
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(60),
-                              border: Border.all(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .outline
-                                    .withValues(alpha: 0.3),
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  spreadRadius: 2,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(57),
-                              child: _selectedImage != null
-                                  ? (kIsWeb
-                                      ? Image.memory(
-                                          _selectedImageBytes!,
-                                          width: 114,
-                                          height: 114,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Image.file(
-                                          _selectedImage as File,
-                                          width: 114,
-                                          height: 114,
-                                          fit: BoxFit.cover,
-                                        ))
-                                  : _profilePicture != null
-                                      ? Image.network(
-                                          _profilePicture!,
-                                          width: 114,
-                                          height: 114,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Icon(
-                                            Icons.person,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(57),
+                                child: _selectedImage != null
+                                    ? (kIsWeb
+                                        ? Image.memory(
+                                            _selectedImageBytes!,
+                                            width: 114,
+                                            height: 114,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.file(
+                                            _selectedImage as File,
+                                            width: 114,
+                                            height: 114,
+                                            fit: BoxFit.cover,
+                                          ))
+                                    : _profilePicture != null
+                                        ? Image.network(
+                                            _profilePicture!,
+                                            width: 114,
+                                            height: 114,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    Icon(
+                                              Icons.person,
+                                              size: 56,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.person_add_alt_1,
                                             size: 56,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onSurfaceVariant,
+                                                .onSurfaceVariant
+                                                .withValues(alpha: 0.6),
                                           ),
-                                        )
-                                      : Icon(
-                                          Icons.person_add_alt_1,
-                                          size: 56,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                              .withValues(alpha: 0.6),
-                                        ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextButton.icon(
-                          onPressed:
-                              _isUploadingImage ? null : _showImageSourceDialog,
-                          icon: _isUploadingImage
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Icon(
-                                  _selectedImage != null ||
+                          const SizedBox(height: 12),
+                          TextButton.icon(
+                            onPressed: _isUploadingImage
+                                ? null
+                                : _showImageSourceDialog,
+                            icon: _isUploadingImage
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  )
+                                : Icon(
+                                    _selectedImage != null ||
+                                            _profilePicture != null
+                                        ? Icons.edit
+                                        : Icons.add_a_photo,
+                                  ),
+                            label: Text(
+                              _isUploadingImage
+                                  ? AppLocalizations.of(context)!.uploading
+                                  : _selectedImage != null ||
                                           _profilePicture != null
-                                      ? Icons.edit
-                                      : Icons.add_a_photo,
-                                ),
-                          label: Text(
-                            _isUploadingImage
-                                ? AppLocalizations.of(context)!.uploading
-                                : _selectedImage != null ||
-                                        _profilePicture != null
-                                    ? AppLocalizations.of(context)!.replacePhoto
-                                    : AppLocalizations.of(context)!.addPhoto,
+                                      ? AppLocalizations.of(context)!
+                                          .replacePhoto
+                                      : AppLocalizations.of(context)!.addPhoto,
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 8),
+                            ),
                           ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 8),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Sezione: Informazioni anagrafiche
+                    _buildSectionHeader(
+                        AppLocalizations.of(context)!.personalData),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextFormField(
+                            controller: _firstNameController,
+                            label: AppLocalizations.of(context)!.firstName,
+                            icon: Icons.person_outline,
+                            textCapitalization: TextCapitalization.words,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return AppLocalizations.of(context)!
+                                    .firstNameRequired;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildTextFormField(
+                            controller: _lastNameController,
+                            label: AppLocalizations.of(context)!.lastName,
+                            icon: Icons.person_outline,
+                            textCapitalization: TextCapitalization.words,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return AppLocalizations.of(context)!
+                                    .lastNameRequired;
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 16),
 
-                  // Sezione: Informazioni anagrafiche
-                  _buildSectionHeader(
-                      AppLocalizations.of(context)!.personalData),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextFormField(
-                          controller: _firstNameController,
-                          label: AppLocalizations.of(context)!.firstName,
-                          icon: Icons.person_outline,
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return AppLocalizations.of(context)!
-                                  .firstNameRequired;
-                            }
-                            return null;
-                          },
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildGenderDropdown(),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildTextFormField(
-                          controller: _lastNameController,
-                          label: AppLocalizations.of(context)!.lastName,
-                          icon: Icons.person_outline,
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return AppLocalizations.of(context)!
-                                  .lastNameRequired;
-                            }
-                            return null;
-                          },
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildDateField(),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildGenderDropdown(),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildDateField(),
-                      ),
-                    ],
-                  ),
+                    // Sezione: Nazionalità
+                    _buildSectionHeader(
+                        _getLocalizedText('nationality_section')),
+                    const SizedBox(height: 16),
 
-                  const SizedBox(height: 32),
+                    _buildNewNationalityDropdown(),
 
-                  // Sezione: Contatti
-                  _buildSectionHeader(
-                      AppLocalizations.of(context)!.contactInformation),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  _buildTextFormField(
-                    controller: _emailController,
-                    label: AppLocalizations.of(context)!.email,
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return AppLocalizations.of(context)!.emailRequired;
-                      }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value!)) {
-                        return AppLocalizations.of(context)!.validEmailRequired;
-                      }
-                      return null;
-                    },
-                  ),
+                    _buildNewLanguageDropdown(),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-                  _buildTextFormField(
-                    controller: _phoneController,
-                    label: AppLocalizations.of(context)!.phone,
-                    icon: Icons.phone_outlined,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [PhoneInputFormatter()],
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return AppLocalizations.of(context)!.phoneRequired;
-                      }
-                      return null;
-                    },
-                  ),
+                    // Sezione: Contatti
+                    _buildSectionHeader(
+                        AppLocalizations.of(context)!.contactInformation),
+                    const SizedBox(height: 16),
 
-                  const SizedBox(height: 32),
+                    _buildTextFormField(
+                      controller: _emailController,
+                      label: AppLocalizations.of(context)!.email,
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      textCapitalization: TextCapitalization.none,
+                      onChanged: _onEmailChanged,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.emailRequired;
+                        }
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value!)) {
+                          return AppLocalizations.of(context)!
+                              .validEmailRequired;
+                        }
+                        return null;
+                      },
+                    ),
 
-                  // Sezione: Indirizzo
-                  _buildSectionHeader(AppLocalizations.of(context)!.address),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  _buildTextFormField(
-                    controller: _addressController,
-                    label: AppLocalizations.of(context)!.address,
-                    icon: Icons.home_outlined,
-                    textCapitalization: TextCapitalization.words,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return AppLocalizations.of(context)!.addressRequired;
-                      }
-                      return null;
-                    },
-                  ),
+                    _buildTextFormField(
+                      controller: _phoneController,
+                      label: AppLocalizations.of(context)!.phone,
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [PhoneInputFormatter()],
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.phoneRequired;
+                        }
+                        return null;
+                      },
+                    ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextFormField(
-                          controller: _cityController,
-                          label: AppLocalizations.of(context)!.city,
-                          icon: Icons.location_city_outlined,
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return AppLocalizations.of(context)!.cityRequired;
-                            }
-                            return null;
-                          },
+                    // Sezione: Indirizzo
+                    _buildSectionHeader(AppLocalizations.of(context)!.address),
+                    const SizedBox(height: 16),
+
+                    _buildTextFormField(
+                      controller: _addressController,
+                      label: AppLocalizations.of(context)!.address,
+                      icon: Icons.home_outlined,
+                      textCapitalization: TextCapitalization.words,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.addressRequired;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextFormField(
+                            controller: _cityController,
+                            label: AppLocalizations.of(context)!.city,
+                            icon: Icons.location_city_outlined,
+                            textCapitalization: TextCapitalization.words,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return AppLocalizations.of(context)!
+                                    .cityRequired;
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildTextFormField(
-                          controller: _stateController,
-                          label: AppLocalizations.of(context)!.state,
-                          icon: Icons.map_outlined,
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return AppLocalizations.of(context)!
-                                  .stateRequired;
-                            }
-                            return null;
-                          },
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildTextFormField(
+                            controller: _stateController,
+                            label: AppLocalizations.of(context)!.state,
+                            icon: Icons.map_outlined,
+                            textCapitalization: TextCapitalization.words,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return AppLocalizations.of(context)!
+                                    .stateRequired;
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextFormField(
-                          controller: _postalCodeController,
-                          label: AppLocalizations.of(context)!.postalCode,
-                          icon: Icons.local_post_office_outlined,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.characters,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return AppLocalizations.of(context)!
-                                  .postalCodeRequired;
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildCountryDropdown(),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Sezione: Selezione Lingua
-                  const LanguageSelector(showAsCard: false),
-
-                  const SizedBox(height: 24),
-
-                  // Pulsante di salvataggio
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _savePersonalInfo,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isSaving
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _postalCodeController,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.characters,
+                            textAlignVertical: TextAlignVertical.top,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return AppLocalizations.of(context)!
+                                    .postalCodeRequired;
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.postalCode,
+                              prefixIcon:
+                                  const Icon(Icons.local_post_office_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.5),
                                 ),
-                                const SizedBox(width: 12),
-                                Text(AppLocalizations.of(context)!.saving),
-                              ],
-                            )
-                          : Text(
-                              AppLocalizations.of(context)!.saveInformation,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  width: 2,
+                                ),
                               ),
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildNewCountryDropdown(),
+                        ),
+                      ],
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 40),
+
+                    // Sezione: Selezione Lingua
+                    _buildNewLanguageAppDropdown(),
+
+                    const SizedBox(height: 24),
+
+                    // Pulsante di salvataggio
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _savePersonalInfo,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isSaving
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(AppLocalizations.of(context)!.saving),
+                                ],
+                              )
+                            : Text(
+                                AppLocalizations.of(context)!.saveInformation,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1167,6 +2035,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     String? Function(String?)? validator,
     TextCapitalization? textCapitalization,
     List<TextInputFormatter>? inputFormatters,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
@@ -1174,6 +2043,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       validator: validator,
       textCapitalization: textCapitalization ?? TextCapitalization.none,
       inputFormatters: inputFormatters,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
@@ -1321,7 +2191,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     );
   }
 
-  Widget _buildCountryDropdown() {
+  // NEW COUNTRY DROPDOWN WITH SEARCH - SINGLE SELECTION LIKE NATIONALITY
+  Widget _buildNewCountryDropdown() {
     // Find selected country to show in text field
     CountryModel? selectedCountry;
     if (_selectedCountryCode != null) {
@@ -1336,130 +2207,837 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _showCountryDropdown = !_showCountryDropdown;
-              if (_showCountryDropdown) {
-                _countrySearchController.text = '';
-                _filteredCountries = _countries;
-              } else if (selectedCountry != null &&
-                  selectedCountry.code.isNotEmpty) {
-                _countrySearchController.text = selectedCountry.name;
-              }
-            });
-          },
-          child: AbsorbPointer(
-            absorbing: !_showCountryDropdown,
-            child: TextFormField(
-              controller: _countrySearchController,
-              onChanged: _showCountryDropdown ? _filterCountries : null,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.country,
-                hintText: _showCountryDropdown
-                    ? AppLocalizations.of(context)!.searchCountry
-                    : AppLocalizations.of(context)!.selectCountry,
-                suffixIcon: Icon(
-                  _showCountryDropdown
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
+    return TapRegion(
+      onTapOutside: (event) {
+        // Close dropdown when tapping outside the entire dropdown area
+        if (_showCountryDropdown) {
+          _closeCountryDropdown();
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main dropdown button
+          GestureDetector(
+            onTap: _toggleCountryDropdown,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.5),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surface,
+              ),
+              child: Row(
+                children: [
+                  if (selectedCountry?.emoji != null) ...[
+                    Text(
+                      selectedCountry!.emoji!,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(width: 12),
+                  ] else ...[
+                    Icon(
+                      Icons.flag,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.country,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          selectedCountry?.name ??
+                              AppLocalizations.of(context)!.selectCountry,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _showCountryDropdown
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable dropdown content
+          if (_showCountryDropdown) ...[
+            const SizedBox(height: 8),
+            KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  _closeCountryDropdown();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
                     color: Theme.of(context)
                         .colorScheme
                         .outline
                         .withValues(alpha: 0.5),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
+                  color: Theme.of(context).colorScheme.surface,
                 ),
-              ),
-              validator: (value) {
-                if (_selectedCountryCode == null ||
-                    _selectedCountryCode!.isEmpty) {
-                  return AppLocalizations.of(context)!.countryRequired;
-                }
-                return null;
-              },
-              readOnly: !_showCountryDropdown,
-            ),
-          ),
-        ),
-        if (_showCountryDropdown)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.5),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: _filteredCountries.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      AppLocalizations.of(context)!.noCountryFound,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _filteredCountries.length,
-                    itemBuilder: (context, index) {
-                      final country = _filteredCountries[index];
-                      final isSelected = country.code == _selectedCountryCode;
-
-                      return ListTile(
-                        dense: true,
-                        title: Text(
-                          country.name,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                          ),
+                child: Column(
+                  children: [
+                    // Search field
+                    TextField(
+                      controller: _countrySearchController,
+                      focusNode: _countrySearchFocusNode,
+                      onChanged: _filterCountries,
+                      onSubmitted: (value) {
+                        // Don't close on enter, allow user to continue searching
+                      },
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchCountry,
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
                         ),
-                        trailing: isSelected
-                            ? Icon(
-                                Icons.check,
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                            : null,
-                        onTap: () => _selectCountry(country),
-                      );
-                    },
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Country list
+                    SizedBox(
+                      height: 250, // Fixed height for scrollable area
+                      child: _filteredCountries.isEmpty
+                          ? Center(
+                              child: Text(
+                                AppLocalizations.of(context)!.noCountryFound,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _filteredCountries.length,
+                              itemBuilder: (context, index) {
+                                final country = _filteredCountries[index];
+                                final isSelected =
+                                    country.code == _selectedCountryCode;
+
+                                return InkWell(
+                                  onTap: () => _selectCountry(country),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        if (country.emoji != null) ...[
+                                          Text(
+                                            country.emoji!,
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                          ),
+                                          const SizedBox(width: 12),
+                                        ] else ...[
+                                          Icon(
+                                            Icons.flag,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 12),
+                                        ],
+                                        Expanded(
+                                          child: Text(
+                                            country.name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                ),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Icon(
+                                            Icons.check,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            size: 20,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // NEW NATIONALITY DROPDOWN WITH SEARCH
+  Widget _buildNewNationalityDropdown() {
+    // Get current language for localization
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final nationalitiesForLanguage =
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+
+    // Get selected nationality names
+    final selectedNationalityNames = _selectedNationalities
+        .map((code) => nationalitiesForLanguage[code] ?? code)
+        .toList();
+
+    return TapRegion(
+      onTapOutside: (event) {
+        // Close dropdown when tapping outside the entire dropdown area
+        if (_showNationalityDropdown) {
+          _closeNationalityDropdown();
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main dropdown button
+          GestureDetector(
+            onTap: _toggleNationalityDropdown,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.5),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surface,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.public,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 20,
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getLocalizedText('nationality_label'),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _selectedNationalities.isEmpty
+                              ? _getLocalizedText('select_nationality')
+                              : selectedNationalityNames.join(', '),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _showNationalityDropdown
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
           ),
-      ],
+
+          // Expandable dropdown content
+          if (_showNationalityDropdown) ...[
+            const SizedBox(height: 8),
+            KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  _closeNationalityDropdown();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.5),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                child: Column(
+                  children: [
+                    // Search field
+                    TextField(
+                      controller: _nationalitySearchController,
+                      focusNode: _nationalitySearchFocusNode,
+                      onChanged: _filterNationalities,
+                      onSubmitted: (value) {
+                        // Don't close on enter, allow user to continue searching
+                      },
+                      decoration: InputDecoration(
+                        hintText: _getLocalizedText('search_nationality'),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Nationality list
+                    SizedBox(
+                      height: 250, // Fixed height for scrollable area
+                      child: _filteredNationalities.isEmpty
+                          ? Center(
+                              child: Text(
+                                _getLocalizedText('no_nationality_found'),
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _filteredNationalities.length,
+                              itemBuilder: (context, index) {
+                                final code = _filteredNationalities[index];
+                                final name =
+                                    nationalitiesForLanguage[code] ?? code;
+                                final isSelected =
+                                    _selectedNationalities.contains(code);
+
+                                return InkWell(
+                                  onTap: () => _toggleNationality(code),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        Checkbox(
+                                          value: isSelected,
+                                          onChanged: (bool? value) {
+                                            _toggleNationality(code);
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ], // Close the if (_showNationalityDropdown) list
+        ],
+      ),
+    );
+  }
+
+  // NEW LANGUAGE DROPDOWN WITH SEARCH - IDENTICAL TO NATIONALITY
+  Widget _buildNewLanguageDropdown() {
+    // Get current language for localization
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+
+    // Get selected language names
+    final selectedLanguageNames = _selectedLanguages
+        .map((code) => languagesForLanguage[code] ?? code)
+        .toList();
+
+    return TapRegion(
+      onTapOutside: (event) {
+        // Close dropdown when tapping outside the entire dropdown area
+        if (_showLanguageDropdown) {
+          _closeLanguageDropdown();
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main dropdown button
+          GestureDetector(
+            onTap: _toggleLanguageDropdown,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.5),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surface,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.language,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.languages,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _selectedLanguages.isEmpty
+                              ? AppLocalizations.of(context)!.selectLanguage
+                              : selectedLanguageNames.join(', '),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _showLanguageDropdown
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable dropdown content
+          if (_showLanguageDropdown) ...[
+            const SizedBox(height: 8),
+            KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  _closeLanguageDropdown();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.5),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                child: Column(
+                  children: [
+                    // Search field
+                    TextField(
+                      controller: _languageSearchController,
+                      focusNode: _languageSearchFocusNode,
+                      onChanged: _filterLanguages,
+                      onSubmitted: (value) {
+                        // Don't close on enter, allow user to continue searching
+                      },
+                      decoration: InputDecoration(
+                        hintText: _getLocalizedText('search_languages'),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Language list
+                    SizedBox(
+                      height: 250, // Fixed height for scrollable area
+                      child: _filteredLanguages.isEmpty
+                          ? Center(
+                              child: Text(
+                                _getLocalizedText('no_languages_found'),
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _filteredLanguages.length,
+                              itemBuilder: (context, index) {
+                                final code = _filteredLanguages[index];
+                                final name = languagesForLanguage[code] ?? code;
+                                final isSelected =
+                                    _selectedLanguages.contains(code);
+
+                                return InkWell(
+                                  onTap: () => _toggleLanguage(code),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        Checkbox(
+                                          value: isSelected,
+                                          onChanged: (bool? value) {
+                                            _toggleLanguage(code);
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // NEW LANGUAGE APP DROPDOWN WITH SEARCH - SINGLE SELECTION LIKE COUNTRY
+  Widget _buildNewLanguageAppDropdown() {
+    // Get current locale
+    final currentLocale = LocaleService.instance.currentLocale;
+    final currentDisplayName = currentLocale != null
+        ? LocaleService.instance.getLanguageName(currentLocale.languageCode)
+        : AppLocalizations.of(context)!.selectLanguage;
+
+    return TapRegion(
+      onTapOutside: (event) {
+        // Close dropdown when tapping outside the entire dropdown area
+        if (_showLanguageAppDropdown) {
+          _closeLanguageAppDropdown();
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main dropdown button
+          GestureDetector(
+            onTap: _toggleLanguageAppDropdown,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.5),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surface,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.language,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.language,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          currentDisplayName,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _showLanguageAppDropdown
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable dropdown content
+          if (_showLanguageAppDropdown) ...[
+            const SizedBox(height: 8),
+            KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  _closeLanguageAppDropdown();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.5),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                child: Column(
+                  children: [
+                    // Search field
+                    TextField(
+                      controller: _languageAppSearchController,
+                      focusNode: _languageAppSearchFocusNode,
+                      onChanged: _filterLanguageApp,
+                      onSubmitted: (value) {
+                        // Don't close on enter, allow user to continue searching
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search language...',
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Language list
+                    SizedBox(
+                      height: 250, // Fixed height for scrollable area
+                      child: _filteredLocalesApp.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No language found',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _filteredLocalesApp.length,
+                              itemBuilder: (context, index) {
+                                final locale = _filteredLocalesApp[index];
+                                final displayName = LocaleService.instance
+                                    .getLanguageName(locale.languageCode);
+                                final isSelected = LocaleService
+                                        .instance.currentLocale?.languageCode ==
+                                    locale.languageCode;
+
+                                return InkWell(
+                                  onTap: () => _selectLanguageApp(locale),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        // Flag emoji for language
+                                        Text(
+                                          LocaleService.instance
+                                                  .getLanguageEmoji(
+                                                      locale.languageCode) ??
+                                              '🌐',
+                                          style: const TextStyle(fontSize: 20),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            displayName,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                ),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Icon(
+                                            Icons.check,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            size: 20,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

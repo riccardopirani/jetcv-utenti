@@ -128,38 +128,28 @@ class _CVViewPageState extends State<CVViewPage> {
     return age.toString();
   }
 
-  String _formatBirthInfo() {
-    final localizations = AppLocalizations.of(context)!;
+  String _formatFormalBirthInfo() {
     if (_cv?.dateOfBirth == null) return '';
 
     final birthDate = DateTime.tryParse(_cv!.dateOfBirth!);
     if (birthDate == null) return '';
 
     final age = _calculateAge(birthDate);
-    final gender = _cv?.gender;
 
-    // Use gender-appropriate translation for "born"
-    final bornText =
-        (gender == 'female') ? localizations.bornFemale : localizations.born;
-
-    return '$bornText ${birthDate.day}/${birthDate.month}/${birthDate.year} ($age ${localizations.years})';
+    return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} (${age} anni)';
   }
 
   String _generateCVSerial() {
-    if (_cv?.serial != null) {
-      return _cv!.serial;
-    }
+    // serialNumber is now required and has a default value from the database
+    return _cv!.serialNumber;
+  }
 
-    // Fallback: generate from idCvHash or idCv
-    if (_cv?.idCvHash != null) {
-      final hash = _cv!.idCvHash!.toUpperCase();
-      if (hash.length >= 8) {
-        return 'CV-${hash.substring(0, 4)}-${hash.substring(4, 8)}';
-      }
-      return 'CV-${hash.padRight(8, 'X').substring(0, 4)}-${hash.padRight(8, 'X').substring(4, 8)}';
-    }
-
-    return 'CV-XXXX-XXXX';
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 
   Future<void> _shareCV() async {
@@ -272,12 +262,10 @@ class _CVViewPageState extends State<CVViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(localizations.viewCV),
+          title: const Text('Visualizza il mio CV'),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -290,7 +278,7 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_cv == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(localizations.viewCV),
+          title: const Text('Visualizza il mio CV'),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -308,7 +296,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.viewCV),
+        title: const Text('Visualizza il mio CV'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         // Removed share action - moved to main body
@@ -391,139 +379,98 @@ class _CVViewPageState extends State<CVViewPage> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Stack(
         children: [
-          // Outer glow effect
-          Container(
-            width: double.infinity,
-            height: 400,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.2,
-                colors: [
-                  Colors.blue.withValues(alpha: 0.15),
-                  Colors.purple.withValues(alpha: 0.1),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-
           // Main certificate container
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.all(6),
+            margin: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade400,
-                  Colors.indigo.shade500,
-                  Colors.purple.shade500,
-                  Colors.pink.shade400,
-                ],
-                stops: const [0.0, 0.3, 0.7, 1.0],
+              borderRadius: BorderRadius.circular(16),
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.3),
+                width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withValues(alpha: 0.3),
+                  color: Colors.black.withValues(alpha: 0.1),
                   spreadRadius: 0,
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: Colors.purple.withValues(alpha: 0.2),
-                  spreadRadius: 0,
-                  blurRadius: 30,
-                  offset: const Offset(0, 12),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white,
-                    Colors.grey.shade50,
-                  ],
-                ),
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context).colorScheme.surface,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  width: 2,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.2),
+                  width: 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    spreadRadius: 0,
-                    blurRadius: 25,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(13),
                 child: Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white,
-                        Colors.blue.shade50.withValues(alpha: 0.3),
-                        Colors.purple.shade50.withValues(alpha: 0.2),
-                      ],
-                      stops: const [0.0, 0.5, 1.0],
-                    ),
+                    color: Theme.of(context).colorScheme.surface,
                   ),
-                  child: Column(
+                  child: Stack(
                     children: [
-                      // Premium certification badge
-                      _buildPremiumBadge(localizations),
+                      // Main content
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Left column: Photo, name and certification
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  // Profile picture
+                                  _buildEnhancedProfilePicture(),
+                                  const SizedBox(height: 16),
+                                  // Name
+                                  _buildNameSection(),
+                                  const SizedBox(height: 20),
+                                  // Premium certification badge with serial
+                                  _buildPremiumBadgeWithSerial(localizations),
+                                ],
+                              ),
+                            ),
 
-                      const SizedBox(height: 28),
+                            const SizedBox(width: 24),
 
-                      // Enhanced profile picture
-                      _buildEnhancedProfilePicture(),
-
-                      const SizedBox(height: 24),
-
-                      // Name with premium styling
-                      _buildNameSection(),
-
-                      const SizedBox(height: 20),
-
-                      // Elegant divider
-                      _buildElegantDivider(),
-
-                      const SizedBox(height: 20),
-
-                      // Personal information cards
-                      _buildPersonalInfoCards(country, localizations),
-
-                      const SizedBox(height: 24),
-
-                      // Premium CV Serial
-                      _buildPremiumCVSerial(localizations),
+                            // Right column: Personal info only
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Personal information
+                                  _buildPersonalInfoCards(
+                                      country, localizations),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-
-          // Premium corner decorations
-          _buildPremiumCornerDecorations(),
-
-          // Floating verification badge
-          _buildFloatingVerificationBadge(),
         ],
       ),
     );
@@ -584,14 +531,14 @@ class _CVViewPageState extends State<CVViewPage> {
               _buildContactItem(
                 icon: Icons.home,
                 label: localizations.address,
-                value: [
+                value: _toTitleCase([
                   _cv!.address,
                   _cv!.city,
                   _cv!.state,
                   _cv!.postalCode,
                 ]
                     .where((element) => element != null && element.isNotEmpty)
-                    .join(', '),
+                    .join(', ')),
               ),
             ],
           ],
@@ -758,25 +705,18 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildShareSection() {
-    final localizations = AppLocalizations.of(context)!;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.blue.shade50,
-                Colors.indigo.shade50,
-                Colors.purple.shade50,
-              ],
-              stops: const [0.0, 0.5, 1.0],
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(context).colorScheme.surface,
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             ),
           ),
           child: Padding(
@@ -785,31 +725,15 @@ class _CVViewPageState extends State<CVViewPage> {
               children: [
                 // Icon container
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue.shade400,
-                        Colors.indigo.shade500,
-                        Colors.purple.shade600,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withValues(alpha: 0.3),
-                        spreadRadius: 0,
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.share,
                     color: Colors.white,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
 
@@ -821,18 +745,22 @@ class _CVViewPageState extends State<CVViewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        localizations.shareCV,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.indigo.shade800,
-                                ),
+                        AppLocalizations.of(context)!.shareCV,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'CV certificato blockchain',
+                        AppLocalizations.of(context)!.verifiedCV,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.indigo.shade600,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                       ),
@@ -842,31 +770,33 @@ class _CVViewPageState extends State<CVViewPage> {
 
                 const SizedBox(width: 16),
 
-                // Single share button
-                ElevatedButton.icon(
-                  onPressed: _shareCV,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                // Share button
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: ElevatedButton.icon(
+                    onPressed: _shareCV,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 1,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                    icon: Icon(
+                      kIsWeb ? Icons.copy : Icons.share,
+                      size: 16,
                     ),
-                    elevation: 4,
-                    shadowColor: Colors.indigo.withValues(alpha: 0.4),
-                  ),
-                  icon: Icon(
-                    kIsWeb ? Icons.copy : Icons.share,
-                    size: 18,
-                  ),
-                  label: Text(
-                    kIsWeb ? 'Copia Link' : 'Condividi',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                    label: Text(
+                      kIsWeb ? 'Copia Link' : 'Condividi',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -879,68 +809,109 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   // New premium design methods
-  Widget _buildPremiumBadge(AppLocalizations localizations) {
+
+  Widget _buildPremiumBadgeWithSerial(AppLocalizations localizations) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.amber.shade100,
-            Colors.amber.shade50,
-            Colors.orange.shade50,
+            Colors.green.shade100,
+            Colors.green.shade50,
+            Colors.teal.shade50,
           ],
         ),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           width: 2,
-          color: Colors.amber.shade300,
+          color: Colors.green.shade300,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withValues(alpha: 0.3),
+            color: Colors.green.withValues(alpha: 0.3),
             spreadRadius: 0,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.amber.shade200,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.verified,
-              color: Colors.amber.shade800,
-              size: 20,
-            ),
+          // Certification header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade200,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.verified,
+                  color: Colors.green.shade800,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  localizations.blockchainCertified,
+                  style: TextStyle(
+                    color: Colors.green.shade900,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Text(
-            localizations.blockchainCertified,
-            style: TextStyle(
-              color: Colors.amber.shade900,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(width: 8),
+
+          const SizedBox(height: 16),
+
+          // Serial section
           Container(
-            width: 8,
-            height: 8,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber.shade600,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withValues(alpha: 0.5),
-                  spreadRadius: 2,
-                  blurRadius: 4,
+              color: Colors.white.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.green.shade200,
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.fingerprint,
+                      color: Colors.green.shade700,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      AppLocalizations.of(context)!.cvSerial,
+                      style: TextStyle(
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _generateCVSerial(),
+                  style: TextStyle(
+                    color: Colors.green.shade900,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                    letterSpacing: 1,
+                  ),
                 ),
               ],
             ),
@@ -951,242 +922,73 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildEnhancedProfilePicture() {
-    return Stack(
-      children: [
-        // Outer glow ring
-        Container(
-          width: 140,
-          height: 140,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                Colors.blue.shade400,
-                Colors.purple.shade400,
-                Colors.pink.shade300,
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withValues(alpha: 0.4),
-                spreadRadius: 0,
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+          width: 3,
         ),
-        // Middle ring
-        Positioned(
-          top: 4,
-          left: 4,
-          child: Container(
-            width: 132,
-            height: 132,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  spreadRadius: 0,
-                  blurRadius: 15,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            spreadRadius: 0,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(60),
+        child: _cv!.profilePicture != null
+            ? Image.network(
+                _cv!.profilePicture!,
+                width: 114,
+                height: 114,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.person,
+                    size: 50,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
-        // Inner picture frame
-        Positioned(
-          top: 8,
-          left: 8,
-          child: Container(
-            width: 124,
-            height: 124,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade100,
-                  Colors.white,
-                  Colors.purple.shade50,
-                ],
-              ),
-              border: Border.all(
-                color: Colors.blue.shade200,
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(60),
-              child: _cv!.profilePicture != null
-                  ? Image.network(
-                      _cv!.profilePicture!,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.blue.shade100,
-                              Colors.purple.shade100
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.indigo.shade400,
-                        ),
-                      ),
-                    )
-                  : Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade100,
-                            Colors.purple.shade100
-                          ],
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.indigo.shade400,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-        // Premium badge overlay
-        Positioned(
-          bottom: 8,
-          right: 8,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.amber.shade400, Colors.orange.shade400],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withValues(alpha: 0.4),
-                  spreadRadius: 0,
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              )
+            : Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ],
-            ),
-            child: Icon(
-              Icons.diamond,
-              color: Colors.white,
-              size: 16,
-            ),
-          ),
-        ),
-      ],
+              ),
+      ),
     );
   }
 
   Widget _buildNameSection() {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.indigo.shade50,
-                Colors.blue.shade50,
-                Colors.purple.shade50,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.indigo.shade100,
-              width: 1,
-            ),
-          ),
-          child: Text(
-            '${_cv!.firstName ?? ''} ${_cv!.lastName ?? ''}'.trim(),
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.indigo.shade800,
-              letterSpacing: 1.2,
-              shadows: [
-                Shadow(
-                  color: Colors.indigo.withValues(alpha: 0.1),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            textAlign: TextAlign.center,
-          ),
+        Text(
+          _toTitleCase('${_cv!.firstName ?? ''} ${_cv!.lastName ?? ''}'.trim()),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: 0.5,
+              ),
+          textAlign: TextAlign.center,
         ),
       ],
-    );
-  }
-
-  Widget _buildElegantDivider() {
-    return Container(
-      height: 60,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background gradient line
-          Container(
-            height: 2,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.blue.shade300,
-                  Colors.purple.shade300,
-                  Colors.pink.shade300,
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          // Central decoration
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                colors: [
-                  Colors.white,
-                  Colors.blue.shade50,
-                ],
-              ),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.blue.shade200,
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withValues(alpha: 0.2),
-                  spreadRadius: 0,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.auto_awesome,
-              color: Colors.indigo.shade400,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1194,7 +996,7 @@ class _CVViewPageState extends State<CVViewPage> {
       CountryModel? country, AppLocalizations localizations) {
     final infoItems = <Widget>[];
 
-    // Location card
+    // Location info
     if (_cv!.city != null || _cv!.state != null || country != null) {
       final locationText = [
         _cv!.city,
@@ -1202,234 +1004,63 @@ class _CVViewPageState extends State<CVViewPage> {
         if (country != null) '${country.name} ${country.emoji ?? ''}',
       ].where((element) => element != null && element.isNotEmpty).join(', ');
 
-      infoItems
-          .add(_buildInfoCard(Icons.location_on, locationText, Colors.blue));
+      infoItems.add(_buildFormalInfoItem(
+        Icons.location_on,
+        AppLocalizations.of(context)!.address,
+        _toTitleCase(locationText),
+      ));
     }
 
-    // Birth info card
+    // Birth info
     if (_cv!.dateOfBirth != null) {
-      infoItems
-          .add(_buildInfoCard(Icons.cake, _formatBirthInfo(), Colors.purple));
+      infoItems.add(_buildFormalInfoItem(
+        Icons.cake,
+        AppLocalizations.of(context)!.dateOfBirth,
+        _formatFormalBirthInfo(),
+      ));
     }
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      alignment: WrapAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: infoItems,
     );
   }
 
-  Widget _buildInfoCard(IconData icon, String text, MaterialColor color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.shade50,
-            color.shade100,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.shade200,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.2),
-            spreadRadius: 0,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+  Widget _buildFormalInfoItem(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: color.shade700,
-              size: 18,
-            ),
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 18,
           ),
           const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: color.shade800,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumCVSerial(AppLocalizations localizations) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey.shade50,
-            Colors.blue.shade50,
-            Colors.purple.shade50,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.indigo.shade200,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.indigo.withValues(alpha: 0.1),
-            spreadRadius: 0,
-            blurRadius: 15,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.fingerprint,
-                color: Colors.indigo.shade400,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                localizations.cvSerial,
-                style: TextStyle(
-                  color: Colors.indigo.shade600,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  letterSpacing: 1.5,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.white, Colors.indigo.shade50],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.indigo.shade100,
-                width: 1,
-              ),
-            ),
-            child: Text(
-              _generateCVSerial(),
-              style: TextStyle(
-                color: Colors.indigo.shade800,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                letterSpacing: 3,
-                fontFamily: 'monospace',
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumCornerDecorations() {
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          // Top corners with animated dots
-          ...List.generate(4, (index) {
-            final positions = [
-              {'top': 20.0, 'left': 20.0}, // Top-left
-              {'top': 20.0, 'right': 20.0}, // Top-right
-              {'bottom': 20.0, 'left': 20.0}, // Bottom-left
-              {'bottom': 20.0, 'right': 20.0}, // Bottom-right
-            ];
-
-            return Positioned(
-              top: positions[index]['top'],
-              left: positions[index]['left'],
-              right: positions[index]['right'],
-              bottom: positions[index]['bottom'],
-              child: _buildCornerDot(index),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCornerDot(int index) {
-    final colors = [
-      Colors.blue.shade400,
-      Colors.purple.shade400,
-      Colors.pink.shade400,
-      Colors.indigo.shade400,
-    ];
-
-    return Container(
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: colors[index],
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: colors[index].withValues(alpha: 0.4),
-            spreadRadius: 0,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingVerificationBadge() {
-    return Positioned(
-      top: 40,
-      right: 40,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.green.shade400, Colors.teal.shade400],
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green.withValues(alpha: 0.4),
-              spreadRadius: 0,
-              blurRadius: 15,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.verified_user,
-          color: Colors.white,
-          size: 24,
-        ),
       ),
     );
   }
@@ -1526,46 +1157,49 @@ class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
                         LocaleService.instance.currentLocale?.languageCode ==
                             locale.languageCode;
 
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => _selectLanguage(locale),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        child: Row(
-                          children: [
-                            if (languageEmoji != null) ...[
-                              Text(
-                                languageEmoji,
-                                style: const TextStyle(fontSize: 20),
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => _selectLanguage(locale),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: Row(
+                            children: [
+                              if (languageEmoji != null) ...[
+                                Text(
+                                  languageEmoji,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  languageName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : null,
+                                      ),
+                                ),
                               ),
-                              const SizedBox(width: 12),
+                              if (isSelected)
+                                Icon(
+                                  Icons.check,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 20,
+                                ),
                             ],
-                            Expanded(
-                              child: Text(
-                                languageName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      color: isSelected
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                          : null,
-                                    ),
-                              ),
-                            ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 20,
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -1640,46 +1274,50 @@ class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
         ? LocaleService.instance.getLanguageEmoji(currentLocale.languageCode)
         : null;
 
-    return GestureDetector(
-      key: _buttonKey,
-      onTap: _showDropdown,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        key: _buttonKey,
+        onTap: _showDropdown,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            ),
+            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(context).colorScheme.surface,
           ),
-          borderRadius: BorderRadius.circular(8),
-          color: Theme.of(context).colorScheme.surface,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (currentLanguageEmoji != null) ...[
-              Text(
-                currentLanguageEmoji,
-                style: const TextStyle(fontSize: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (currentLanguageEmoji != null) ...[
+                Text(
+                  currentLanguageEmoji,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  currentLanguageName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const SizedBox(width: 8),
-            ],
-            Expanded(
-              child: Text(
-                currentLanguageName,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                overflow: TextOverflow.ellipsis,
+              Icon(
+                _isDropdownOpen
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              _isDropdownOpen
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

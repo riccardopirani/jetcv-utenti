@@ -47,8 +47,16 @@ class CvModel {
   final String? countrySalt;
   final String? profilePictureSalt;
   final String? genderSalt;
-  final String serial;
+  final String serialNumber;
+  final String? serialNumberHash;
+  final String? serialNumberSalt;
   final String? publicId;
+  final List<String>? nationalityCodes;
+  final List<String>? nationalityCodesHash;
+  final List<String>? nationalityCodesSalt;
+  final List<String>? languageCodes;
+  final List<String>? languageCodesHash;
+  final List<String>? languageCodesSalt;
 
   CvModel({
     required this.idCv,
@@ -98,8 +106,16 @@ class CvModel {
     this.countrySalt,
     this.profilePictureSalt,
     this.genderSalt,
-    required this.serial,
+    required this.serialNumber,
+    this.serialNumberHash,
+    this.serialNumberSalt,
     this.publicId,
+    this.nationalityCodes,
+    this.nationalityCodesHash,
+    this.nationalityCodesSalt,
+    this.languageCodes,
+    this.languageCodesHash,
+    this.languageCodesSalt,
   });
 
   /// Create CvModel from JSON/Map
@@ -150,11 +166,31 @@ class CvModel {
         citySalt: json['citySalt'] as String?,
         stateSalt: json['stateSalt'] as String?,
         postalCodeSalt: json['postalCodeSalt'] as String?,
-        countrySalt: json['countrySalt'] as String?,
+        countrySalt: json['countryCodeSalt'] as String?,
         profilePictureSalt: json['profilePictureSalt'] as String?,
         genderSalt: json['genderSalt'] as String?,
-        serial: json['serial'] as String,
+        serialNumber: json['serial_number'] as String,
+        serialNumberHash: json['serial_number_hash'] as String?,
+        serialNumberSalt: json['serial_number_salt'] as String?,
         publicId: json['publicId'] as String?,
+        nationalityCodes: json['nationality_codes'] != null
+            ? List<String>.from(json['nationality_codes'])
+            : null,
+        nationalityCodesHash: json['nationality_codes_hash'] != null
+            ? List<String>.from(json['nationality_codes_hash'])
+            : null,
+        nationalityCodesSalt: json['nationality_codes_salt'] != null
+            ? List<String>.from(json['nationality_codes_salt'])
+            : null,
+        languageCodes: json['language_codes'] != null
+            ? List<String>.from(json['language_codes'])
+            : null,
+        languageCodesHash: json['language_codes_hash'] != null
+            ? List<String>.from(json['language_codes_hash'])
+            : null,
+        languageCodesSalt: json['language_codes_salt'] != null
+            ? List<String>.from(json['language_codes_salt'])
+            : null,
       );
 
   /// Convert CvModel to JSON/Map
@@ -203,15 +239,23 @@ class CvModel {
         'citySalt': citySalt,
         'stateSalt': stateSalt,
         'postalCodeSalt': postalCodeSalt,
-        'countrySalt': countrySalt,
+        'countryCodeSalt': countrySalt,
         'profilePictureSalt': profilePictureSalt,
         'genderSalt': genderSalt,
-        'serial': serial,
+        'serial_number': serialNumber,
+        'serial_number_hash': serialNumberHash,
+        'serial_number_salt': serialNumberSalt,
         'publicId': publicId,
+        'nationality_codes': nationalityCodes,
+        'nationality_codes_hash': nationalityCodesHash,
+        'nationality_codes_salt': nationalityCodesSalt,
+        'language_codes': languageCodes,
+        'language_codes_hash': languageCodesHash,
+        'language_codes_salt': languageCodesSalt,
       };
 
   @override
-  String toString() => 'CvModel(idCv: $idCv, serial: $serial)';
+  String toString() => 'CvModel(idCv: $idCv, serialNumber: $serialNumber)';
 
   @override
   bool operator ==(Object other) =>

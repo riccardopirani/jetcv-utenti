@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
@@ -22,6 +23,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
   bool _showDropdown = false;
   final GlobalKey _buttonKey = GlobalKey();
   OverlayEntry? _overlayEntry;
+  bool _showAbove = false; // Track dropdown position
 
   @override
   void initState() {
@@ -63,6 +65,26 @@ class _LanguageSelectorState extends State<LanguageSelector> {
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
+    // Calculate available space above and below
+    final screenHeight = MediaQuery.of(context).size.height;
+    final spaceBelow = screenHeight - offset.dy - size.height;
+    final spaceAbove = offset.dy;
+
+    // Calculate actual dropdown height based on content
+    final searchFieldHeight = 60.0; // Search field height
+    final itemHeight = 48.0; // Height per language item
+    final maxItems = 8; // Maximum items to show
+    final actualDropdownHeight = searchFieldHeight +
+        (itemHeight * _filteredLocales.length.clamp(0, maxItems));
+    final dropdownHeight =
+        actualDropdownHeight.clamp(100.0, 300.0); // Min 100, Max 300
+
+    // Determine if we should show dropdown above or below
+    _showAbove = spaceBelow < dropdownHeight && spaceAbove > dropdownHeight;
+    final topPosition = _showAbove
+        ? offset.dy - dropdownHeight - 4
+        : offset.dy + size.height + 4;
+
     _overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -75,16 +97,34 @@ class _LanguageSelectorState extends State<LanguageSelector> {
               ),
             ),
           ),
+          // Handle Escape key
+          Positioned.fill(
+            child: RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: (event) {
+                if (event is RawKeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  _removeOverlay();
+                }
+              },
+              child: Container(
+                color: Colors.transparent,
+              ),
+            ),
+          ),
           // Actual dropdown menu
           Positioned(
             left: offset.dx,
-            top: offset.dy + size.height + 4,
+            top: topPosition,
             width: size.width,
             child: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                constraints: const BoxConstraints(maxHeight: 300),
+                constraints: BoxConstraints(
+                  maxHeight: 300,
+                  minHeight: 100,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -104,8 +144,17 @@ class _LanguageSelectorState extends State<LanguageSelector> {
                       child: TextFormField(
                         controller: _searchController,
                         onChanged: _filterLocales,
+                        autofocus: true, // Auto-focus on search field
+                        onFieldSubmitted: (value) {
+                          // Prevent form submission when Enter is pressed
+                          return;
+                        },
+                        onTapOutside: (event) {
+                          // Close dropdown when clicking outside
+                          _removeOverlay();
+                        },
                         decoration: InputDecoration(
-                          hintText: 'Search language...',
+                          hintText: _getSearchHintText(),
                           prefixIcon: const Icon(Icons.search, size: 20),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -125,12 +174,12 @@ class _LanguageSelectorState extends State<LanguageSelector> {
                     // Language list
                     Flexible(
                       child: _filteredLocales.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.all(16),
+                          ? Padding(
+                              padding: const EdgeInsets.all(16),
                               child: Text(
-                                'No language found',
+                                _getNoLanguageFoundText(),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey),
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             )
                           : ListView.builder(
@@ -215,19 +264,72 @@ class _LanguageSelectorState extends State<LanguageSelector> {
     });
   }
 
-  void _filterLocales(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredLocales = LocaleService.fullyTranslatedLocales;
-      } else {
-        _filteredLocales = LocaleService.fullyTranslatedLocales.where((locale) {
-          final languageName =
-              LocaleService.instance.getLanguageName(locale.languageCode);
-          return languageName.toLowerCase().contains(query.toLowerCase()) ||
-              locale.languageCode.toLowerCase().contains(query.toLowerCase());
-        }).toList();
+  String _getSearchHintText() {
+    final localizations = AppLocalizations.of(context);
+    if (localizations != null) {
+      // Try to get localized search text, fallback to English
+      switch (localizations.localeName) {
+        case 'it':
+          return 'Cerca lingua...';
+        case 'es':
+          return 'Buscar idioma...';
+        case 'fr':
+          return 'Rechercher une langue...';
+        case 'de':
+          return 'Sprache suchen...';
+        default:
+          return 'Search language...';
       }
-    });
+    }
+    return 'Search language...';
+  }
+
+  String _getNoLanguageFoundText() {
+    final localizations = AppLocalizations.of(context);
+    if (localizations != null) {
+      // Try to get localized no results text, fallback to English
+      switch (localizations.localeName) {
+        case 'it':
+          return 'Nessuna lingua trovata';
+        case 'es':
+          return 'No se encontró ningún idioma';
+        case 'fr':
+          return 'Aucune langue trouvée';
+        case 'de':
+          return 'Keine Sprache gefunden';
+        default:
+          return 'No language found';
+      }
+    }
+    return 'No language found';
+  }
+
+  void _filterLocales(String query) {
+    // Update filtered locales without triggering a full rebuild
+    final newFilteredLocales = query.isEmpty
+        ? LocaleService.fullyTranslatedLocales
+        : LocaleService.fullyTranslatedLocales.where((locale) {
+            final languageName =
+                LocaleService.instance.getLanguageName(locale.languageCode);
+            return languageName.toLowerCase().contains(query.toLowerCase()) ||
+                locale.languageCode.toLowerCase().contains(query.toLowerCase());
+          }).toList();
+
+    // Only update if the list actually changed
+    if (!_listEquals(_filteredLocales, newFilteredLocales)) {
+      setState(() {
+        _filteredLocales = newFilteredLocales;
+      });
+    }
+  }
+
+  bool _listEquals<T>(List<T>? a, List<T>? b) {
+    if (a == null) return b == null;
+    if (b == null || a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   void _selectLanguage(Locale locale) async {
