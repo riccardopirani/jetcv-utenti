@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfBirth.
   ///
   /// In en, this message translates to:
-  /// **'Date of Birth (dd/mm/yyyy)'**
+  /// **'Date of Birth'**
   String get dateOfBirth;
 
   /// No description provided for @email.
@@ -692,6 +692,24 @@ abstract class AppLocalizations {
   /// **'Name must be at least 2 characters'**
   String get nameMinLength;
 
+  /// No description provided for @viewMyCV.
+  ///
+  /// In en, this message translates to:
+  /// **'View My CV'**
+  String get viewMyCV;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Link'**
+  String get copyLink;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
   /// No description provided for @createSecurePassword.
   ///
   /// In en, this message translates to:
@@ -935,7 +953,7 @@ abstract class AppLocalizations {
   /// No description provided for @cvLanguage.
   ///
   /// In en, this message translates to:
-  /// **'CV Language'**
+  /// **'CV Display Language'**
   String get cvLanguage;
 
   /// No description provided for @personalInfo.
@@ -1027,6 +1045,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CV Serial'**
   String get cvSerial;
+
+  /// No description provided for @serialCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial Code'**
+  String get serialCode;
 
   /// No description provided for @verifiedCV.
   ///

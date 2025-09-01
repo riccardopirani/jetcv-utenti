@@ -37,9 +37,9 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
           });
 
           // Carica la lingua dal profilo utente se disponibile
-          if (userData.languageCode != null) {
+          if (userData.languageCodeApp != null) {
             LocaleService.instance
-                .loadLanguageFromUserProfile(userData.languageCode);
+                .loadLanguageFromUserProfile(userData.languageCodeApp);
           }
         } else {
           setState(() {
@@ -293,7 +293,7 @@ class QuickActionsSection extends StatelessWidget {
           ] else if (user?.hasCv == true) ...[
             QuickActionCard(
               icon: Icons.visibility,
-              title: 'Visualizza il mio CV',
+              title: AppLocalizations.of(context)!.viewMyCV,
               subtitle: AppLocalizations.of(context)!.yourDigitalCV,
               color: Theme.of(context).colorScheme.primary,
               onTap: () {

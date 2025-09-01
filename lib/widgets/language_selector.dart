@@ -345,7 +345,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       final currentUser = SupabaseConfig.client.auth.currentUser;
       if (currentUser != null) {
         await UserService.updateUser(currentUser.id, {
-          'languageCode': locale.languageCode,
+          'languageCodeApp': locale.languageCode,
         });
         debugPrint(
             '✅ Lingua ${locale.languageCode} salvata nel profilo utente');

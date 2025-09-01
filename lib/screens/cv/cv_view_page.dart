@@ -136,7 +136,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
     final age = _calculateAge(birthDate);
 
-    return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} (${age} anni)';
+    return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} ($age anni)';
   }
 
   String _generateCVSerial() {
@@ -265,7 +265,7 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Visualizza il mio CV'),
+          title: Text(AppLocalizations.of(context)!.viewMyCV),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -278,7 +278,7 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_cv == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Visualizza il mio CV'),
+          title: Text(AppLocalizations.of(context)!.viewMyCV),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -296,7 +296,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visualizza il mio CV'),
+        title: Text(AppLocalizations.of(context)!.viewMyCV),
         backgroundColor: Colors.transparent,
         elevation: 0,
         // Removed share action - moved to main body
@@ -379,22 +379,33 @@ class _CVViewPageState extends State<CVViewPage> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Stack(
         children: [
-          // Main certificate container
+          // Main certificate container with enhanced blockchain-style border
           Container(
             width: double.infinity,
             margin: const EdgeInsets.all(4),
-            padding: const EdgeInsets.all(2),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: Theme.of(context).colorScheme.surface,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.green.shade100.withValues(alpha: 0.3),
+                  Colors.teal.shade50.withValues(alpha: 0.2),
+                  Colors.blue.shade50.withValues(alpha: 0.1),
+                ],
+              ),
               border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.3),
-                width: 1,
+                color: Colors.green.shade300.withValues(alpha: 0.6),
+                width: 2,
               ),
               boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withValues(alpha: 0.2),
+                  spreadRadius: 0,
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.1),
                   spreadRadius: 0,
@@ -409,10 +420,7 @@ class _CVViewPageState extends State<CVViewPage> {
                 borderRadius: BorderRadius.circular(14),
                 color: Theme.of(context).colorScheme.surface,
                 border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
+                  color: Colors.green.shade200.withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -425,15 +433,20 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                   child: Stack(
                     children: [
+                      // Serial chip in top-right corner
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: _buildSerialChip(),
+                      ),
                       // Main content
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Left column: Photo, name and certification
+                            // Main content: Photo, name, certification, personal info
                             Expanded(
-                              flex: 2,
                               child: Column(
                                 children: [
                                   // Profile picture
@@ -441,23 +454,12 @@ class _CVViewPageState extends State<CVViewPage> {
                                   const SizedBox(height: 16),
                                   // Name
                                   _buildNameSection(),
-                                  const SizedBox(height: 20),
-                                  // Premium certification badge with serial
+                                  const SizedBox(height: 16),
+                                  // Premium certification badge
                                   _buildPremiumBadgeWithSerial(localizations),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(width: 24),
-
-                            // Right column: Personal info only
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Personal information
-                                  _buildPersonalInfoCards(
+                                  const SizedBox(height: 20),
+                                  // Personal info (address and birth date)
+                                  _buildPersonalInfoSection(
                                       country, localizations),
                                 ],
                               ),
@@ -792,7 +794,9 @@ class _CVViewPageState extends State<CVViewPage> {
                       size: 16,
                     ),
                     label: Text(
-                      kIsWeb ? 'Copia Link' : 'Condividi',
+                      kIsWeb
+                          ? AppLocalizations.of(context)!.copyLink
+                          : AppLocalizations.of(context)!.share,
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 13,
@@ -810,113 +814,160 @@ class _CVViewPageState extends State<CVViewPage> {
 
   // New premium design methods
 
-  Widget _buildPremiumBadgeWithSerial(AppLocalizations localizations) {
+  Widget _buildSerialChip() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.green.shade100,
-            Colors.green.shade50,
-            Colors.teal.shade50,
+            Colors.white.withValues(alpha: 0.95),
+            Colors.green.shade50.withValues(alpha: 0.8),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          width: 2,
           color: Colors.green.shade300,
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.3),
+            color: Colors.green.withValues(alpha: 0.2),
             spreadRadius: 0,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Certification header
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade200,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.verified,
-                  color: Colors.green.shade800,
-                  size: 20,
-                ),
+              Icon(
+                Icons.fingerprint,
+                color: Colors.green.shade700,
+                size: 14,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  localizations.blockchainCertified,
-                  style: TextStyle(
-                    color: Colors.green.shade900,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
+              const SizedBox(width: 6),
+              Text(
+                AppLocalizations.of(context)!.serialCode,
+                style: TextStyle(
+                  color: Colors.green.shade700,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 16),
-
-          // Serial section
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.green.shade200,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.fingerprint,
-                      color: Colors.green.shade700,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      AppLocalizations.of(context)!.cvSerial,
-                      style: TextStyle(
-                        color: Colors.green.shade700,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _generateCVSerial(),
-                  style: TextStyle(
-                    color: Colors.green.shade900,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    fontFamily: 'monospace',
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 4),
+          Text(
+            _generateCVSerial(),
+            style: TextStyle(
+              color: Colors.green.shade900,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              fontFamily: 'monospace',
+              letterSpacing: 1,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumBadgeWithSerial(AppLocalizations localizations) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green.shade100,
+                Colors.green.shade50,
+                Colors.teal.shade50,
+                Colors.blue.shade50,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              width: 2,
+              color: Colors.green.shade400,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withValues(alpha: 0.4),
+                spreadRadius: 0,
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Colors.teal.withValues(alpha: 0.2),
+                spreadRadius: 0,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Certification header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.green.shade300,
+                          Colors.green.shade500,
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withValues(alpha: 0.4),
+                          spreadRadius: 0,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.verified,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      localizations.blockchainCertified,
+                      style: TextStyle(
+                        color: Colors.green.shade900,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        letterSpacing: 0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.green.withValues(alpha: 0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -992,7 +1043,7 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  Widget _buildPersonalInfoCards(
+  Widget _buildPersonalInfoSection(
       CountryModel? country, AppLocalizations localizations) {
     final infoItems = <Widget>[];
 
@@ -1014,28 +1065,76 @@ class _CVViewPageState extends State<CVViewPage> {
     // Birth info
     if (_cv!.dateOfBirth != null) {
       infoItems.add(_buildFormalInfoItem(
-        Icons.cake,
+        Icons.person_outline,
         AppLocalizations.of(context)!.dateOfBirth,
         _formatFormalBirthInfo(),
       ));
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: infoItems,
+    if (infoItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.4),
+                Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.2),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.green.shade200.withValues(alpha: 0.4),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withValues(alpha: 0.1),
+                spreadRadius: 0,
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: infoItems,
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildFormalInfoItem(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 18,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.green.shade100.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.green.shade700,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1045,16 +1144,16 @@ class _CVViewPageState extends State<CVViewPage> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.w500,
                       ),
                 ),
               ],
@@ -1232,7 +1331,7 @@ class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
           final currentUser = await UserService.getCurrentUser();
           if (currentUser != null) {
             await UserService.updateUser(currentUser.idUser, {
-              'languageCode': locale.languageCode,
+              'languageCodeApp': locale.languageCode,
             });
           }
         } catch (e) {

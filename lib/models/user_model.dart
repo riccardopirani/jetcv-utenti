@@ -13,7 +13,6 @@ class UserModel {
   final String? state;
   final String? postalCode;
   final String? countryCode;
-  final String? languageCode; // Deprecated - use languageCodeApp
   final String? languageCodeApp; // Language for i18n display
   final String? profilePicture;
   final UserGender? gender;
@@ -44,7 +43,6 @@ class UserModel {
     this.state,
     this.postalCode,
     this.countryCode,
-    this.languageCode,
     this.languageCodeApp,
     this.profilePicture,
     this.gender,
@@ -79,7 +77,6 @@ class UserModel {
         state: json['state'] as String?,
         postalCode: json['postalCode'] as String?,
         countryCode: json['countryCode'] as String?,
-        languageCode: json['languageCode'] as String?,
         languageCodeApp: json['languageCodeApp'] as String?,
         profilePicture: json['profilePicture'] as String?,
         gender: json['gender'] != null
@@ -121,7 +118,6 @@ class UserModel {
         'state': state,
         'postalCode': postalCode,
         'countryCode': countryCode,
-        'languageCode': languageCode,
         'languageCodeApp': languageCodeApp,
         'profilePicture': profilePicture,
         'gender': gender?.toDbString(),
@@ -153,7 +149,6 @@ class UserModel {
     String? state,
     String? postalCode,
     String? countryCode,
-    String? languageCode,
     String? languageCodeApp,
     String? profilePicture,
     UserGender? gender,
@@ -182,7 +177,6 @@ class UserModel {
         state: state ?? this.state,
         postalCode: postalCode ?? this.postalCode,
         countryCode: countryCode ?? this.countryCode,
-        languageCode: languageCode ?? this.languageCode,
         languageCodeApp: languageCodeApp ?? this.languageCodeApp,
         profilePicture: profilePicture ?? this.profilePicture,
         gender: gender ?? this.gender,

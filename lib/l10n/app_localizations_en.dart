@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gender => 'Gender';
 
   @override
-  String get dateOfBirth => 'Date of Birth (dd/mm/yyyy)';
+  String get dateOfBirth => 'Date of Birth';
 
   @override
   String get email => 'Email';
@@ -322,6 +322,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nameMinLength => 'Name must be at least 2 characters';
 
   @override
+  String get viewMyCV => 'View My CV';
+
+  @override
+  String get copyLink => 'Copy Link';
+
+  @override
+  String get share => 'Share';
+
+  @override
   String get createSecurePassword => 'Create a secure password';
 
   @override
@@ -451,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareText => 'Share';
 
   @override
-  String get cvLanguage => 'CV Language';
+  String get cvLanguage => 'CV Display Language';
 
   @override
   String get personalInfo => 'Personal Information';
@@ -501,6 +510,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cvSerial => 'CV Serial';
+
+  @override
+  String get serialCode => 'Serial Code';
 
   @override
   String get verifiedCV => 'Verified CV';
