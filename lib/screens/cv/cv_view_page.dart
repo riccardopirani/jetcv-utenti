@@ -347,43 +347,65 @@ class _CVViewPageState extends State<CVViewPage> {
 
     final country = _getCountryByCode(_cv!.countryCode);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isDesktop = screenWidth >= 1024;
+
+    // Responsive padding and spacing
+    final pagePadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+    final sectionSpacing = isMobile
+        ? 20.0
+        : isTablet
+            ? 24.0
+            : 32.0;
+    final smallSpacing = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+
     return MainLayout(
       currentRoute: '/cv',
       title: AppLocalizations.of(context)!.viewMyCV,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(pagePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Language selector
             _buildLanguageSelector(),
 
-            const SizedBox(height: 24),
+            SizedBox(height: smallSpacing),
 
             // Share CV section (moved to top)
             _buildShareSection(),
 
-            const SizedBox(height: 24),
+            SizedBox(height: smallSpacing),
 
             // Main profile section
             _buildMainProfileSection(country),
 
-            const SizedBox(height: 32),
+            SizedBox(height: sectionSpacing),
 
             // Contact information section
             _buildContactSection(),
 
-            const SizedBox(height: 32),
+            SizedBox(height: sectionSpacing),
 
             // Autodichiarazioni section
             _buildAutodichiarazioniSection(),
 
-            const SizedBox(height: 32),
+            SizedBox(height: sectionSpacing),
 
             // Certifications timeline section
             _buildCertificationsSection(),
 
-            const SizedBox(height: 32),
+            SizedBox(height: sectionSpacing),
           ],
         ),
       ),
@@ -391,46 +413,129 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildLanguageSelector() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final cardPadding = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+    final iconSize = isMobile
+        ? 20.0
+        : isTablet
+            ? 22.0
+            : 24.0;
+    final spacing = isMobile
+        ? 8.0
+        : isTablet
+            ? 10.0
+            : 12.0;
+    final titleFontSize = isMobile
+        ? 14.0
+        : isTablet
+            ? 16.0
+            : 18.0;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(
-              Icons.language,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              AppLocalizations.of(context)!.cvLanguage,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+        padding: EdgeInsets.all(cardPadding),
+        child: isMobile
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.language,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: iconSize,
+                      ),
+                      SizedBox(width: spacing),
+                      Text(
+                        AppLocalizations.of(context)!.cvLanguage,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: titleFontSize,
+                                ),
+                      ),
+                    ],
                   ),
-            ),
-            const Spacer(),
-            Expanded(
-              child: CVLanguageDropdown(),
-            ),
-          ],
-        ),
+                  SizedBox(height: spacing),
+                  CVLanguageDropdown(),
+                ],
+              )
+            : Row(
+                children: [
+                  Icon(
+                    Icons.language,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: iconSize,
+                  ),
+                  SizedBox(width: spacing),
+                  Text(
+                    AppLocalizations.of(context)!.cvLanguage,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: titleFontSize,
+                        ),
+                  ),
+                  const Spacer(),
+                  Expanded(
+                    child: CVLanguageDropdown(),
+                  ),
+                ],
+              ),
       ),
     );
   }
 
   Widget _buildMainProfileSection(CountryModel? country) {
     final localizations = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    // Responsive sizing
+    final containerMargin = isMobile
+        ? 2.0
+        : isTablet
+            ? 3.0
+            : 4.0;
+    final containerPadding = isMobile
+        ? 2.0
+        : isTablet
+            ? 2.5
+            : 3.0;
+    final innerPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+    final contentPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+    final spacing = isMobile
+        ? 12.0
+        : isTablet
+            ? 16.0
+            : 20.0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      margin: EdgeInsets.symmetric(horizontal: containerMargin),
       child: Stack(
         children: [
           // Main certificate container with enhanced blockchain-style border
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.all(4),
-            padding: const EdgeInsets.all(3),
+            margin: EdgeInsets.all(containerMargin),
+            padding: EdgeInsets.all(containerPadding),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               gradient: LinearGradient(
@@ -474,7 +579,7 @@ class _CVViewPageState extends State<CVViewPage> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(13),
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(innerPadding),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                   ),
@@ -482,35 +587,35 @@ class _CVViewPageState extends State<CVViewPage> {
                     children: [
                       // Serial chip in top-right corner
                       Positioned(
-                        top: 16,
-                        right: 16,
+                        top: isMobile
+                            ? 12
+                            : isTablet
+                                ? 14
+                                : 16,
+                        right: isMobile
+                            ? 12
+                            : isTablet
+                                ? 14
+                                : 16,
                         child: _buildSerialChip(),
                       ),
                       // Main content
                       Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Row(
+                        padding: EdgeInsets.all(contentPadding),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Main content: Photo, name, certification, personal info
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  // Profile picture
-                                  _buildEnhancedProfilePicture(),
-                                  const SizedBox(height: 16),
-                                  // Name
-                                  _buildNameSection(),
-                                  const SizedBox(height: 20),
-                                  // Personal info (address and birth date)
-                                  _buildPersonalInfoSection(
-                                      country, localizations),
-                                  const SizedBox(height: 20),
-                                  // Premium certification badge
-                                  _buildPremiumBadgeWithSerial(localizations),
-                                ],
-                              ),
-                            ),
+                            // Profile picture
+                            _buildEnhancedProfilePicture(),
+                            SizedBox(height: spacing),
+                            // Name
+                            _buildNameSection(),
+                            SizedBox(height: spacing),
+                            // Personal info (address and birth date)
+                            _buildPersonalInfoSection(country, localizations),
+                            SizedBox(height: spacing),
+                            // Premium certification badge
+                            _buildPremiumBadgeWithSerial(localizations),
                           ],
                         ),
                       ),
@@ -527,12 +632,41 @@ class _CVViewPageState extends State<CVViewPage> {
 
   Widget _buildContactSection() {
     final localizations = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final iconSize = isMobile
+        ? 20.0
+        : isTablet
+            ? 22.0
+            : 24.0;
+    final spacing = isMobile
+        ? 8.0
+        : isTablet
+            ? 10.0
+            : 12.0;
+    final titleFontSize = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final sectionSpacing = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
 
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -541,19 +675,23 @@ class _CVViewPageState extends State<CVViewPage> {
                 Icon(
                   Icons.contact_phone,
                   color: Theme.of(context).colorScheme.primary,
+                  size: iconSize,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  localizations.contactInfo,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                SizedBox(width: spacing),
+                Expanded(
+                  child: Text(
+                    localizations.contactInfo,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: titleFontSize,
+                        ),
+                  ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: sectionSpacing),
 
             // Email
             if (_cv!.email != null) ...[
@@ -612,15 +750,45 @@ class _CVViewPageState extends State<CVViewPage> {
     required String label,
     required String value,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final iconSize = isMobile
+        ? 18.0
+        : isTablet
+            ? 19.0
+            : 20.0;
+    final spacing = isMobile
+        ? 8.0
+        : isTablet
+            ? 10.0
+            : 12.0;
+    final labelFontSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 13.0
+            : 14.0;
+    final valueFontSize = isMobile
+        ? 14.0
+        : isTablet
+            ? 15.0
+            : 16.0;
+    final verticalSpacing = isMobile
+        ? 2.0
+        : isTablet
+            ? 3.0
+            : 4.0;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
-          size: 20,
+          size: iconSize,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: spacing),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -630,14 +798,17 @@ class _CVViewPageState extends State<CVViewPage> {
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
+                      fontSize: labelFontSize,
                     ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: verticalSpacing),
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
+                      fontSize: valueFontSize,
                     ),
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -951,6 +1122,41 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildCertificationsSection() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+    final titleFontSize = isMobile
+        ? 20.0
+        : isTablet
+            ? 24.0
+            : 28.0;
+    final subtitleFontSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 13.0
+            : 14.0;
+    final buttonFontSize = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+    final sectionSpacing = isMobile
+        ? 20.0
+        : isTablet
+            ? 24.0
+            : 32.0;
+    final smallSpacing = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+
     // Show loading state
     if (_certificationsLoading) {
       return Card(
@@ -962,23 +1168,33 @@ class _CVViewPageState extends State<CVViewPage> {
             color: Colors.grey.shade50,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(cardPadding),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.certifications,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context)!.certifications,
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: isMobile
+                              ? 8
+                              : isTablet
+                                  ? 10
+                                  : 12,
+                          vertical: isMobile
+                              ? 4
+                              : isTablet
+                                  ? 5
+                                  : 6),
                       decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(16),
@@ -999,31 +1215,35 @@ class _CVViewPageState extends State<CVViewPage> {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                              fontSize: buttonFontSize,
                               letterSpacing: 0.2,
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: isMobile ? 2 : 4),
                           Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.white,
-                            size: 16,
+                            size: isMobile
+                                ? 14
+                                : isTablet
+                                    ? 15
+                                    : 16,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: sectionSpacing),
                 const Center(
                   child: CircularProgressIndicator(),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: smallSpacing),
                 Text(
                   AppLocalizations.of(context)!.loadingCertifications,
                   style: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: 14,
+                    fontSize: subtitleFontSize,
                   ),
                 ),
               ],
@@ -1317,18 +1537,25 @@ class _CVViewPageState extends State<CVViewPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Timeline with certifications - dates aligned with card start, matching image exactly
+                // Timeline with certifications - responsive layout
                 Stack(
                   children: [
-                    // Timeline line (background) - centered with the blue dots
+                    // Timeline line (background) - responsive positioning
                     Positioned(
-                      left:
-                          60, // Center of the 120px width column (60px from left)
+                      left: isMobile
+                          ? 50
+                          : isTablet
+                              ? 55
+                              : 60, // Responsive center positioning
                       top: 0,
                       child: Container(
                         width: 2,
                         height: _certifications.length *
-                            250.0, // Adjust based on content height + spacing
+                            (isMobile
+                                ? 200.0
+                                : isTablet
+                                    ? 225.0
+                                    : 250.0), // Responsive height
                         color: Colors.grey.shade300,
                       ),
                     ),
@@ -1345,14 +1572,27 @@ class _CVViewPageState extends State<CVViewPage> {
                           children: [
                             // Timeline column with date and node
                             SizedBox(
-                              width: 120,
+                              width: isMobile
+                                  ? 100
+                                  : isTablet
+                                      ? 110
+                                      : 120, // Responsive width
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   // Date bubble
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: isMobile
+                                            ? 8
+                                            : isTablet
+                                                ? 9
+                                                : 10,
+                                        vertical: isMobile
+                                            ? 4
+                                            : isTablet
+                                                ? 5
+                                                : 6),
                                     decoration: BoxDecoration(
                                       color: Colors.blue.shade100,
                                       borderRadius: BorderRadius.circular(12),
@@ -1363,15 +1603,32 @@ class _CVViewPageState extends State<CVViewPage> {
                                       style: TextStyle(
                                         color: Colors.blue.shade800,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 11,
+                                        fontSize: isMobile
+                                            ? 9
+                                            : isTablet
+                                                ? 10
+                                                : 11,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                      height: isMobile
+                                          ? 6
+                                          : isTablet
+                                              ? 7
+                                              : 8),
                                   // Timeline node - centered
                                   Container(
-                                    width: 12,
-                                    height: 12,
+                                    width: isMobile
+                                        ? 10
+                                        : isTablet
+                                            ? 11
+                                            : 12,
+                                    height: isMobile
+                                        ? 10
+                                        : isTablet
+                                            ? 11
+                                            : 12,
                                     decoration: BoxDecoration(
                                       color: Colors.blue,
                                       shape: BoxShape.circle,
@@ -1380,7 +1637,12 @@ class _CVViewPageState extends State<CVViewPage> {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 24),
+                            SizedBox(
+                                width: isMobile
+                                    ? 16
+                                    : isTablet
+                                        ? 20
+                                        : 24),
 
                             // Certification card
                             Expanded(
@@ -1388,7 +1650,13 @@ class _CVViewPageState extends State<CVViewPage> {
                                 children: [
                                   _buildCertificationCard(cert),
                                   // Add spacing between cards (except for the last one)
-                                  if (!isLast) const SizedBox(height: 32),
+                                  if (!isLast)
+                                    SizedBox(
+                                        height: isMobile
+                                            ? 24
+                                            : isTablet
+                                                ? 28
+                                                : 32),
                                 ],
                               ),
                             ),
@@ -1430,6 +1698,21 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildCertificationCard(UserCertificationDetail cert) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final imageHeight = isMobile
+        ? 100.0
+        : isTablet
+            ? 120.0
+            : 140.0;
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1449,7 +1732,7 @@ class _CVViewPageState extends State<CVViewPage> {
         children: [
           // Image section with relevant example images
           Container(
-            height: 140,
+            height: imageHeight,
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.only(
@@ -1467,51 +1750,131 @@ class _CVViewPageState extends State<CVViewPage> {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(cardPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title and date - matching image layout
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        cert.certification?.category?.name ??
-                            AppLocalizations.of(context)!.certification,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
-                        ),
+                // Title and date - responsive layout
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cert.certification?.category?.name ??
+                                AppLocalizations.of(context)!.certification,
+                            style: TextStyle(
+                              fontSize: isMobile
+                                  ? 16
+                                  : isTablet
+                                      ? 17
+                                      : 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          SizedBox(height: isMobile ? 8 : 12),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isMobile
+                                    ? 8
+                                    : isTablet
+                                        ? 9
+                                        : 10,
+                                vertical: isMobile
+                                    ? 4
+                                    : isTablet
+                                        ? 5
+                                        : 6),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _formatCertificationDate(
+                                  cert.certificationUser.createdAt),
+                              style: TextStyle(
+                                color: Colors.blue.shade800,
+                                fontWeight: FontWeight.w600,
+                                fontSize: isMobile
+                                    ? 10
+                                    : isTablet
+                                        ? 11
+                                        : 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              cert.certification?.category?.name ??
+                                  AppLocalizations.of(context)!.certification,
+                              style: TextStyle(
+                                fontSize: isMobile
+                                    ? 16
+                                    : isTablet
+                                        ? 17
+                                        : 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isMobile
+                                    ? 8
+                                    : isTablet
+                                        ? 9
+                                        : 10,
+                                vertical: isMobile
+                                    ? 4
+                                    : isTablet
+                                        ? 5
+                                        : 6),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _formatCertificationDate(
+                                  cert.certificationUser.createdAt),
+                              style: TextStyle(
+                                color: Colors.blue.shade800,
+                                fontWeight: FontWeight.w600,
+                                fontSize: isMobile
+                                    ? 10
+                                    : isTablet
+                                        ? 11
+                                        : 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _formatCertificationDate(
-                            cert.certificationUser.createdAt),
-                        style: TextStyle(
-                          color: Colors.blue.shade800,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                SizedBox(
+                    height: isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16),
 
                 // Issuer with circular logo
                 Row(
                   children: [
                     Container(
-                      width: 28,
-                      height: 28,
+                      width: isMobile
+                          ? 24
+                          : isTablet
+                              ? 26
+                              : 28,
+                      height: isMobile
+                          ? 24
+                          : isTablet
+                              ? 26
+                              : 28,
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         shape: BoxShape.circle,
@@ -1522,23 +1885,44 @@ class _CVViewPageState extends State<CVViewPage> {
                       ),
                       child: Icon(
                         Icons.school,
-                        size: 16,
+                        size: isMobile
+                            ? 14
+                            : isTablet
+                                ? 15
+                                : 16,
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      cert.certification?.category?.name ??
-                          AppLocalizations.of(context)!.certifyingBody,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade700,
+                    SizedBox(
+                        width: isMobile
+                            ? 8
+                            : isTablet
+                                ? 9
+                                : 10),
+                    Expanded(
+                      child: Text(
+                        cert.certification?.category?.name ??
+                            AppLocalizations.of(context)!.certifyingBody,
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 13
+                                  : 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(
+                    height: isMobile
+                        ? 8
+                        : isTablet
+                            ? 10
+                            : 12),
 
                 // Certifier name and serial number if available
                 if (cert.certificationUser.serialNumber != null) ...[
@@ -1547,41 +1931,83 @@ class _CVViewPageState extends State<CVViewPage> {
                     children: [
                       Icon(
                         Icons.business,
-                        size: 16,
+                        size: isMobile
+                            ? 14
+                            : isTablet
+                                ? 15
+                                : 16,
                         color: Colors.grey.shade600,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${AppLocalizations.of(context)!.certifier}: ${cert.certification?.category?.name ?? AppLocalizations.of(context)!.certifyingBody}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                      SizedBox(
+                          width: isMobile
+                              ? 6
+                              : isTablet
+                                  ? 7
+                                  : 8),
+                      Expanded(
+                        child: Text(
+                          '${AppLocalizations.of(context)!.certifier}: ${cert.certification?.category?.name ?? AppLocalizations.of(context)!.certifyingBody}',
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 11
+                                : isTablet
+                                    ? 12
+                                    : 13,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(
+                      height: isMobile
+                          ? 6
+                          : isTablet
+                              ? 7
+                              : 8),
                   // Serial number
                   Row(
                     children: [
                       Icon(
                         Icons.fingerprint,
-                        size: 16,
+                        size: isMobile
+                            ? 14
+                            : isTablet
+                                ? 15
+                                : 16,
                         color: Colors.grey.shade600,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${AppLocalizations.of(context)!.serial}: ${cert.certificationUser.serialNumber}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                      SizedBox(
+                          width: isMobile
+                              ? 6
+                              : isTablet
+                                  ? 7
+                                  : 8),
+                      Expanded(
+                        child: Text(
+                          '${AppLocalizations.of(context)!.serial}: ${cert.certificationUser.serialNumber}',
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 11
+                                : isTablet
+                                    ? 12
+                                    : 13,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(
+                      height: isMobile
+                          ? 12
+                          : isTablet
+                              ? 14
+                              : 16),
                 ],
 
                 // Description from category information
@@ -1593,7 +2019,11 @@ class _CVViewPageState extends State<CVViewPage> {
                         .where((name) => name.isNotEmpty)
                         .join(', '),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: isMobile
+                          ? 12
+                          : isTablet
+                              ? 13
+                              : 14,
                       color: Colors.grey.shade700,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
@@ -1603,7 +2033,11 @@ class _CVViewPageState extends State<CVViewPage> {
                   Text(
                     AppLocalizations.of(context)!.verifiedAndAuthenticated,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: isMobile
+                          ? 12
+                          : isTablet
+                              ? 13
+                              : 14,
                       color: Colors.grey.shade700,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
@@ -1611,7 +2045,12 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                 ],
 
-                const SizedBox(height: 16),
+                SizedBox(
+                    height: isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16),
 
                 // Attached Media Section
                 _buildAttachedMediaSection(cert),

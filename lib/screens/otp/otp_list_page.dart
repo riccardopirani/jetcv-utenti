@@ -98,6 +98,10 @@ class _OtpListPageState extends State<OtpListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
     return Scaffold(
       body: MainLayout(
         currentRoute: '/otp',
@@ -111,24 +115,91 @@ class _OtpListPageState extends State<OtpListPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showNewOtpModal,
         backgroundColor: const Color(0xFF6B46C1),
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: Icon(
+          Icons.add,
+          color: Colors.white,
+          size: isMobile
+              ? 18
+              : isTablet
+                  ? 20
+                  : 24,
+        ),
         label: Text(
           AppLocalizations.of(context)!.newOtp,
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: isMobile
+                ? 12
+                : isTablet
+                    ? 14
+                    : 16,
+          ),
+        ),
+        extendedPadding: EdgeInsets.symmetric(
+          horizontal: isMobile
+              ? 12
+              : isTablet
+                  ? 16
+                  : 20,
         ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final containerPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final containerMargin = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+    final iconSize = isMobile
+        ? 18.0
+        : isTablet
+            ? 19.0
+            : 20.0;
+    final iconPadding = isMobile
+        ? 6.0
+        : isTablet
+            ? 7.0
+            : 8.0;
+    final titleFontSize = isMobile
+        ? 16.0
+        : isTablet
+            ? 17.0
+            : 18.0;
+    final subtitleFontSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 13.0
+            : 14.0;
+    final spacing = isMobile
+        ? 8.0
+        : isTablet
+            ? 10.0
+            : 12.0;
+    final sectionSpacing = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+
     return Column(
       children: [
         // Permanent OTP Codes Section
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(containerPadding),
+          margin: EdgeInsets.all(containerMargin),
           decoration: BoxDecoration(
             color: const Color(0xFFE0E7FF),
             borderRadius: BorderRadius.circular(12),
@@ -139,36 +210,36 @@ class _OtpListPageState extends State<OtpListPage> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(iconPadding),
                     decoration: BoxDecoration(
                       color: const Color(0xFF6B46C1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.security,
                       color: Colors.white,
-                      size: 20,
+                      size: iconSize,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: spacing),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           AppLocalizations.of(context)!.permanentOtpCodes,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: titleFontSize,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: const Color(0xFF1F2937),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: isMobile ? 2 : 4),
                         Text(
                           AppLocalizations.of(context)!.manageSecureAccessCodes,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
+                          style: TextStyle(
+                            fontSize: subtitleFontSize,
+                            color: const Color(0xFF6B7280),
                           ),
                         ),
                       ],
@@ -176,35 +247,50 @@ class _OtpListPageState extends State<OtpListPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: sectionSpacing),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile
+                    ? 12
+                    : isTablet
+                        ? 14
+                        : 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.vpn_key,
-                      color: Color(0xFF6B46C1),
-                      size: 20,
+                      color: const Color(0xFF6B46C1),
+                      size: iconSize,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: spacing),
                     Text(
                       '0',
-                      style: const TextStyle(
-                        fontSize: 24,
+                      style: TextStyle(
+                        fontSize: isMobile
+                            ? 20
+                            : isTablet
+                                ? 22
+                                : 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
+                        color: const Color(0xFF1F2937),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      AppLocalizations.of(context)!.activeOtps,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
+                    SizedBox(width: isMobile ? 6 : 8),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context)!.activeOtps,
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 13
+                                  : 14,
+                          color: const Color(0xFF6B7280),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -221,53 +307,118 @@ class _OtpListPageState extends State<OtpListPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: isMobile
+                      ? 80
+                      : isTablet
+                          ? 100
+                          : 120,
+                  height: isMobile
+                      ? 80
+                      : isTablet
+                          ? 100
+                          : 120,
                   decoration: BoxDecoration(
                     color: const Color(0xFFE0E7FF),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.security,
-                    color: Color(0xFF6B46C1),
-                    size: 48,
+                    color: const Color(0xFF6B46C1),
+                    size: isMobile
+                        ? 32
+                        : isTablet
+                            ? 40
+                            : 48,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(
+                    height: isMobile
+                        ? 16
+                        : isTablet
+                            ? 20
+                            : 24),
                 Text(
                   AppLocalizations.of(context)!.noOtpGenerated,
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: const Color(0xFF1F2937),
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(
+                    height: isMobile
+                        ? 8
+                        : isTablet
+                            ? 10
+                            : 12),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isMobile
+                          ? 16
+                          : isTablet
+                              ? 24
+                              : 32),
                   child: Text(
                     AppLocalizations.of(context)!.createFirstOtpDescription,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF6B7280),
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 12
+                          : isTablet
+                              ? 14
+                              : 16,
+                      color: const Color(0xFF6B7280),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(
+                    height: isMobile
+                        ? 24
+                        : isTablet
+                            ? 28
+                            : 32),
                 ElevatedButton.icon(
                   onPressed: _showNewOtpModal,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6B46C1),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isMobile
+                            ? 16
+                            : isTablet
+                                ? 20
+                                : 24,
+                        vertical: isMobile
+                            ? 10
+                            : isTablet
+                                ? 11
+                                : 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context)!.generateFirstOtp),
+                  icon: Icon(
+                    Icons.add,
+                    size: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
+                  ),
+                  label: Text(
+                    AppLocalizations.of(context)!.generateFirstOtp,
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 12
+                          : isTablet
+                              ? 14
+                              : 16,
+                    ),
+                  ),
                 ),
               ],
             ),

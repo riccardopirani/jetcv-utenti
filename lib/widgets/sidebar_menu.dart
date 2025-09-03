@@ -115,9 +115,40 @@ class _SidebarMenuState extends State<SidebarMenu> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isDesktop = screenWidth >= 1024;
+
+    // Responsive sizing
+    final sidebarWidth = isMobile
+        ? 280.0
+        : isTablet
+            ? 300.0
+            : 320.0;
+    final headerPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final iconSize = isMobile
+        ? 20.0
+        : isTablet
+            ? 22.0
+            : 24.0;
+    final titleFontSize = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final iconPadding = isMobile
+        ? 6.0
+        : isTablet
+            ? 7.0
+            : 8.0;
 
     return Container(
-      width: 280,
+      width: sidebarWidth,
       height: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFF6B46C1), // Dark purple background
@@ -134,11 +165,11 @@ class _SidebarMenuState extends State<SidebarMenu> {
         children: [
           // App Header
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(headerPadding),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(iconPadding),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -146,16 +177,19 @@ class _SidebarMenuState extends State<SidebarMenu> {
                   child: Icon(
                     Icons.rocket_launch,
                     color: const Color(0xFF6B46C1),
-                    size: 24,
+                    size: iconSize,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  AppLocalizations.of(context)!.appTitle,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                SizedBox(width: isMobile ? 8 : 12),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context)!.appTitle,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -164,25 +198,40 @@ class _SidebarMenuState extends State<SidebarMenu> {
 
           // User Profile Section
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile
+                  ? 16
+                  : isTablet
+                      ? 18
+                      : 20,
+              vertical: isMobile ? 12 : 16,
+            ),
             child: _isLoading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 2,
+                      strokeWidth: isMobile ? 1.5 : 2,
                     ),
                   )
                 : _currentUser != null
                     ? Row(
                         children: [
                           Container(
-                            width: 50,
-                            height: 50,
+                            width: isMobile
+                                ? 40
+                                : isTablet
+                                    ? 45
+                                    : 50,
+                            height: isMobile
+                                ? 40
+                                : isTablet
+                                    ? 45
+                                    : 50,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: Colors.white,
-                                width: 2,
+                                width: isMobile ? 1.5 : 2,
                               ),
                             ),
                             child: ClipOval(
@@ -194,17 +243,25 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                           (context, error, stackTrace) => Icon(
                                         Icons.person,
                                         color: Colors.white,
-                                        size: 24,
+                                        size: isMobile
+                                            ? 20
+                                            : isTablet
+                                                ? 22
+                                                : 24,
                                       ),
                                     )
                                   : Icon(
                                       Icons.person,
                                       color: Colors.white,
-                                      size: 24,
+                                      size: isMobile
+                                          ? 20
+                                          : isTablet
+                                              ? 22
+                                              : 24,
                                     ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: isMobile ? 8 : 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,17 +271,25 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                       .trim(),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: isMobile
+                                        ? 14
+                                        : isTablet
+                                            ? 15
+                                            : 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 2),
+                                SizedBox(height: isMobile ? 1 : 2),
                                 Text(
                                   _currentUser!.email ?? '',
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.8),
-                                    fontSize: 12,
+                                    fontSize: isMobile
+                                        ? 10
+                                        : isTablet
+                                            ? 11
+                                            : 12,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -234,12 +299,16 @@ class _SidebarMenuState extends State<SidebarMenu> {
                         ],
                       )
                     : Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(isMobile ? 12 : 16),
                         child: Text(
                           AppLocalizations.of(context)!.userNotLoaded,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 14,
+                            fontSize: isMobile
+                                ? 12
+                                : isTablet
+                                    ? 13
+                                    : 14,
                           ),
                         ),
                       ),
@@ -248,7 +317,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
           // Navigation Items
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 8),
               children: [
                 _buildMenuItem(
                   icon: Icons.home,
@@ -287,13 +356,22 @@ class _SidebarMenuState extends State<SidebarMenu> {
           // Separator
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+            margin: EdgeInsets.symmetric(
+                horizontal: isMobile
+                    ? 16
+                    : isTablet
+                        ? 18
+                        : 20),
             color: Colors.white.withValues(alpha: 0.2),
           ),
 
           // Action Items
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(isMobile
+                ? 16
+                : isTablet
+                    ? 18
+                    : 20),
             child: Column(
               children: [
                 _buildActionItem(
@@ -302,7 +380,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                   isDestructive: true,
                   onTap: _deleteAccount,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: isMobile ? 6 : 8),
                 _buildActionItem(
                   icon: Icons.logout,
                   title: localizations.logout,
@@ -322,17 +400,49 @@ class _SidebarMenuState extends State<SidebarMenu> {
     required String title,
     required String route,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
     final isSelected = widget.currentRoute == route;
 
+    // Responsive sizing
+    final iconSize = isMobile
+        ? 18.0
+        : isTablet
+            ? 19.0
+            : 20.0;
+    final fontSize = isMobile
+        ? 13.0
+        : isTablet
+            ? 13.5
+            : 14.0;
+    final horizontalPadding = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+    final verticalPadding = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+    final spacing = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
+      margin: EdgeInsets.symmetric(vertical: isMobile ? 1 : 2),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _navigateTo(route),
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding, vertical: verticalPadding),
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.white.withValues(alpha: 0.1)
@@ -344,18 +454,19 @@ class _SidebarMenuState extends State<SidebarMenu> {
                 Icon(
                   icon,
                   color: Colors.white,
-                  size: 20,
+                  size: iconSize,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: spacing),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: fontSize,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -372,29 +483,62 @@ class _SidebarMenuState extends State<SidebarMenu> {
     required bool isDestructive,
     required VoidCallback onTap,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    // Responsive sizing
+    final iconSize = isMobile
+        ? 18.0
+        : isTablet
+            ? 19.0
+            : 20.0;
+    final fontSize = isMobile
+        ? 13.0
+        : isTablet
+            ? 13.5
+            : 14.0;
+    final horizontalPadding = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+    final verticalPadding = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+    final spacing = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding, vertical: verticalPadding),
           child: Row(
             children: [
               Icon(
                 icon,
                 color: isDestructive ? Colors.red.shade300 : Colors.white,
-                size: 20,
+                size: iconSize,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: spacing),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
                     color: isDestructive ? Colors.red.shade300 : Colors.white,
-                    fontSize: 14,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
