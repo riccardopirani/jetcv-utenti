@@ -1319,9 +1319,10 @@ class _CVViewPageState extends State<CVViewPage> {
                 // Timeline with certifications - dates aligned with card start, matching image exactly
                 Stack(
                   children: [
-                    // Timeline line (background)
+                    // Timeline line (background) - centered with the blue dots
                     Positioned(
-                      left: 6,
+                      left:
+                          60, // Center of the 120px width column (60px from left)
                       top: 0,
                       child: Container(
                         width: 2,
@@ -1345,7 +1346,7 @@ class _CVViewPageState extends State<CVViewPage> {
                             SizedBox(
                               width: 120,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   // Date bubble
                                   Container(
@@ -1366,7 +1367,7 @@ class _CVViewPageState extends State<CVViewPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  // Timeline node
+                                  // Timeline node - centered
                                   Container(
                                     width: 12,
                                     height: 12,
@@ -1538,29 +1539,29 @@ class _CVViewPageState extends State<CVViewPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Status
-                Row(
-                  children: [
-                    Icon(
-                      _getStatusIcon(cert.certificationUser.status),
-                      size: 16,
-                      color: _getStatusColor(cert.certificationUser.status),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${AppLocalizations.of(context)!.status}: ${_getStatusText(cert.certificationUser.status)}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: _getStatusColor(cert.certificationUser.status),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Serial number if available
+                // Certifier name and serial number if available
                 if (cert.certificationUser.serialNumber != null) ...[
+                  // Certifier name
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.business,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppLocalizations.of(context)!.certifier}: ${cert.certification?.category?.name ?? AppLocalizations.of(context)!.certifyingBody}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Serial number
                   Row(
                     children: [
                       Icon(

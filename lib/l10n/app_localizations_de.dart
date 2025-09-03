@@ -782,4 +782,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String otpNumber(int number) {
     return 'OTP #$number';
   }
+
+  @override
+  String get certifier => 'Zertifizierer';
 }

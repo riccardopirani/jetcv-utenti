@@ -1525,6 +1525,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OTP #{number}'**
   String otpNumber(int number);
+
+  /// No description provided for @certifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifier'**
+  String get certifier;
 }
 
 class _AppLocalizationsDelegate
