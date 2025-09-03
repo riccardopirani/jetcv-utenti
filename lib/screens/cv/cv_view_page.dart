@@ -1552,10 +1552,10 @@ class _CVViewPageState extends State<CVViewPage> {
                         width: 2,
                         height: _certifications.length *
                             (isMobile
-                                ? 200.0
+                                ? 180.0
                                 : isTablet
-                                    ? 225.0
-                                    : 250.0), // Responsive height
+                                    ? 200.0
+                                    : 220.0), // Reduced height to prevent overflow
                         color: Colors.grey.shade300,
                       ),
                     ),
@@ -1584,14 +1584,14 @@ class _CVViewPageState extends State<CVViewPage> {
                                   Container(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: isMobile
-                                            ? 8
+                                            ? 6
                                             : isTablet
-                                                ? 9
+                                                ? 8
                                                 : 10,
                                         vertical: isMobile
-                                            ? 4
+                                            ? 3
                                             : isTablet
-                                                ? 5
+                                                ? 4
                                                 : 6),
                                     decoration: BoxDecoration(
                                       color: Colors.blue.shade100,
@@ -1604,30 +1604,31 @@ class _CVViewPageState extends State<CVViewPage> {
                                         color: Colors.blue.shade800,
                                         fontWeight: FontWeight.w600,
                                         fontSize: isMobile
-                                            ? 9
+                                            ? 7
                                             : isTablet
-                                                ? 10
-                                                : 11,
+                                                ? 8
+                                                : 9,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                   SizedBox(
                                       height: isMobile
-                                          ? 6
+                                          ? 4
                                           : isTablet
-                                              ? 7
-                                              : 8),
+                                              ? 5
+                                              : 6),
                                   // Timeline node - centered
                                   Container(
                                     width: isMobile
-                                        ? 10
+                                        ? 8
                                         : isTablet
-                                            ? 11
+                                            ? 10
                                             : 12,
                                     height: isMobile
-                                        ? 10
+                                        ? 8
                                         : isTablet
-                                            ? 11
+                                            ? 10
                                             : 12,
                                     decoration: BoxDecoration(
                                       color: Colors.blue,
@@ -1639,10 +1640,10 @@ class _CVViewPageState extends State<CVViewPage> {
                             ),
                             SizedBox(
                                 width: isMobile
-                                    ? 16
+                                    ? 12
                                     : isTablet
-                                        ? 20
-                                        : 24),
+                                        ? 16
+                                        : 20),
 
                             // Certification card
                             Expanded(
@@ -1653,10 +1654,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                   if (!isLast)
                                     SizedBox(
                                         height: isMobile
-                                            ? 24
+                                            ? 16
                                             : isTablet
-                                                ? 28
-                                                : 32),
+                                                ? 20
+                                                : 24),
                                 ],
                               ),
                             ),
@@ -1703,15 +1704,15 @@ class _CVViewPageState extends State<CVViewPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     final imageHeight = isMobile
-        ? 100.0
+        ? 80.0
         : isTablet
-            ? 120.0
-            : 140.0;
+            ? 100.0
+            : 120.0;
     final cardPadding = isMobile
-        ? 16.0
+        ? 12.0
         : isTablet
-            ? 18.0
-            : 20.0;
+            ? 14.0
+            : 16.0;
 
     return Container(
       width: double.infinity,
@@ -1764,10 +1765,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                 AppLocalizations.of(context)!.certification,
                             style: TextStyle(
                               fontSize: isMobile
-                                  ? 16
+                                  ? 11
                                   : isTablet
-                                      ? 17
-                                      : 18,
+                                      ? 12
+                                      : 13,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey.shade800,
                             ),
@@ -1796,10 +1797,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.w600,
                                 fontSize: isMobile
-                                    ? 10
+                                    ? 9
                                     : isTablet
-                                        ? 11
-                                        : 12,
+                                        ? 10
+                                        : 11,
                               ),
                             ),
                           ),
@@ -1813,10 +1814,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                   AppLocalizations.of(context)!.certification,
                               style: TextStyle(
                                 fontSize: isMobile
-                                    ? 16
+                                    ? 11
                                     : isTablet
-                                        ? 17
-                                        : 18,
+                                        ? 12
+                                        : 13,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey.shade800,
                               ),
@@ -1845,10 +1846,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.w600,
                                 fontSize: isMobile
-                                    ? 10
+                                    ? 9
                                     : isTablet
-                                        ? 11
-                                        : 12,
+                                        ? 10
+                                        : 11,
                               ),
                             ),
                           ),
@@ -1905,10 +1906,10 @@ class _CVViewPageState extends State<CVViewPage> {
                             AppLocalizations.of(context)!.certifyingBody,
                         style: TextStyle(
                           fontSize: isMobile
-                              ? 12
+                              ? 9
                               : isTablet
-                                  ? 13
-                                  : 14,
+                                  ? 10
+                                  : 11,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey.shade700,
                         ),
@@ -1949,10 +1950,10 @@ class _CVViewPageState extends State<CVViewPage> {
                           '${AppLocalizations.of(context)!.certifier}: ${cert.certification?.category?.name ?? AppLocalizations.of(context)!.certifyingBody}',
                           style: TextStyle(
                             fontSize: isMobile
-                                ? 11
+                                ? 8
                                 : isTablet
-                                    ? 12
-                                    : 13,
+                                    ? 9
+                                    : 10,
                             color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1990,10 +1991,10 @@ class _CVViewPageState extends State<CVViewPage> {
                           '${AppLocalizations.of(context)!.serial}: ${cert.certificationUser.serialNumber}',
                           style: TextStyle(
                             fontSize: isMobile
-                                ? 11
+                                ? 8
                                 : isTablet
-                                    ? 12
-                                    : 13,
+                                    ? 9
+                                    : 10,
                             color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
                           ),
@@ -2020,10 +2021,10 @@ class _CVViewPageState extends State<CVViewPage> {
                         .join(', '),
                     style: TextStyle(
                       fontSize: isMobile
-                          ? 12
+                          ? 9
                           : isTablet
-                              ? 13
-                              : 14,
+                              ? 10
+                              : 11,
                       color: Colors.grey.shade700,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
@@ -2034,10 +2035,10 @@ class _CVViewPageState extends State<CVViewPage> {
                     AppLocalizations.of(context)!.verifiedAndAuthenticated,
                     style: TextStyle(
                       fontSize: isMobile
-                          ? 12
+                          ? 9
                           : isTablet
-                              ? 13
-                              : 14,
+                              ? 10
+                              : 11,
                       color: Colors.grey.shade700,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
