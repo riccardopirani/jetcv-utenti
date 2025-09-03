@@ -103,11 +103,11 @@ class OpenBadgeModel {
     }
 
     if (evidence != null) {
-      jsonLd['evidence'] = evidence;
+      jsonLd['evidence'] = evidence as Object;
     }
 
     if (alignment != null) {
-      jsonLd['alignment'] = alignment;
+      jsonLd['alignment'] = alignment as Object;
     }
 
     return jsonLd;
@@ -120,36 +120,36 @@ class OpenBadgeModel {
 
   /// Crea una copia del badge con campi aggiornati
   OpenBadgeModel copyWith({
-    String? id,
-    String? type,
-    String? name,
-    String? description,
-    String? image,
-    String? criteria,
-    OpenBadgeIssuer? issuer,
-    OpenBadgeRecipient? recipient,
-    OpenBadgeVerification? verification,
-    DateTime? issuedOn,
-    DateTime? expires,
-    List<String>? tags,
-    Map<String, dynamic>? evidence,
-    Map<String, dynamic>? alignment,
+    String? newId,
+    String? newType,
+    String? newName,
+    String? newDescription,
+    String? newImage,
+    String? newCriteria,
+    OpenBadgeIssuer? newIssuer,
+    OpenBadgeRecipient? newRecipient,
+    OpenBadgeVerification? newVerification,
+    DateTime? newIssuedOn,
+    DateTime? newExpires,
+    List<String>? newTags,
+    Map<String, dynamic>? newEvidence,
+    Map<String, dynamic>? newAlignment,
   }) {
     return OpenBadgeModel(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      image: image ?? this.image,
-      criteria: criteria ?? this.criteria,
-      issuer: issuer ?? this.issuer,
-      recipient: recipient ?? this.recipient,
-      verification: verification ?? this.verification,
-      issuedOn: issuedOn ?? this.issuedOn,
-      expires: expires ?? this.expires,
-      tags: tags ?? this.tags,
-      evidence: evidence ?? this.evidence,
-      alignment: alignment ?? this.alignment,
+      id: newId ?? this.id,
+      type: newType ?? this.type,
+      name: newName ?? this.name,
+      description: newDescription ?? this.description,
+      image: newImage ?? this.image,
+      criteria: newCriteria ?? this.criteria,
+      issuer: newIssuer ?? this.issuer,
+      recipient: newRecipient ?? this.recipient,
+      verification: newVerification ?? this.verification,
+      issuedOn: newIssuedOn ?? this.issuedOn,
+      expires: newExpires ?? this.expires,
+      tags: newTags ?? this.tags,
+      evidence: newEvidence ?? this.evidence,
+      alignment: newAlignment ?? this.alignment,
     );
   }
 
@@ -193,9 +193,9 @@ class OpenBadgeIssuer {
       'url': url,
     };
 
-    if (email != null) json['email'] = email;
-    if (description != null) json['description'] = description;
-    if (image != null) json['image'] = image;
+    if (email != null) json['email'] = email!;
+    if (description != null) json['description'] = description!;
+    if (image != null) json['image'] = image!;
 
     return json;
   }
@@ -235,8 +235,8 @@ class OpenBadgeRecipient {
       'type': type,
     };
 
-    if (name != null) json['name'] = name;
-    if (salt != null) json['salt'] = salt;
+    if (name != null) json['name'] = name!;
+    if (salt != null) json['salt'] = salt!;
 
     return json;
   }
@@ -267,13 +267,14 @@ class OpenBadgeVerification {
   });
 
   Map<String, dynamic> toJson() {
-    final json = {
+    final json = <String, dynamic>{
       'type': type,
     };
 
-    if (url != null) json['url'] = url;
-    if (allowedOrigins != null) json['allowedOrigins'] = allowedOrigins;
-    if (verificationProperty != null) json['verificationProperty'] = verificationProperty;
+    if (url != null) json['url'] = url!;
+    if (allowedOrigins != null) json['allowedOrigins'] = allowedOrigins!;
+    if (verificationProperty != null)
+      json['verificationProperty'] = verificationProperty!;
 
     return json;
   }
@@ -283,7 +284,8 @@ class OpenBadgeVerification {
       type: json['type'] as String,
       url: json['url'] as String?,
       allowedOrigins: json['allowedOrigins'] as String?,
-      verificationProperty: json['verificationProperty'] as Map<String, dynamic>?,
+      verificationProperty:
+          json['verificationProperty'] as Map<String, dynamic>?,
     );
   }
 }

@@ -1855,6 +1855,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Media file is not available for download'**
   String get mediaNotAvailable;
+
+  /// No description provided for @createOpenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Open Badge'**
+  String get createOpenBadge;
+
+  /// No description provided for @openBadgeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a verifiable digital badge for this certification. Open Badges are portable, verifiable credentials that can be shared on professional platforms.'**
+  String get openBadgeDescription;
+
+  /// No description provided for @openBadgeBenefits.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefits: Portable, verifiable, shareable on LinkedIn and other platforms, follows international standards.'**
+  String get openBadgeBenefits;
+
+  /// No description provided for @createBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Badge'**
+  String get createBadge;
+
+  /// No description provided for @openBadgeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Badge created successfully!'**
+  String get openBadgeCreated;
+
+  /// No description provided for @openBadgeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error creating Open Badge'**
+  String get openBadgeError;
 }
 
 class _AppLocalizationsDelegate

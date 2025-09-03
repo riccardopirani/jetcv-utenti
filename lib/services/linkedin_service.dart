@@ -34,16 +34,18 @@ class LinkedInService {
         organizationName: 'JetCV',
         issueYear: issueDate.year,
         issueMonth: issueDate.month,
-        certUrl: 'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        certUrl:
+            'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
       );
-      
+
       // Costruisce l'URL per aprire LinkedIn
       final linkedInUrl = _buildAddToProfileUrl(
         certName: certName,
         organizationName: 'JetCV',
         issueYear: issueDate.year,
         issueMonth: issueDate.month,
-        certUrl: 'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        certUrl:
+            'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
         certId: firstCert.certificationUser.idCertificationUser,
       );
 
@@ -57,7 +59,8 @@ class LinkedInService {
           mode: LaunchMode.externalApplication,
         );
 
-        debugPrint('✅ LinkedInService: LinkedIn opened and certification details copied to clipboard');
+        debugPrint(
+            '✅ LinkedInService: LinkedIn opened and certification details copied to clipboard');
       } else {
         debugPrint('❌ LinkedInService: Could not launch LinkedIn URL');
         throw Exception(
@@ -87,7 +90,7 @@ Certificate URL: $certUrl
 
 Copy these details and paste them when adding the certification to your LinkedIn profile.
 ''';
-    
+
     await Clipboard.setData(ClipboardData(text: certificationText));
     debugPrint('📋 Certification details copied to clipboard');
   }

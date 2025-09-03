@@ -562,12 +562,13 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   /// Gestisce l'azione del media (download o visualizzazione)
   void _handleMediaAction(CertificationMediaItem media) {
     final isRealTime = media.acquisitionType?.toLowerCase() == 'real-time';
-    
+
     if (isRealTime) {
       // Per i media real-time, mostra un messaggio
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.realTimeMediaNotDownloadable),
+          content:
+              Text(AppLocalizations.of(context)!.realTimeMediaNotDownloadable),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 2),
         ),

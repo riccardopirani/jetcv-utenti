@@ -14,6 +14,7 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
+import 'package:jetcv__utenti/widgets/open_badge_button.dart';
 
 import 'package:share_plus/share_plus.dart';
 
@@ -2091,6 +2092,9 @@ class _CVViewPageState extends State<CVViewPage> {
 
                 // Attached Media Section
                 _buildAttachedMediaSection(cert),
+
+                // Open Badge Section
+                _buildOpenBadgeSection(cert),
               ],
             ),
           ),
@@ -2110,6 +2114,33 @@ class _CVViewPageState extends State<CVViewPage> {
     return AttachedMediaWidget(
       certification: cert,
       totalMediaCount: totalMediaCount,
+    );
+  }
+
+  Widget _buildOpenBadgeSection(UserCertificationDetail cert) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final spacing = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+
+    return Container(
+      margin: EdgeInsets.only(top: spacing),
+      child: Row(
+        children: [
+         
+          Expanded(
+            child: OpenBadgeButton(
+              certification: cert,
+              isCompact: false,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

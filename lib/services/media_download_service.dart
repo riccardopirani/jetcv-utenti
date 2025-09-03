@@ -9,15 +9,16 @@ import 'package:jetcv__utenti/services/certification_service.dart';
 /// Servizio per il download dei media dalle certificazioni
 class MediaDownloadService {
   static const String _storageBucket = 'certification-media';
-  
+
   /// Scarica un media dalla certificazione
   static Future<void> downloadMedia({
     required CertificationMediaItem media,
     required BuildContext context,
   }) async {
     try {
-      debugPrint('📥 MediaDownloadService: Starting download for media: ${media.idCertificationMedia}');
-      
+      debugPrint(
+          '📥 MediaDownloadService: Starting download for media: ${media.idCertificationMedia}');
+
       // Mostra dialog di caricamento
       showDialog(
         context: context,
@@ -39,7 +40,8 @@ class MediaDownloadService {
 
       // Scarica il file
       final fileData = await _downloadFile(fileUrl);
-      debugPrint('📦 MediaDownloadService: File downloaded, size: ${fileData.length} bytes');
+      debugPrint(
+          '📦 MediaDownloadService: File downloaded, size: ${fileData.length} bytes');
 
       // Salva il file localmente
       final savedFile = await _saveFileLocally(media, fileData);
@@ -60,10 +62,9 @@ class MediaDownloadService {
           ),
         );
       }
-
     } catch (e) {
       debugPrint('❌ MediaDownloadService: Error downloading media: $e');
-      
+
       // Chiudi il dialog di caricamento se è ancora aperto
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -87,15 +88,14 @@ class MediaDownloadService {
     try {
       // Usa l'ID del media hash per costruire il path del file
       final filePath = '${media.idMediaHash}';
-      
+
       // Ottieni l'URL pubblico del file
       final response = SupabaseConfig.client.storage
           .from(_storageBucket)
           .getPublicUrl(filePath);
-      
+
       debugPrint('🔗 MediaDownloadService: Generated public URL: $response');
       return response;
-      
     } catch (e) {
       debugPrint('❌ MediaDownloadService: Error getting media URL: $e');
       throw Exception('Failed to get media URL: $e');
@@ -106,7 +106,7 @@ class MediaDownloadService {
   static Future<Uint8List> _downloadFile(String url) async {
     try {
       final response = await http.get(Uri.parse(url));
-      
+
       if (response.statusCode == 200) {
         return response.bodyBytes;
       } else {
@@ -119,7 +119,8 @@ class MediaDownloadService {
   }
 
   /// Salva il file localmente
-  static Future<File> _saveFileLocally(CertificationMediaItem media, Uint8List data) async {
+  static Future<File> _saveFileLocally(
+      CertificationMediaItem media, Uint8List data) async {
     try {
       // Ottieni la directory dei download
       Directory? directory;
@@ -144,9 +145,10 @@ class MediaDownloadService {
 
       // Determina l'estensione del file
       final extension = _getFileExtension(media.fileType);
-      
+
       // Crea il nome del file
-      final fileName = '${media.name ?? 'media'}_${media.idCertificationMedia}$extension';
+      final fileName =
+          '${media.name ?? 'media'}_${media.idCertificationMedia}$extension';
       final filePath = '${downloadDir.path}/$fileName';
 
       // Salva il file
@@ -163,7 +165,7 @@ class MediaDownloadService {
   /// Determina l'estensione del file basata sul tipo
   static String _getFileExtension(String? fileType) {
     if (fileType == null) return '.bin';
-    
+
     switch (fileType.toLowerCase()) {
       case 'image/jpeg':
       case 'jpeg':

@@ -309,5 +309,11 @@
   "linkedInIntegration": "Integrazione Certificazioni LinkedIn",
   "shareCertificationsOnLinkedIn": "Questo copierà i dettagli della certificazione negli appunti e aprirà LinkedIn. Poi vai al tuo profilo → Aggiungi sezione profilo → Licenze e certificazioni e incolla i dettagli.",
   "realTimeMediaNotDownloadable": "I media in tempo reale non possono essere scaricati",
-  "mediaNotAvailable": "Il file media non è disponibile per il download"
+  "mediaNotAvailable": "Il file media non è disponibile per il download",
+  "createOpenBadge": "Crea Open Badge",
+  "openBadgeDescription": "Crea un badge digitale verificabile per questa certificazione. Gli Open Badge sono credenziali portatili e verificabili che possono essere condivise su piattaforme professionali.",
+  "openBadgeBenefits": "Vantaggi: Portatili, verificabili, condivisibili su LinkedIn e altre piattaforme, seguono standard internazionali.",
+  "createBadge": "Crea Badge",
+  "openBadgeCreated": "Open Badge creato con successo!",
+  "openBadgeError": "Errore nella creazione dell'Open Badge"
 }

@@ -408,5 +408,11 @@
   "linkedInIntegration": "LinkedIn Certification Integration",
   "shareCertificationsOnLinkedIn": "This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.",
   "realTimeMediaNotDownloadable": "Real-time media cannot be downloaded",
-  "mediaNotAvailable": "Media file is not available for download"
+  "mediaNotAvailable": "Media file is not available for download",
+  "createOpenBadge": "Create Open Badge",
+  "openBadgeDescription": "Create a verifiable digital badge for this certification. Open Badges are portable, verifiable credentials that can be shared on professional platforms.",
+  "openBadgeBenefits": "Benefits: Portable, verifiable, shareable on LinkedIn and other platforms, follows international standards.",
+  "createBadge": "Create Badge",
+  "openBadgeCreated": "Open Badge created successfully!",
+  "openBadgeError": "Error creating Open Badge"
 }

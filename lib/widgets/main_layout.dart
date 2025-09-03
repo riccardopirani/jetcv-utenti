@@ -124,8 +124,8 @@ class _MainLayoutState extends State<MainLayout>
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: horizontalPadding),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: horizontalPadding),
                       child: Row(
                         children: [
                           // Hamburger button (always visible)

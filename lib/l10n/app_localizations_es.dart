@@ -952,4 +952,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mediaNotAvailable => 'Media file is not available for download';
+
+  @override
+  String get createOpenBadge => 'Create Open Badge';
+
+  @override
+  String get openBadgeDescription =>
+      'Create a verifiable digital badge for this certification. Open Badges are portable, verifiable credentials that can be shared on professional platforms.';
+
+  @override
+  String get openBadgeBenefits =>
+      'Benefits: Portable, verifiable, shareable on LinkedIn and other platforms, follows international standards.';
+
+  @override
+  String get createBadge => 'Create Badge';
+
+  @override
+  String get openBadgeCreated => 'Open Badge created successfully!';
+
+  @override
+  String get openBadgeError => 'Error creating Open Badge';
 }
