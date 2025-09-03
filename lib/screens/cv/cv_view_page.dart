@@ -12,6 +12,7 @@ import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
+import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 
 import 'package:share_plus/share_plus.dart';
 
@@ -1609,11 +1610,30 @@ class _CVViewPageState extends State<CVViewPage> {
                     ),
                   ),
                 ],
+
+                const SizedBox(height: 16),
+
+                // Attached Media Section
+                _buildAttachedMediaSection(cert),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAttachedMediaSection(UserCertificationDetail cert) {
+    final totalMediaCount =
+        cert.media.directMedia.length + cert.media.linkedMedia.length;
+
+    if (totalMediaCount == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return AttachedMediaWidget(
+      certification: cert,
+      totalMediaCount: totalMediaCount,
     );
   }
 

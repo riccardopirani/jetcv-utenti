@@ -284,5 +284,24 @@
       }
     }
   },
-  "certifier": "Certificador"
+  "certifier": "Certificador",
+  "attachedMedia": "Medios Adjuntos",
+  "attachedMediaCount": "Medios Adjuntos ({count})",
+  "@attachedMediaCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentationAndRelatedContent": "Documentación y contenido relacionado",
+  "mediaDividedInfo": "Los medios están divididos entre contenido genérico de certificación y documentos específicos de tu trayectoria.",
+  "genericMedia": "Medios Genéricos",
+  "didacticMaterialAndOfficialDocumentation": "Material didáctico y documentación oficial",
+  "personalMedia": "Medios Personales",
+  "documentsAndContentOfYourCertificationPath": "Documentos y contenido de tu trayectoria de certificación",
+  "realTime": "TIEMPO REAL",
+  "uploaded": "SUBIDO",
+  "view": "Ver",
+  "download": "Descargar"
 }

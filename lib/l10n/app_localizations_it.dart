@@ -777,4 +777,46 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get certifier => 'Certificatore';
+
+  @override
+  String get attachedMedia => 'Media Allegati';
+
+  @override
+  String attachedMediaCount(int count) {
+    return 'Media Allegati ($count)';
+  }
+
+  @override
+  String get documentationAndRelatedContent =>
+      'Documentazione e contenuti correlati';
+
+  @override
+  String get mediaDividedInfo =>
+      'I media sono suddivisi tra contenuti generici della certificazione e documenti specifici del tuo percorso.';
+
+  @override
+  String get genericMedia => 'Media Generici';
+
+  @override
+  String get didacticMaterialAndOfficialDocumentation =>
+      'Materiale didattico e documentazione ufficiale';
+
+  @override
+  String get personalMedia => 'Media Personali';
+
+  @override
+  String get documentsAndContentOfYourCertificationPath =>
+      'Documenti e contenuti del tuo percorso di certificazione';
+
+  @override
+  String get realTime => 'REAL-TIME';
+
+  @override
+  String get uploaded => 'CARICATO';
+
+  @override
+  String get view => 'Visualizza';
+
+  @override
+  String get download => 'Scarica';
 }

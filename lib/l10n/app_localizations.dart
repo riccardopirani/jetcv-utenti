@@ -1531,6 +1531,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Certifier'**
   String get certifier;
+
+  /// No description provided for @attachedMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Media'**
+  String get attachedMedia;
+
+  /// No description provided for @attachedMediaCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Media ({count})'**
+  String attachedMediaCount(int count);
+
+  /// No description provided for @documentationAndRelatedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation and related content'**
+  String get documentationAndRelatedContent;
+
+  /// No description provided for @mediaDividedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Media are divided between generic certification content and specific documents of your path.'**
+  String get mediaDividedInfo;
+
+  /// No description provided for @genericMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Generic Media'**
+  String get genericMedia;
+
+  /// No description provided for @didacticMaterialAndOfficialDocumentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Didactic material and official documentation'**
+  String get didacticMaterialAndOfficialDocumentation;
+
+  /// No description provided for @personalMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Media'**
+  String get personalMedia;
+
+  /// No description provided for @documentsAndContentOfYourCertificationPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents and content of your certification path'**
+  String get documentsAndContentOfYourCertificationPath;
+
+  /// No description provided for @realTime.
+  ///
+  /// In en, this message translates to:
+  /// **'REAL-TIME'**
+  String get realTime;
+
+  /// No description provided for @uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'UPLOADED'**
+  String get uploaded;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
 }
 
 class _AppLocalizationsDelegate

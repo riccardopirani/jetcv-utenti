@@ -340,5 +340,24 @@
       }
     }
   },
-  "certifier": "Certifier"
+  "certifier": "Certifier",
+  "attachedMedia": "Attached Media",
+  "attachedMediaCount": "Attached Media ({count})",
+  "@attachedMediaCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentationAndRelatedContent": "Documentation and related content",
+  "mediaDividedInfo": "Media are divided between generic certification content and specific documents of your path.",
+  "genericMedia": "Generic Media",
+  "didacticMaterialAndOfficialDocumentation": "Didactic material and official documentation",
+  "personalMedia": "Personal Media",
+  "documentsAndContentOfYourCertificationPath": "Documents and content of your certification path",
+  "realTime": "REAL-TIME",
+  "uploaded": "UPLOADED",
+  "view": "View",
+  "download": "Download"
 }

@@ -1,0 +1,595 @@
+import 'package:flutter/material.dart';
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
+import 'package:jetcv__utenti/services/certification_service.dart';
+
+class AttachedMediaWidget extends StatefulWidget {
+  final UserCertificationDetail certification;
+  final int totalMediaCount;
+
+  const AttachedMediaWidget({
+    super.key,
+    required this.certification,
+    required this.totalMediaCount,
+  });
+
+  @override
+  State<AttachedMediaWidget> createState() => _AttachedMediaWidgetState();
+}
+
+class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isDesktop = screenWidth >= 1024;
+
+    // Responsive padding and sizing
+    final headerPadding = isMobile
+        ? const EdgeInsets.all(12)
+        : isTablet
+            ? const EdgeInsets.all(16)
+            : const EdgeInsets.all(20);
+
+    final iconSize = isMobile
+        ? 16.0
+        : isTablet
+            ? 18.0
+            : 20.0;
+    final folderIconSize = isMobile
+        ? 28.0
+        : isTablet
+            ? 32.0
+            : 36.0;
+    final titleFontSize = isMobile
+        ? 14.0
+        : isTablet
+            ? 16.0
+            : 18.0;
+    final subtitleFontSize = isMobile
+        ? 10.0
+        : isTablet
+            ? 12.0
+            : 14.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header - clickable to expand/collapse
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          child: Container(
+            padding: headerPadding,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                // Folder icon
+                Container(
+                  width: folderIconSize,
+                  height: folderIconSize,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.folder_outlined,
+                    size: iconSize,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 8 : 12),
+                // Title and subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!
+                            .attachedMediaCount(widget.totalMediaCount),
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 1 : 2),
+                      Text(
+                        AppLocalizations.of(context)!
+                            .documentationAndRelatedContent,
+                        style: TextStyle(
+                          fontSize: subtitleFontSize,
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: isMobile ? 2 : 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // Expand/collapse icon
+                Icon(
+                  _isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: Colors.grey.shade600,
+                  size: iconSize,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Expanded content
+        if (_isExpanded) ...[
+          SizedBox(height: isMobile ? 12 : 16),
+
+          // Info box
+          Container(
+            padding: EdgeInsets.all(isMobile
+                ? 10
+                : isTablet
+                    ? 12
+                    : 16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.blue.shade200,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: isMobile
+                      ? 14
+                      : isTablet
+                          ? 16
+                          : 18,
+                  color: Colors.blue.shade600,
+                ),
+                SizedBox(width: isMobile ? 6 : 8),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context)!.mediaDividedInfo,
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 10
+                          : isTablet
+                              ? 12
+                              : 14,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: isMobile ? 12 : 16),
+
+          // Media sections - responsive layout
+          if (isDesktop &&
+              (widget.certification.media.directMedia.isNotEmpty ||
+                  widget.certification.media.linkedMedia.isNotEmpty)) ...[
+            // Desktop: side by side layout
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Generic Media Section
+                if (widget.certification.media.directMedia.isNotEmpty) ...[
+                  Expanded(
+                    child: _buildMediaSection(
+                      title: AppLocalizations.of(context)!.genericMedia,
+                      subtitle: AppLocalizations.of(context)!
+                          .didacticMaterialAndOfficialDocumentation,
+                      icon: Icons.description_outlined,
+                      mediaItems: widget.certification.media.directMedia,
+                      isDesktop: true,
+                    ),
+                  ),
+                  if (widget.certification.media.linkedMedia.isNotEmpty)
+                    SizedBox(width: isDesktop ? 16 : 12),
+                ],
+
+                // Personal Media Section
+                if (widget.certification.media.linkedMedia.isNotEmpty) ...[
+                  Expanded(
+                    child: _buildMediaSection(
+                      title: AppLocalizations.of(context)!.personalMedia,
+                      subtitle: AppLocalizations.of(context)!
+                          .documentsAndContentOfYourCertificationPath,
+                      icon: Icons.person_outline,
+                      mediaItems: widget.certification.media.linkedMedia
+                          .map((linked) => linked.media)
+                          .where((media) => media != null)
+                          .cast<CertificationMediaItem>()
+                          .toList(),
+                      isDesktop: true,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ] else ...[
+            // Mobile/Tablet: stacked layout
+            // Generic Media Section
+            if (widget.certification.media.directMedia.isNotEmpty) ...[
+              _buildMediaSection(
+                title: AppLocalizations.of(context)!.genericMedia,
+                subtitle: AppLocalizations.of(context)!
+                    .didacticMaterialAndOfficialDocumentation,
+                icon: Icons.description_outlined,
+                mediaItems: widget.certification.media.directMedia,
+                isDesktop: false,
+              ),
+              SizedBox(height: isMobile ? 12 : 16),
+            ],
+
+            // Personal Media Section
+            if (widget.certification.media.linkedMedia.isNotEmpty) ...[
+              _buildMediaSection(
+                title: AppLocalizations.of(context)!.personalMedia,
+                subtitle: AppLocalizations.of(context)!
+                    .documentsAndContentOfYourCertificationPath,
+                icon: Icons.person_outline,
+                mediaItems: widget.certification.media.linkedMedia
+                    .map((linked) => linked.media)
+                    .where((media) => media != null)
+                    .cast<CertificationMediaItem>()
+                    .toList(),
+                isDesktop: false,
+              ),
+            ],
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMediaSection({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<CertificationMediaItem> mediaItems,
+    required bool isDesktop,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final iconSize = isMobile
+        ? 14.0
+        : isTablet
+            ? 16.0
+            : 18.0;
+    final titleFontSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+    final subtitleFontSize = isMobile
+        ? 9.0
+        : isTablet
+            ? 11.0
+            : 13.0;
+    final spacing = isMobile
+        ? 8.0
+        : isTablet
+            ? 10.0
+            : 12.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: iconSize,
+              color: Colors.grey.shade600,
+            ),
+            SizedBox(width: isMobile ? 6 : 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: subtitleFontSize,
+                      color: Colors.grey.shade600,
+                    ),
+                    maxLines: isMobile ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: spacing),
+
+        // Media items - responsive grid for desktop
+        if (isDesktop && mediaItems.length > 2) ...[
+          // Desktop: 2-column grid for many items
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: mediaItems
+                .map(
+                  (media) => SizedBox(
+                    width: (MediaQuery.of(context).size.width - 200) /
+                        2, // Responsive width
+                    child: _buildMediaItem(media),
+                  ),
+                )
+                .toList(),
+          ),
+        ] else ...[
+          // Mobile/Tablet: single column
+          ...mediaItems.map((media) => _buildMediaItem(media)).toList(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMediaItem(CertificationMediaItem media) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final isRealTime = media.acquisitionType?.toLowerCase() == 'real-time';
+    final statusText = isRealTime
+        ? AppLocalizations.of(context)!.realTime
+        : AppLocalizations.of(context)!.uploaded;
+    final statusColor = isRealTime ? Colors.orange : Colors.green;
+
+    final icon = _getMediaIcon(media.fileType);
+    final actionIcon = isRealTime ? Icons.visibility : Icons.download;
+
+    // Responsive sizing
+    final itemPadding = isMobile
+        ? const EdgeInsets.all(8)
+        : isTablet
+            ? const EdgeInsets.all(10)
+            : const EdgeInsets.all(12);
+
+    final iconSize = isMobile
+        ? 24.0
+        : isTablet
+            ? 28.0
+            : 32.0;
+    final mediaIconSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+    final titleFontSize = isMobile
+        ? 11.0
+        : isTablet
+            ? 12.0
+            : 13.0;
+    final descriptionFontSize = isMobile
+        ? 9.0
+        : isTablet
+            ? 10.0
+            : 11.0;
+    final timeFontSize = isMobile
+        ? 8.0
+        : isTablet
+            ? 9.0
+            : 10.0;
+    final statusFontSize = isMobile
+        ? 7.0
+        : isTablet
+            ? 8.0
+            : 9.0;
+    final actionIconSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 14.0
+            : 16.0;
+    final actionPadding = isMobile
+        ? 6.0
+        : isTablet
+            ? 7.0
+            : 8.0;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: isMobile ? 6 : 8),
+      padding: itemPadding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Media icon
+          Container(
+            width: iconSize,
+            height: iconSize,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: mediaIconSize,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          SizedBox(width: isMobile ? 8 : 12),
+
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        media.name ?? 'Media',
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                        maxLines: isMobile ? 1 : 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 4 : 6,
+                        vertical: isMobile ? 1 : 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: TextStyle(
+                          fontSize: statusFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (media.description != null) ...[
+                  SizedBox(height: isMobile ? 2 : 4),
+                  Text(
+                    media.description!,
+                    style: TextStyle(
+                      fontSize: descriptionFontSize,
+                      color: Colors.grey.shade600,
+                    ),
+                    maxLines: isMobile ? 2 : 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (media.capturedAt != null) ...[
+                  SizedBox(height: isMobile ? 2 : 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: isMobile ? 8 : 10,
+                        color: Colors.grey.shade500,
+                      ),
+                      SizedBox(width: isMobile ? 2 : 4),
+                      Expanded(
+                        child: Text(
+                          _formatMediaDate(media.capturedAt!),
+                          style: TextStyle(
+                            fontSize: timeFontSize,
+                            color: Colors.grey.shade500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          SizedBox(width: isMobile ? 6 : 8),
+
+          // Action button
+          GestureDetector(
+            onTap: () {
+              // TODO: Implement media action (view/download)
+            },
+            child: Container(
+              padding: EdgeInsets.all(actionPadding),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                actionIcon,
+                size: actionIconSize,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getMediaIcon(String? fileType) {
+    if (fileType == null) return Icons.insert_drive_file;
+
+    switch (fileType.toLowerCase()) {
+      case 'video':
+      case 'mp4':
+      case 'avi':
+        return Icons.play_circle_outline;
+      case 'image':
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  String _formatMediaDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year;
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+
+    return '$day/$month/$year $hour:$minute';
+  }
+}

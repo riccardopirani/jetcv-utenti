@@ -284,5 +284,24 @@
       }
     }
   },
-  "certifier": "Zertifizierer"
+  "certifier": "Zertifizierer",
+  "attachedMedia": "Angehängte Medien",
+  "attachedMediaCount": "Angehängte Medien ({count})",
+  "@attachedMediaCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentationAndRelatedContent": "Dokumentation und verwandte Inhalte",
+  "mediaDividedInfo": "Medien sind zwischen generischen Zertifizierungsinhalten und spezifischen Dokumenten Ihres Weges aufgeteilt.",
+  "genericMedia": "Generische Medien",
+  "didacticMaterialAndOfficialDocumentation": "Didaktisches Material und offizielle Dokumentation",
+  "personalMedia": "Persönliche Medien",
+  "documentsAndContentOfYourCertificationPath": "Dokumente und Inhalte Ihres Zertifizierungsweges",
+  "realTime": "ECHTZEIT",
+  "uploaded": "HOCHGELADEN",
+  "view": "Anzeigen",
+  "download": "Herunterladen"
 }

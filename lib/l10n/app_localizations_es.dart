@@ -780,4 +780,46 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get certifier => 'Certificador';
+
+  @override
+  String get attachedMedia => 'Medios Adjuntos';
+
+  @override
+  String attachedMediaCount(int count) {
+    return 'Medios Adjuntos ($count)';
+  }
+
+  @override
+  String get documentationAndRelatedContent =>
+      'Documentación y contenido relacionado';
+
+  @override
+  String get mediaDividedInfo =>
+      'Los medios están divididos entre contenido genérico de certificación y documentos específicos de tu trayectoria.';
+
+  @override
+  String get genericMedia => 'Medios Genéricos';
+
+  @override
+  String get didacticMaterialAndOfficialDocumentation =>
+      'Material didáctico y documentación oficial';
+
+  @override
+  String get personalMedia => 'Medios Personales';
+
+  @override
+  String get documentsAndContentOfYourCertificationPath =>
+      'Documentos y contenido de tu trayectoria de certificación';
+
+  @override
+  String get realTime => 'TIEMPO REAL';
+
+  @override
+  String get uploaded => 'SUBIDO';
+
+  @override
+  String get view => 'Ver';
+
+  @override
+  String get download => 'Descargar';
 }
