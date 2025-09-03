@@ -943,4 +943,12 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get shareCertificationsOnLinkedIn =>
       'Questo copierà i dettagli della certificazione negli appunti e aprirà LinkedIn. Poi vai al tuo profilo → Aggiungi sezione profilo → Licenze e certificazioni e incolla i dettagli.';
+
+  @override
+  String get realTimeMediaNotDownloadable =>
+      'I media in tempo reale non possono essere scaricati';
+
+  @override
+  String get mediaNotAvailable =>
+      'Il file media non è disponibile per il download';
 }

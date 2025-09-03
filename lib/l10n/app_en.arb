@@ -406,5 +406,7 @@
   "addToLinkedIn": "Add to LinkedIn",
   "addCertificationsToLinkedIn": "Add Certification to LinkedIn",
   "linkedInIntegration": "LinkedIn Certification Integration",
-  "shareCertificationsOnLinkedIn": "This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details."
+  "shareCertificationsOnLinkedIn": "This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.",
+  "realTimeMediaNotDownloadable": "Real-time media cannot be downloaded",
+  "mediaNotAvailable": "Media file is not available for download"
 }

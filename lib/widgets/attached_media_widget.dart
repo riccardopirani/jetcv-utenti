@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/services/media_download_service.dart';
 
 class AttachedMediaWidget extends StatefulWidget {
   final UserCertificationDetail certification;
@@ -539,9 +540,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
           // Action button
           GestureDetector(
-            onTap: () {
-              // TODO: Implement media action (view/download)
-            },
+            onTap: () => _handleMediaAction(media),
             child: Container(
               padding: EdgeInsets.all(actionPadding),
               decoration: BoxDecoration(
@@ -558,6 +557,38 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
         ],
       ),
     );
+  }
+
+  /// Gestisce l'azione del media (download o visualizzazione)
+  void _handleMediaAction(CertificationMediaItem media) {
+    final isRealTime = media.acquisitionType?.toLowerCase() == 'real-time';
+    
+    if (isRealTime) {
+      // Per i media real-time, mostra un messaggio
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.realTimeMediaNotDownloadable),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Per i media caricati, avvia il download
+      if (MediaDownloadService.canDownload(media)) {
+        MediaDownloadService.downloadMedia(
+          media: media,
+          context: context,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.mediaNotAvailable),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   IconData _getMediaIcon(String? fileType) {

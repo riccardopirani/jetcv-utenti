@@ -1843,6 +1843,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.'**
   String get shareCertificationsOnLinkedIn;
+
+  /// No description provided for @realTimeMediaNotDownloadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time media cannot be downloaded'**
+  String get realTimeMediaNotDownloadable;
+
+  /// No description provided for @mediaNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Media file is not available for download'**
+  String get mediaNotAvailable;
 }
 
 class _AppLocalizationsDelegate

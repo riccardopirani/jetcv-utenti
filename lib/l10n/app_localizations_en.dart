@@ -938,4 +938,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shareCertificationsOnLinkedIn =>
       'This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.';
+
+  @override
+  String get realTimeMediaNotDownloadable =>
+      'Real-time media cannot be downloaded';
+
+  @override
+  String get mediaNotAvailable => 'Media file is not available for download';
 }
