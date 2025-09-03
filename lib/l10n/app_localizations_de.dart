@@ -827,4 +827,114 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get download => 'Herunterladen';
+
+  @override
+  String get otpCreatedSuccessfully => 'OTP created successfully';
+
+  @override
+  String get otpCreationFailed => 'Failed to create OTP';
+
+  @override
+  String get otpVerificationSuccess => 'OTP verified successfully';
+
+  @override
+  String get otpVerificationFailed => 'OTP verification failed';
+
+  @override
+  String get otpBurnedSuccessfully => 'OTP invalidated successfully';
+
+  @override
+  String get otpBurnFailed => 'Failed to invalidate OTP';
+
+  @override
+  String get otpMetadataRetrieved => 'OTP metadata retrieved';
+
+  @override
+  String get otpMetadataFailed => 'Failed to retrieve OTP metadata';
+
+  @override
+  String otpCleanupSuccess(int count) {
+    return 'Cleaned up $count expired OTPs';
+  }
+
+  @override
+  String get otpCleanupFailed => 'Failed to cleanup expired OTPs';
+
+  @override
+  String get invalidOtpCode => 'Invalid OTP code';
+
+  @override
+  String get otpExpired => 'OTP has expired';
+
+  @override
+  String get otpAlreadyUsed => 'OTP has already been used';
+
+  @override
+  String get otpAlreadyBurned => 'OTP has been invalidated';
+
+  @override
+  String get otpNotFound => 'OTP not found';
+
+  @override
+  String get generatingOtp => 'Generating OTP...';
+
+  @override
+  String get verifyingOtp => 'Verifying OTP...';
+
+  @override
+  String get burningOtp => 'Invalidating OTP...';
+
+  @override
+  String get loadingOtpMetadata => 'Loading OTP metadata...';
+
+  @override
+  String get cleaningUpOtps => 'Cleaning up expired OTPs...';
+
+  @override
+  String get otpCodeLength => 'Code length';
+
+  @override
+  String get otpTtlSeconds => 'Time to live (seconds)';
+
+  @override
+  String get otpNumericOnly => 'Numeric only';
+
+  @override
+  String get otpTag => 'Tag';
+
+  @override
+  String get otpIdUser => 'User ID';
+
+  @override
+  String get otpUsedBy => 'Used by';
+
+  @override
+  String get otpMarkUsed => 'Mark as used';
+
+  @override
+  String get otpCreatedAt => 'Created at';
+
+  @override
+  String get otpExpiresAt => 'Expires at';
+
+  @override
+  String get otpUsedAt => 'Used at';
+
+  @override
+  String get otpBurnedAt => 'Burned at';
+
+  @override
+  String get otpStatus => 'Status';
+
+  @override
+  String get otpStatusValid => 'Valid';
+
+  @override
+  String get otpStatusExpired => 'Expired';
+
+  @override
+  String get otpStatusUsed => 'Used';
+
+  @override
+  String get otpStatusBurned => 'Burned';
 }

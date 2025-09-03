@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
+import 'package:jetcv__utenti/services/otp_service.dart';
+import 'package:jetcv__utenti/models/models.dart';
+import 'package:jetcv__utenti/supabase/supabase_config.dart';
+import 'package:flutter/services.dart';
 
 class OtpListPage extends StatefulWidget {
   const OtpListPage({super.key});
@@ -10,8 +14,9 @@ class OtpListPage extends StatefulWidget {
 }
 
 class _OtpListPageState extends State<OtpListPage> {
-  List<OtpItem> _otps = [];
+  List<OtpModel> _otps = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -19,39 +24,60 @@ class _OtpListPageState extends State<OtpListPage> {
     _loadOtps();
   }
 
-  void _loadOtps() {
-    // Simulate loading OTPs
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        _otps = [
-          OtpItem(
-            id: '1',
-            name: AppLocalizations.of(context)!.trainingCourse,
-            code: '403 018',
-            createdAt: DateTime.now(),
-            isActive: true,
-          ),
-          OtpItem(
-            id: '2',
-            name: AppLocalizations.of(context)!.otpNumber(2),
-            code: '920 689',
-            createdAt: DateTime.now().subtract(const Duration(minutes: 2)),
-            isActive: true,
-          ),
-        ];
-        _isLoading = false;
-      });
+  Future<void> _loadOtps() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
     });
+
+    try {
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      if (userId != null) {
+        // Per ora, inizializziamo con una lista vuota
+        // In un'app reale, potresti voler recuperare gli OTP esistenti dal database
+        if (mounted) {
+          setState(() {
+            _otps = [];
+            _isLoading = false;
+            _errorMessage = null;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'User not authenticated';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error loading OTPs: $e';
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _showNewOtpModal() {
     showDialog(
       context: context,
-      builder: (context) => const NewOtpModal(),
+      builder: (context) => NewOtpModal(
+        onOtpCreated: (otp) {
+          if (mounted) {
+            setState(() {
+              _otps.add(otp);
+            });
+          }
+        },
+      ),
     );
   }
 
-  void _showQrCodeModal(OtpItem otp) {
+  void _showQrCodeModal(OtpModel otp) {
     showDialog(
       context: context,
       builder: (context) => QrCodeModal(otp: otp),
@@ -59,16 +85,18 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   void _copyOtpCode(String code) {
-    // TODO: Implement clipboard copy
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.otpCodeCopied),
-        backgroundColor: Colors.green,
-      ),
-    );
+    Clipboard.setData(ClipboardData(text: code));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.otpCodeCopied),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
-  void _deleteOtp(OtpItem otp) {
+  void _deleteOtp(OtpModel otp) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -80,11 +108,69 @@ class _OtpListPageState extends State<OtpListPage> {
             child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                _otps.removeWhere((item) => item.id == otp.id);
-              });
+            onPressed: () async {
               Navigator.pop(context);
+
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+
+              try {
+                final response = await OtpService.burnOtp(
+                  idOtp: otp.idOtp,
+                  idUser: otp.idUser,
+                );
+
+                if (!mounted) return;
+                Navigator.pop(context); // Close loading dialog
+
+                if (response.success) {
+                  setState(() {
+                    _otps.removeWhere((item) => item.idOtp == otp.idOtp);
+                    // Se la lista è vuota, aggiorna lo stato
+                    if (_otps.isEmpty) {
+                      _isLoading = false;
+                      _errorMessage = null;
+                    }
+                  });
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!
+                            .otpBurnedSuccessfully),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(response.error ??
+                            AppLocalizations.of(context)!.otpBurnFailed),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Close loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text(AppLocalizations.of(context)!.otpBurnFailed),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: Text(
               AppLocalizations.of(context)!.delete,
@@ -108,9 +194,11 @@ class _OtpListPageState extends State<OtpListPage> {
         title: AppLocalizations.of(context)!.myOtps,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _otps.isEmpty
-                ? _buildEmptyState()
-                : _buildOtpList(),
+            : _errorMessage != null
+                ? _buildErrorState()
+                : _otps.isEmpty
+                    ? _buildEmptyState()
+                    : _buildOtpList(),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showNewOtpModal,
@@ -536,7 +624,36 @@ class _OtpListPageState extends State<OtpListPage> {
     );
   }
 
-  Widget _buildOtpCard(OtpItem otp) {
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage ?? 'An error occurred',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.red,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadOtps,
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtpCard(OtpModel otp) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -574,7 +691,7 @@ class _OtpListPageState extends State<OtpListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      otp.name,
+                      otp.tag ?? AppLocalizations.of(context)!.otpNumber(1),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -587,6 +704,15 @@ class _OtpListPageState extends State<OtpListPage> {
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF6B7280),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _getStatusText(otp),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _getStatusColor(otp),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -686,26 +812,26 @@ class _OtpListPageState extends State<OtpListPage> {
       return AppLocalizations.of(context)!.createdDaysAgo(difference.inDays);
     }
   }
-}
 
-class OtpItem {
-  final String id;
-  final String name;
-  final String code;
-  final DateTime createdAt;
-  final bool isActive;
+  String _getStatusText(OtpModel otp) {
+    if (otp.isBurned) return AppLocalizations.of(context)!.otpStatusBurned;
+    if (otp.isUsed) return AppLocalizations.of(context)!.otpStatusUsed;
+    if (otp.isExpired) return AppLocalizations.of(context)!.otpStatusExpired;
+    return AppLocalizations.of(context)!.otpStatusValid;
+  }
 
-  OtpItem({
-    required this.id,
-    required this.name,
-    required this.code,
-    required this.createdAt,
-    required this.isActive,
-  });
+  Color _getStatusColor(OtpModel otp) {
+    if (otp.isBurned) return Colors.red;
+    if (otp.isUsed) return Colors.orange;
+    if (otp.isExpired) return Colors.grey;
+    return Colors.green;
+  }
 }
 
 class NewOtpModal extends StatefulWidget {
-  const NewOtpModal({super.key});
+  final Function(OtpModel)? onOtpCreated;
+
+  const NewOtpModal({super.key, this.onOtpCreated});
 
   @override
   State<NewOtpModal> createState() => _NewOtpModalState();
@@ -721,19 +847,66 @@ class _NewOtpModalState extends State<NewOtpModal> {
     super.dispose();
   }
 
-  void _generateOtp() {
+  Future<void> _generateOtp() async {
     setState(() {
       _isGenerating = true;
     });
 
-    // Simulate OTP generation
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.userNotLoaded),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final response = await OtpService.createOtp(
+        idUser: userId,
+        tag: _tagController.text.trim().isEmpty
+            ? null
+            : _tagController.text.trim(),
+        ttlSeconds: 3600, // 1 hour
+        length: 6,
+        numericOnly: true,
+      );
+
+      if (response.success && response.data != null) {
+        Navigator.pop(context);
+        widget.onOtpCreated?.call(response.data!);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.otpCreatedSuccessfully),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.error ??
+                AppLocalizations.of(context)!.otpCreationFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.otpCreationFailed),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
       setState(() {
         _isGenerating = false;
       });
-      Navigator.pop(context);
-      // TODO: Add new OTP to list
-    });
+    }
   }
 
   @override
@@ -836,12 +1009,18 @@ class _NewOtpModalState extends State<NewOtpModal> {
 }
 
 class QrCodeModal extends StatelessWidget {
-  final OtpItem otp;
+  final OtpModel otp;
 
   const QrCodeModal({super.key, required this.otp});
 
-  void _copyCode() {
-    // TODO: Implement clipboard copy
+  void _copyCode(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: otp.code));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.otpCodeCopied),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -865,7 +1044,7 @@ class QrCodeModal extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              otp.name,
+              otp.tag ?? AppLocalizations.of(context)!.otpNumber(1),
               style: const TextStyle(
                 fontSize: 14,
                 color: Color(0xFF6B7280),
@@ -926,7 +1105,7 @@ class QrCodeModal extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextButton(
-                    onPressed: _copyCode,
+                    onPressed: () => _copyCode(context),
                     style: TextButton.styleFrom(
                       foregroundColor: const Color(0xFF6B46C1),
                       padding: const EdgeInsets.symmetric(vertical: 12),

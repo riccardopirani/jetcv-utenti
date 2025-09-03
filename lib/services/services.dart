@@ -2,6 +2,7 @@
 export 'user_service.dart';
 export 'country_service.dart';
 export 'wallet_service.dart';
+export 'otp_service.dart';
 
 // Edge Function Services
 export 'edge_function_service.dart';

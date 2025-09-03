@@ -359,5 +359,48 @@
   "realTime": "REAL-TIME",
   "uploaded": "UPLOADED",
   "view": "View",
-  "download": "Download"
+  "download": "Download",
+  "otpCreatedSuccessfully": "OTP created successfully",
+  "otpCreationFailed": "Failed to create OTP",
+  "otpVerificationSuccess": "OTP verified successfully",
+  "otpVerificationFailed": "OTP verification failed",
+  "otpBurnedSuccessfully": "OTP invalidated successfully",
+  "otpBurnFailed": "Failed to invalidate OTP",
+  "otpMetadataRetrieved": "OTP metadata retrieved",
+  "otpMetadataFailed": "Failed to retrieve OTP metadata",
+  "otpCleanupSuccess": "Cleaned up {count} expired OTPs",
+  "@otpCleanupSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "otpCleanupFailed": "Failed to cleanup expired OTPs",
+  "invalidOtpCode": "Invalid OTP code",
+  "otpExpired": "OTP has expired",
+  "otpAlreadyUsed": "OTP has already been used",
+  "otpAlreadyBurned": "OTP has been invalidated",
+  "otpNotFound": "OTP not found",
+  "generatingOtp": "Generating OTP...",
+  "verifyingOtp": "Verifying OTP...",
+  "burningOtp": "Invalidating OTP...",
+  "loadingOtpMetadata": "Loading OTP metadata...",
+  "cleaningUpOtps": "Cleaning up expired OTPs...",
+  "otpCodeLength": "Code length",
+  "otpTtlSeconds": "Time to live (seconds)",
+  "otpNumericOnly": "Numeric only",
+  "otpTag": "Tag",
+  "otpIdUser": "User ID",
+  "otpUsedBy": "Used by",
+  "otpMarkUsed": "Mark as used",
+  "otpCreatedAt": "Created at",
+  "otpExpiresAt": "Expires at",
+  "otpUsedAt": "Used at",
+  "otpBurnedAt": "Burned at",
+  "otpStatus": "Status",
+  "otpStatusValid": "Valid",
+  "otpStatusExpired": "Expired",
+  "otpStatusUsed": "Used",
+  "otpStatusBurned": "Burned"
 }

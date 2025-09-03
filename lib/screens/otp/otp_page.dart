@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
+import 'package:jetcv__utenti/services/otp_service.dart';
+import 'package:jetcv__utenti/supabase/supabase_config.dart';
 
 class OTPPage extends StatefulWidget {
   const OTPPage({super.key});
@@ -66,22 +68,40 @@ class _OTPPageState extends State<OTPPage> {
     try {
       final otp = _controllers.map((c) => c.text).join();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      if (otp.length != 6) {
+        setState(() {
+          _errorMessage = AppLocalizations.of(context)!.invalidOTP;
+        });
+        _clearOTP();
+        return;
+      }
 
-      // TODO: Implement actual OTP verification
-      if (otp == '123456') {
+      // Get current user ID for verification
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      // Call the OTP verification API
+      final response = await OtpService.verifyOtp(
+        code: otp,
+        idUser: userId,
+        markUsed: true,
+      );
+
+      if (response.success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.otpVerified),
+              content:
+                  Text(AppLocalizations.of(context)!.otpVerificationSuccess),
               backgroundColor: Colors.green,
             ),
           );
         }
+        _clearOTP();
       } else {
         setState(() {
-          _errorMessage = AppLocalizations.of(context)!.invalidOTP;
+          _errorMessage = response.error ??
+              AppLocalizations.of(context)!.otpVerificationFailed;
         });
         _clearOTP();
       }
@@ -110,16 +130,38 @@ class _OTPPageState extends State<OTPPage> {
     });
 
     try {
-      // TODO: Implement actual OTP resend
-      await Future.delayed(const Duration(seconds: 1));
+      // Get current user ID for OTP creation
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.otpResent),
-            backgroundColor: Colors.blue,
-          ),
-        );
+      // Create a new OTP
+      final response = await OtpService.createOtp(
+        idUser: userId,
+        tag: 'resend',
+        ttlSeconds: 300, // 5 minutes
+        length: 6,
+        numericOnly: true,
+      );
+
+      if (response.success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.otpResent),
+              backgroundColor: Colors.blue,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ??
+                  AppLocalizations.of(context)!.otpResendError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

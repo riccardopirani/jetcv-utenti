@@ -1603,6 +1603,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download'**
   String get download;
+
+  /// No description provided for @otpCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP created successfully'**
+  String get otpCreatedSuccessfully;
+
+  /// No description provided for @otpCreationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create OTP'**
+  String get otpCreationFailed;
+
+  /// No description provided for @otpVerificationSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP verified successfully'**
+  String get otpVerificationSuccess;
+
+  /// No description provided for @otpVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP verification failed'**
+  String get otpVerificationFailed;
+
+  /// No description provided for @otpBurnedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP invalidated successfully'**
+  String get otpBurnedSuccessfully;
+
+  /// No description provided for @otpBurnFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to invalidate OTP'**
+  String get otpBurnFailed;
+
+  /// No description provided for @otpMetadataRetrieved.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP metadata retrieved'**
+  String get otpMetadataRetrieved;
+
+  /// No description provided for @otpMetadataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to retrieve OTP metadata'**
+  String get otpMetadataFailed;
+
+  /// No description provided for @otpCleanupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaned up {count} expired OTPs'**
+  String otpCleanupSuccess(int count);
+
+  /// No description provided for @otpCleanupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cleanup expired OTPs'**
+  String get otpCleanupFailed;
+
+  /// No description provided for @invalidOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid OTP code'**
+  String get invalidOtpCode;
+
+  /// No description provided for @otpExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP has expired'**
+  String get otpExpired;
+
+  /// No description provided for @otpAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP has already been used'**
+  String get otpAlreadyUsed;
+
+  /// No description provided for @otpAlreadyBurned.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP has been invalidated'**
+  String get otpAlreadyBurned;
+
+  /// No description provided for @otpNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP not found'**
+  String get otpNotFound;
+
+  /// No description provided for @generatingOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating OTP...'**
+  String get generatingOtp;
+
+  /// No description provided for @verifyingOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying OTP...'**
+  String get verifyingOtp;
+
+  /// No description provided for @burningOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalidating OTP...'**
+  String get burningOtp;
+
+  /// No description provided for @loadingOtpMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading OTP metadata...'**
+  String get loadingOtpMetadata;
+
+  /// No description provided for @cleaningUpOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning up expired OTPs...'**
+  String get cleaningUpOtps;
+
+  /// No description provided for @otpCodeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Code length'**
+  String get otpCodeLength;
+
+  /// No description provided for @otpTtlSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to live (seconds)'**
+  String get otpTtlSeconds;
+
+  /// No description provided for @otpNumericOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Numeric only'**
+  String get otpNumericOnly;
+
+  /// No description provided for @otpTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get otpTag;
+
+  /// No description provided for @otpIdUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get otpIdUser;
+
+  /// No description provided for @otpUsedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by'**
+  String get otpUsedBy;
+
+  /// No description provided for @otpMarkUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as used'**
+  String get otpMarkUsed;
+
+  /// No description provided for @otpCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at'**
+  String get otpCreatedAt;
+
+  /// No description provided for @otpExpiresAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires at'**
+  String get otpExpiresAt;
+
+  /// No description provided for @otpUsedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Used at'**
+  String get otpUsedAt;
+
+  /// No description provided for @otpBurnedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Burned at'**
+  String get otpBurnedAt;
+
+  /// No description provided for @otpStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get otpStatus;
+
+  /// No description provided for @otpStatusValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get otpStatusValid;
+
+  /// No description provided for @otpStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get otpStatusExpired;
+
+  /// No description provided for @otpStatusUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get otpStatusUsed;
+
+  /// No description provided for @otpStatusBurned.
+  ///
+  /// In en, this message translates to:
+  /// **'Burned'**
+  String get otpStatusBurned;
 }
 
 class _AppLocalizationsDelegate
