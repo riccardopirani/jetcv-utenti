@@ -1819,6 +1819,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Burned'**
   String get otpStatusBurned;
+
+  /// No description provided for @addToLinkedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Skills to LinkedIn'**
+  String get addToLinkedIn;
+
+  /// No description provided for @addCertificationsToLinkedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Skills to LinkedIn Profile'**
+  String get addCertificationsToLinkedIn;
+
+  /// No description provided for @linkedInIntegration.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkedIn Skills Integration'**
+  String get linkedInIntegration;
+
+  /// No description provided for @shareCertificationsOnLinkedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your certification skills to your LinkedIn profile to enhance your professional visibility.'**
+  String get shareCertificationsOnLinkedIn;
 }
 
 class _AppLocalizationsDelegate

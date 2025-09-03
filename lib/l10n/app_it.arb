@@ -303,5 +303,9 @@
   "realTime": "REAL-TIME",
   "uploaded": "CARICATO",
   "view": "Visualizza",
-  "download": "Scarica"
+  "download": "Scarica",
+  "addToLinkedIn": "Aggiungi Competenze a LinkedIn",
+  "addCertificationsToLinkedIn": "Aggiungi Competenze al Profilo LinkedIn",
+  "linkedInIntegration": "Integrazione Competenze LinkedIn",
+  "shareCertificationsOnLinkedIn": "Aggiungi le competenze delle tue certificazioni al tuo profilo LinkedIn per migliorare la tua visibilità professionale."
 }

@@ -9,6 +9,7 @@ import 'package:jetcv__utenti/services/cv_edge_service.dart';
 import 'package:jetcv__utenti/services/country_service.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
@@ -1471,6 +1472,41 @@ class _CVViewPageState extends State<CVViewPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // LinkedIn Integration Button
+                if (_certifications.isNotEmpty) ...[
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: ElevatedButton.icon(
+                      onPressed: () => _addCertificationsToLinkedIn(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFF0077B5), // LinkedIn blue
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                      icon: const Icon(
+                        Icons.work,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      label: Text(
+                        AppLocalizations.of(context)!
+                            .addCertificationsToLinkedIn,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
                 // Header with title and sort button - matching image exactly
                 Row(
                   children: [
@@ -2773,6 +2809,89 @@ class _CVViewPageState extends State<CVViewPage> {
         ],
       ),
     );
+  }
+
+  /// Gestisce l'aggiunta delle certificazioni a LinkedIn
+  Future<void> _addCertificationsToLinkedIn() async {
+    try {
+      debugPrint('🔗 Opening LinkedIn for certifications');
+
+      // Mostra un dialog di conferma con le competenze
+      final skillsMessage = LinkedInService.generateSkillsMessage(_certifications);
+      final shouldProceed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.linkedInIntegration),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppLocalizations.of(context)!.shareCertificationsOnLinkedIn),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Text(
+                    skillsMessage,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0077B5),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(AppLocalizations.of(context)!.addToLinkedIn),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldProceed == true) {
+        // Apre LinkedIn per aggiungere competenze al profilo
+        await LinkedInService.addSkillsToLinkedInProfile(
+          certifications: _certifications,
+        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'LinkedIn opened! You can now add your certification skills to your profile.'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error opening LinkedIn: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening LinkedIn: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

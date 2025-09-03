@@ -402,5 +402,9 @@
   "otpStatusValid": "Valid",
   "otpStatusExpired": "Expired",
   "otpStatusUsed": "Used",
-  "otpStatusBurned": "Burned"
+  "otpStatusBurned": "Burned",
+  "addToLinkedIn": "Add Skills to LinkedIn",
+  "addCertificationsToLinkedIn": "Add Skills to LinkedIn Profile",
+  "linkedInIntegration": "LinkedIn Skills Integration",
+  "shareCertificationsOnLinkedIn": "Add your certification skills to your LinkedIn profile to enhance your professional visibility."
 }
