@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:jetcv__utenti/models/open_badge_model.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 /// Servizio per la creazione e gestione degli Open Badge
 class OpenBadgeService {
@@ -290,6 +291,127 @@ class OpenBadgeService {
     return byteData!.buffer.asUint8List();
   }
 
+  /// Scarica l'immagine PNG del badge
+  static Future<void> _downloadBadgeImage(
+    BuildContext context,
+    OpenBadgeModel badge,
+    Uint8List imageData,
+  ) async {
+    try {
+      debugPrint('📸 OpenBadgeService: Downloading badge image');
+      
+      if (kIsWeb) {
+        // Su web, mostriamo l'immagine in un dialog per il download manuale
+        await _showImageDialog(context, badge, imageData);
+      } else {
+        // Su mobile/desktop, salviamo l'immagine
+        await _saveBadgeImage(badge, imageData);
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(AppLocalizations.of(context)!.badgeImageSaved),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ OpenBadgeService: Error downloading badge image: $e');
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${AppLocalizations.of(context)!.badgeImageError}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Mostra l'immagine del badge in un dialog (per web)
+  static Future<void> _showImageDialog(
+    BuildContext context,
+    OpenBadgeModel badge,
+    Uint8List imageData,
+  ) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${badge.name} - Badge Image'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.memory(
+                imageData,
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)!.saveImageAs,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Salva l'immagine del badge (per mobile/desktop)
+  static Future<void> _saveBadgeImage(OpenBadgeModel badge, Uint8List imageData) async {
+    try {
+      // Ottieni la directory dei download
+      Directory? directory;
+      try {
+        if (Platform.isAndroid) {
+          directory = await getExternalStorageDirectory();
+        } else if (Platform.isIOS) {
+          directory = await getApplicationDocumentsDirectory();
+        } else {
+          directory = await getTemporaryDirectory();
+        }
+      } catch (e) {
+        directory = await getTemporaryDirectory();
+      }
+
+      if (directory == null) {
+        throw Exception('Could not get storage directory');
+      }
+
+      // Crea la directory dei badge se non esiste
+      final badgeDir = Directory('${directory.path}/JetCV_Badges');
+      if (!await badgeDir.exists()) {
+        await badgeDir.create(recursive: true);
+      }
+
+      // Salva l'immagine PNG
+      final fileName = '${badge.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File('${badgeDir.path}/$fileName');
+      await file.writeAsBytes(imageData);
+
+      debugPrint('✅ OpenBadgeService: Badge image saved to: ${file.path}');
+    } catch (e) {
+      debugPrint('❌ OpenBadgeService: Error saving badge image: $e');
+      throw Exception('Failed to save badge image: $e');
+    }
+  }
+
   /// Mostra il dialog di condivisione
   static Future<void> _showShareDialog({
     required BuildContext context,
@@ -320,7 +442,7 @@ class OpenBadgeService {
           ElevatedButton.icon(
             onPressed: () => _downloadBadgeImage(context, badge, imageData),
             icon: const Icon(Icons.download, size: 16),
-            label: const Text('Download PNG'),
+            label: Text(AppLocalizations.of(context)!.downloadPng),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
               foregroundColor: Colors.white,

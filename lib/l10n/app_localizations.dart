@@ -1891,6 +1891,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error creating Open Badge'**
   String get openBadgeError;
+
+  /// No description provided for @downloadPng.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PNG'**
+  String get downloadPng;
+
+  /// No description provided for @badgeImageSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge image saved successfully!'**
+  String get badgeImageSaved;
+
+  /// No description provided for @badgeImageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error downloading badge image'**
+  String get badgeImageError;
+
+  /// No description provided for @saveImageAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click on the image above and select \"Save image as...\" to download the badge PNG.'**
+  String get saveImageAs;
 }
 
 class _AppLocalizationsDelegate

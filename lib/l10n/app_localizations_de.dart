@@ -977,4 +977,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get openBadgeError => 'Error creating Open Badge';
+
+  @override
+  String get downloadPng => 'Download PNG';
+
+  @override
+  String get badgeImageSaved => 'Badge image saved successfully!';
+
+  @override
+  String get badgeImageError => 'Error downloading badge image';
+
+  @override
+  String get saveImageAs =>
+      'Right-click on the image above and select \"Save image as...\" to download the badge PNG.';
 }

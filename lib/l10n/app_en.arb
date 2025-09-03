@@ -414,5 +414,9 @@
   "openBadgeBenefits": "Benefits: Portable, verifiable, shareable on LinkedIn and other platforms, follows international standards.",
   "createBadge": "Create Badge",
   "openBadgeCreated": "Open Badge created successfully!",
-  "openBadgeError": "Error creating Open Badge"
+  "openBadgeError": "Error creating Open Badge",
+  "downloadPng": "Download PNG",
+  "badgeImageSaved": "Badge image saved successfully!",
+  "badgeImageError": "Error downloading badge image",
+  "saveImageAs": "Right-click on the image above and select \"Save image as...\" to download the badge PNG."
 }

@@ -315,5 +315,9 @@
   "openBadgeBenefits": "Vantaggi: Portatili, verificabili, condivisibili su LinkedIn e altre piattaforme, seguono standard internazionali.",
   "createBadge": "Crea Badge",
   "openBadgeCreated": "Open Badge creato con successo!",
-  "openBadgeError": "Errore nella creazione dell'Open Badge"
+  "openBadgeError": "Errore nella creazione dell'Open Badge",
+  "downloadPng": "Scarica PNG",
+  "badgeImageSaved": "Immagine badge salvata con successo!",
+  "badgeImageError": "Errore nel download dell'immagine badge",
+  "saveImageAs": "Fai clic destro sull'immagine sopra e seleziona \"Salva immagine con nome...\" per scaricare il PNG del badge."
 }
