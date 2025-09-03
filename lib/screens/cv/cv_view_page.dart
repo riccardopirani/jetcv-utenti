@@ -327,13 +327,8 @@ class _CVViewPageState extends State<CVViewPage> {
 
               const SizedBox(height: 32),
 
-              // Languages section (placeholder)
-              _buildLanguagesSection(),
-
-              const SizedBox(height: 32),
-
-              // Attitudes section (placeholder)
-              _buildAttitudesSection(),
+              // Autodichiarazioni section
+              _buildAutodichiarazioniSection(),
 
               const SizedBox(height: 32),
             ],
@@ -454,13 +449,13 @@ class _CVViewPageState extends State<CVViewPage> {
                                   const SizedBox(height: 16),
                                   // Name
                                   _buildNameSection(),
-                                  const SizedBox(height: 16),
-                                  // Premium certification badge
-                                  _buildPremiumBadgeWithSerial(localizations),
                                   const SizedBox(height: 20),
                                   // Personal info (address and birth date)
                                   _buildPersonalInfoSection(
                                       country, localizations),
+                                  const SizedBox(height: 20),
+                                  // Premium certification badge
+                                  _buildPremiumBadgeWithSerial(localizations),
                                 ],
                               ),
                             ),
@@ -542,6 +537,17 @@ class _CVViewPageState extends State<CVViewPage> {
                     .where((element) => element != null && element.isNotEmpty)
                     .join(', ')),
               ),
+              const SizedBox(height: 16),
+            ],
+
+            // Nationalities
+            if (_cv!.nationalityCodes != null &&
+                _cv!.nationalityCodes!.isNotEmpty) ...[
+              _buildNationalitiesItem(
+                icon: Icons.public,
+                label: 'Nazionalità',
+                nationalityCodes: _cv!.nationalityCodes!,
+              ),
             ],
           ],
         ),
@@ -588,67 +594,179 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  Widget _buildLanguagesSection() {
-    final localizations = AppLocalizations.of(context)!;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.translate,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  localizations.languages,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
+  Widget _buildNationalitiesItem({
+    required IconData icon,
+    required String label,
+    required List<String> nationalityCodes,
+  }) {
+    return FutureBuilder<List<CountryModel>>(
+      future: _loadNationalities(nationalityCodes),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    const CircularProgressIndicator(strokeWidth: 2),
+                  ],
                 ),
               ),
-              child: Text(
-                localizations.languagesPlaceholder,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
+            ],
+          );
+        }
+
+        final countries = snapshot.data ?? [];
+        if (countries.isEmpty) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
-                textAlign: TextAlign.center,
+                    const SizedBox(height: 4),
+                    Text(
+                      'Nessuna nazionalità specificata',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontStyle: FontStyle.italic,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: countries.map((country) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (country.emoji != null) ...[
+                              Text(
+                                country.emoji!,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(
+                              country.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildAttitudesSection() {
-    final localizations = AppLocalizations.of(context)!;
+  Future<List<CountryModel>> _loadNationalities(
+      List<String> nationalityCodes) async {
+    final List<CountryModel> countries = [];
+
+    for (final code in nationalityCodes) {
+      try {
+        final response = await CountryService.getCountryByCode(code);
+        if (response.success && response.data != null) {
+          countries.add(response.data!);
+        }
+      } catch (e) {
+        debugPrint('Error loading nationality $code: $e');
+      }
+    }
+
+    return countries;
+  }
+
+  Widget _buildAutodichiarazioniSection() {
+    final languageCodes = _cv?.languageCodes;
 
     return Card(
       elevation: 2,
@@ -661,12 +779,12 @@ class _CVViewPageState extends State<CVViewPage> {
             Row(
               children: [
                 Icon(
-                  Icons.psychology,
+                  Icons.assignment_ind,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  localizations.attitudes,
+                  'Autodichiarazioni',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -675,31 +793,105 @@ class _CVViewPageState extends State<CVViewPage> {
               ],
             ),
             const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
+
+            // Languages subsection
+            if (languageCodes != null && languageCodes.isNotEmpty) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.translate,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Lingue parlate:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: languageCodes.map((languageCode) {
+                  final languageName =
+                      LocaleService.languageNames[languageCode] ??
+                          languageCode.toUpperCase();
+                  final languageEmoji =
+                      LocaleService.languageEmojis[languageCode];
+
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (languageEmoji != null) ...[
+                          Text(
+                            languageEmoji,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          languageName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ] else ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
                   color: Theme.of(context)
                       .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Text(
+                  'Nessuna lingua specificata',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              child: Text(
-                localizations.attitudesPlaceholder,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-            ),
+            ],
           ],
         ),
       ),

@@ -31,10 +31,12 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
       if (currentUser != null) {
         final userData = await UserService.getUserById(currentUser.idUser);
         if (userData != null) {
-          setState(() {
-            _user = userData;
-            _isLoading = false;
-          });
+          if (mounted) {
+            setState(() {
+              _user = userData;
+              _isLoading = false;
+            });
+          }
 
           // Carica la lingua dal profilo utente se disponibile
           if (userData.languageCodeApp != null) {
@@ -42,16 +44,20 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
                 .loadLanguageFromUserProfile(userData.languageCodeApp);
           }
         } else {
-          setState(() {
-            _isLoading = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
         }
       }
     } catch (e) {
       debugPrint('Errore nel caricamento dati utente: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

@@ -4,84 +4,116 @@ import 'package:jetcv__utenti/supabase/structure/enumerated_types.dart';
 class CertificationModel {
   final String idCertification;
   final String idCertificationHash;
-  final String idUser;
   final String idCertifier;
   final String idLegalEntity;
   final CertificationStatus status;
-  final DateTime? statusUpdatedAtByUser;
-  final String? rejectionReason;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String serialNumber;
+  final String idLocation;
+  final int nUsers;
+  final DateTime? sentAt;
+  final DateTime? draftAt;
+  final DateTime? closedAt;
+  final String idCertificationCategory;
 
   CertificationModel({
     required this.idCertification,
     required this.idCertificationHash,
-    required this.idUser,
     required this.idCertifier,
     required this.idLegalEntity,
     this.status = CertificationStatus.draft,
-    this.statusUpdatedAtByUser,
-    this.rejectionReason,
     required this.createdAt,
     this.updatedAt,
+    required this.serialNumber,
+    required this.idLocation,
+    required this.nUsers,
+    this.sentAt,
+    this.draftAt,
+    this.closedAt,
+    required this.idCertificationCategory,
   });
 
   /// Create CertificationModel from JSON/Map
-  factory CertificationModel.fromJson(Map<String, dynamic> json) => CertificationModel(
-    idCertification: json['idCertification'] as String,
-    idCertificationHash: json['idCertificationHash'] as String,
-    idUser: json['idUser'] as String,
-    idCertifier: json['idCertifier'] as String,
-    idLegalEntity: json['idLegalEntity'] as String,
-    status: json['status'] != null ? CertificationStatus.fromString(json['status']) : CertificationStatus.draft,
-    statusUpdatedAtByUser: json['statusUpdatedAtByUser'] != null ? DateTime.parse(json['statusUpdatedAtByUser']) : null,
-    rejectionReason: json['rejectionReason'] as String?,
-    createdAt: DateTime.parse(json['createdAt']),
-    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-  );
+  factory CertificationModel.fromJson(Map<String, dynamic> json) =>
+      CertificationModel(
+        idCertification: json['id_certification'] as String,
+        idCertificationHash: json['id_certification_hash'] as String,
+        idCertifier: json['id_certifier'] as String,
+        idLegalEntity: json['id_legal_entity'] as String,
+        status: json['status'] != null
+            ? CertificationStatus.fromString(json['status'])
+            : CertificationStatus.draft,
+        createdAt: DateTime.parse(json['created_at']),
+        updatedAt: json['updated_t'] != null
+            ? DateTime.parse(json['updated_t'])
+            : null,
+        serialNumber: json['serial_number'] as String,
+        idLocation: json['id_location'] as String,
+        nUsers: json['n_users'] as int,
+        sentAt:
+            json['sent_at'] != null ? DateTime.parse(json['sent_at']) : null,
+        draftAt:
+            json['draft_at'] != null ? DateTime.parse(json['draft_at']) : null,
+        closedAt: json['closed_at'] != null
+            ? DateTime.parse(json['closed_at'])
+            : null,
+        idCertificationCategory: json['id_certification_category'] as String,
+      );
 
   /// Convert CertificationModel to JSON/Map
   Map<String, dynamic> toJson() => {
-    'idCertification': idCertification,
-    'idCertificationHash': idCertificationHash,
-    'idUser': idUser,
-    'idCertifier': idCertifier,
-    'idLegalEntity': idLegalEntity,
-    'status': status.toDbString(),
-    'statusUpdatedAtByUser': statusUpdatedAtByUser?.toIso8601String(),
-    'rejectionReason': rejectionReason,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt?.toIso8601String(),
-  };
+        'id_certification': idCertification,
+        'id_certification_hash': idCertificationHash,
+        'id_certifier': idCertifier,
+        'id_legal_entity': idLegalEntity,
+        'status': status.toDbString(),
+        'created_at': createdAt.toIso8601String(),
+        'updated_t': updatedAt?.toIso8601String(),
+        'serial_number': serialNumber,
+        'id_location': idLocation,
+        'n_users': nUsers,
+        'sent_at': sentAt?.toIso8601String(),
+        'draft_at': draftAt?.toIso8601String(),
+        'closed_at': closedAt?.toIso8601String(),
+        'id_certification_category': idCertificationCategory,
+      };
 
   /// Create copy with updated fields
   CertificationModel copyWith({
     CertificationStatus? status,
-    DateTime? statusUpdatedAtByUser,
-    String? rejectionReason,
     DateTime? updatedAt,
-  }) => CertificationModel(
-    idCertification: idCertification,
-    idCertificationHash: idCertificationHash,
-    idUser: idUser,
-    idCertifier: idCertifier,
-    idLegalEntity: idLegalEntity,
-    status: status ?? this.status,
-    statusUpdatedAtByUser: statusUpdatedAtByUser ?? this.statusUpdatedAtByUser,
-    rejectionReason: rejectionReason ?? this.rejectionReason,
-    createdAt: createdAt,
-    updatedAt: updatedAt ?? DateTime.now(),
-  );
+    DateTime? sentAt,
+    DateTime? draftAt,
+    DateTime? closedAt,
+  }) =>
+      CertificationModel(
+        idCertification: idCertification,
+        idCertificationHash: idCertificationHash,
+        idCertifier: idCertifier,
+        idLegalEntity: idLegalEntity,
+        status: status ?? this.status,
+        createdAt: createdAt,
+        updatedAt: updatedAt ?? DateTime.now(),
+        serialNumber: serialNumber,
+        idLocation: idLocation,
+        nUsers: nUsers,
+        sentAt: sentAt ?? this.sentAt,
+        draftAt: draftAt ?? this.draftAt,
+        closedAt: closedAt ?? this.closedAt,
+        idCertificationCategory: idCertificationCategory,
+      );
 
   @override
-  String toString() => 'CertificationModel(idCertification: $idCertification, status: $status)';
+  String toString() =>
+      'CertificationModel(idCertification: $idCertification, status: $status)';
 
   @override
   bool operator ==(Object other) =>
-    identical(this, other) ||
-    other is CertificationModel &&
-    runtimeType == other.runtimeType &&
-    idCertification == other.idCertification;
+      identical(this, other) ||
+      other is CertificationModel &&
+          runtimeType == other.runtimeType &&
+          idCertification == other.idCertification;
 
   @override
   int get hashCode => idCertification.hashCode;

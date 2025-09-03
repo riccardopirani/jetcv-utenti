@@ -22,27 +22,84 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 
-CREATE TYPE "public"."certificationStatus" AS ENUM (
+CREATE TYPE "public"."certification_category_type" AS ENUM (
+    'standard',
+    'custom'
+);
+
+
+ALTER TYPE "public"."certification_category_type" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_information_scope" AS ENUM (
+    'certification',
+    'certification_user'
+);
+
+
+ALTER TYPE "public"."certification_information_scope" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_information_type" AS ENUM (
+    'standard',
+    'custom'
+);
+
+
+ALTER TYPE "public"."certification_information_type" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_media_acquisition_type" AS ENUM (
+    'realtime',
+    'deferred'
+);
+
+
+ALTER TYPE "public"."certification_media_acquisition_type" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_media_file_type" AS ENUM (
+    'image',
+    'video',
+    'document'
+);
+
+
+ALTER TYPE "public"."certification_media_file_type" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_status" AS ENUM (
     'draft',
+    'sent',
+    'closed'
+);
+
+
+ALTER TYPE "public"."certification_status" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."certification_user_status" AS ENUM (
+    'draft',
+    'pending',
     'accepted',
     'rejected'
 );
 
 
-ALTER TYPE "public"."certificationStatus" OWNER TO "postgres";
+ALTER TYPE "public"."certification_user_status" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."legalEntityStatus" AS ENUM (
+CREATE TYPE "public"."legal_entity_status" AS ENUM (
     'pending',
     'approved',
     'rejected'
 );
 
 
-ALTER TYPE "public"."legalEntityStatus" OWNER TO "postgres";
+ALTER TYPE "public"."legal_entity_status" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."userGender" AS ENUM (
+CREATE TYPE "public"."user_gender" AS ENUM (
     'male',
     'female',
     'other',
@@ -51,10 +108,10 @@ CREATE TYPE "public"."userGender" AS ENUM (
 );
 
 
-ALTER TYPE "public"."userGender" OWNER TO "postgres";
+ALTER TYPE "public"."user_gender" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."userType" AS ENUM (
+CREATE TYPE "public"."user_type" AS ENUM (
     'user',
     'legal_entity',
     'certifier',
@@ -62,16 +119,60 @@ CREATE TYPE "public"."userType" AS ENUM (
 );
 
 
-ALTER TYPE "public"."userType" OWNER TO "postgres";
+ALTER TYPE "public"."user_type" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."walletCreatedBy" AS ENUM (
+CREATE TYPE "public"."wallet_created_by" AS ENUM (
     'application',
     'user'
 );
 
 
-ALTER TYPE "public"."walletCreatedBy" OWNER TO "postgres";
+ALTER TYPE "public"."wallet_created_by" OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."base36_10_readable"() RETURNS "text"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  b   bytea := gen_random_bytes(8); -- 64 bits of randomness
+  val numeric := 0;
+  chars text := '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  code  text := '';
+  i int;
+  digit int;
+BEGIN
+  -- Convert 8 random bytes into a big integer
+  FOR i IN 0..7 LOOP
+    val := val * 256 + get_byte(b, i);
+  END LOOP;
+
+  -- Build 10 base36 digits (most significant padded by division chain)
+  FOR i IN 1..10 LOOP
+    digit := (val % 36)::int;
+    code := substr(chars, digit + 1, 1) || code; -- prepend
+    val := trunc(val / 36);
+  END LOOP;
+
+  RETURN substr(code, 1, 5) || '-' || substr(code, 6, 5);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."base36_10_readable"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."base64url_encode"("input" "bytea") RETURNS "text"
+    LANGUAGE "sql"
+    AS $_$
+  SELECT regexp_replace(
+           replace(replace(encode($1, 'base64'), '+', '-'), '/', '_'),
+           '=+$', ''
+         )
+$_$;
+
+
+ALTER FUNCTION "public"."base64url_encode"("input" "bytea") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."create_user_row_on_auth"() RETURNS "trigger"
@@ -119,6 +220,16 @@ $$;
 
 
 ALTER FUNCTION "public"."gen_codice_6"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."gen_url_token_256"() RETURNS "text"
+    LANGUAGE "sql"
+    AS $$
+  SELECT base64url_encode(gen_random_bytes(32))
+$$;
+
+
+ALTER FUNCTION "public"."gen_url_token_256"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."handle_profile_picture_upload"() RETURNS "trigger"
@@ -248,31 +359,162 @@ SET default_table_access_method = "heap";
 
 
 CREATE TABLE IF NOT EXISTS "public"."certification" (
-    "idCertification" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "idCertificationHash" "text" NOT NULL,
-    "idUser" "uuid" NOT NULL,
-    "idCertifier" "uuid" NOT NULL,
-    "idLegalEntity" "uuid" NOT NULL,
-    "status" "public"."certificationStatus" DEFAULT 'draft'::"public"."certificationStatus" NOT NULL,
-    "statusUpdatedAtByUser" timestamp with time zone,
-    "rejectionReason" "text",
-    "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updatedAt" timestamp with time zone
+    "id_certification" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_certification_hash" "text" NOT NULL,
+    "id_certifier" "uuid" NOT NULL,
+    "id_legal_entity" "uuid" NOT NULL,
+    "status" "public"."certification_status" DEFAULT 'draft'::"public"."certification_status" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_t" timestamp with time zone,
+    "serial_number" "text" DEFAULT "public"."base36_10_readable"() NOT NULL,
+    "id_location" "uuid" NOT NULL,
+    "n_users" smallint NOT NULL,
+    "sent_at" timestamp with time zone,
+    "draft_at" timestamp with time zone,
+    "closed_at" timestamp with time zone,
+    "id_certification_category" "uuid" NOT NULL,
+    CONSTRAINT "cert_serial_number_format_ck" CHECK (("serial_number" ~ '^[A-Z0-9]{5}-[A-Z0-9]{5}$'::"text"))
 );
 
 
 ALTER TABLE "public"."certification" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."certification_category" (
+    "name" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "type" "public"."certification_category_type" NOT NULL,
+    "order" smallint,
+    "id_legal_entity" "uuid",
+    "id_certification_category" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
+);
+
+
+ALTER TABLE "public"."certification_category" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_category_has_information" (
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "id_certification_category" "uuid" NOT NULL,
+    "id_certification_information" "uuid" NOT NULL,
+    "id_certification_category_has_information" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
+);
+
+
+ALTER TABLE "public"."certification_category_has_information" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_has_media" (
+    "id_certification_has_media" bigint NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "id_certification" "uuid",
+    "id_certification_user" "uuid",
+    "id_certification_media" "uuid" NOT NULL
+);
+
+
+ALTER TABLE "public"."certification_has_media" OWNER TO "postgres";
+
+
+ALTER TABLE "public"."certification_has_media" ALTER COLUMN "id_certification_has_media" ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME "public"."certification_has_media_id_certification_has_media_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_information" (
+    "name" "text" NOT NULL,
+    "order" smallint,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "label" "text" NOT NULL,
+    "type" "public"."certification_information_type",
+    "id_certification_information" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_legal_entity" "uuid",
+    "scope" "public"."certification_information_scope"
+);
+
+
+ALTER TABLE "public"."certification_information" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_information_value" (
+    "id_certification_information_value" bigint NOT NULL,
+    "id_certification_information" "uuid" NOT NULL,
+    "value" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone
+);
+
+
+ALTER TABLE "public"."certification_information_value" OWNER TO "postgres";
+
+
+ALTER TABLE "public"."certification_information_value" ALTER COLUMN "id_certification_information_value" ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME "public"."certification_information_val_id_certification_information__seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_media" (
+    "id_certification_media" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_media_hash" "text" NOT NULL,
+    "id_certification" "uuid" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "name" "text",
+    "description" "text",
+    "acquisition_type" "public"."certification_media_acquisition_type" NOT NULL,
+    "captured_at" timestamp with time zone NOT NULL,
+    "id_location" "uuid",
+    "file_type" "public"."certification_media_file_type" NOT NULL
+);
+
+
+ALTER TABLE "public"."certification_media" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."certification_user" (
+    "id_certification" "uuid" NOT NULL,
+    "id_user" "uuid" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "status" "public"."certification_user_status" DEFAULT 'draft'::"public"."certification_user_status" NOT NULL,
+    "id_certification_user" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "serial_number" "text" DEFAULT "public"."base36_10_readable"() NOT NULL,
+    "rejection_reason" "text",
+    "id_otp" "uuid" NOT NULL
+);
+
+
+ALTER TABLE "public"."certification_user" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."certifier" (
-    "idCertifier" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "idCertifierHash" "text",
-    "idUser" "uuid",
-    "idLegalEntity" "uuid",
-    "active" boolean,
-    "roleCompany" "text",
-    "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updatedAt" timestamp with time zone
+    "id_certifier" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_certifier_hash" "text" NOT NULL,
+    "id_legal_entity" "uuid" NOT NULL,
+    "id_user" "uuid",
+    "active" boolean DEFAULT true NOT NULL,
+    "role" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "invitation_token" "text" DEFAULT "public"."gen_url_token_256"(),
+    "kyc_passed" boolean,
+    "id_kyc_attempt" "uuid",
+    CONSTRAINT "certifier_invitation_token_format_ck" CHECK (("invitation_token" ~ '^[A-Za-z0-9_-]{43}$'::"text"))
 );
 
 
@@ -317,8 +559,8 @@ CREATE TABLE IF NOT EXISTS "public"."cv" (
     "stateHash" "text",
     "postalCode" "text",
     "postalCodeHash" "text",
-    "country" "text",
-    "countryHash" "text",
+    "countryCode" "text",
+    "countryCodeHash" "text",
     "profilePicture" "text",
     "profilePictureHash" "text",
     "gender" "text",
@@ -335,74 +577,30 @@ CREATE TABLE IF NOT EXISTS "public"."cv" (
     "citySalt" "text",
     "stateSalt" "text",
     "postalCodeSalt" "text",
-    "countrySalt" "text",
+    "countryCodeSalt" "text",
     "profilePictureSalt" "text",
     "genderSalt" "text",
-    "serial" "text" DEFAULT "public"."gen_codice_6"() NOT NULL,
-    CONSTRAINT "serial_chk" CHECK (("serial" ~ '^[A-Za-z0-9]{6}$'::"text"))
+    "publicId" "text",
+    "serial_number" "text" DEFAULT "public"."base36_10_readable"() NOT NULL,
+    "serial_number_hash" "text",
+    "serial_number_salt" "text",
+    "nationality_codes" "text"[],
+    "nationality_codes_hash" "text"[],
+    "nationality_codes_salt" "text"[],
+    "language_codes" "text"[],
+    "language_codes_hash" "text"[],
+    "language_codes_salt" "text"[],
+    CONSTRAINT "cv_serial_number_format_ck" CHECK (("serial_number" ~ '^[A-Z0-9]{5}-[A-Z0-9]{5}$'::"text"))
 );
 
 
 ALTER TABLE "public"."cv" OWNER TO "postgres";
 
 
-CREATE OR REPLACE VIEW "public"."cv_view" AS
- SELECT "idCv",
-    "idCvHash",
-    "idUser",
-    "idWallet",
-    "nftTokenId",
-    "nftMintTransactionUrl",
-    "nftMintTransactionHash",
-    "createdAt",
-    "updatedAt",
-    "ipfsCid",
-    "ipfsUrl",
-    "firstName",
-    "firstNameHash",
-    "firstNameSalt",
-    "lastName",
-    "lastNameHash",
-    "lastNameSalt",
-    "email",
-    "emailHash",
-    "emailSalt",
-    "phone",
-    "phoneHash",
-    "phoneSalt",
-    "dateOfBirth",
-    "dateOfBirthHash",
-    "dateOfBirthSalt",
-    "address",
-    "addressHash",
-    "addressSalt",
-    "city",
-    "cityHash",
-    "citySalt",
-    "state",
-    "stateHash",
-    "stateSalt",
-    "postalCode",
-    "postalCodeHash",
-    "postalCodeSalt",
-    "country",
-    "countryHash",
-    "countrySalt",
-    "profilePicture",
-    "profilePictureHash",
-    "profilePictureSalt",
-    "gender",
-    "genderHash",
-    "genderSalt"
-   FROM "public"."cv";
-
-
-ALTER VIEW "public"."cv_view" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."debug_log" (
     "ts" timestamp with time zone DEFAULT "now"(),
-    "message" "text"
+    "message" "text",
+    "id_debug_log" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
 );
 
 
@@ -410,87 +608,119 @@ ALTER TABLE "public"."debug_log" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."kyc_attempt" (
-    "idKycAttempt" bigint NOT NULL,
-    "idUser" "uuid" NOT NULL,
-    "requestBody" "text",
+    "id_user" "uuid" NOT NULL,
+    "request_body" "text",
     "success" "text",
     "message" "text",
-    "receivedParams" "text",
-    "responseStatus" "text",
-    "responseVerificationId" "text",
-    "responseVerificationUrl" "text",
-    "responseVerificationSessionToken" "text",
-    "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updatedAt" timestamp with time zone,
-    "sessionId" "text",
+    "received_params" "text",
+    "response_status" "text",
+    "response_verification_id" "text",
+    "response_verification_url" "text",
+    "response_verification_session_token" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "session_id" "text",
     "verificated" boolean,
-    "verificatedAt" timestamp with time zone
+    "verificated_at" timestamp with time zone,
+    "id_kyc_attempt" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
 );
 
 
 ALTER TABLE "public"."kyc_attempt" OWNER TO "postgres";
 
 
-ALTER TABLE "public"."kyc_attempt" ALTER COLUMN "idKycAttempt" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."kyc_attempts_idKycAttempts_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."legal_entity" (
-    "idLegalEntity" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "idLegalEntityHash" "text" NOT NULL,
-    "legalName" "text" NOT NULL,
-    "identifierCode" "text" NOT NULL,
-    "operationalAddress" "text" NOT NULL,
-    "headquartersAddress" "text" NOT NULL,
-    "legalRepresentative" "text" NOT NULL,
-    "email" "text" NOT NULL,
-    "phone" "text" NOT NULL,
+    "id_legal_entity" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_legal_entity_hash" "text" NOT NULL,
+    "legal_name" "text",
+    "identifier_code" "text",
+    "operational_address" "text",
+    "operational_city" "text",
+    "operational_postal_code" "text",
+    "operational_state" "text",
+    "operational_country" "text",
+    "headquarter_address" "text",
+    "headquarter_city" "text",
+    "headquarter_postal_code" "text",
+    "headquarter_state" "text",
+    "headquarter_country" "text",
+    "legal_rapresentative" "text",
+    "email" "text",
+    "phone" "text",
     "pec" "text",
     "website" "text",
-    "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updatedAt" timestamp with time zone,
-    "statusUpdatedAt" timestamp with time zone,
-    "statusUpdatedByIdUser" "uuid",
-    "requestingIdUser" "uuid" NOT NULL,
-    "status" "public"."legalEntityStatus" DEFAULT 'pending'::"public"."legalEntityStatus" NOT NULL,
-    "logoPictureUrl" "text",
-    "companyPictureUrl" "text",
-    "address" "text",
-    "city" "text",
-    "state" "text",
-    "postalcode" "text",
-    "countrycode" "text"
+    "status" "public"."legal_entity_status" NOT NULL,
+    "logo_picture" "text",
+    "company_picture" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "created_by_id_user" "uuid" NOT NULL
 );
 
 
 ALTER TABLE "public"."legal_entity" OWNER TO "postgres";
 
 
-COMMENT ON COLUMN "public"."legal_entity"."address" IS 'address';
+CREATE TABLE IF NOT EXISTS "public"."legal_entity_invitation" (
+    "id_legal_entity" "uuid" NOT NULL,
+    "email" "text" NOT NULL,
+    "invitation_token" "text" DEFAULT "public"."gen_url_token_256"() NOT NULL,
+    "sent_at" timestamp with time zone,
+    "expires_at" timestamp with time zone NOT NULL,
+    "accepted_at" timestamp with time zone,
+    "id_legal_entity_invitation" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "valid" boolean DEFAULT true NOT NULL
+);
 
 
-
-COMMENT ON COLUMN "public"."legal_entity"."city" IS 'city';
-
+ALTER TABLE "public"."legal_entity_invitation" OWNER TO "postgres";
 
 
-COMMENT ON COLUMN "public"."legal_entity"."state" IS 'state';
+CREATE TABLE IF NOT EXISTS "public"."location" (
+    "id_location" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_user" "uuid" NOT NULL,
+    "aquired_at" timestamp with time zone NOT NULL,
+    "latitude" double precision NOT NULL,
+    "longitude" double precision NOT NULL,
+    "accuracy_m" real,
+    "is_moked" boolean,
+    "altitude" double precision,
+    "altitude_accuracy_m" real,
+    "name" "text",
+    "street" "text",
+    "locality" "text",
+    "sub_locality" "text",
+    "administrative_area" "text",
+    "sub_administrative_area" "text",
+    "postal_code" "text",
+    "iso_country_code" "text",
+    "country" "text",
+    "thoroughfare" "text",
+    "sub_thoroughfare" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
 
 
-
-COMMENT ON COLUMN "public"."legal_entity"."postalcode" IS 'postalcode';
-
+ALTER TABLE "public"."location" OWNER TO "postgres";
 
 
-COMMENT ON COLUMN "public"."legal_entity"."countrycode" IS 'countrycode';
+CREATE TABLE IF NOT EXISTS "public"."otp" (
+    "id_otp" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_user" "uuid" NOT NULL,
+    "code" "text" NOT NULL,
+    "code_hash" "text" NOT NULL,
+    "tag" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "expires_at" timestamp with time zone NOT NULL,
+    "used_at" timestamp with time zone,
+    "used_by_id_user" "uuid",
+    "burned_at" timestamp with time zone
+);
 
+
+ALTER TABLE "public"."otp" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."user" (
@@ -506,19 +736,20 @@ CREATE TABLE IF NOT EXISTS "public"."user" (
     "postalCode" "text",
     "countryCode" "text",
     "profilePicture" "text",
-    "gender" "public"."userGender",
+    "gender" "public"."user_gender",
     "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updatedAt" timestamp with time zone,
     "fullName" "text",
-    "type" "public"."userType",
+    "type" "public"."user_type",
     "hasWallet" boolean DEFAULT false NOT NULL,
     "idWallet" "uuid",
     "hasCv" boolean DEFAULT false NOT NULL,
     "idCv" "uuid",
     "idUserHash" "text" NOT NULL,
     "profileCompleted" boolean DEFAULT false NOT NULL,
-    "kycCompleted" boolean,
-    "kycPassed" boolean
+    "languageCodeApp" "text",
+    "nationalityCodes" "text"[],
+    "languageCodes" "text"[]
 );
 
 
@@ -530,7 +761,7 @@ CREATE TABLE IF NOT EXISTS "public"."wallet" (
     "secretKey" "text" NOT NULL,
     "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updatedAt" timestamp with time zone,
-    "createdBy" "public"."walletCreatedBy" NOT NULL,
+    "createdBy" "public"."wallet_created_by" NOT NULL,
     "publicAddress" "text" NOT NULL,
     "idWallet" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
 );
@@ -539,13 +770,68 @@ CREATE TABLE IF NOT EXISTS "public"."wallet" (
 ALTER TABLE "public"."wallet" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."certification_category_has_information"
+    ADD CONSTRAINT "certification_category_has_information_pkey" PRIMARY KEY ("id_certification_category_has_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_category"
+    ADD CONSTRAINT "certification_category_id_cat_uuid_uc" UNIQUE ("id_certification_category");
+
+
+
+ALTER TABLE ONLY "public"."certification_category"
+    ADD CONSTRAINT "certification_category_pkey" PRIMARY KEY ("id_certification_category");
+
+
+
+ALTER TABLE ONLY "public"."certification_has_media"
+    ADD CONSTRAINT "certification_has_media_pkey" PRIMARY KEY ("id_certification_has_media");
+
+
+
+ALTER TABLE ONLY "public"."certification_information"
+    ADD CONSTRAINT "certification_information_pkey" PRIMARY KEY ("id_certification_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_information"
+    ADD CONSTRAINT "certification_information_uuid_uc" UNIQUE ("id_certification_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_information_value"
+    ADD CONSTRAINT "certification_information_value_pkey" PRIMARY KEY ("id_certification_information_value");
+
+
+
+ALTER TABLE ONLY "public"."certification_media"
+    ADD CONSTRAINT "certification_media_pkey" PRIMARY KEY ("id_certification_media");
+
+
+
 ALTER TABLE ONLY "public"."certification"
-    ADD CONSTRAINT "certification_pkey" PRIMARY KEY ("idCertification");
+    ADD CONSTRAINT "certification_pkey" PRIMARY KEY ("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."certification_user"
+    ADD CONSTRAINT "certification_user_pkey" PRIMARY KEY ("id_certification_user");
+
+
+
+ALTER TABLE ONLY "public"."certification_user"
+    ADD CONSTRAINT "certification_user_serial_key" UNIQUE ("serial_number");
 
 
 
 ALTER TABLE ONLY "public"."certifier"
-    ADD CONSTRAINT "certifier_pkey" PRIMARY KEY ("idCertifier");
+    ADD CONSTRAINT "certifier_invitation_id_key" UNIQUE ("invitation_token");
+
+
+
+ALTER TABLE ONLY "public"."certifier"
+    ADD CONSTRAINT "certifier_pkey1" PRIMARY KEY ("id_certifier");
 
 
 
@@ -564,13 +850,38 @@ ALTER TABLE ONLY "public"."cv"
 
 
 
+ALTER TABLE ONLY "public"."cv"
+    ADD CONSTRAINT "cv_serial_number_key" UNIQUE ("serial_number");
+
+
+
 ALTER TABLE ONLY "public"."kyc_attempt"
-    ADD CONSTRAINT "kyc_attempt_pkey" PRIMARY KEY ("idKycAttempt");
+    ADD CONSTRAINT "kyc_attempt_pkey" PRIMARY KEY ("id_kyc_attempt");
+
+
+
+ALTER TABLE ONLY "public"."legal_entity_invitation"
+    ADD CONSTRAINT "legal_entity_invitation_pkey" PRIMARY KEY ("id_legal_entity_invitation");
+
+
+
+ALTER TABLE ONLY "public"."legal_entity_invitation"
+    ADD CONSTRAINT "legal_entity_invitations_invitation_token_key" UNIQUE ("invitation_token");
 
 
 
 ALTER TABLE ONLY "public"."legal_entity"
-    ADD CONSTRAINT "legal_entity_pkey" PRIMARY KEY ("idLegalEntity");
+    ADD CONSTRAINT "legal_entity_pkey1" PRIMARY KEY ("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."location"
+    ADD CONSTRAINT "location_pkey" PRIMARY KEY ("id_location");
+
+
+
+ALTER TABLE ONLY "public"."otp"
+    ADD CONSTRAINT "otp_pkey" PRIMARY KEY ("id_otp");
 
 
 
@@ -584,28 +895,111 @@ ALTER TABLE ONLY "public"."wallet"
 
 
 
-ALTER TABLE ONLY "public"."certification"
-    ADD CONSTRAINT "certification_idCertifier_fkey" FOREIGN KEY ("idCertifier") REFERENCES "public"."certifier"("idCertifier");
+ALTER TABLE ONLY "public"."wallet"
+    ADD CONSTRAINT "wallet_publicaddress_key" UNIQUE ("publicAddress");
+
+
+
+CREATE INDEX "legal_entity_invitations_email_idx" ON "public"."legal_entity_invitation" USING "btree" ("email");
+
+
+
+CREATE INDEX "legal_entity_invitations_id_legal_entity_idx" ON "public"."legal_entity_invitation" USING "btree" ("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."certification_category_has_information"
+    ADD CONSTRAINT "certification_category_has_in_id_certification_information_fkey" FOREIGN KEY ("id_certification_information") REFERENCES "public"."certification_information"("id_certification_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_category_has_information"
+    ADD CONSTRAINT "certification_category_has_infor_id_certification_category_fkey" FOREIGN KEY ("id_certification_category") REFERENCES "public"."certification_category"("id_certification_category");
+
+
+
+ALTER TABLE ONLY "public"."certification_category"
+    ADD CONSTRAINT "certification_category_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."certification_has_media"
+    ADD CONSTRAINT "certification_has_media_id_certification_fkey" FOREIGN KEY ("id_certification") REFERENCES "public"."certification"("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."certification_has_media"
+    ADD CONSTRAINT "certification_has_media_id_certification_media_fkey" FOREIGN KEY ("id_certification_media") REFERENCES "public"."certification_media"("id_certification_media");
+
+
+
+ALTER TABLE ONLY "public"."certification_has_media"
+    ADD CONSTRAINT "certification_has_media_id_certification_user_fkey" FOREIGN KEY ("id_certification_user") REFERENCES "public"."certification_user"("id_certification_user");
 
 
 
 ALTER TABLE ONLY "public"."certification"
-    ADD CONSTRAINT "certification_idLegalEntity_fkey" FOREIGN KEY ("idLegalEntity") REFERENCES "public"."legal_entity"("idLegalEntity");
+    ADD CONSTRAINT "certification_id_certification_category_fkey" FOREIGN KEY ("id_certification_category") REFERENCES "public"."certification_category"("id_certification_category");
 
 
 
 ALTER TABLE ONLY "public"."certification"
-    ADD CONSTRAINT "certification_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES "public"."user"("idUser");
+    ADD CONSTRAINT "certification_id_certifier_fkey" FOREIGN KEY ("id_certifier") REFERENCES "public"."certifier"("id_certifier");
+
+
+
+ALTER TABLE ONLY "public"."certification"
+    ADD CONSTRAINT "certification_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."certification"
+    ADD CONSTRAINT "certification_id_location_fkey" FOREIGN KEY ("id_location") REFERENCES "public"."location"("id_location");
+
+
+
+ALTER TABLE ONLY "public"."certification_information"
+    ADD CONSTRAINT "certification_information_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."certification_information_value"
+    ADD CONSTRAINT "certification_information_val_id_certification_information_fkey" FOREIGN KEY ("id_certification_information") REFERENCES "public"."certification_information"("id_certification_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_media"
+    ADD CONSTRAINT "certification_media_id_location_fkey" FOREIGN KEY ("id_location") REFERENCES "public"."location"("id_location");
+
+
+
+ALTER TABLE ONLY "public"."certification_user"
+    ADD CONSTRAINT "certification_user_id_certification_fkey" FOREIGN KEY ("id_certification") REFERENCES "public"."certification"("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."certification_user"
+    ADD CONSTRAINT "certification_user_id_otp_fkey" FOREIGN KEY ("id_otp") REFERENCES "public"."otp"("id_otp");
+
+
+
+ALTER TABLE ONLY "public"."certification_user"
+    ADD CONSTRAINT "certification_user_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser");
 
 
 
 ALTER TABLE ONLY "public"."certifier"
-    ADD CONSTRAINT "certifier_idLegalEntity_fkey" FOREIGN KEY ("idLegalEntity") REFERENCES "public"."legal_entity"("idLegalEntity");
+    ADD CONSTRAINT "certifier_id_kyc_attempt_fkey" FOREIGN KEY ("id_kyc_attempt") REFERENCES "public"."kyc_attempt"("id_kyc_attempt");
 
 
 
 ALTER TABLE ONLY "public"."certifier"
-    ADD CONSTRAINT "certifier_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES "public"."user"("idUser");
+    ADD CONSTRAINT "certifier_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity");
+
+
+
+ALTER TABLE ONLY "public"."certifier"
+    ADD CONSTRAINT "certifier_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser");
 
 
 
@@ -620,17 +1014,37 @@ ALTER TABLE ONLY "public"."cv"
 
 
 ALTER TABLE ONLY "public"."kyc_attempt"
-    ADD CONSTRAINT "kyc_attempts_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES "public"."user"("idUser");
+    ADD CONSTRAINT "kyc_attempts_idUser_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser");
 
 
 
 ALTER TABLE ONLY "public"."legal_entity"
-    ADD CONSTRAINT "legal_entity_approvedByIdUser_fkey" FOREIGN KEY ("statusUpdatedByIdUser") REFERENCES "public"."user"("idUser");
+    ADD CONSTRAINT "legal_entity_created_by_id_user_fkey" FOREIGN KEY ("created_by_id_user") REFERENCES "public"."user"("idUser");
 
 
 
-ALTER TABLE ONLY "public"."legal_entity"
-    ADD CONSTRAINT "legal_entity_requestingIdUser_fkey" FOREIGN KEY ("requestingIdUser") REFERENCES "public"."user"("idUser");
+ALTER TABLE ONLY "public"."legal_entity_invitation"
+    ADD CONSTRAINT "legal_entity_invitations_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."location"
+    ADD CONSTRAINT "location_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser");
+
+
+
+ALTER TABLE ONLY "public"."certification_media"
+    ADD CONSTRAINT "media_id_certification_fkey" FOREIGN KEY ("id_certification") REFERENCES "public"."certification"("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."otp"
+    ADD CONSTRAINT "otp_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser");
+
+
+
+ALTER TABLE ONLY "public"."otp"
+    ADD CONSTRAINT "otp_used_by_id_user_fkey" FOREIGN KEY ("used_by_id_user") REFERENCES "public"."user"("idUser");
 
 
 
@@ -654,10 +1068,79 @@ ALTER TABLE ONLY "public"."wallet"
 
 
 
+ALTER TABLE "public"."certification" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_category" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_category_has_information" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_has_media" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_information" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_information_value" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_media" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certification_user" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."certifier" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."country" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."cv" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."debug_log" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."kyc_attempt" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."legal_entity" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."legal_entity_invitation" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."location" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."otp" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."user" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."wallet" ENABLE ROW LEVEL SECURITY;
+
+
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."base36_10_readable"() TO "anon";
+GRANT ALL ON FUNCTION "public"."base36_10_readable"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."base36_10_readable"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."base64url_encode"("input" "bytea") TO "anon";
+GRANT ALL ON FUNCTION "public"."base64url_encode"("input" "bytea") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."base64url_encode"("input" "bytea") TO "service_role";
 
 
 
@@ -670,6 +1153,12 @@ GRANT ALL ON FUNCTION "public"."create_user_row_on_auth"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."gen_codice_6"() TO "anon";
 GRANT ALL ON FUNCTION "public"."gen_codice_6"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gen_codice_6"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."gen_url_token_256"() TO "anon";
+GRANT ALL ON FUNCTION "public"."gen_url_token_256"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."gen_url_token_256"() TO "service_role";
 
 
 
@@ -697,6 +1186,60 @@ GRANT ALL ON TABLE "public"."certification" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."certification_category" TO "anon";
+GRANT ALL ON TABLE "public"."certification_category" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_category" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_category_has_information" TO "anon";
+GRANT ALL ON TABLE "public"."certification_category_has_information" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_category_has_information" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_has_media" TO "anon";
+GRANT ALL ON TABLE "public"."certification_has_media" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_has_media" TO "service_role";
+
+
+
+GRANT ALL ON SEQUENCE "public"."certification_has_media_id_certification_has_media_seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."certification_has_media_id_certification_has_media_seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."certification_has_media_id_certification_has_media_seq" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_information" TO "anon";
+GRANT ALL ON TABLE "public"."certification_information" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_information" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_information_value" TO "anon";
+GRANT ALL ON TABLE "public"."certification_information_value" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_information_value" TO "service_role";
+
+
+
+GRANT ALL ON SEQUENCE "public"."certification_information_val_id_certification_information__seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."certification_information_val_id_certification_information__seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."certification_information_val_id_certification_information__seq" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_media" TO "anon";
+GRANT ALL ON TABLE "public"."certification_media" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_media" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."certification_user" TO "anon";
+GRANT ALL ON TABLE "public"."certification_user" TO "authenticated";
+GRANT ALL ON TABLE "public"."certification_user" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."certifier" TO "anon";
 GRANT ALL ON TABLE "public"."certifier" TO "authenticated";
 GRANT ALL ON TABLE "public"."certifier" TO "service_role";
@@ -715,12 +1258,6 @@ GRANT ALL ON TABLE "public"."cv" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."cv_view" TO "anon";
-GRANT ALL ON TABLE "public"."cv_view" TO "authenticated";
-GRANT ALL ON TABLE "public"."cv_view" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."debug_log" TO "anon";
 GRANT ALL ON TABLE "public"."debug_log" TO "authenticated";
 GRANT ALL ON TABLE "public"."debug_log" TO "service_role";
@@ -733,15 +1270,27 @@ GRANT ALL ON TABLE "public"."kyc_attempt" TO "service_role";
 
 
 
-GRANT ALL ON SEQUENCE "public"."kyc_attempts_idKycAttempts_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."kyc_attempts_idKycAttempts_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."kyc_attempts_idKycAttempts_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."legal_entity" TO "anon";
 GRANT ALL ON TABLE "public"."legal_entity" TO "authenticated";
 GRANT ALL ON TABLE "public"."legal_entity" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."legal_entity_invitation" TO "anon";
+GRANT ALL ON TABLE "public"."legal_entity_invitation" TO "authenticated";
+GRANT ALL ON TABLE "public"."legal_entity_invitation" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."location" TO "anon";
+GRANT ALL ON TABLE "public"."location" TO "authenticated";
+GRANT ALL ON TABLE "public"."location" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."otp" TO "anon";
+GRANT ALL ON TABLE "public"."otp" TO "authenticated";
+GRANT ALL ON TABLE "public"."otp" TO "service_role";
 
 
 

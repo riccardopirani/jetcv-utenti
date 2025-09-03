@@ -1,77 +1,97 @@
 /// Certifier model representing the certifier table
 class CertifierModel {
   final String idCertifier;
-  final String? idCertifierHash;
+  final String idCertifierHash;
+  final String idLegalEntity;
   final String? idUser;
-  final String? idLegalEntity;
-  final bool? active;
-  final String? roleCompany;
+  final bool active;
+  final String? role;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String? invitationToken;
+  final bool? kycPassed;
+  final String? idKycAttempt;
 
   CertifierModel({
     required this.idCertifier,
-    this.idCertifierHash,
+    required this.idCertifierHash,
+    required this.idLegalEntity,
     this.idUser,
-    this.idLegalEntity,
-    this.active,
-    this.roleCompany,
+    this.active = true,
+    this.role,
     required this.createdAt,
     this.updatedAt,
+    this.invitationToken,
+    this.kycPassed,
+    this.idKycAttempt,
   });
 
   /// Create CertifierModel from JSON/Map
   factory CertifierModel.fromJson(Map<String, dynamic> json) => CertifierModel(
-    idCertifier: json['idCertifier'] as String,
-    idCertifierHash: json['idCertifierHash'] as String?,
-    idUser: json['idUser'] as String?,
-    idLegalEntity: json['idLegalEntity'] as String?,
-    active: json['active'] as bool?,
-    roleCompany: json['roleCompany'] as String?,
-    createdAt: DateTime.parse(json['createdAt']),
-    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-  );
+        idCertifier: json['id_certifier'] as String,
+        idCertifierHash: json['id_certifier_hash'] as String,
+        idLegalEntity: json['id_legal_entity'] as String,
+        idUser: json['id_user'] as String?,
+        active: json['active'] as bool? ?? true,
+        role: json['role'] as String?,
+        createdAt: DateTime.parse(json['created_at']),
+        updatedAt: json['updated_at'] != null
+            ? DateTime.parse(json['updated_at'])
+            : null,
+        invitationToken: json['invitation_token'] as String?,
+        kycPassed: json['kyc_passed'] as bool?,
+        idKycAttempt: json['id_kyc_attempt'] as String?,
+      );
 
   /// Convert CertifierModel to JSON/Map
   Map<String, dynamic> toJson() => {
-    'idCertifier': idCertifier,
-    'idCertifierHash': idCertifierHash,
-    'idUser': idUser,
-    'idLegalEntity': idLegalEntity,
-    'active': active,
-    'roleCompany': roleCompany,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt?.toIso8601String(),
-  };
+        'id_certifier': idCertifier,
+        'id_certifier_hash': idCertifierHash,
+        'id_legal_entity': idLegalEntity,
+        'id_user': idUser,
+        'active': active,
+        'role': role,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+        'invitation_token': invitationToken,
+        'kyc_passed': kycPassed,
+        'id_kyc_attempt': idKycAttempt,
+      };
 
   /// Create copy with updated fields
   CertifierModel copyWith({
-    String? idCertifierHash,
     String? idUser,
-    String? idLegalEntity,
     bool? active,
-    String? roleCompany,
+    String? role,
     DateTime? updatedAt,
-  }) => CertifierModel(
-    idCertifier: idCertifier,
-    idCertifierHash: idCertifierHash ?? this.idCertifierHash,
-    idUser: idUser ?? this.idUser,
-    idLegalEntity: idLegalEntity ?? this.idLegalEntity,
-    active: active ?? this.active,
-    roleCompany: roleCompany ?? this.roleCompany,
-    createdAt: createdAt,
-    updatedAt: updatedAt ?? DateTime.now(),
-  );
+    String? invitationToken,
+    bool? kycPassed,
+    String? idKycAttempt,
+  }) =>
+      CertifierModel(
+        idCertifier: idCertifier,
+        idCertifierHash: idCertifierHash,
+        idLegalEntity: idLegalEntity,
+        idUser: idUser ?? this.idUser,
+        active: active ?? this.active,
+        role: role ?? this.role,
+        createdAt: createdAt,
+        updatedAt: updatedAt ?? DateTime.now(),
+        invitationToken: invitationToken ?? this.invitationToken,
+        kycPassed: kycPassed ?? this.kycPassed,
+        idKycAttempt: idKycAttempt ?? this.idKycAttempt,
+      );
 
   @override
-  String toString() => 'CertifierModel(idCertifier: $idCertifier, roleCompany: $roleCompany, active: $active)';
+  String toString() =>
+      'CertifierModel(idCertifier: $idCertifier, role: $role, active: $active)';
 
   @override
   bool operator ==(Object other) =>
-    identical(this, other) ||
-    other is CertifierModel &&
-    runtimeType == other.runtimeType &&
-    idCertifier == other.idCertifier;
+      identical(this, other) ||
+      other is CertifierModel &&
+          runtimeType == other.runtimeType &&
+          idCertifier == other.idCertifier;
 
   @override
   int get hashCode => idCertifier.hashCode;
