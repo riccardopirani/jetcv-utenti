@@ -3,6 +3,7 @@ import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
+import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 
 class SidebarMenu extends StatefulWidget {
   final VoidCallback? onClose;
@@ -89,7 +90,12 @@ class _SidebarMenuState extends State<SidebarMenu> {
         // TODO: Navigate to profile page
         break;
       case '/cv':
-        // TODO: Navigate to CV page
+        // Navigate to CV page
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CVViewPage(cvUserId: _currentUser?.idUser),
+          ),
+        );
         break;
       case '/certifications':
         // TODO: Navigate to certifications page
