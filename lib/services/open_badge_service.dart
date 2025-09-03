@@ -84,7 +84,8 @@ class OpenBadgeService {
 
       // Per web, restituiamo un file fittizio
       if (kIsWeb) {
-        debugPrint('🌐 OpenBadgeService: Web platform detected, returning virtual file');
+        debugPrint(
+            '🌐 OpenBadgeService: Web platform detected, returning virtual file');
         return File('/tmp/$fileName.json');
       }
 
@@ -299,14 +300,14 @@ class OpenBadgeService {
   ) async {
     try {
       debugPrint('📸 OpenBadgeService: Downloading badge image');
-      
+
       if (kIsWeb) {
         // Su web, mostriamo l'immagine in un dialog per il download manuale
         await _showImageDialog(context, badge, imageData);
       } else {
         // Su mobile/desktop, salviamo l'immagine
         await _saveBadgeImage(badge, imageData);
-        
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -318,11 +319,12 @@ class OpenBadgeService {
       }
     } catch (e) {
       debugPrint('❌ OpenBadgeService: Error downloading badge image: $e');
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context)!.badgeImageError}: $e'),
+            content:
+                Text('${AppLocalizations.of(context)!.badgeImageError}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -374,7 +376,8 @@ class OpenBadgeService {
   }
 
   /// Salva l'immagine del badge (per mobile/desktop)
-  static Future<void> _saveBadgeImage(OpenBadgeModel badge, Uint8List imageData) async {
+  static Future<void> _saveBadgeImage(
+      OpenBadgeModel badge, Uint8List imageData) async {
     try {
       // Ottieni la directory dei download
       Directory? directory;
@@ -401,7 +404,8 @@ class OpenBadgeService {
       }
 
       // Salva l'immagine PNG
-      final fileName = '${badge.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
+      final fileName =
+          '${badge.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File('${badgeDir.path}/$fileName');
       await file.writeAsBytes(imageData);
 
@@ -482,8 +486,8 @@ class OpenBadgeService {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(kIsWeb
-                    ? 'Open Badge created! Copy the JSON-LD content to save your badge.'
-                    : 'Badge files saved successfully!'),
+                      ? 'Open Badge created! Copy the JSON-LD content to save your badge.'
+                      : 'Badge files saved successfully!'),
                   backgroundColor: Colors.green,
                 ),
               );

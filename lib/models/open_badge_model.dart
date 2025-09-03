@@ -136,20 +136,20 @@ class OpenBadgeModel {
     Map<String, dynamic>? newAlignment,
   }) {
     return OpenBadgeModel(
-      id: newId ?? this.id,
-      type: newType ?? this.type,
-      name: newName ?? this.name,
-      description: newDescription ?? this.description,
-      image: newImage ?? this.image,
-      criteria: newCriteria ?? this.criteria,
-      issuer: newIssuer ?? this.issuer,
-      recipient: newRecipient ?? this.recipient,
-      verification: newVerification ?? this.verification,
-      issuedOn: newIssuedOn ?? this.issuedOn,
-      expires: newExpires ?? this.expires,
-      tags: newTags ?? this.tags,
-      evidence: newEvidence ?? this.evidence,
-      alignment: newAlignment ?? this.alignment,
+      id: newId ?? id,
+      type: newType ?? type,
+      name: newName ?? name,
+      description: newDescription ?? description,
+      image: newImage ?? image,
+      criteria: newCriteria ?? criteria,
+      issuer: newIssuer ?? issuer,
+      recipient: newRecipient ?? recipient,
+      verification: newVerification ?? verification,
+      issuedOn: newIssuedOn ?? issuedOn,
+      expires: newExpires ?? expires,
+      tags: newTags ?? tags,
+      evidence: newEvidence ?? evidence,
+      alignment: newAlignment ?? alignment,
     );
   }
 
@@ -273,8 +273,9 @@ class OpenBadgeVerification {
 
     if (url != null) json['url'] = url!;
     if (allowedOrigins != null) json['allowedOrigins'] = allowedOrigins!;
-    if (verificationProperty != null)
+    if (verificationProperty != null) {
       json['verificationProperty'] = verificationProperty!;
+    }
 
     return json;
   }

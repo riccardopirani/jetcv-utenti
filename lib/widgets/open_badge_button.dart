@@ -25,9 +25,11 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
 
   @override
   Widget build(BuildContext context) {
-    
+    if (widget.isCompact) {
       return _buildCompactButton();
-   
+    } else {
+      return _buildFullButton();
+    }
   }
 
   Widget _buildCompactButton() {

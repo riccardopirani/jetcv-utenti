@@ -2132,7 +2132,6 @@ class _CVViewPageState extends State<CVViewPage> {
       margin: EdgeInsets.only(top: spacing),
       child: Row(
         children: [
-         
           Expanded(
             child: OpenBadgeButton(
               certification: cert,
