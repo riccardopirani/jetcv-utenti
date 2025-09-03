@@ -5,21 +5,18 @@ This app now includes LinkedIn integration that allows users to add their certif
 
 ## How It Works
 
-The app uses LinkedIn's official "Add to Profile" URL feature, which allows users to add certifications directly to their LinkedIn profile with pre-filled information.
+The app opens the user's LinkedIn profile where they can manually add their certification. Due to recent changes in LinkedIn's API and URL structure, the automatic pre-filling feature is no longer available.
 
-### URL Format
-```
-https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name={certName}&organizationName={issuer}&issueYear={year}&issueMonth={month}&certUrl={certUrl}&certId={certId}
-```
+### Current Implementation
+- Opens LinkedIn profile page: `https://www.linkedin.com/in/me/`
+- Shows certification details in the app for easy reference
+- User manually adds the certification to their LinkedIn profile
 
-### Parameters
-- `startTask`: Always "CERTIFICATION_NAME" for certifications
-- `name`: The name of the certification
-- `organizationName`: The issuer/organization name (e.g., "JetCV")
-- `issueYear`: Year the certification was issued
-- `issueMonth`: Month the certification was issued
-- `certUrl`: URL to the certification details (optional)
-- `certId`: Unique identifier for the certification
+### Why This Approach?
+LinkedIn has recently made changes to their "Add to Profile" URL feature, making it less reliable for automatic pre-filling. The current implementation provides a better user experience by:
+- Avoiding errors from unsupported URL parameters
+- Showing certification details clearly in the app
+- Allowing users to copy/paste information easily
 
 ## Setup Steps
 
@@ -39,11 +36,12 @@ If you want to provide a link to the certification details:
 
 ### Current Implementation
 1. User clicks "Add Certification to LinkedIn" button
-2. App shows a dialog with certification details
+2. App shows a dialog with certification details (name, issuer, date)
 3. User confirms the action
-4. App opens LinkedIn with pre-filled certification form
-5. User can review and add the certification to their LinkedIn profile
-6. Certification is added to LinkedIn profile with all details pre-filled
+4. App opens LinkedIn profile page
+5. User navigates to "Add profile section" → "Licenses & certifications"
+6. User manually enters the certification details shown in the app
+7. Certification is added to LinkedIn profile
 
 ## Advantages of This Approach
 

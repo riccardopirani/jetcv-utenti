@@ -2859,7 +2859,7 @@ class _CVViewPageState extends State<CVViewPage> {
                           'Issue Date: ${issueDate.day}/${issueDate.month}/${issueDate.year}'),
                       const SizedBox(height: 8),
                       Text(
-                        'This will open LinkedIn with pre-filled certification details.',
+                        'This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -2898,7 +2898,7 @@ class _CVViewPageState extends State<CVViewPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'LinkedIn opened! You can now add your certification to your LinkedIn profile with pre-filled details.'),
+                  'LinkedIn opened! Certification details have been copied to your clipboard. Go to your LinkedIn profile → Add profile section → Licenses & certifications, then paste the details.'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 4),
             ),

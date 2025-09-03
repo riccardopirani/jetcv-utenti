@@ -949,5 +949,5 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareCertificationsOnLinkedIn =>
-      'This will open LinkedIn where you can add your certification directly to your profile. The certification details will be pre-filled for easy addition.';
+      'This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.';
 }

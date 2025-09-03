@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -25,22 +26,28 @@ class LinkedInService {
       final firstCert = certifications.first;
       final certName =
           firstCert.certification?.category?.name ?? 'Certification';
-      final issuer = firstCert.certification?.idCertifier ?? 'JetCV';
       final issueDate = firstCert.certificationUser.createdAt;
 
-      // Costruisce l'URL per aggiungere certificazione a LinkedIn
-      final linkedInUrl = _buildAddToProfileUrl(
+      // Copia le informazioni della certificazione negli appunti
+      await copyCertificationToClipboard(
         certName: certName,
-        organizationName: 'JetCV', // Usa un nome invece di un ID
+        organizationName: 'JetCV',
         issueYear: issueDate.year,
         issueMonth: issueDate.month,
-        certUrl:
-            'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        certUrl: 'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+      );
+      
+      // Costruisce l'URL per aprire LinkedIn
+      final linkedInUrl = _buildAddToProfileUrl(
+        certName: certName,
+        organizationName: 'JetCV',
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl: 'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
         certId: firstCert.certificationUser.idCertificationUser,
       );
 
-      debugPrint(
-          '🔗 LinkedInService: LinkedIn Add to Profile URL: $linkedInUrl');
+      debugPrint('🔗 LinkedInService: LinkedIn URL: $linkedInUrl');
 
       final uri = Uri.parse(linkedInUrl);
 
@@ -50,8 +57,7 @@ class LinkedInService {
           mode: LaunchMode.externalApplication,
         );
 
-        debugPrint(
-            '✅ LinkedInService: LinkedIn opened for certification addition');
+        debugPrint('✅ LinkedInService: LinkedIn opened and certification details copied to clipboard');
       } else {
         debugPrint('❌ LinkedInService: Could not launch LinkedIn URL');
         throw Exception(
@@ -63,6 +69,29 @@ class LinkedInService {
     }
   }
 
+  /// Copia le informazioni della certificazione negli appunti
+  static Future<void> copyCertificationToClipboard({
+    required String certName,
+    required String organizationName,
+    required int issueYear,
+    required int issueMonth,
+    required String certUrl,
+  }) async {
+    final certificationText = '''
+Certification Details for LinkedIn:
+
+Name: $certName
+Organization: $organizationName
+Issue Date: $issueMonth/$issueYear
+Certificate URL: $certUrl
+
+Copy these details and paste them when adding the certification to your LinkedIn profile.
+''';
+    
+    await Clipboard.setData(ClipboardData(text: certificationText));
+    debugPrint('📋 Certification details copied to clipboard');
+  }
+
   /// Costruisce l'URL per aggiungere certificazione al profilo LinkedIn
   static String _buildAddToProfileUrl({
     required String certName,
@@ -72,30 +101,9 @@ class LinkedInService {
     required String certUrl,
     required String certId,
   }) {
-    // Utilizza il formato più semplice e compatibile con LinkedIn
-    final baseUrl = 'https://www.linkedin.com/profile/add';
-    final params = {
-      'startTask': 'CERTIFICATION_NAME',
-      'name': Uri.encodeComponent(certName),
-      'organizationName': Uri.encodeComponent(organizationName),
-      'issueYear': issueYear.toString(),
-      'issueMonth': issueMonth.toString(),
-    };
-
-    // Aggiungi certUrl solo se non è vuoto
-    if (certUrl.isNotEmpty) {
-      params['certUrl'] = Uri.encodeComponent(certUrl);
-    }
-
-    // Aggiungi certId solo se non è vuoto
-    if (certId.isNotEmpty) {
-      params['certId'] = certId;
-    }
-
-    final queryString =
-        params.entries.map((e) => '${e.key}=${e.value}').join('&');
-
-    return '$baseUrl?$queryString';
+    // LinkedIn ha rimosso la funzionalità di precompilazione automatica
+    // Ora apriamo direttamente la pagina del profilo
+    return 'https://www.linkedin.com/in/me/';
   }
 
   /// Aggiunge una competenza al profilo LinkedIn tramite API
