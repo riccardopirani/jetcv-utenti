@@ -976,12 +976,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get downloadPng => 'Scarica PNG';
 
   @override
-  String get badgeImageSaved => 'Immagine badge salvata con successo!';
+  String get badgeImageSaved => 'Immagine del badge salvata con successo!';
 
   @override
-  String get badgeImageError => 'Errore nel download dell\'immagine badge';
+  String get badgeImageError => 'Errore nel download dell\'immagine del badge';
 
   @override
   String get saveImageAs =>
-      'Fai clic destro sull\'immagine sopra e seleziona \"Salva immagine con nome...\" per scaricare il PNG del badge.';
+      'Fai clic destro sull\'immagine sopra e seleziona \"Salva immagine con nome...\" per scaricare il badge PNG.';
 }

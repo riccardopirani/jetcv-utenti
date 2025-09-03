@@ -309,7 +309,7 @@ class OpenBadgeService {
         
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(AppLocalizations.of(context)!.badgeImageSaved),
               backgroundColor: Colors.green,
             ),
@@ -422,17 +422,45 @@ class OpenBadgeService {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Share Open Badge'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Your Open Badge has been created successfully!'),
-            const SizedBox(height: 16),
-            Text('Badge: ${badge.name}'),
-            Text('Issuer: ${badge.issuer.name}'),
-            const SizedBox(height: 16),
-            Text('Files saved to: ${jsonFile.path}'),
-          ],
+        title: const Text('Open Badge Created'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Your Open Badge has been created successfully!'),
+              const SizedBox(height: 16),
+              Text('Badge: ${badge.name}'),
+              Text('Issuer: ${badge.issuer.name}'),
+              const SizedBox(height: 16),
+              if (kIsWeb) ...[
+                const Text('Badge JSON-LD Content:'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: SelectableText(
+                    badge.toJsonLdString(),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.saveImageAs,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ] else ...[
+                Text('Files saved to: ${jsonFile.path}'),
+              ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -453,7 +481,7 @@ class OpenBadgeService {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(kIsWeb 
+                  content: Text(kIsWeb
                     ? 'Open Badge created! Copy the JSON-LD content to save your badge.'
                     : 'Badge files saved successfully!'),
                   backgroundColor: Colors.green,

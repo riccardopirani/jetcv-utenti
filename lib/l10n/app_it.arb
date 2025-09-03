@@ -317,7 +317,7 @@
   "openBadgeCreated": "Open Badge creato con successo!",
   "openBadgeError": "Errore nella creazione dell'Open Badge",
   "downloadPng": "Scarica PNG",
-  "badgeImageSaved": "Immagine badge salvata con successo!",
-  "badgeImageError": "Errore nel download dell'immagine badge",
-  "saveImageAs": "Fai clic destro sull'immagine sopra e seleziona \"Salva immagine con nome...\" per scaricare il PNG del badge."
+  "badgeImageSaved": "Immagine del badge salvata con successo!",
+  "badgeImageError": "Errore nel download dell'immagine del badge",
+  "saveImageAs": "Fai clic destro sull'immagine sopra e seleziona \"Salva immagine con nome...\" per scaricare il badge PNG."
 }
