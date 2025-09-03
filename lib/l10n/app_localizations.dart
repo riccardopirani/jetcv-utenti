@@ -1823,25 +1823,25 @@ abstract class AppLocalizations {
   /// No description provided for @addToLinkedIn.
   ///
   /// In en, this message translates to:
-  /// **'Add Skills to LinkedIn'**
+  /// **'Add to LinkedIn'**
   String get addToLinkedIn;
 
   /// No description provided for @addCertificationsToLinkedIn.
   ///
   /// In en, this message translates to:
-  /// **'Add Skills to LinkedIn Profile'**
+  /// **'Add Certification to LinkedIn'**
   String get addCertificationsToLinkedIn;
 
   /// No description provided for @linkedInIntegration.
   ///
   /// In en, this message translates to:
-  /// **'LinkedIn Skills Integration'**
+  /// **'LinkedIn Certification Integration'**
   String get linkedInIntegration;
 
   /// No description provided for @shareCertificationsOnLinkedIn.
   ///
   /// In en, this message translates to:
-  /// **'Add your certification skills to your LinkedIn profile to enhance your professional visibility.'**
+  /// **'This will open LinkedIn where you can add your certification directly to your profile. The certification details will be pre-filled for easy addition.'**
   String get shareCertificationsOnLinkedIn;
 }
 

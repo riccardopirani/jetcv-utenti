@@ -934,15 +934,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get otpStatusBurned => 'Burned';
 
   @override
-  String get addToLinkedIn => 'Add Skills to LinkedIn';
+  String get addToLinkedIn => 'Add to LinkedIn';
 
   @override
-  String get addCertificationsToLinkedIn => 'Add Skills to LinkedIn Profile';
+  String get addCertificationsToLinkedIn => 'Add Certification to LinkedIn';
 
   @override
-  String get linkedInIntegration => 'LinkedIn Skills Integration';
+  String get linkedInIntegration => 'LinkedIn Certification Integration';
 
   @override
   String get shareCertificationsOnLinkedIn =>
-      'Add your certification skills to your LinkedIn profile to enhance your professional visibility.';
+      'This will open LinkedIn where you can add your certification directly to your profile. The certification details will be pre-filled for easy addition.';
 }

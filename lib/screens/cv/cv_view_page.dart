@@ -2816,8 +2816,13 @@ class _CVViewPageState extends State<CVViewPage> {
     try {
       debugPrint('🔗 Opening LinkedIn for certifications');
 
-      // Mostra un dialog di conferma con le competenze
-      final skillsMessage = LinkedInService.generateSkillsMessage(_certifications);
+      // Mostra un dialog di conferma con i dettagli della certificazione
+      final firstCert = _certifications.first;
+      final certName =
+          firstCert.certification?.category?.name ?? 'Certification';
+      final issuer = firstCert.certification?.idCertifier ?? 'JetCV';
+      final issueDate = firstCert.certificationUser.createdAt;
+
       final shouldProceed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -2827,7 +2832,8 @@ class _CVViewPageState extends State<CVViewPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppLocalizations.of(context)!.shareCertificationsOnLinkedIn),
+                Text(AppLocalizations.of(context)!
+                    .shareCertificationsOnLinkedIn),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -2836,12 +2842,30 @@ class _CVViewPageState extends State<CVViewPage> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: Text(
-                    skillsMessage,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'monospace',
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📜 Certification Details:',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Name: $certName'),
+                      Text('Issuer: $issuer'),
+                      Text(
+                          'Issue Date: ${issueDate.day}/${issueDate.month}/${issueDate.year}'),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This will open LinkedIn with pre-filled certification details.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -2874,7 +2898,7 @@ class _CVViewPageState extends State<CVViewPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'LinkedIn opened! You can now add your certification skills to your profile.'),
+                  'LinkedIn opened! You can now add your certification to your LinkedIn profile with pre-filled details.'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 4),
             ),

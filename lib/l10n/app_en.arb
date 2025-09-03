@@ -403,8 +403,8 @@
   "otpStatusExpired": "Expired",
   "otpStatusUsed": "Used",
   "otpStatusBurned": "Burned",
-  "addToLinkedIn": "Add Skills to LinkedIn",
-  "addCertificationsToLinkedIn": "Add Skills to LinkedIn Profile",
-  "linkedInIntegration": "LinkedIn Skills Integration",
-  "shareCertificationsOnLinkedIn": "Add your certification skills to your LinkedIn profile to enhance your professional visibility."
+  "addToLinkedIn": "Add to LinkedIn",
+  "addCertificationsToLinkedIn": "Add Certification to LinkedIn",
+  "linkedInIntegration": "LinkedIn Certification Integration",
+  "shareCertificationsOnLinkedIn": "This will open LinkedIn where you can add your certification directly to your profile. The certification details will be pre-filled for easy addition."
 }

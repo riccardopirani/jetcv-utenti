@@ -1,32 +1,46 @@
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/config/linkedin_config.dart';
 
 /// Servizio per l'integrazione con LinkedIn
 class LinkedInService {
   static const String _linkedInBaseUrl = 'https://www.linkedin.com';
 
-  /// Apre LinkedIn per aggiungere competenze al profilo
+  /// Apre LinkedIn per aggiungere certificazioni al profilo tramite URL diretto
   static Future<void> addSkillsToLinkedInProfile({
     required List<UserCertificationDetail> certifications,
   }) async {
     try {
       debugPrint(
-          '🔗 LinkedInService: Opening LinkedIn to add skills to profile');
+          '🔗 LinkedInService: Opening LinkedIn to add certifications to profile');
 
-      // Estrae le competenze dalle certificazioni
-      final skills = _extractSkillsFromCertifications(certifications);
-
-      if (skills.isEmpty) {
-        throw Exception('No skills found in certifications');
+      if (certifications.isEmpty) {
+        throw Exception('No certifications found');
       }
 
-      // Costruisce l'URL per la pagina di modifica del profilo LinkedIn
-      // LinkedIn non ha un URL diretto per aggiungere competenze, quindi apriamo la pagina del profilo
-      final linkedInUrl = '$_linkedInBaseUrl/in/me/';
+      // Prende la prima certificazione per l'URL (LinkedIn supporta una certificazione per volta)
+      final firstCert = certifications.first;
+      final certName =
+          firstCert.certification?.category?.name ?? 'Certification';
+      final issuer = firstCert.certification?.idCertifier ?? 'JetCV';
+      final issueDate = firstCert.certificationUser.createdAt;
 
-      debugPrint('🔗 LinkedInService: Opening LinkedIn profile: $linkedInUrl');
-      debugPrint('🔗 LinkedInService: Skills to add: $skills');
+      // Costruisce l'URL per aggiungere certificazione a LinkedIn
+      final linkedInUrl = _buildAddToProfileUrl(
+        certName: certName,
+        organizationName: 'JetCV', // Usa un nome invece di un ID
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl:
+            'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        certId: firstCert.certificationUser.idCertificationUser,
+      );
+
+      debugPrint(
+          '🔗 LinkedInService: LinkedIn Add to Profile URL: $linkedInUrl');
 
       final uri = Uri.parse(linkedInUrl);
 
@@ -36,11 +50,10 @@ class LinkedInService {
           mode: LaunchMode.externalApplication,
         );
 
-        // Mostra un messaggio informativo all'utente
         debugPrint(
-            'ℹ️ LinkedInService: User should manually add skills to their profile');
+            '✅ LinkedInService: LinkedIn opened for certification addition');
       } else {
-        debugPrint('❌ LinkedInService: Could not launch $linkedInUrl');
+        debugPrint('❌ LinkedInService: Could not launch LinkedIn URL');
         throw Exception(
             'Could not launch LinkedIn. Please ensure the LinkedIn app is installed or try again later.');
       }
@@ -50,49 +63,234 @@ class LinkedInService {
     }
   }
 
-    /// Estrae le competenze dalle certificazioni
+  /// Costruisce l'URL per aggiungere certificazione al profilo LinkedIn
+  static String _buildAddToProfileUrl({
+    required String certName,
+    required String organizationName,
+    required int issueYear,
+    required int issueMonth,
+    required String certUrl,
+    required String certId,
+  }) {
+    // Utilizza il formato più semplice e compatibile con LinkedIn
+    final baseUrl = 'https://www.linkedin.com/profile/add';
+    final params = {
+      'startTask': 'CERTIFICATION_NAME',
+      'name': Uri.encodeComponent(certName),
+      'organizationName': Uri.encodeComponent(organizationName),
+      'issueYear': issueYear.toString(),
+      'issueMonth': issueMonth.toString(),
+    };
+
+    // Aggiungi certUrl solo se non è vuoto
+    if (certUrl.isNotEmpty) {
+      params['certUrl'] = Uri.encodeComponent(certUrl);
+    }
+
+    // Aggiungi certId solo se non è vuoto
+    if (certId.isNotEmpty) {
+      params['certId'] = certId;
+    }
+
+    final queryString =
+        params.entries.map((e) => '${e.key}=${e.value}').join('&');
+
+    return '$baseUrl?$queryString';
+  }
+
+  /// Aggiunge una competenza al profilo LinkedIn tramite API
+  static Future<bool> addSkillToProfile({
+    required String accessToken,
+    required String skillName,
+    String language = 'en_US',
+  }) async {
+    try {
+      debugPrint(
+          '🔗 LinkedInService: Adding skill "$skillName" to LinkedIn profile');
+
+      // Prima otteniamo l'ID del profilo dell'utente
+      final profileId = await _getUserProfileId(accessToken);
+      if (profileId == null) {
+        throw Exception('Could not get user profile ID');
+      }
+
+      // Costruisce il corpo della richiesta per aggiungere la competenza
+      final requestBody = {
+        'name': {
+          'localized': {
+            language: skillName,
+          },
+          'preferredLocale': {
+            'country': language.split('_')[1],
+            'language': language.split('_')[0],
+          },
+        },
+      };
+
+      final response = await http.post(
+        Uri.parse('${LinkedInConfig.apiBaseUrl}/people/$profileId/skills'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+          'X-Restli-Protocol-Version': '2.0.0',
+        },
+        body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 201) {
+        debugPrint('✅ LinkedInService: Skill "$skillName" added successfully');
+        return true;
+      } else {
+        debugPrint(
+            '❌ LinkedInService: Failed to add skill. Status: ${response.statusCode}, Body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ LinkedInService: Error adding skill: $e');
+      return false;
+    }
+  }
+
+  /// Gestisce il callback OAuth e aggiunge tutte le competenze
+  static Future<bool> handleOAuthCallback({
+    required String authorizationCode,
+    required List<UserCertificationDetail> certifications,
+  }) async {
+    try {
+      debugPrint('🔗 LinkedInService: Handling OAuth callback');
+
+      // Scambia il codice di autorizzazione con un token di accesso
+      final accessToken = await _exchangeCodeForToken(authorizationCode);
+      if (accessToken == null) {
+        throw Exception('Failed to get access token');
+      }
+
+      // Estrae le competenze dalle certificazioni
+      final skills = _extractSkillsFromCertifications(certifications);
+
+      // Aggiunge tutte le competenze al profilo
+      int successCount = 0;
+      for (final skill in skills) {
+        final success = await addSkillToProfile(
+          accessToken: accessToken,
+          skillName: skill,
+        );
+        if (success) {
+          successCount++;
+        }
+      }
+
+      debugPrint(
+          '✅ LinkedInService: Added $successCount out of ${skills.length} skills');
+      return successCount > 0;
+    } catch (e) {
+      debugPrint('❌ LinkedInService: Error handling OAuth callback: $e');
+      return false;
+    }
+  }
+
+  /// Scambia il codice di autorizzazione con un token di accesso
+  static Future<String?> _exchangeCodeForToken(String authorizationCode) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${LinkedInConfig.authBaseUrl}/accessToken'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'grant_type': 'authorization_code',
+          'code': authorizationCode,
+          'redirect_uri': LinkedInConfig.redirectUri,
+          'client_id': LinkedInConfig.clientId,
+          'client_secret': LinkedInConfig.clientSecret,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['access_token'];
+      } else {
+        debugPrint(
+            '❌ LinkedInService: Failed to exchange code for token. Status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ LinkedInService: Error exchanging code for token: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene l'ID del profilo dell'utente autenticato
+  static Future<String?> _getUserProfileId(String accessToken) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${LinkedInConfig.apiBaseUrl}/people/~'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['id'];
+      } else {
+        debugPrint(
+            '❌ LinkedInService: Failed to get profile ID. Status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ LinkedInService: Error getting profile ID: $e');
+      return null;
+    }
+  }
+
+  /// Estrae le competenze dalle certificazioni
   static List<String> _extractSkillsFromCertifications(
       List<UserCertificationDetail> certifications) {
     final skills = <String>{};
-    
+
     for (final cert in certifications) {
       // Aggiunge il nome della certificazione come competenza
       if (cert.certification?.category?.name != null) {
         skills.add(cert.certification!.category!.name!);
       }
-      
+
       // Aggiunge il tipo di certificazione come competenza
       if (cert.certification?.category?.type != null) {
         skills.add(cert.certification!.category!.type!);
       }
     }
-    
+
     return skills.toList();
   }
 
   /// Genera un messaggio con le competenze da aggiungere al profilo LinkedIn
-  static String generateSkillsMessage(List<UserCertificationDetail> certifications) {
+  static String generateSkillsMessage(
+      List<UserCertificationDetail> certifications) {
     final skills = _extractSkillsFromCertifications(certifications);
-    
+
     if (skills.isEmpty) {
       return 'Add your certification skills to LinkedIn!';
     }
-    
+
     final buffer = StringBuffer();
     buffer.writeln('🎯 Skills to add to your LinkedIn profile:');
     buffer.writeln();
-    
-    for (final skill in skills.take(10)) { // Limita a 10 competenze
+
+    for (final skill in skills.take(10)) {
+      // Limita a 10 competenze
       buffer.writeln('• $skill');
     }
-    
+
     if (skills.length > 10) {
       buffer.writeln('• ... and ${skills.length - 10} more skills');
     }
-    
+
     buffer.writeln();
-    buffer.writeln('💡 Tip: Go to your LinkedIn profile → Add profile section → Skills');
-    
+    buffer.writeln(
+        '💡 Tip: Go to your LinkedIn profile → Add profile section → Skills');
+
     return buffer.toString();
   }
 
