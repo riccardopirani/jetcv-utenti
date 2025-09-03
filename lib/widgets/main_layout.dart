@@ -74,7 +74,6 @@ class _MainLayoutState extends State<MainLayout>
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
-    final isDesktop = screenWidth >= 1024;
 
     // Responsive sizing
     final appBarHeight = isMobile
@@ -98,123 +97,101 @@ class _MainLayoutState extends State<MainLayout>
             ? 300.0
             : 320.0;
 
-    // Desktop: sidebar always visible, mobile/tablet: overlay
-    final showSidebarOverlay = isMobile || isTablet;
-    final sidebarAlwaysVisible = isDesktop;
+    // Sidebar sempre come overlay su tutti i dispositivi
+    final showSidebarOverlay = true; // Sempre overlay
 
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
-          // Desktop: Always visible sidebar
-          if (isDesktop) ...[
-            Container(
-              width: sidebarWidth,
-              color: Colors.white,
-              child: SidebarMenu(
-                onClose: _closeSidebar,
-                currentRoute: widget.currentRoute,
-              ),
-            ),
-          ],
-
-          // Main content area
-          Expanded(
-            child: Stack(
+          // Main content
+          Container(
+            color: Colors.grey.shade50,
+            child: Column(
               children: [
-                // Main content
+                // App bar
                 Container(
-                  color: Colors.grey.shade50,
-                  child: Column(
-                    children: [
-                      // App bar
-                      Container(
-                        height: appBarHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              spreadRadius: 0,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: SafeArea(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: horizontalPadding),
-                            child: Row(
-                              children: [
-                                // Hamburger button (only on mobile/tablet)
-                                if (!isDesktop) ...[
-                                  HamburgerButton(
-                                    onPressed: _toggleSidebar,
-                                    isOpen: _isSidebarOpen,
-                                  ),
-                                  SizedBox(width: isMobile ? 12 : 16),
-                                ],
-                                // Title
-                                if (widget.title != null) ...[
-                                  Expanded(
-                                    child: Text(
-                                      widget.title!,
-                                      style: TextStyle(
-                                        fontSize: titleFontSize,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1F2937),
-                                      ),
-                                    ),
-                                  ),
-                                ] else ...[
-                                  const Spacer(),
-                                ],
-                                // Actions
-                                if (widget.actions != null) ...[
-                                  ...widget.actions!,
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Main content
-                      Expanded(
-                        child: widget.child,
+                  height: appBarHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        spreadRadius: 0,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                ),
-
-                // Mobile/Tablet: Sidebar overlay
-                if (showSidebarOverlay && _isSidebarOpen)
-                  GestureDetector(
-                    onTap: _closeSidebar,
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      child: const SizedBox.expand(),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding),
+                      child: Row(
+                        children: [
+                          // Hamburger button (always visible)
+                          HamburgerButton(
+                            onPressed: _toggleSidebar,
+                            isOpen: _isSidebarOpen,
+                          ),
+                          SizedBox(width: isMobile ? 12 : 16),
+                          // Title
+                          if (widget.title != null) ...[
+                            Expanded(
+                              child: Text(
+                                widget.title!,
+                                style: TextStyle(
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1F2937),
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            const Spacer(),
+                          ],
+                          // Actions
+                          if (widget.actions != null) ...[
+                            ...widget.actions!,
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-
-                // Mobile/Tablet: Animated sidebar
-                if (showSidebarOverlay)
-                  AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Positioned(
-                        left: -sidebarWidth + (sidebarWidth * _animation.value),
-                        top: 0,
-                        bottom: 0,
-                        child: SidebarMenu(
-                          onClose: _closeSidebar,
-                          currentRoute: widget.currentRoute,
-                        ),
-                      );
-                    },
-                  ),
+                ),
+                // Main content
+                Expanded(
+                  child: widget.child,
+                ),
               ],
             ),
           ),
+
+          // Sidebar overlay (always shown when open)
+          if (showSidebarOverlay && _isSidebarOpen)
+            GestureDetector(
+              onTap: _closeSidebar,
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const SizedBox.expand(),
+              ),
+            ),
+
+          // Animated sidebar
+          if (showSidebarOverlay)
+            AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                return Positioned(
+                  left: -sidebarWidth + (sidebarWidth * _animation.value),
+                  top: 0,
+                  bottom: 0,
+                  child: SidebarMenu(
+                    onClose: _closeSidebar,
+                    currentRoute: widget.currentRoute,
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
