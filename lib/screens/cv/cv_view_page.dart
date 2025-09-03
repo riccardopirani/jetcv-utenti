@@ -8,13 +8,15 @@ import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/services/cv_edge_service.dart';
 import 'package:jetcv__utenti/services/country_service.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
+import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
+import 'package:jetcv__utenti/widgets/main_layout.dart';
 
 import 'package:share_plus/share_plus.dart';
 
 class CVViewPage extends StatefulWidget {
-  final String? cvUserId; // ID dell'utente di cui visualizzare il CV
+  final String? cvUserId;
 
   const CVViewPage({
     super.key,
@@ -33,6 +35,11 @@ class _CVViewPageState extends State<CVViewPage> {
   bool _isLoading = true;
   String? _errorMessage;
 
+  // Certifications data
+  List<UserCertificationDetail> _certifications = [];
+  bool _certificationsLoading = false;
+  String? _certificationsError;
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +52,7 @@ class _CVViewPageState extends State<CVViewPage> {
       _currentUser = await UserService.getCurrentUser();
       if (_currentUser == null) {
         setState(() {
-          _errorMessage = 'User not authenticated';
+          _errorMessage = 'User not authenticated'; // TODO: localize
           _isLoading = false;
         });
         return;
@@ -65,7 +72,8 @@ class _CVViewPageState extends State<CVViewPage> {
       } else {
         debugPrint('❌ Failed to load CV: ${cvResponse.error}');
         setState(() {
-          _errorMessage = cvResponse.error ?? 'Failed to load CV data';
+          _errorMessage =
+              cvResponse.error ?? 'Failed to load CV data'; // TODO: localize
           _isLoading = false;
         });
         return;
@@ -99,12 +107,56 @@ class _CVViewPageState extends State<CVViewPage> {
 
       // Pre-carica l'URL pubblico in background per l'anteprima
       _getPublicCvUrl();
+
+      // Load certifications data
+      _loadCertifications();
     } catch (e) {
       debugPrint('Error loading CV data: $e');
       setState(() {
-        _errorMessage = 'Error loading CV data: $e';
+        _errorMessage = 'Error loading CV data: $e'; // TODO: localize
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadCertifications() async {
+    setState(() {
+      _certificationsLoading = true;
+      _certificationsError = null;
+    });
+
+    try {
+      final response =
+          await CertificationService.getUserCertificationsDetails();
+
+      if (response.success && response.data != null) {
+        // Sort certifications by date (most recent first)
+        final sortedCertifications =
+            List<UserCertificationDetail>.from(response.data!)
+              ..sort((a, b) => b.certificationUser.createdAt
+                  .compareTo(a.certificationUser.createdAt));
+
+        setState(() {
+          _certifications = sortedCertifications;
+          _certificationsLoading = false;
+        });
+        debugPrint(
+            '✅ Certifications loaded successfully: ${_certifications.length} items (sorted by date)');
+      } else {
+        setState(() {
+          _certificationsError = response.error ??
+              AppLocalizations.of(context)!.errorLoadingCertifications;
+          _certificationsLoading = false;
+        });
+        debugPrint('❌ Failed to load certifications: ${response.error}');
+      }
+    } catch (e) {
+      setState(() {
+        _certificationsError =
+            'Error loading certifications: $e'; // TODO: localize
+        _certificationsLoading = false;
+      });
+      debugPrint('Error loading certifications: $e');
     }
   }
 
@@ -136,7 +188,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
     final age = _calculateAge(birthDate);
 
-    return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} ($age anni)';
+    return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} ($age ${AppLocalizations.of(context)!.years})';
   }
 
   String _generateCVSerial() {
@@ -162,7 +214,8 @@ class _CVViewPageState extends State<CVViewPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Errore nella generazione dell\'URL pubblico'),
+              content: Text(
+                  'Errore nella generazione dell\'URL pubblico'), // TODO: localize
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -187,8 +240,7 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                        'Link del CV copiato negli appunti! Condividilo ora.'),
+                    child: Text(AppLocalizations.of(context)!.cvLinkCopied),
                   ),
                 ],
               ),
@@ -284,7 +336,7 @@ class _CVViewPageState extends State<CVViewPage> {
         ),
         body: Center(
           child: Text(
-            _errorMessage ?? 'CV data not available',
+            _errorMessage ?? 'CV data not available', // TODO: localize
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
@@ -294,45 +346,44 @@ class _CVViewPageState extends State<CVViewPage> {
 
     final country = _getCountryByCode(_cv!.countryCode);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.viewMyCV),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // Removed share action - moved to main body
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Language selector
-              _buildLanguageSelector(),
+    return MainLayout(
+      currentRoute: '/cv',
+      title: AppLocalizations.of(context)!.viewMyCV,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Language selector
+            _buildLanguageSelector(),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              // Share CV section (moved to top)
-              _buildShareSection(),
+            // Share CV section (moved to top)
+            _buildShareSection(),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              // Main profile section
-              _buildMainProfileSection(country),
+            // Main profile section
+            _buildMainProfileSection(country),
 
-              const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-              // Contact information section
-              _buildContactSection(),
+            // Contact information section
+            _buildContactSection(),
 
-              const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-              // Autodichiarazioni section
-              _buildAutodichiarazioniSection(),
+            // Autodichiarazioni section
+            _buildAutodichiarazioniSection(),
 
-              const SizedBox(height: 32),
-            ],
-          ),
+            const SizedBox(height: 32),
+
+            // Certifications timeline section
+            _buildCertificationsSection(),
+
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
@@ -545,7 +596,7 @@ class _CVViewPageState extends State<CVViewPage> {
                 _cv!.nationalityCodes!.isNotEmpty) ...[
               _buildNationalitiesItem(
                 icon: Icons.public,
-                label: 'Nazionalità',
+                label: AppLocalizations.of(context)!.nationality,
                 nationalityCodes: _cv!.nationalityCodes!,
               ),
             ],
@@ -658,7 +709,7 @@ class _CVViewPageState extends State<CVViewPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Nessuna nazionalità specificata',
+                      AppLocalizations.of(context)!.noNationalitySpecified,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w500,
                             fontStyle: FontStyle.italic,
@@ -784,7 +835,7 @@ class _CVViewPageState extends State<CVViewPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Autodichiarazioni',
+                  AppLocalizations.of(context)!.autodichiarazioni,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -805,7 +856,7 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Lingue parlate:',
+                    AppLocalizations.of(context)!.spokenLanguages,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -883,7 +934,7 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                 ),
                 child: Text(
-                  'Nessuna lingua specificata',
+                  AppLocalizations.of(context)!.noLanguageSpecified,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontStyle: FontStyle.italic,
@@ -896,6 +947,913 @@ class _CVViewPageState extends State<CVViewPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildCertificationsSection() {
+    // Show loading state
+    if (_certificationsLoading) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade50,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.certifications,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withValues(alpha: 0.3),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.mostRecent,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.loadingCertifications,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Show error state
+    if (_certificationsError != null) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade50,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.certifications,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withValues(alpha: 0.3),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.mostRecent,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.errorLoadingCertifications,
+                  style: TextStyle(
+                    color: Colors.red.shade600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _certificationsError!,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loadCertifications,
+                  child: Text(AppLocalizations.of(context)!.retry),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Show empty state
+    if (_certifications.isEmpty) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade50,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.certifications,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withValues(alpha: 0.3),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.mostRecent,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '0 ${AppLocalizations.of(context)!.verifiedCertifications}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Icon(
+                  Icons.workspace_premium_outlined,
+                  size: 48,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.noCertificationsFound,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.yourVerifiedCertifications,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color:
+                Colors.grey.shade50, // Light gray background like in the image
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with title and sort button - matching image exactly
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.certifications,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_certifications.length} ${AppLocalizations.of(context)!.verifiedCertifications}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withValues(alpha: 0.3),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.mostRecent,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // Timeline with certifications - dates aligned with card start, matching image exactly
+                Stack(
+                  children: [
+                    // Timeline line (background)
+                    Positioned(
+                      left: 6,
+                      top: 0,
+                      child: Container(
+                        width: 2,
+                        height: _certifications.length *
+                            250.0, // Adjust based on content height + spacing
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+
+                    // Content with aligned dates and cards
+                    Column(
+                      children: _certifications.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final cert = entry.value;
+                        final isLast = index == _certifications.length - 1;
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Timeline column with date and node
+                            SizedBox(
+                              width: 120,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Date bubble
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      _formatCertificationDate(
+                                          cert.certificationUser.createdAt),
+                                      style: TextStyle(
+                                        color: Colors.blue.shade800,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Timeline node
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+
+                            // Certification card
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  _buildCertificationCard(cert),
+                                  // Add spacing between cards (except for the last one)
+                                  if (!isLast) const SizedBox(height: 32),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatCertificationDate(DateTime date) {
+    final months = [
+      'Gen',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mag',
+      'Giu',
+      'Lug',
+      'Ago',
+      'Set',
+      'Ott',
+      'Nov',
+      'Dic'
+    ];
+
+    final day = date.day.toString().padLeft(2, '0');
+    final month = months[date.month - 1];
+    final year = date.year;
+
+    return '$day $month $year';
+  }
+
+  Widget _buildCertificationCard(UserCertificationDetail cert) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image section with relevant example images
+          Container(
+            height: 140,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              child: _buildCertificationImage(cert),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title and date - matching image layout
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        cert.certification?.category?.name ??
+                            AppLocalizations.of(context)!.certification,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _formatCertificationDate(
+                            cert.certificationUser.createdAt),
+                        style: TextStyle(
+                          color: Colors.blue.shade800,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Issuer with circular logo
+                Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.school,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      cert.certification?.category?.name ??
+                          AppLocalizations.of(context)!.certifyingBody,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Status
+                Row(
+                  children: [
+                    Icon(
+                      _getStatusIcon(cert.certificationUser.status),
+                      size: 16,
+                      color: _getStatusColor(cert.certificationUser.status),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${AppLocalizations.of(context)!.status}: ${_getStatusText(cert.certificationUser.status)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _getStatusColor(cert.certificationUser.status),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Serial number if available
+                if (cert.certificationUser.serialNumber != null) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.fingerprint,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppLocalizations.of(context)!.serial}: ${cert.certificationUser.serialNumber}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Description from category information
+                if (cert.certification?.categoryInformation.isNotEmpty ==
+                    true) ...[
+                  Text(
+                    cert.certification!.categoryInformation
+                        .map((info) => info.info?.name ?? '')
+                        .where((name) => name.isNotEmpty)
+                        .join(', '),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      height: 1.4,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    AppLocalizations.of(context)!.verifiedAndAuthenticated,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      height: 1.4,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationImage(UserCertificationDetail cert) {
+    // Determine image type based on certification category
+    final categoryName =
+        cert.certification?.category?.name?.toLowerCase() ?? '';
+
+    if (categoryName.contains('project') ||
+        categoryName.contains('management')) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue.shade50,
+              Colors.blue.shade100,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background pattern
+            Positioned.fill(
+              child: CustomPaint(
+                painter: ProjectManagementPatternPainter(),
+              ),
+            ),
+            // Main content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.analytics,
+                      size: 32,
+                      color: Colors.blue.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)!.projectManagement,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade700,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (categoryName.contains('flutter') ||
+        categoryName.contains('development') ||
+        categoryName.contains('mobile')) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.cyan.shade50,
+              Colors.blue.shade100,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background pattern
+            Positioned.fill(
+              child: CustomPaint(
+                painter: FlutterDevelopmentPatternPainter(),
+              ),
+            ),
+            // Main content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.phone_android,
+                      size: 32,
+                      color: Colors.cyan.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)!.flutterDevelopment,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.cyan.shade700,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Default certification image
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.green.shade50,
+              Colors.green.shade100,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.workspace_premium,
+                  size: 32,
+                  color: Colors.green.shade600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context)!.certified,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+      case 'verified':
+      case 'completed':
+        return Icons.check_circle;
+      case 'pending':
+      case 'in_progress':
+        return Icons.hourglass_empty;
+      case 'rejected':
+      case 'failed':
+        return Icons.cancel;
+      default:
+        return Icons.info;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+      case 'verified':
+      case 'completed':
+        return Colors.green;
+      case 'pending':
+      case 'in_progress':
+        return Colors.orange;
+      case 'rejected':
+      case 'failed':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getStatusText(String status) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return localizations.approved;
+      case 'verified':
+        return localizations.verified;
+      case 'completed':
+        return localizations.completed;
+      case 'pending':
+        return localizations.pending;
+      case 'in_progress':
+        return localizations.inProgress;
+      case 'rejected':
+        return localizations.rejected;
+      case 'failed':
+        return localizations.failed;
+      default:
+        return status;
+    }
   }
 
   Widget _buildShareSection() {
@@ -1546,7 +2504,8 @@ class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error changing language: $e'),
+            content: Text(AppLocalizations.of(context)!
+                .errorChangingLanguage(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -1560,7 +2519,7 @@ class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
     final currentLocale = LocaleService.instance.currentLocale;
     final currentLanguageName = currentLocale != null
         ? LocaleService.instance.getLanguageName(currentLocale.languageCode)
-        : 'Language';
+        : AppLocalizations.of(context)!.language;
     final currentLanguageEmoji = currentLocale != null
         ? LocaleService.instance.getLanguageEmoji(currentLocale.languageCode)
         : null;
@@ -1701,6 +2660,167 @@ class EnhancedCornerPainter extends CustomPainter {
         Offset(size.width * 0.15 + (i * 3), size.height * 0.25),
         Offset(size.width * 0.18 + (i * 3), size.height * 0.25),
         hashPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for Project Management certification background
+class ProjectManagementPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.blue.shade200.withValues(alpha: 0.3)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final fillPaint = Paint()
+      ..color = Colors.blue.shade100.withValues(alpha: 0.2)
+      ..style = PaintingStyle.fill;
+
+    // Draw Gantt chart-like bars
+    final barHeight = size.height * 0.08;
+    final barSpacing = size.height * 0.12;
+
+    for (int i = 0; i < 4; i++) {
+      final y = size.height * 0.2 + (i * barSpacing);
+      final barWidth = size.width * (0.3 + (i * 0.1));
+
+      // Bar background
+      canvas.drawRect(
+        Rect.fromLTWH(0, y, barWidth, barHeight),
+        fillPaint,
+      );
+
+      // Bar border
+      canvas.drawRect(
+        Rect.fromLTWH(0, y, barWidth, barHeight),
+        paint,
+      );
+    }
+
+    // Draw project timeline dots
+    final dotPaint = Paint()
+      ..color = Colors.blue.shade400
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 6; i++) {
+      final x = size.width * 0.1 + (i * size.width * 0.15);
+      final y = size.height * 0.7;
+      canvas.drawCircle(Offset(x, y), 3, dotPaint);
+    }
+
+    // Draw connecting lines
+    final linePaint = Paint()
+      ..color = Colors.blue.shade300.withValues(alpha: 0.5)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    for (int i = 0; i < 5; i++) {
+      final x1 = size.width * 0.1 + (i * size.width * 0.15);
+      final x2 = size.width * 0.1 + ((i + 1) * size.width * 0.15);
+      final y = size.height * 0.7;
+      canvas.drawLine(Offset(x1, y), Offset(x2, y), linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for Flutter Development certification background
+class FlutterDevelopmentPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.cyan.shade300.withValues(alpha: 0.4)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final fillPaint = Paint()
+      ..color = Colors.cyan.shade100.withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    // Draw mobile device outlines
+    final deviceWidth = size.width * 0.15;
+    final deviceHeight = size.height * 0.25;
+
+    // Device 1 (left)
+    final device1Rect = Rect.fromLTWH(
+      size.width * 0.1,
+      size.height * 0.2,
+      deviceWidth,
+      deviceHeight,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device1Rect, const Radius.circular(8)),
+      fillPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device1Rect, const Radius.circular(8)),
+      paint,
+    );
+
+    // Device 2 (center)
+    final device2Rect = Rect.fromLTWH(
+      size.width * 0.4,
+      size.height * 0.3,
+      deviceWidth,
+      deviceHeight,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device2Rect, const Radius.circular(8)),
+      fillPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device2Rect, const Radius.circular(8)),
+      paint,
+    );
+
+    // Device 3 (right)
+    final device3Rect = Rect.fromLTWH(
+      size.width * 0.7,
+      size.height * 0.25,
+      deviceWidth,
+      deviceHeight,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device3Rect, const Radius.circular(8)),
+      fillPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(device3Rect, const Radius.circular(8)),
+      paint,
+    );
+
+    // Draw Flutter logo-like elements
+    final logoPaint = Paint()
+      ..color = Colors.cyan.shade500
+      ..style = PaintingStyle.fill;
+
+    // Draw small circles representing Flutter widgets
+    for (int i = 0; i < 8; i++) {
+      final x = size.width * 0.1 + (i * size.width * 0.1);
+      final y = size.height * 0.6;
+      canvas.drawCircle(Offset(x, y), 4, logoPaint);
+    }
+
+    // Draw code-like lines
+    final codePaint = Paint()
+      ..color = Colors.cyan.shade400.withValues(alpha: 0.6)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    for (int i = 0; i < 5; i++) {
+      final y = size.height * 0.75 + (i * 8);
+      final lineLength = size.width * (0.2 + (i * 0.1));
+      canvas.drawLine(
+        Offset(size.width * 0.1, y),
+        Offset(size.width * 0.1 + lineLength, y),
+        codePaint,
       );
     }
   }

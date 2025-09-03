@@ -11,7 +11,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -56,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     // Controlla se l'utente è già autenticato
     final session = SupabaseConfig.client.auth.currentSession;
-    
+
     if (session != null) {
       // Utente già autenticato, vai alla home
       _navigateToHome();
@@ -69,7 +70,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void _navigateToHome() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const AuthenticatedHomePage(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const AuthenticatedHomePage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,
@@ -84,7 +86,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void _navigateToLogin() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoginPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,
@@ -153,17 +156,21 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       children: [
                         Text(
                           'JetCV',
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'CV Digitali su Blockchain',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
                         ),
                       ],
                     ),

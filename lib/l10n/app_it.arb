@@ -159,5 +159,129 @@
   "blockchainCertified": "Certificato Blockchain",
   "cvSerial": "Seriale CV",
   "serialCode": "Codice seriale",
-  "verifiedCV": "CV Verificato"
+  "verifiedCV": "CV Verificato",
+  "autodichiarazioni": "Autodichiarazioni",
+  "spokenLanguages": "Lingue parlate:",
+  "noLanguageSpecified": "Nessuna lingua specificata",
+  "certifications": "Certificazioni",
+  "mostRecent": "Più Recenti",
+  "verifiedCertifications": "certificazioni verificate",
+  "loadingCertifications": "Caricamento certificazioni...",
+  "errorLoadingCertifications": "Errore nel caricamento delle certificazioni",
+  "retry": "Riprova",
+  "noCertificationsFound": "Nessuna certificazione trovata",
+  "yourVerifiedCertifications": "Le tue certificazioni verificate appariranno qui",
+  "certification": "Certificazione",
+  "certifyingBody": "Ente Certificatore",
+  "status": "Stato",
+  "serial": "Serial",
+  "verifiedAndAuthenticated": "Certificazione verificata e autenticata",
+  "approved": "Approvata",
+  "verified": "Verificata",
+  "completed": "Completata",
+  "pending": "In Attesa",
+  "inProgress": "In Corso",
+  "rejected": "Rifiutata",
+  "failed": "Fallita",
+  "nationality": "Nazionalità",
+  "noNationalitySpecified": "Nessuna nazionalità specificata",
+  "cvLinkCopied": "Link del CV copiato negli appunti! Condividilo ora.",
+  "loadingCertifications": "Caricamento certificazioni...",
+  "years": "anni",
+  "language": "Lingua",
+  "errorChangingLanguage": "Errore nel cambiare lingua: {error}",
+  "@errorChangingLanguage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectManagement": "GESTIONE\nPROGETTI",
+  "flutterDevelopment": "SVILUPPO\nFLUTTER",
+  "certified": "CERTIFICATO",
+  "home": "Home",
+  "myProfile": "Il mio profilo",
+  "myCV": "Il mio Curriculum",
+  "myCertifications": "Le mie certificazioni",
+  "otp": "OTP",
+  "myWallets": "I miei Wallet",
+  "deleteAccount": "Elimina account",
+  "logout": "Esci",
+  "otpVerification": "Verifica OTP",
+  "otpDescription": "Inserisci il codice a 6 cifre inviato alla tua email registrata",
+  "enterOTP": "Inserisci il codice OTP",
+  "verifyOTP": "Verifica OTP",
+  "resendOTP": "Invia di nuovo OTP",
+  "otpVerified": "OTP verificato con successo!",
+  "invalidOTP": "Codice OTP non valido. Riprova.",
+  "otpVerificationError": "Errore nella verifica OTP. Riprova.",
+  "otpResent": "Il codice OTP è stato reinviato alla tua email",
+  "otpResendError": "Errore nell'invio dell'OTP. Riprova.",
+  "securityInfo": "Informazioni di sicurezza",
+  "otpSecurityNote": "Per la tua sicurezza, questo codice OTP scadrà tra 10 minuti. Non condividere questo codice con nessuno.",
+  "myOtps": "I Miei OTP",
+  "permanentOtpCodes": "Codici OTP Permanenti",
+  "manageSecureAccessCodes": "Gestisci i tuoi codici di accesso sicuri",
+  "activeOtps": "OTP Attivi",
+  "noOtpGenerated": "Nessun OTP Generato",
+  "createFirstOtpDescription": "Crea il tuo primo codice OTP permanente per accedere in modo sicuro alla piattaforma.",
+  "generateFirstOtp": "Genera Primo OTP",
+  "newOtp": "Nuovo OTP",
+  "addOptionalTagDescription": "Aggiungi un tag opzionale per identificare questo OTP:",
+  "tagOptional": "Tag (opzionale)",
+  "generateOtp": "Genera OTP",
+  "createdNow": "Creato ora",
+  "createdMinutesAgo": "Creato {minutes}min fa",
+  "@createdMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "createdHoursAgo": "Creato {hours}h fa",
+  "@createdHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "createdDaysAgo": "Creato {days} giorni fa",
+  "@createdDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "copy": "Copia",
+  "qrCode": "QR Code",
+  "deleteOtp": "Elimina OTP",
+  "deleteOtpConfirmation": "Sei sicuro di voler eliminare questo OTP?",
+  "delete": "Elimina",
+  "otpCodeCopied": "Codice OTP copiato negli appunti!",
+  "qrCodeOtp": "QR Code OTP",
+  "qrCodeFor": "QR Code per",
+  "close": "Chiudi",
+  "errorDuringLogout": "Errore durante il logout: {error}",
+  "@errorDuringLogout": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeletionNotImplemented": "Eliminazione account non ancora implementata",
+  "userNotLoaded": "Utente non caricato",
+  "trainingCourse": "Corso Training",
+  "otpNumber": "OTP #{number}",
+  "@otpNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
 }

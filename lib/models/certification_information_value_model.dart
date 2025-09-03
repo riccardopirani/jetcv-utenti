@@ -66,4 +66,3 @@ class CertificationInformationValueModel {
   @override
   int get hashCode => idCertificationInformationValue.hashCode;
 }
-

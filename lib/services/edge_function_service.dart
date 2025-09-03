@@ -41,7 +41,7 @@ class EdgeFunctionService {
 
       if (response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        
+
         if (data['success'] == true) {
           return EdgeFunctionResponse<T>(
             success: true,
@@ -82,7 +82,7 @@ class EdgeFunctionService {
 
       if (response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        
+
         return EdgeFunctionResponse<void>(
           success: data['success'] == true,
           error: data['error'],

@@ -84,13 +84,14 @@ class _AppRouterState extends State<AppRouter> {
     // Ascolta i cambiamenti di stato dell'autenticazione (inclusi i deep link)
     _authSubscription = SupabaseConfig.auth.onAuthStateChange.listen((data) {
       final session = data.session;
-      debugPrint('🔄 Auth state changed: ${session != null ? 'authenticated' : 'not authenticated'}');
-      
+      debugPrint(
+          '🔄 Auth state changed: ${session != null ? 'authenticated' : 'not authenticated'}');
+
       // Se l'utente si è appena autenticato tramite deep link o altro metodo
       if (session != null && !_isAuthenticated) {
         debugPrint('✅ User authenticated via deep link or OAuth callback');
       }
-      
+
       setState(() {
         _isAuthenticated = session != null;
         _isLoading = false;
@@ -109,7 +110,7 @@ class _AppRouterState extends State<AppRouter> {
       // Controlla se c'è già una sessione attiva
       final session = SupabaseConfig.client.auth.currentSession;
       debugPrint('🔍 Current session exists: ${session != null}');
-      
+
       setState(() {
         _isAuthenticated = session != null;
         _isLoading = false;
@@ -132,7 +133,7 @@ class _AppRouterState extends State<AppRouter> {
         ),
       );
     }
-    
+
     if (_isAuthenticated) {
       // Utente autenticato → mostra splash screen e poi home utente autenticato
       return const SplashScreen();

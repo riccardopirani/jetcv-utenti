@@ -207,7 +207,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get language => 'Sprache';
 
   @override
-  String get home => 'Start';
+  String get home => 'Startseite';
 
   @override
   String get cv => 'Lebenslauf';
@@ -522,4 +522,264 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get verifiedCV => 'Verifizierter Lebenslauf';
+
+  @override
+  String get autodichiarazioni => 'Selbsterklärungen';
+
+  @override
+  String get spokenLanguages => 'Gesprochene Sprachen:';
+
+  @override
+  String get noLanguageSpecified => 'Keine Sprache angegeben';
+
+  @override
+  String get certifications => 'Zertifizierungen';
+
+  @override
+  String get mostRecent => 'Neueste';
+
+  @override
+  String get verifiedCertifications => 'verifizierte Zertifizierungen';
+
+  @override
+  String get loadingCertifications => 'Lade Zertifizierungen...';
+
+  @override
+  String get errorLoadingCertifications =>
+      'Fehler beim Laden der Zertifizierungen';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String get noCertificationsFound => 'Keine Zertifizierungen gefunden';
+
+  @override
+  String get yourVerifiedCertifications =>
+      'Ihre verifizierten Zertifizierungen erscheinen hier';
+
+  @override
+  String get certification => 'Zertifizierung';
+
+  @override
+  String get certifyingBody => 'Zertifizierungsstelle';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get serial => 'Serie';
+
+  @override
+  String get verifiedAndAuthenticated =>
+      'Verifizierte und authentifizierte Zertifizierung';
+
+  @override
+  String get approved => 'Genehmigt';
+
+  @override
+  String get verified => 'Verifiziert';
+
+  @override
+  String get completed => 'Abgeschlossen';
+
+  @override
+  String get pending => 'Ausstehend';
+
+  @override
+  String get inProgress => 'In Bearbeitung';
+
+  @override
+  String get rejected => 'Abgelehnt';
+
+  @override
+  String get failed => 'Fehlgeschlagen';
+
+  @override
+  String get nationality => 'Nationalität';
+
+  @override
+  String get noNationalitySpecified => 'Keine Nationalität angegeben';
+
+  @override
+  String get cvLinkCopied =>
+      'CV-Link in die Zwischenablage kopiert! Teilen Sie ihn jetzt.';
+
+  @override
+  String errorChangingLanguage(String error) {
+    return 'Fehler beim Ändern der Sprache: $error';
+  }
+
+  @override
+  String get projectManagement => 'PROJEKTMANAGEMENT';
+
+  @override
+  String get flutterDevelopment => 'FLUTTER\nENTWICKLUNG';
+
+  @override
+  String get certified => 'ZERTIFIZIERT';
+
+  @override
+  String get myProfile => 'Mein Profil';
+
+  @override
+  String get myCV => 'Mein Lebenslauf';
+
+  @override
+  String get myCertifications => 'Meine Zertifizierungen';
+
+  @override
+  String get otp => 'OTP';
+
+  @override
+  String get myWallets => 'Meine Wallets';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get logout => 'Abmelden';
+
+  @override
+  String get otpVerification => 'OTP-Verifizierung';
+
+  @override
+  String get otpDescription =>
+      'Geben Sie den 6-stelligen Code ein, der an Ihre registrierte E-Mail gesendet wurde';
+
+  @override
+  String get enterOTP => 'OTP-Code eingeben';
+
+  @override
+  String get verifyOTP => 'OTP verifizieren';
+
+  @override
+  String get resendOTP => 'OTP erneut senden';
+
+  @override
+  String get otpVerified => 'OTP erfolgreich verifiziert!';
+
+  @override
+  String get invalidOTP =>
+      'Ungültiger OTP-Code. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get otpVerificationError =>
+      'Fehler bei der OTP-Verifizierung. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get otpResent => 'Der OTP-Code wurde an Ihre E-Mail erneut gesendet';
+
+  @override
+  String get otpResendError =>
+      'Fehler beim erneuten Senden des OTP. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get securityInfo => 'Sicherheitsinformationen';
+
+  @override
+  String get otpSecurityNote =>
+      'Zu Ihrer Sicherheit läuft dieser OTP-Code in 10 Minuten ab. Teilen Sie diesen Code mit niemandem.';
+
+  @override
+  String get myOtps => 'Meine OTPs';
+
+  @override
+  String get permanentOtpCodes => 'Permanente OTP-Codes';
+
+  @override
+  String get manageSecureAccessCodes =>
+      'Verwalten Sie Ihre sicheren Zugangscodes';
+
+  @override
+  String get activeOtps => 'Aktive OTPs';
+
+  @override
+  String get noOtpGenerated => 'Kein OTP Generiert';
+
+  @override
+  String get createFirstOtpDescription =>
+      'Erstellen Sie Ihren ersten permanenten OTP-Code, um sicher auf die Plattform zuzugreifen.';
+
+  @override
+  String get generateFirstOtp => 'Ersten OTP Generieren';
+
+  @override
+  String get newOtp => 'Neuer OTP';
+
+  @override
+  String get addOptionalTagDescription =>
+      'Fügen Sie ein optionales Tag hinzu, um diesen OTP zu identifizieren:';
+
+  @override
+  String get tagOptional => 'Tag (optional)';
+
+  @override
+  String get generateOtp => 'OTP Generieren';
+
+  @override
+  String get createdNow => 'Jetzt erstellt';
+
+  @override
+  String createdMinutesAgo(int minutes) {
+    return 'Vor ${minutes}min erstellt';
+  }
+
+  @override
+  String createdHoursAgo(int hours) {
+    return 'Vor ${hours}h erstellt';
+  }
+
+  @override
+  String createdDaysAgo(int days) {
+    return 'Vor $days Tagen erstellt';
+  }
+
+  @override
+  String get copy => 'Kopieren';
+
+  @override
+  String get qrCode => 'QR-Code';
+
+  @override
+  String get deleteOtp => 'OTP Löschen';
+
+  @override
+  String get deleteOtpConfirmation =>
+      'Sind Sie sicher, dass Sie diesen OTP löschen möchten?';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get otpCodeCopied => 'OTP-Code in die Zwischenablage kopiert!';
+
+  @override
+  String get qrCodeOtp => 'QR-Code OTP';
+
+  @override
+  String get qrCodeFor => 'QR-Code für';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String errorDuringLogout(String error) {
+    return 'Fehler beim Abmelden: $error';
+  }
+
+  @override
+  String get accountDeletionNotImplemented =>
+      'Kontolöschung noch nicht implementiert';
+
+  @override
+  String get userNotLoaded => 'Benutzer nicht geladen';
+
+  @override
+  String get trainingCourse => 'Schulungskurs';
+
+  @override
+  String otpNumber(int number) {
+    return 'OTP #$number';
+  }
 }

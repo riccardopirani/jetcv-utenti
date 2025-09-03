@@ -155,5 +155,3 @@ class LocationModel {
   @override
   int get hashCode => idLocation.hashCode;
 }
-
-

@@ -109,5 +109,3 @@ class OtpModel {
   @override
   int get hashCode => idOtp.hashCode;
 }
-
-

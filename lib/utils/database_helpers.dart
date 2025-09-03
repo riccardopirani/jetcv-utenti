@@ -2,7 +2,6 @@ import 'package:jetcv__utenti/supabase/structure/enumerated_types.dart';
 
 /// Helper utilities for database operations and data handling
 class DatabaseHelpers {
-  
   /// Parse enum values safely with fallbacks
   static T? parseEnum<T>(String? value, T Function(String) parser) {
     if (value == null || value.isEmpty) return null;
@@ -69,29 +68,30 @@ class DatabaseHelpers {
   /// Validate UUID format
   static bool isValidUuid(String? uuid) {
     if (uuid == null || uuid.isEmpty) return false;
-    return RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$').hasMatch(uuid);
+    return RegExp(
+            r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$')
+        .hasMatch(uuid);
   }
 
   /// Get display text for enums (Italian labels)
   static String getDisplayText(dynamic enumValue) {
     if (enumValue == null) return 'N/A';
-    
+
     // Use the displayLabel property if available
     if (enumValue is UserGender) return enumValue.displayLabel;
     if (enumValue is UserType) return enumValue.displayLabel;
     if (enumValue is CertificationStatus) return enumValue.displayLabel;
     if (enumValue is LegalEntityStatus) return enumValue.displayLabel;
     if (enumValue is WalletCreatedBy) return enumValue.displayLabel;
-    
+
     // Fallback to enum name
     return enumValue.toString().split('.').last;
   }
 
-
   /// Get status color based on enum value
   static String getStatusColor(dynamic enumValue) {
     if (enumValue == null) return 'grey';
-    
+
     switch (enumValue.runtimeType) {
       case CertificationStatus:
         final status = enumValue as CertificationStatus;

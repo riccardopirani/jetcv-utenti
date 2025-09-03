@@ -5,6 +5,7 @@ import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
+import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
@@ -311,6 +312,22 @@ class QuickActionsSection extends StatelessWidget {
               },
             ),
           ],
+
+          // OTP Card
+          const SizedBox(height: 16),
+          QuickActionCard(
+            icon: Icons.key,
+            title: AppLocalizations.of(context)!.myOtps,
+            subtitle: AppLocalizations.of(context)!.manageSecureAccessCodes,
+            color: const Color(0xFF6B46C1),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const OtpListPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -423,6 +440,18 @@ class CustomBottomNavigationBar extends StatelessWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => CVViewPage(cvUserId: user?.idUser),
+                    ),
+                  );
+                },
+              ),
+              BottomNavItem(
+                icon: Icons.key,
+                label: AppLocalizations.of(context)!.otp,
+                isSelected: false,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OtpListPage(),
                     ),
                   );
                 },

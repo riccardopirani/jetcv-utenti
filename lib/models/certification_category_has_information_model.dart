@@ -48,5 +48,3 @@ class CertificationCategoryHasInformationModel {
   @override
   int get hashCode => idCertificationCategoryHasInformation.hashCode;
 }
-
-

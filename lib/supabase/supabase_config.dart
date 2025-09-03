@@ -5,14 +5,15 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// Supabase configuration and client code
 class SupabaseConfig {
   static const String supabaseUrl = 'https://skqsuxmdfqxbkhmselaz.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU';
+  static const String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU';
 
   static Future<void> initialize() async {
     try {
       debugPrint('🔧 Initializing Supabase...');
       debugPrint('🌐 URL: $supabaseUrl');
       debugPrint('🔑 Using anon key: ${anonKey.substring(0, 20)}...');
-      
+
       await Supabase.initialize(
         url: supabaseUrl,
         anonKey: anonKey,
@@ -30,7 +31,7 @@ class SupabaseConfig {
           throw Exception('Timeout durante l\'inizializzazione di Supabase');
         },
       );
-      
+
       debugPrint('✅ Supabase initialized successfully!');
     } catch (e) {
       debugPrint('❌ Failed to initialize Supabase: $e');
@@ -40,7 +41,6 @@ class SupabaseConfig {
 
   static SupabaseClient get client => Supabase.instance.client;
   static GoTrueClient get auth => client.auth;
-  
 }
 
 /// Authentication service - Remove this class if your project doesn't need auth
@@ -65,27 +65,31 @@ class SupabaseAuth {
     try {
       debugPrint('🚀 Starting signup process for: $email');
       debugPrint('⏳ Calling Supabase auth.signUp...');
-      
+
       final redirectUrl = _getRedirectUrl();
       debugPrint('📍 Using redirect URL: $redirectUrl');
-      
-      final response = await SupabaseConfig.auth.signUp(
+
+      final response = await SupabaseConfig.auth
+          .signUp(
         email: email,
         password: password,
         data: userData,
         emailRedirectTo: redirectUrl,
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 15),
         onTimeout: () {
           debugPrint('❌ Signup timeout after 15 seconds');
-          throw Exception('La registrazione sta impiegando troppo tempo. Verifica le impostazioni del progetto Supabase o riprova più tardi.');
+          throw Exception(
+              'La registrazione sta impiegando troppo tempo. Verifica le impostazioni del progetto Supabase o riprova più tardi.');
         },
       );
 
       debugPrint('✅ Signup response received!');
       debugPrint('👤 User ID: ${response.user?.id}');
       debugPrint('🔐 Session exists: ${response.session != null}');
-      debugPrint('📧 Email confirmed: ${response.user?.emailConfirmedAt != null}');
+      debugPrint(
+          '📧 Email confirmed: ${response.user?.emailConfirmedAt != null}');
 
       // If user exists but no session, email confirmation is likely required
       if (response.user != null && response.session == null) {
@@ -98,17 +102,20 @@ class SupabaseAuth {
     } catch (e) {
       debugPrint('💥 Signup error: $e');
       debugPrint('🔍 Error type: ${e.runtimeType}');
-      
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Timeout')) {
-        throw Exception('La registrazione sta impiegando troppo tempo. Verifica che il progetto Supabase sia configurato correttamente o riprova più tardi.');
+
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Timeout')) {
+        throw Exception(
+            'La registrazione sta impiegando troppo tempo. Verifica che il progetto Supabase sia configurato correttamente o riprova più tardi.');
       }
-      
+
       // Handle specific Supabase errors
       if (e is AuthException) {
         throw Exception(_handleAuthError(e));
       }
-      
-      throw Exception('Errore durante la registrazione: ${_handleAuthError(e)}');
+
+      throw Exception(
+          'Errore durante la registrazione: ${_handleAuthError(e)}');
     }
   }
 
@@ -119,22 +126,27 @@ class SupabaseAuth {
   }) async {
     try {
       debugPrint('🔑 Starting login process for: $email');
-      final response = await SupabaseConfig.auth.signInWithPassword(
+      final response = await SupabaseConfig.auth
+          .signInWithPassword(
         email: email,
         password: password,
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 20),
         onTimeout: () {
           debugPrint('❌ Login timeout after 20 seconds');
-          throw Exception('Timeout durante il login. Controlla la connessione internet o riprova più tardi.');
+          throw Exception(
+              'Timeout durante il login. Controlla la connessione internet o riprova più tardi.');
         },
       );
       debugPrint('✅ Login completed successfully!');
       return response;
     } catch (e) {
       debugPrint('💥 Login error: $e');
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Timeout')) {
-        throw Exception('Timeout durante il login. Controlla la connessione internet o riprova più tardi.');
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Timeout')) {
+        throw Exception(
+            'Timeout durante il login. Controlla la connessione internet o riprova più tardi.');
       }
       throw _handleAuthError(e);
     }
@@ -163,7 +175,7 @@ class SupabaseAuth {
     try {
       final redirectUrl = _getRedirectUrl();
       debugPrint('📍 Password reset redirect URL: $redirectUrl');
-      
+
       await SupabaseConfig.auth.resetPasswordForEmail(
         email,
         redirectTo: redirectUrl,
@@ -177,16 +189,16 @@ class SupabaseAuth {
   static Future<void> signInWithGoogle() async {
     try {
       debugPrint('🔑 Starting Google authentication...');
-      
+
       final redirectUrl = _getRedirectUrl();
       debugPrint('📍 Google OAuth redirect URL: $redirectUrl');
-      
+
       // Use Supabase's OAuth flow
       await SupabaseConfig.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: redirectUrl,
       );
-      
+
       debugPrint('✅ Google OAuth flow initiated successfully!');
     } catch (e) {
       debugPrint('💥 Google authentication error: $e');
@@ -259,12 +271,13 @@ class SupabaseAuth {
     } else if (error is PostgrestException) {
       errorMessage = 'Errore del database: ${error.message}';
     } else {
-      errorMessage = 'Errore di connessione. Controlla la tua connessione internet';
+      errorMessage =
+          'Errore di connessione. Controlla la tua connessione internet';
     }
-    
+
     // Stampa l'errore per il debug
     debugPrint('Auth Error: $error');
-    
+
     return errorMessage;
   }
 }

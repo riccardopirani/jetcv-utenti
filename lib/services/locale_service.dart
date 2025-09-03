@@ -4,16 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocaleService extends ChangeNotifier {
   static const String _localeKey = 'selected_locale';
   static LocaleService? _instance;
-  
+
   LocaleService._();
-  
+
   static LocaleService get instance {
     _instance ??= LocaleService._();
     return _instance!;
   }
 
   Locale? _currentLocale;
-  
+
   Locale? get currentLocale => _currentLocale;
 
   // Lingue supportate con tutti i locale di flutter_localizations
@@ -204,17 +204,17 @@ class LocaleService extends ChangeNotifier {
     try {
       // Prima proviamo a caricare la lingua dal profilo utente (se autenticato)
       await _loadLocaleFromUserProfile();
-      
+
       // Se non c'è lingua nel profilo, carichiamo da SharedPreferences
       if (_currentLocale == null) {
         final prefs = await SharedPreferences.getInstance();
         final savedLocaleCode = prefs.getString(_localeKey);
-        
+
         if (savedLocaleCode != null) {
           _currentLocale = Locale(savedLocaleCode);
         }
       }
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading saved locale: $e');
@@ -231,7 +231,7 @@ class LocaleService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_localeKey, locale.languageCode);
-      
+
       _currentLocale = locale;
       notifyListeners();
     } catch (e) {
@@ -248,7 +248,8 @@ class LocaleService extends ChangeNotifier {
   }
 
   bool isFullyTranslated(Locale locale) {
-    return fullyTranslatedLocales.any((l) => l.languageCode == locale.languageCode);
+    return fullyTranslatedLocales
+        .any((l) => l.languageCode == locale.languageCode);
   }
 
   /// Carica la lingua dal profilo utente se disponibile
@@ -257,15 +258,16 @@ class LocaleService extends ChangeNotifier {
     try {
       if (userLanguageCode != null && userLanguageCode.isNotEmpty) {
         final newLocale = Locale(userLanguageCode);
-        
+
         // Verifica che sia una lingua supportata e tradotta
-        if (fullyTranslatedLocales.any((l) => l.languageCode == userLanguageCode)) {
+        if (fullyTranslatedLocales
+            .any((l) => l.languageCode == userLanguageCode)) {
           _currentLocale = newLocale;
-          
+
           // Salva anche in SharedPreferences per consistenza
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_localeKey, userLanguageCode);
-          
+
           notifyListeners();
           debugPrint('✅ Lingua caricata dal profilo utente: $userLanguageCode');
         }

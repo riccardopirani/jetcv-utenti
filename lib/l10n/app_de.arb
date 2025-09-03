@@ -159,5 +159,129 @@
   "blockchainCertified": "Blockchain Zertifiziert",
   "cvSerial": "Lebenslauf-Serie",
   "serialCode": "Seriencode",
-  "verifiedCV": "Verifizierter Lebenslauf"
+  "verifiedCV": "Verifizierter Lebenslauf",
+  "autodichiarazioni": "Selbsterklärungen",
+  "spokenLanguages": "Gesprochene Sprachen:",
+  "noLanguageSpecified": "Keine Sprache angegeben",
+  "certifications": "Zertifizierungen",
+  "mostRecent": "Neueste",
+  "verifiedCertifications": "verifizierte Zertifizierungen",
+  "loadingCertifications": "Lade Zertifizierungen...",
+  "errorLoadingCertifications": "Fehler beim Laden der Zertifizierungen",
+  "retry": "Erneut versuchen",
+  "noCertificationsFound": "Keine Zertifizierungen gefunden",
+  "yourVerifiedCertifications": "Ihre verifizierten Zertifizierungen erscheinen hier",
+  "certification": "Zertifizierung",
+  "certifyingBody": "Zertifizierungsstelle",
+  "status": "Status",
+  "serial": "Serie",
+  "verifiedAndAuthenticated": "Verifizierte und authentifizierte Zertifizierung",
+  "approved": "Genehmigt",
+  "verified": "Verifiziert",
+  "completed": "Abgeschlossen",
+  "pending": "Ausstehend",
+  "inProgress": "In Bearbeitung",
+  "rejected": "Abgelehnt",
+  "failed": "Fehlgeschlagen",
+  "nationality": "Nationalität",
+  "noNationalitySpecified": "Keine Nationalität angegeben",
+  "cvLinkCopied": "CV-Link in die Zwischenablage kopiert! Teilen Sie ihn jetzt.",
+  "loadingCertifications": "Lade Zertifizierungen...",
+  "years": "Jahre",
+  "language": "Sprache",
+  "errorChangingLanguage": "Fehler beim Ändern der Sprache: {error}",
+  "@errorChangingLanguage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectManagement": "PROJEKTMANAGEMENT",
+  "flutterDevelopment": "FLUTTER\nENTWICKLUNG",
+  "certified": "ZERTIFIZIERT",
+  "home": "Startseite",
+  "myProfile": "Mein Profil",
+  "myCV": "Mein Lebenslauf",
+  "myCertifications": "Meine Zertifizierungen",
+  "otp": "OTP",
+  "myWallets": "Meine Wallets",
+  "deleteAccount": "Konto löschen",
+  "logout": "Abmelden",
+  "otpVerification": "OTP-Verifizierung",
+  "otpDescription": "Geben Sie den 6-stelligen Code ein, der an Ihre registrierte E-Mail gesendet wurde",
+  "enterOTP": "OTP-Code eingeben",
+  "verifyOTP": "OTP verifizieren",
+  "resendOTP": "OTP erneut senden",
+  "otpVerified": "OTP erfolgreich verifiziert!",
+  "invalidOTP": "Ungültiger OTP-Code. Bitte versuchen Sie es erneut.",
+  "otpVerificationError": "Fehler bei der OTP-Verifizierung. Bitte versuchen Sie es erneut.",
+  "otpResent": "Der OTP-Code wurde an Ihre E-Mail erneut gesendet",
+  "otpResendError": "Fehler beim erneuten Senden des OTP. Bitte versuchen Sie es erneut.",
+  "securityInfo": "Sicherheitsinformationen",
+  "otpSecurityNote": "Zu Ihrer Sicherheit läuft dieser OTP-Code in 10 Minuten ab. Teilen Sie diesen Code mit niemandem.",
+  "myOtps": "Meine OTPs",
+  "permanentOtpCodes": "Permanente OTP-Codes",
+  "manageSecureAccessCodes": "Verwalten Sie Ihre sicheren Zugangscodes",
+  "activeOtps": "Aktive OTPs",
+  "noOtpGenerated": "Kein OTP Generiert",
+  "createFirstOtpDescription": "Erstellen Sie Ihren ersten permanenten OTP-Code, um sicher auf die Plattform zuzugreifen.",
+  "generateFirstOtp": "Ersten OTP Generieren",
+  "newOtp": "Neuer OTP",
+  "addOptionalTagDescription": "Fügen Sie ein optionales Tag hinzu, um diesen OTP zu identifizieren:",
+  "tagOptional": "Tag (optional)",
+  "generateOtp": "OTP Generieren",
+  "createdNow": "Jetzt erstellt",
+  "createdMinutesAgo": "Vor {minutes}min erstellt",
+  "@createdMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "createdHoursAgo": "Vor {hours}h erstellt",
+  "@createdHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "createdDaysAgo": "Vor {days} Tagen erstellt",
+  "@createdDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "copy": "Kopieren",
+  "qrCode": "QR-Code",
+  "deleteOtp": "OTP Löschen",
+  "deleteOtpConfirmation": "Sind Sie sicher, dass Sie diesen OTP löschen möchten?",
+  "delete": "Löschen",
+  "otpCodeCopied": "OTP-Code in die Zwischenablage kopiert!",
+  "qrCodeOtp": "QR-Code OTP",
+  "qrCodeFor": "QR-Code für",
+  "close": "Schließen",
+  "errorDuringLogout": "Fehler beim Abmelden: {error}",
+  "@errorDuringLogout": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeletionNotImplemented": "Kontolöschung noch nicht implementiert",
+  "userNotLoaded": "Benutzer nicht geladen",
+  "trainingCourse": "Schulungskurs",
+  "otpNumber": "OTP #{number}",
+  "@otpNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
 }

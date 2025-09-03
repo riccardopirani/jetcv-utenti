@@ -1057,6 +1057,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified CV'**
   String get verifiedCV;
+
+  /// No description provided for @autodichiarazioni.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-Declarations'**
+  String get autodichiarazioni;
+
+  /// No description provided for @spokenLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken languages:'**
+  String get spokenLanguages;
+
+  /// No description provided for @noLanguageSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'No language specified'**
+  String get noLanguageSpecified;
+
+  /// No description provided for @certifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifications'**
+  String get certifications;
+
+  /// No description provided for @mostRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Recent'**
+  String get mostRecent;
+
+  /// No description provided for @verifiedCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'verified certifications'**
+  String get verifiedCertifications;
+
+  /// No description provided for @loadingCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading certifications...'**
+  String get loadingCertifications;
+
+  /// No description provided for @errorLoadingCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading certifications'**
+  String get errorLoadingCertifications;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noCertificationsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No certifications found'**
+  String get noCertificationsFound;
+
+  /// No description provided for @yourVerifiedCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verified certifications will appear here'**
+  String get yourVerifiedCertifications;
+
+  /// No description provided for @certification.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification'**
+  String get certification;
+
+  /// No description provided for @certifyingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifying Body'**
+  String get certifyingBody;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @serial.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial'**
+  String get serial;
+
+  /// No description provided for @verifiedAndAuthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified and authenticated certification'**
+  String get verifiedAndAuthenticated;
+
+  /// No description provided for @approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get inProgress;
+
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get failed;
+
+  /// No description provided for @nationality.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality'**
+  String get nationality;
+
+  /// No description provided for @noNationalitySpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'No nationality specified'**
+  String get noNationalitySpecified;
+
+  /// No description provided for @cvLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'CV link copied to clipboard! Share it now.'**
+  String get cvLinkCopied;
+
+  /// No description provided for @errorChangingLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error changing language: {error}'**
+  String errorChangingLanguage(String error);
+
+  /// No description provided for @projectManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'PROJECT\nMANAGEMENT'**
+  String get projectManagement;
+
+  /// No description provided for @flutterDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'FLUTTER\nDEVELOPMENT'**
+  String get flutterDevelopment;
+
+  /// No description provided for @certified.
+  ///
+  /// In en, this message translates to:
+  /// **'CERTIFIED'**
+  String get certified;
+
+  /// No description provided for @myProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get myProfile;
+
+  /// No description provided for @myCV.
+  ///
+  /// In en, this message translates to:
+  /// **'My CV'**
+  String get myCV;
+
+  /// No description provided for @myCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'My Certifications'**
+  String get myCertifications;
+
+  /// No description provided for @otp.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP'**
+  String get otp;
+
+  /// No description provided for @myWallets.
+  ///
+  /// In en, this message translates to:
+  /// **'My Wallets'**
+  String get myWallets;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @otpVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Verification'**
+  String get otpVerification;
+
+  /// No description provided for @otpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to your registered email'**
+  String get otpDescription;
+
+  /// No description provided for @enterOTP.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter OTP Code'**
+  String get enterOTP;
+
+  /// No description provided for @verifyOTP.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify OTP'**
+  String get verifyOTP;
+
+  /// No description provided for @resendOTP.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend OTP'**
+  String get resendOTP;
+
+  /// No description provided for @otpVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP verified successfully!'**
+  String get otpVerified;
+
+  /// No description provided for @invalidOTP.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid OTP code. Please try again.'**
+  String get invalidOTP;
+
+  /// No description provided for @otpVerificationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error verifying OTP. Please try again.'**
+  String get otpVerificationError;
+
+  /// No description provided for @otpResent.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP code has been resent to your email'**
+  String get otpResent;
+
+  /// No description provided for @otpResendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error resending OTP. Please try again.'**
+  String get otpResendError;
+
+  /// No description provided for @securityInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Information'**
+  String get securityInfo;
+
+  /// No description provided for @otpSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, this OTP code will expire in 10 minutes. Do not share this code with anyone.'**
+  String get otpSecurityNote;
+
+  /// No description provided for @myOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'My OTPs'**
+  String get myOtps;
+
+  /// No description provided for @permanentOtpCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent OTP Codes'**
+  String get permanentOtpCodes;
+
+  /// No description provided for @manageSecureAccessCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your secure access codes'**
+  String get manageSecureAccessCodes;
+
+  /// No description provided for @activeOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'Active OTPs'**
+  String get activeOtps;
+
+  /// No description provided for @noOtpGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'No OTP Generated'**
+  String get noOtpGenerated;
+
+  /// No description provided for @createFirstOtpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first permanent OTP code to securely access the platform.'**
+  String get createFirstOtpDescription;
+
+  /// No description provided for @generateFirstOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate First OTP'**
+  String get generateFirstOtp;
+
+  /// No description provided for @newOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'New OTP'**
+  String get newOtp;
+
+  /// No description provided for @addOptionalTagDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an optional tag to identify this OTP:'**
+  String get addOptionalTagDescription;
+
+  /// No description provided for @tagOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag (optional)'**
+  String get tagOptional;
+
+  /// No description provided for @generateOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate OTP'**
+  String get generateOtp;
+
+  /// No description provided for @createdNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Created now'**
+  String get createdNow;
+
+  /// No description provided for @createdMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {minutes}min ago'**
+  String createdMinutesAgo(int minutes);
+
+  /// No description provided for @createdHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {hours}h ago'**
+  String createdHoursAgo(int hours);
+
+  /// No description provided for @createdDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {days} days ago'**
+  String createdDaysAgo(int days);
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @qrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code'**
+  String get qrCode;
+
+  /// No description provided for @deleteOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete OTP'**
+  String get deleteOtp;
+
+  /// No description provided for @deleteOtpConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this OTP?'**
+  String get deleteOtpConfirmation;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @otpCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP code copied to clipboard!'**
+  String get otpCodeCopied;
+
+  /// No description provided for @qrCodeOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code OTP'**
+  String get qrCodeOtp;
+
+  /// No description provided for @qrCodeFor.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code for'**
+  String get qrCodeFor;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @errorDuringLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during logout: {error}'**
+  String errorDuringLogout(String error);
+
+  /// No description provided for @accountDeletionNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion not implemented yet'**
+  String get accountDeletionNotImplemented;
+
+  /// No description provided for @userNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'User not loaded'**
+  String get userNotLoaded;
+
+  /// No description provided for @trainingCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Course'**
+  String get trainingCourse;
+
+  /// No description provided for @otpNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP #{number}'**
+  String otpNumber(int number);
 }
 
 class _AppLocalizationsDelegate
