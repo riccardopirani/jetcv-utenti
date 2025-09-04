@@ -138,33 +138,6 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
-  Future<void> _signUpWithGoogle() async {
-    setState(() {
-      _isGoogleLoading = true;
-    });
-
-    try {
-      await SupabaseAuth.signInWithGoogle();
-      // OAuth flow initiated, browser will handle authentication
-      // Navigation will be handled when user returns to app
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                AppLocalizations.of(context)!.googleAuthError(e.toString())),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGoogleLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
