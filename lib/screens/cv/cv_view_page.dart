@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/models/cv_model.dart';
 import 'package:jetcv__utenti/models/country_model.dart';
@@ -11,6 +12,8 @@ import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
+import 'package:jetcv__utenti/services/image_cache_service.dart';
+import 'package:jetcv__utenti/services/base64_image_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
@@ -49,6 +52,8 @@ class _CVViewPageState extends State<CVViewPage> {
 
   // Legal entities cache
   Map<String, String> _legalEntityNames = {};
+  // Legal entities logos cache
+  Map<String, String?> _legalEntityLogos = {};
 
   @override
   void initState() {
@@ -155,6 +160,9 @@ class _CVViewPageState extends State<CVViewPage> {
         });
         debugPrint(
             '✅ Certifications loaded successfully: ${_certifications.length} items (sorted by date)');
+
+        // Precarica i logo delle legal entities
+        _preloadLegalEntityLogos();
       } else {
         setState(() {
           _certificationsError = response.error ??
@@ -1554,7 +1562,12 @@ class _CVViewPageState extends State<CVViewPage> {
 
                     // Content with aligned dates and cards
                     Column(
-                      children: _certifications.asMap().entries.map((entry) {
+                      children: (_isMostRecentFirst
+                              ? _certifications
+                              : _certifications.reversed.toList())
+                          .asMap()
+                          .entries
+                          .map((entry) {
                         final index = entry.key;
                         final cert = entry.value;
                         final isLast = index == _certifications.length - 1;
@@ -1799,22 +1812,8 @@ class _CVViewPageState extends State<CVViewPage> {
                         ],
                       )
                     : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Expanded(
-                            child: Text(
-                              cert.certification?.category?.name ??
-                                  AppLocalizations.of(context)!.certification,
-                              style: TextStyle(
-                                fontSize: isMobile
-                                    ? 11
-                                    : isTablet
-                                        ? 12
-                                        : 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade800,
-                              ),
-                            ),
-                          ),
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: isMobile
@@ -1981,22 +1980,15 @@ class _CVViewPageState extends State<CVViewPage> {
                               ? 7
                               : 8),
 
-                  // Legal Entity name
+                  // Legal Entity name with logo
                   FutureBuilder<String>(
                     future: _getOrganizationName(cert),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                         return Row(
                           children: [
-                            Icon(
-                              Icons.corporate_fare,
-                              size: isMobile
-                                  ? 14
-                                  : isTablet
-                                      ? 15
-                                      : 16,
-                              color: Colors.grey.shade600,
-                            ),
+                            // Legal Entity logo from database
+                            _buildLegalEntityLogo(cert, isMobile, isTablet),
                             SizedBox(
                                 width: isMobile
                                     ? 6
@@ -2704,7 +2696,7 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  /// Costruisce la sezione del link NFT
+  /// Costruisce la sezione del Link Blockchain
   Widget _buildNftLinkSection() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -2743,7 +2735,7 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  /// Apre il link NFT in una nuova finestra
+  /// Apre il Link Blockchain in una nuova finestra
   Future<void> _openNftLink() async {
     if (_cv?.nftMintTransactionUrl != null &&
         _cv!.nftMintTransactionUrl!.isNotEmpty) {
@@ -3015,6 +3007,304 @@ class _CVViewPageState extends State<CVViewPage> {
     } catch (e) {
       debugPrint('❌ Error getting organization name: $e');
       return 'JetCV';
+    }
+  }
+
+  /// Precarica i logo delle legal entities per tutte le certificazioni
+  Future<void> _preloadLegalEntityLogos() async {
+    debugPrint('🔄 Preloading legal entity logos...');
+
+    // Svuota la cache per forzare il ricaricamento
+    _legalEntityLogos.clear();
+    debugPrint('🗑️ Cleared legal entity logos cache');
+
+    // Raccoglie tutti gli ID delle legal entities uniche
+    final Set<String> legalEntityIds = _certifications
+        .map((cert) => cert.certification?.idLegalEntity)
+        .where((id) => id != null)
+        .cast<String>()
+        .toSet();
+
+    debugPrint('🔍 Found ${legalEntityIds.length} unique legal entity IDs');
+
+    // Precarica i logo per ogni legal entity
+    for (final legalEntityId in legalEntityIds) {
+      try {
+        debugPrint('🔄 Preloading logo for: $legalEntityId');
+        final legalEntity =
+            await LegalEntityService.getLegalEntityById(legalEntityId);
+
+        String? logoUrl;
+        if (legalEntity != null &&
+            legalEntity.logoPicture != null &&
+            legalEntity.logoPicture!.isNotEmpty) {
+          logoUrl = legalEntity.logoPicture;
+          debugPrint('✅ Preloaded logo from database: $logoUrl');
+          debugPrint(
+              '🔍 Legal entity data: ${legalEntity.legalName} - ${legalEntity.logoPicture}');
+        } else {
+          debugPrint('❌ No logo found for: $legalEntityId');
+          logoUrl = null;
+        }
+
+        _legalEntityLogos[legalEntityId] = logoUrl;
+      } catch (e) {
+        debugPrint('❌ Error preloading logo for $legalEntityId: $e');
+        _legalEntityLogos[legalEntityId] = null;
+      }
+    }
+
+    debugPrint('✅ Legal entity logos preloading completed');
+  }
+
+  /// Costruisce il widget del logo della legal entity
+  Widget _buildLegalEntityLogo(
+      UserCertificationDetail cert, bool isMobile, bool isTablet) {
+    final legalEntityId = cert.certification?.idLegalEntity;
+
+    if (legalEntityId == null) {
+      debugPrint('❌ No legal entity ID for certification');
+      return Icon(
+        Icons.corporate_fare,
+        size: isMobile
+            ? 14
+            : isTablet
+                ? 15
+                : 16,
+        color: Colors.grey.shade600,
+      );
+    }
+
+    // Se abbiamo il logo in cache, mostralo immediatamente
+    if (_legalEntityLogos.containsKey(legalEntityId) &&
+        _legalEntityLogos[legalEntityId] != null) {
+      final logoUrl = _legalEntityLogos[legalEntityId]!;
+      debugPrint('✅ Displaying cached logo: $logoUrl');
+
+      return Container(
+        width: isMobile
+            ? 16
+            : isTablet
+                ? 18
+                : 20,
+        height: isMobile
+            ? 16
+            : isTablet
+                ? 18
+                : 20,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 0.5,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Image.network(
+            logoUrl,
+            fit: BoxFit.cover,
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: isMobile
+                    ? 16
+                    : isTablet
+                        ? 18
+                        : 20,
+                height: isMobile
+                    ? 16
+                    : isTablet
+                        ? 18
+                        : 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('❌ Error loading logo image: $error');
+              debugPrint('❌ Logo URL: $logoUrl');
+              debugPrint('❌ Stack trace: $stackTrace');
+              return Icon(
+                Icons.corporate_fare,
+                size: isMobile
+                    ? 12
+                    : isTablet
+                        ? 14
+                        : 16,
+                color: Colors.grey.shade600,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Se non abbiamo il logo in cache, caricalo
+    return FutureBuilder<String?>(
+      future: _getLegalEntityLogo(cert),
+      builder: (context, logoSnapshot) {
+        debugPrint(
+            '🔍 Logo FutureBuilder - hasData: ${logoSnapshot.hasData}, data: ${logoSnapshot.data}');
+
+        if (logoSnapshot.connectionState == ConnectionState.waiting) {
+          debugPrint('⏳ Logo FutureBuilder - Still loading...');
+          return SizedBox(
+            width: isMobile
+                ? 16
+                : isTablet
+                    ? 18
+                    : 20,
+            height: isMobile
+                ? 16
+                : isTablet
+                    ? 18
+                    : 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+            ),
+          );
+        }
+
+        if (logoSnapshot.hasData &&
+            logoSnapshot.data != null &&
+            logoSnapshot.data!.isNotEmpty) {
+          debugPrint(
+              '✅ Logo FutureBuilder - Displaying logo: ${logoSnapshot.data}');
+
+          return Container(
+            width: isMobile
+                ? 16
+                : isTablet
+                    ? 18
+                    : 20,
+            height: isMobile
+                ? 16
+                : isTablet
+                    ? 18
+                    : 20,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 0.5,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Image.network(
+                logoSnapshot.data!,
+                fit: BoxFit.cover,
+                headers: {
+                  'User-Agent':
+                      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    width: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
+                    height: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('❌ Error loading logo image: $error');
+                  debugPrint('❌ Logo URL: ${logoSnapshot.data}');
+                  debugPrint('❌ Stack trace: $stackTrace');
+                  return Icon(
+                    Icons.corporate_fare,
+                    size: isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16,
+                    color: Colors.grey.shade600,
+                  );
+                },
+              ),
+            ),
+          );
+        }
+
+        debugPrint('❌ Logo FutureBuilder - Using fallback icon');
+        return Icon(
+          Icons.corporate_fare,
+          size: isMobile
+              ? 14
+              : isTablet
+                  ? 15
+                  : 16,
+          color: Colors.grey.shade600,
+        );
+      },
+    );
+  }
+
+  /// Ottiene il logo della legal entity per una certificazione
+  Future<String?> _getLegalEntityLogo(UserCertificationDetail cert) async {
+    final legalEntityId = cert.certification?.idLegalEntity;
+
+    if (legalEntityId == null) {
+      debugPrint('❌ No legal entity ID for certification');
+      return null;
+    }
+
+    debugPrint('🔍 Getting logo for legal entity: $legalEntityId');
+
+    // Controlla se abbiamo già il logo in cache
+    if (_legalEntityLogos.containsKey(legalEntityId)) {
+      debugPrint('✅ Logo found in cache: ${_legalEntityLogos[legalEntityId]}');
+      return _legalEntityLogos[legalEntityId];
+    }
+
+    try {
+      debugPrint('🔄 Loading logo from database for: $legalEntityId');
+      // Ottiene l'entità legale dal servizio
+      final legalEntity =
+          await LegalEntityService.getLegalEntityById(legalEntityId);
+
+      String? logoUrl;
+      if (legalEntity != null &&
+          legalEntity.logoPicture != null &&
+          legalEntity.logoPicture!.isNotEmpty) {
+        logoUrl = legalEntity.logoPicture;
+        debugPrint('✅ Legal Entity logo found from database: $logoUrl');
+        debugPrint(
+            '🔍 Legal entity data: ${legalEntity.legalName} - ${legalEntity.logoPicture}');
+      } else {
+        debugPrint('❌ No logo found for legal entity: $legalEntityId');
+        logoUrl = null;
+      }
+
+      // Memorizza in cache
+      _legalEntityLogos[legalEntityId] = logoUrl;
+
+      return logoUrl;
+    } catch (e) {
+      debugPrint('❌ Error getting legal entity logo: $e');
+      // Memorizza null in cache per evitare chiamate ripetute
+      _legalEntityLogos[legalEntityId] = null;
+      return null;
     }
   }
 

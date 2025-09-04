@@ -954,7 +954,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addCertificationsToLinkedIn => 'Add Certification to LinkedIn';
 
   @override
-  String get nftLink => 'Link NFT';
+  String get nftLink => 'Link Blockchain';
 
   @override
   String get errorOpeningNftLink => 'Error opening NFT link';

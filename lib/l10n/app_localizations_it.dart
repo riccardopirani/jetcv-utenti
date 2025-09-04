@@ -947,10 +947,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Aggiungi Certificazione a LinkedIn';
 
   @override
-  String get nftLink => 'Link NFT';
+  String get nftLink => 'Link Blockchain';
 
   @override
-  String get errorOpeningNftLink => 'Errore nell\'aprire il link NFT';
+  String get errorOpeningNftLink => 'Errore nell\'aprire il Link Blockchain';
 
   @override
   String get linkedInIntegration => 'Integrazione Certificazioni LinkedIn';
