@@ -438,24 +438,6 @@ class OpenBadgeService {
               Text('Issuer: ${badge.issuer.name}'),
               const SizedBox(height: 16),
               if (kIsWeb) ...[
-                const Text('Badge JSON-LD Content:'),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: SelectableText(
-                    badge.toJsonLdString(),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 Text(
                   AppLocalizations.of(context)!.saveImageAs,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -486,7 +468,7 @@ class OpenBadgeService {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(kIsWeb
-                      ? 'Open Badge created! Copy the JSON-LD content to save your badge.'
+                      ? 'Open Badge created! Download the image to save your badge.'
                       : 'Badge files saved successfully!'),
                   backgroundColor: Colors.green,
                 ),

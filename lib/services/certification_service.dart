@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:functions_client/functions_client.dart';
@@ -30,6 +31,29 @@ DateTime parseDateTime(dynamic dateValue) {
 
 class CertificationService {
   static final SupabaseClient _client = SupabaseConfig.client;
+
+  /// Recupera le informazioni del certificatore dal campo nomeCertificatore
+  /// che viene già calcolato dall'edge function list-user-certifications-details
+  static Future<CertifierInfo?> getCertifierInfo(String certifierId) async {
+    try {
+      debugPrint('=== FETCHING CERTIFIER INFO ===');
+      debugPrint('Certifier ID: $certifierId');
+
+      // L'edge function list-user-certifications-details già include nomeCertificatore
+      // Quindi non abbiamo bisogno di fare query separate, il nome viene già fornito
+      // nel campo certification.nomeCertificatore
+
+      debugPrint(
+          '✅ Certifier info is already available in certification.nomeCertificatore');
+      debugPrint(
+          'This method is now deprecated - use certification.nomeCertificatore directly');
+
+      return null; // Non più necessario fare query separate
+    } catch (e) {
+      debugPrint('Error in getCertifierInfo: $e');
+      return null;
+    }
+  }
 
   /// Calls the list-user-certifications-details edge function
   /// Returns all certifications for the authenticated user with expanded details
@@ -170,6 +194,65 @@ class CertificationUser {
   }
 }
 
+class CertifierInfo {
+  final String idCertifier;
+  final String? idUser;
+  final String? firstName;
+  final String? lastName;
+  final String? fullName;
+
+  CertifierInfo({
+    required this.idCertifier,
+    this.idUser,
+    this.firstName,
+    this.lastName,
+    this.fullName,
+  });
+
+  factory CertifierInfo.fromJson(Map<String, dynamic> json) {
+    return CertifierInfo(
+      idCertifier: json['id_certifier']?.toString() ?? '',
+      idUser: json['id_user']?.toString(),
+      firstName: json['first_name']?.toString(),
+      lastName: json['last_name']?.toString(),
+      fullName: json['full_name']?.toString(),
+    );
+  }
+
+  String get displayName {
+    // Prima prova fullName se è valido
+    if (fullName != null && fullName!.trim().isNotEmpty) {
+      return fullName!.trim();
+    }
+
+    // Poi prova firstName + lastName
+    final first = firstName?.trim();
+    final last = lastName?.trim();
+
+    if (first != null && first.isNotEmpty && last != null && last.isNotEmpty) {
+      return '$first $last';
+    }
+
+    // Se solo firstName è disponibile
+    if (first != null && first.isNotEmpty) {
+      return first;
+    }
+
+    // Se solo lastName è disponibile
+    if (last != null && last.isNotEmpty) {
+      return last;
+    }
+
+    // Se abbiamo almeno un nome parziale
+    if ((first != null && first.isNotEmpty) ||
+        (last != null && last.isNotEmpty)) {
+      return '${first ?? ''}${last ?? ''}'.trim();
+    }
+
+    return 'Unknown Certifier';
+  }
+}
+
 class Certification {
   final String idCertification;
   final String? idCertifier;
@@ -186,6 +269,8 @@ class Certification {
   final String? idCertificationCategory;
   final CertificationCategory? category;
   final List<CategoryInformation> categoryInformation;
+  final CertifierInfo? certifier;
+  final String? nomeCertificatore; // Campo aggiunto dall'edge function
 
   Certification({
     required this.idCertification,
@@ -203,6 +288,8 @@ class Certification {
     this.idCertificationCategory,
     this.category,
     this.categoryInformation = const [],
+    this.certifier,
+    this.nomeCertificatore,
   });
 
   factory Certification.fromJson(Map<String, dynamic> json) {
@@ -232,6 +319,10 @@ class Certification {
               ?.map((item) => CategoryInformation.fromJson(item))
               .toList() ??
           [],
+      certifier: json['certifier'] != null
+          ? CertifierInfo.fromJson(json['certifier'])
+          : null,
+      nomeCertificatore: json['nomeCertificatore']?.toString(),
     );
   }
 }
@@ -275,10 +366,14 @@ class CertificationCategory {
 class CategoryInformation {
   final CertificationInformation? info;
   final List<CertificationInformationValue> values;
+  final String? value; // Direct value field
+  final String? label; // Direct label field
 
   CategoryInformation({
     this.info,
     this.values = const [],
+    this.value,
+    this.label,
   });
 
   factory CategoryInformation.fromJson(Map<String, dynamic> json) {
@@ -290,6 +385,8 @@ class CategoryInformation {
               ?.map((item) => CertificationInformationValue.fromJson(item))
               .toList() ??
           [],
+      value: json['value']?.toString(),
+      label: json['label']?.toString(),
     );
   }
 }

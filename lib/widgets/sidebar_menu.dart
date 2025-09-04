@@ -5,7 +5,7 @@ import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 import 'package:jetcv__utenti/screens/home/home_page.dart';
-import 'package:jetcv__utenti/screens/otp/otp_page.dart';
+import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 
 class SidebarMenu extends StatefulWidget {
@@ -119,10 +119,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
         );
         break;
       case '/otp':
-        // Navigate to OTP page
+        // Navigate to OTP list page
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const OTPPage(),
+            builder: (context) => const OtpListPage(),
           ),
         );
         break;

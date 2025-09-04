@@ -1953,18 +1953,38 @@ class _CVViewPageState extends State<CVViewPage> {
                                   ? 7
                                   : 8),
                       Expanded(
-                        child: Text(
-                          '${AppLocalizations.of(context)!.certifier}: ${cert.certification?.category?.name ?? AppLocalizations.of(context)!.certifyingBody}',
-                          style: TextStyle(
-                            fontSize: isMobile
-                                ? 8
-                                : isTablet
-                                    ? 9
-                                    : 10,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        child: FutureBuilder<String>(
+                          future: _getCertifierDisplayName(cert),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Text(
+                                '${AppLocalizations.of(context)!.certifier}: ${snapshot.data}',
+                                style: TextStyle(
+                                  fontSize: isMobile
+                                      ? 8
+                                      : isTablet
+                                          ? 9
+                                          : 10,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            }
+                            return Text(
+                              '${AppLocalizations.of(context)!.certifier}: ${AppLocalizations.of(context)!.certifyingBody}',
+                              style: TextStyle(
+                                fontSize: isMobile
+                                    ? 8
+                                    : isTablet
+                                        ? 9
+                                        : 10,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -1975,6 +1995,57 @@ class _CVViewPageState extends State<CVViewPage> {
                           : isTablet
                               ? 7
                               : 8),
+
+                  // Legal Entity name
+                  FutureBuilder<String>(
+                    future: _getOrganizationName(cert),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                        return Row(
+                          children: [
+                            Icon(
+                              Icons.corporate_fare,
+                              size: isMobile
+                                  ? 14
+                                  : isTablet
+                                      ? 15
+                                      : 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            SizedBox(
+                                width: isMobile
+                                    ? 6
+                                    : isTablet
+                                        ? 7
+                                        : 8),
+                            Expanded(
+                              child: Text(
+                                'Legal Entity: ${snapshot.data}',
+                                style: TextStyle(
+                                  fontSize: isMobile
+                                      ? 8
+                                      : isTablet
+                                          ? 9
+                                          : 10,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  SizedBox(
+                      height: isMobile
+                          ? 6
+                          : isTablet
+                              ? 7
+                              : 8),
+
                   // Serial number
                   Row(
                     children: [
@@ -2021,21 +2092,32 @@ class _CVViewPageState extends State<CVViewPage> {
                 // Description from category information
                 if (cert.certification?.categoryInformation.isNotEmpty ==
                     true) ...[
-                  Text(
-                    cert.certification!.categoryInformation
-                        .map((info) => info.info?.name ?? '')
-                        .where((name) => name.isNotEmpty)
-                        .join(', '),
-                    style: TextStyle(
-                      fontSize: isMobile
-                          ? 9
-                          : isTablet
-                              ? 10
-                              : 11,
-                      color: Colors.grey.shade700,
-                      height: 1.4,
-                      fontWeight: FontWeight.w400,
-                    ),
+                  // Mostra tutte le informazioni della categoria
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: cert.certification!.categoryInformation
+                        .where(
+                            (info) => info.label != null && info.value != null)
+                        .map((info) {
+                      debugPrint(
+                          'Category info - label: ${info.label}, value: ${info.value}');
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Text(
+                          '${info.label}: ${info.value}',
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 9
+                                : isTablet
+                                    ? 10
+                                    : 11,
+                            color: Colors.grey.shade700,
+                            height: 1.4,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ] else ...[
                   Text(
@@ -2102,19 +2184,24 @@ class _CVViewPageState extends State<CVViewPage> {
       margin: EdgeInsets.only(top: spacing),
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: OpenBadgeButton(
-                  certification: cert,
-                  isCompact: false,
-                ),
-              ),
-            ],
+          // LinkedIn Integration Button - Centrato con 30% di ampiezza
+          Center(
+            child: SizedBox(
+              width: screenWidth * 0.3, // 30% della larghezza dello schermo
+              child: _buildLinkedInButton(cert),
+            ),
           ),
           const SizedBox(height: 8),
-          // LinkedIn Integration Button
-          _buildLinkedInButton(cert),
+          // Open Badge Button - Centrato con 30% di ampiezza
+          Center(
+            child: SizedBox(
+              width: screenWidth * 0.3, // 30% della larghezza dello schermo
+              child: OpenBadgeButton(
+                certification: cert,
+                isCompact: false,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -2887,7 +2974,37 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  /// Ottiene il nome dell'organizzazione per una certificazione
+  /// Ottiene il nome del certificatore per una certificazione
+  /// Ora utilizza il campo nomeCertificatore fornito dall'edge function
+  Future<String> _getCertifierDisplayName(UserCertificationDetail cert) async {
+    // Debug: stampa le informazioni disponibili
+    debugPrint('=== CERTIFIER DEBUG ===');
+    debugPrint('Certification ID: ${cert.certification?.idCertification}');
+    debugPrint('Certifier ID: ${cert.certification?.idCertifier}');
+    debugPrint('Nome Certificatore: ${cert.certification?.nomeCertificatore}');
+    debugPrint('Category name: ${cert.certification?.category?.name}');
+
+    // Prima prova il campo nomeCertificatore fornito dall'edge function
+    if (cert.certification?.nomeCertificatore != null &&
+        cert.certification!.nomeCertificatore!.isNotEmpty) {
+      debugPrint(
+          '✅ Using nomeCertificatore from edge function: ${cert.certification!.nomeCertificatore}');
+      return cert.certification!.nomeCertificatore!;
+    }
+
+    // Fallback al nome della categoria se disponibile
+    if (cert.certification?.category?.name != null &&
+        cert.certification!.category!.name.isNotEmpty) {
+      debugPrint(
+          'Using category name as fallback: ${cert.certification!.category!.name}');
+      return cert.certification!.category!.name;
+    }
+
+    // Ultimo fallback
+    debugPrint('Using default certifying body');
+    return AppLocalizations.of(context)!.certifyingBody;
+  }
+
   Future<String> _getOrganizationName(UserCertificationDetail cert) async {
     final legalEntityId = cert.certification?.idLegalEntity;
 
@@ -2959,23 +3076,20 @@ class _CVViewPageState extends State<CVViewPage> {
 
   /// Costruisce il pulsante LinkedIn per una certificazione specifica
   Widget _buildLinkedInButton(UserCertificationDetail cert) {
-    return Container(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => _openLinkedInForCertification(cert),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF0077B5), // LinkedIn blue
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+    return ElevatedButton.icon(
+      onPressed: () => _openLinkedInForCertification(cert),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF0077B5), // LinkedIn blue
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
-        icon: const Icon(Icons.link, size: 16),
-        label: Text(
-          AppLocalizations.of(context)!.addToLinkedIn,
-          style: TextStyle(fontSize: 12),
-        ),
+      ),
+      icon: const Icon(Icons.link, size: 20),
+      label: Text(
+        AppLocalizations.of(context)!.addToLinkedIn,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }

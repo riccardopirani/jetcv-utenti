@@ -65,8 +65,8 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
       ),
       icon: _isLoading
           ? const SizedBox(
-              width: 16,
-              height: 16,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -76,8 +76,8 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
       label: Text(
         AppLocalizations.of(context)!.createOpenBadge,
         style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

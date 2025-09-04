@@ -1,35 +1,70 @@
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/models/legal_entity_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 /// Servizio per la gestione delle entità legali
 class LegalEntityService {
   static final _client = SupabaseConfig.client;
 
-  /// Ottiene le informazioni di un'entità legale tramite ID
+  /// Ottiene le informazioni di un'entità legale tramite ID usando l'edge function
   static Future<LegalEntityModel?> getLegalEntityById(
       String idLegalEntity) async {
     try {
       debugPrint(
-          '🏢 LegalEntityService: Fetching legal entity: $idLegalEntity');
+          '🏢 LegalEntityService: Fetching legal entity via edge function: $idLegalEntity');
 
-      final response = await _client
-          .from('legal_entity')
-          .select()
-          .eq('id_legal_entity', idLegalEntity)
-          .maybeSingle();
-
-      if (response == null) {
-        debugPrint(
-            '❌ LegalEntityService: Legal entity not found: $idLegalEntity');
+      // Ottieni il token di accesso dall'utente autenticato
+      final session = _client.auth.currentSession;
+      if (session?.accessToken == null) {
+        debugPrint('❌ LegalEntityService: No valid session found');
         return null;
       }
 
-      final legalEntity = LegalEntityModel.fromJson(response);
-      debugPrint('✅ LegalEntityService: Legal entity fetched successfully');
-      return legalEntity;
+      // Costruisci l'URL dell'edge function con query parameters
+      // Usa l'URL base da SupabaseConfig
+      final supabaseUrl = 'https://skqsuxmdfqxbkhmselaz.supabase.co';
+      final functionUrl =
+          '$supabaseUrl/functions/v1/get-legal-entity-by-id?id_legal_entity=$idLegalEntity';
+
+      debugPrint('🔍 LegalEntityService: Calling edge function: $functionUrl');
+
+      // Fai una chiamata HTTP GET diretta
+      final response = await http.get(
+        Uri.parse(functionUrl),
+        headers: {
+          'Authorization': 'Bearer ${session!.accessToken}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      debugPrint(
+          '🔍 LegalEntityService: HTTP response status: ${response.statusCode}');
+      debugPrint('🔍 LegalEntityService: HTTP response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body) as Map<String, dynamic>;
+
+        if (responseData['ok'] == true && responseData['data'] != null) {
+          final legalEntity = LegalEntityModel.fromJson(responseData['data']);
+          debugPrint(
+              '✅ LegalEntityService: Legal entity fetched successfully: ${legalEntity.legalName}');
+          return legalEntity;
+        } else {
+          final errorCode = responseData['code'] ?? 'unknown';
+          final errorMessage = responseData['message'] ?? 'Unknown error';
+          debugPrint(
+              '❌ LegalEntityService: Edge function error - Code: $errorCode, Message: $errorMessage');
+          return null;
+        }
+      } else {
+        debugPrint(
+            '❌ LegalEntityService: HTTP error ${response.statusCode}: ${response.body}');
+        return null;
+      }
     } catch (e) {
-      debugPrint('❌ LegalEntityService: Error fetching legal entity: $e');
+      debugPrint('❌ LegalEntityService: Error calling edge function: $e');
       return null;
     }
   }
