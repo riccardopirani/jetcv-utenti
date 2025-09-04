@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/services/legal_entity_service.dart';
 import 'package:jetcv__utenti/config/linkedin_config.dart';
 
 /// Servizio per l'integrazione con LinkedIn
@@ -28,41 +29,81 @@ class LinkedInService {
           firstCert.certification?.category?.name ?? 'Certification';
       final issueDate = firstCert.certificationUser.createdAt;
 
+      // Ottiene le informazioni dell'azienda
+      String organizationName = 'JetCV';
+      String? companyWebsite;
+
+      if (firstCert.certification?.idLegalEntity != null) {
+        final legalEntity = await LegalEntityService.getLegalEntityById(
+          firstCert.certification!.idLegalEntity!,
+        );
+
+        if (legalEntity != null) {
+          organizationName = LegalEntityService.getCompanyName(legalEntity);
+          companyWebsite = LegalEntityService.getCompanyWebsite(legalEntity);
+        }
+      }
+
       // Copia le informazioni della certificazione negli appunti
       await copyCertificationToClipboard(
         certName: certName,
-        organizationName: 'JetCV',
+        organizationName: organizationName,
         issueYear: issueDate.year,
         issueMonth: issueDate.month,
         certUrl:
             'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        companyWebsite: companyWebsite,
+      );
+
+      // Mostra istruzioni dettagliate per l'utente
+      showLinkedInInstructions(
+        certName: certName,
+        organizationName: organizationName,
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl:
+            'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
+        companyWebsite: companyWebsite,
       );
 
       // Costruisce l'URL per aprire LinkedIn
       final linkedInUrl = _buildAddToProfileUrl(
         certName: certName,
-        organizationName: 'JetCV',
+        organizationName: organizationName,
         issueYear: issueDate.year,
         issueMonth: issueDate.month,
         certUrl:
             'https://amzhiche.com/certification/${firstCert.certificationUser.idCertificationUser}',
         certId: firstCert.certificationUser.idCertificationUser,
+        companyWebsite: companyWebsite,
       );
 
       debugPrint('🔗 LinkedInService: LinkedIn URL: $linkedInUrl');
 
-      final uri = Uri.parse(linkedInUrl);
+      // Prova diversi URL di LinkedIn per trovare quello che funziona meglio
+      final urlsToTry = [
+        'https://www.linkedin.com/in/me/details/certifications/edit/forms/new/?profileFormEntryPoint=PROFILE_SECTION', // URL specifico per form certificazioni
+        'https://www.linkedin.com/in/me/details/certifications/add/', // URL diretto
+        'https://www.linkedin.com/in/me/', // Pagina principale del profilo
+      ];
 
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
+      bool opened = false;
+      for (final url in urlsToTry) {
+        final testUri = Uri.parse(url);
+        if (await canLaunchUrl(testUri)) {
+          await launchUrl(
+            testUri,
+            mode: LaunchMode.externalApplication,
+          );
+          debugPrint('✅ LinkedInService: LinkedIn opened with URL: $url');
+          opened = true;
+          break;
+        } else {
+          debugPrint('❌ LinkedInService: Could not launch URL: $url');
+        }
+      }
 
-        debugPrint(
-            '✅ LinkedInService: LinkedIn opened and certification details copied to clipboard');
-      } else {
-        debugPrint('❌ LinkedInService: Could not launch LinkedIn URL');
+      if (!opened) {
         throw Exception(
             'Could not launch LinkedIn. Please ensure the LinkedIn app is installed or try again later.');
       }
@@ -79,20 +120,113 @@ class LinkedInService {
     required int issueYear,
     required int issueMonth,
     required String certUrl,
+    String? companyWebsite,
   }) async {
+    // Crea un testo formattato per facilitare la copia nei campi LinkedIn
     final certificationText = '''
-Certification Details for LinkedIn:
+🎓 CERTIFICATION DETAILS FOR LINKEDIN:
 
-Name: $certName
-Organization: $organizationName
-Issue Date: $issueMonth/$issueYear
-Certificate URL: $certUrl
+📜 Name: $certName
+🏢 Organization: $organizationName${companyWebsite != null ? '\n🌐 Organization Website: $companyWebsite' : ''}
+📅 Issue Date: $issueMonth/$issueYear
+🔗 Certificate URL: $certUrl
 
-Copy these details and paste them when adding the certification to your LinkedIn profile.
+📋 STEP-BY-STEP INSTRUCTIONS:
+1. LinkedIn should open automatically
+2. If not, go to: https://www.linkedin.com/in/me/details/certifications/edit/forms/new/
+3. Fill in the form with the details above:
+   - Name: $certName
+   - Organization: $organizationName
+   - Issue Date: $issueMonth/$issueYear
+   - Credential URL: $certUrl
+4. Click "Save"
+
+⚠️  NOTE: LinkedIn doesn't allow auto-filling for security reasons.
+   The details above have been copied to your clipboard for easy pasting.
+
+✅ All details have been copied to your clipboard!
 ''';
 
     await Clipboard.setData(ClipboardData(text: certificationText));
     debugPrint('📋 Certification details copied to clipboard');
+  }
+
+  /// Copia solo il nome della certificazione negli appunti (per copia rapida)
+  static Future<void> copyCertificationName(String certName) async {
+    await Clipboard.setData(ClipboardData(text: certName));
+    debugPrint('📋 Certification name copied to clipboard: $certName');
+  }
+
+  /// Copia solo il nome dell'organizzazione negli appunti (per copia rapida)
+  static Future<void> copyOrganizationName(String organizationName) async {
+    await Clipboard.setData(ClipboardData(text: organizationName));
+    debugPrint('📋 Organization name copied to clipboard: $organizationName');
+  }
+
+  /// Copia solo l'URL del certificato negli appunti (per copia rapida)
+  static Future<void> copyCertificationUrl(String certUrl) async {
+    await Clipboard.setData(ClipboardData(text: certUrl));
+    debugPrint('📋 Certification URL copied to clipboard: $certUrl');
+  }
+
+  /// Mostra istruzioni dettagliate per l'utente
+  static void showLinkedInInstructions({
+    required String certName,
+    required String organizationName,
+    required int issueYear,
+    required int issueMonth,
+    required String certUrl,
+    String? companyWebsite,
+  }) {
+    debugPrint('''
+🎯 LINKEDIN INTEGRATION INSTRUCTIONS:
+
+📋 STEP 1: LinkedIn Form
+- LinkedIn should open automatically
+- If not, go to: https://www.linkedin.com/in/me/details/certifications/edit/forms/new/
+
+📋 STEP 2: Fill the Form
+- Name: $certName
+- Organization: $organizationName
+- Issue Date: $issueMonth/$issueYear
+- Credential URL: $certUrl
+${companyWebsite != null ? '- Organization Website: $companyWebsite' : ''}
+
+📋 STEP 3: Quick Copy Commands
+- Use copyCertificationName('$certName') for name
+- Use copyOrganizationName('$organizationName') for organization
+- Use copyCertificationUrl('$certUrl') for URL
+
+✅ All details are already in your clipboard!
+''');
+  }
+
+  /// Crea un messaggio di notifica per l'utente
+  static String createNotificationMessage({
+    required String certName,
+    required String organizationName,
+    required int issueYear,
+    required int issueMonth,
+    required String certUrl,
+    String? companyWebsite,
+  }) {
+    return '''
+🎓 Aggiungi la tua certificazione a LinkedIn!
+
+📋 Dettagli:
+• Nome: $certName
+• Organizzazione: $organizationName
+• Data: $issueMonth/$issueYear
+• URL: $certUrl
+${companyWebsite != null ? '• Sito web: $companyWebsite' : ''}
+
+📱 Istruzioni:
+1. LinkedIn si aprirà automaticamente
+2. Compila il form con i dettagli sopra
+3. Clicca "Salva"
+
+✅ Tutti i dettagli sono stati copiati negli appunti!
+''';
   }
 
   /// Costruisce l'URL per aggiungere certificazione al profilo LinkedIn
@@ -103,10 +237,31 @@ Copy these details and paste them when adding the certification to your LinkedIn
     required int issueMonth,
     required String certUrl,
     required String certId,
+    String? companyWebsite,
   }) {
-    // LinkedIn ha rimosso la funzionalità di precompilazione automatica
-    // Ora apriamo direttamente la pagina del profilo
-    return 'https://www.linkedin.com/in/me/';
+    // Usa l'URL specifico per aggiungere certificazioni che funziona meglio
+    // Questo URL apre direttamente il form per aggiungere una nuova certificazione
+    final addCertificationUrl =
+        'https://www.linkedin.com/in/me/details/certifications/edit/forms/new/?profileFormEntryPoint=PROFILE_SECTION';
+
+    // Prova a precompilare alcuni campi usando i parametri URL
+    // Nota: LinkedIn potrebbe ignorare alcuni di questi parametri per motivi di sicurezza
+    final encodedCertName = Uri.encodeComponent(certName);
+    final encodedOrgName = Uri.encodeComponent(organizationName);
+    final encodedCertUrl = Uri.encodeComponent(certUrl);
+
+    // URL con parametri di precompilazione
+    final urlWithParams = '$addCertificationUrl&'
+        'name=$encodedCertName&'
+        'organization=$encodedOrgName&'
+        'url=$encodedCertUrl&'
+        'issueYear=$issueYear&'
+        'issueMonth=$issueMonth';
+
+    debugPrint(
+        '🔗 LinkedInService: Using specific LinkedIn certification URL: $urlWithParams');
+
+    return urlWithParams;
   }
 
   /// Aggiunge una competenza al profilo LinkedIn tramite API
@@ -264,7 +419,7 @@ Copy these details and paste them when adding the certification to your LinkedIn
     for (final cert in certifications) {
       // Aggiunge il nome della certificazione come competenza
       if (cert.certification?.category?.name != null) {
-        skills.add(cert.certification!.category!.name!);
+        skills.add(cert.certification!.category!.name);
       }
 
       // Aggiunge il tipo di certificazione come competenza
@@ -340,6 +495,51 @@ Copy these details and paste them when adding the certification to your LinkedIn
     return buffer.toString();
   }
 
+  /// Genera un messaggio per le certificazioni da condividere con informazioni aziendali
+  static Future<String> generateCertificationsMessageWithCompany(
+      List<UserCertificationDetail> certifications) async {
+    if (certifications.isEmpty) {
+      return 'I have verified certifications on JetCV!';
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln('🎓 Verified Certifications:');
+    buffer.writeln();
+
+    for (final cert in certifications.take(5)) {
+      // Limita a 5 certificazioni
+      final certName =
+          cert.certification?.category?.name ?? 'Unknown Certification';
+      final date = cert.certificationUser.createdAt;
+
+      // Ottiene il nome dell'azienda
+      String organizationName = 'JetCV';
+      if (cert.certification?.idLegalEntity != null) {
+        final legalEntity = await LegalEntityService.getLegalEntityById(
+          cert.certification!.idLegalEntity!,
+        );
+        if (legalEntity != null) {
+          organizationName = LegalEntityService.getCompanyName(legalEntity);
+        }
+      }
+
+      buffer.writeln('✅ $certName');
+      buffer.writeln('   Issued by: $organizationName');
+      buffer.writeln('   Date: ${date.day}/${date.month}/${date.year}');
+      buffer.writeln();
+    }
+
+    if (certifications.length > 5) {
+      buffer
+          .writeln('... and ${certifications.length - 5} more certifications');
+      buffer.writeln();
+    }
+
+    buffer.writeln('🔗 View all my verified certifications on JetCV!');
+
+    return buffer.toString();
+  }
+
   /// Apre LinkedIn con un messaggio precompilato per le certificazioni
   static Future<void> shareCertificationsOnLinkedIn({
     required List<UserCertificationDetail> certifications,
@@ -348,7 +548,8 @@ Copy these details and paste them when adding the certification to your LinkedIn
     try {
       debugPrint('🔗 LinkedInService: Sharing certifications on LinkedIn');
 
-      final message = generateCertificationsMessage(certifications);
+      final message =
+          await generateCertificationsMessageWithCompany(certifications);
       final encodedMessage = Uri.encodeComponent(message);
 
       // Costruisce l'URL per condividere su LinkedIn
