@@ -1844,6 +1844,18 @@ abstract class AppLocalizations {
   /// **'Add Certification to LinkedIn'**
   String get addCertificationsToLinkedIn;
 
+  /// No description provided for @nftLink.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT Link'**
+  String get nftLink;
+
+  /// No description provided for @errorOpeningNftLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Error opening NFT link'**
+  String get errorOpeningNftLink;
+
   /// No description provided for @linkedInIntegration.
   ///
   /// In en, this message translates to:

@@ -307,5 +307,7 @@
   "download": "Télécharger",
   "addToLinkedIn": "Add to LinkedIn",
   "errorOpeningLinkedIn": "Error opening LinkedIn",
-  "addCertificationsToLinkedIn": "Add Certification to LinkedIn"
+  "addCertificationsToLinkedIn": "Add Certification to LinkedIn",
+  "nftLink": "Link NFT",
+  "errorOpeningNftLink": "Error opening NFT link"
 }

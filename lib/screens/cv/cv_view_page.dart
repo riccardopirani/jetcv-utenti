@@ -2619,11 +2619,77 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                 ],
               ),
+              // NFT Link Section (only if nftMintTransactionUrl is present)
+              if (_cv?.nftMintTransactionUrl != null && _cv!.nftMintTransactionUrl!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildNftLinkSection(),
+              ],
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Costruisce la sezione del link NFT
+  Widget _buildNftLinkSection() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.blue.shade200,
+          width: 1,
+        ),
+      ),
+      child: GestureDetector(
+        onTap: () => _openNftLink(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.link,
+              color: Colors.blue.shade700,
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              AppLocalizations.of(context)!.nftLink,
+              style: TextStyle(
+                color: Colors.blue.shade600,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                decoration: TextDecoration.underline,
+                decorationColor: Colors.blue.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Apre il link NFT in una nuova finestra
+  Future<void> _openNftLink() async {
+    if (_cv?.nftMintTransactionUrl != null && _cv!.nftMintTransactionUrl!.isNotEmpty) {
+      try {
+        await launchUrl(
+          Uri.parse(_cv!.nftMintTransactionUrl!),
+          mode: LaunchMode.externalApplication,
+        );
+      } catch (e) {
+        debugPrint('❌ Error opening NFT link: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${AppLocalizations.of(context)!.errorOpeningNftLink}: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildEnhancedProfilePicture() {
