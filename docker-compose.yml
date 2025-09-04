@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  flutter_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fluttertest-web
+    ports:
+      - "4000:80" # Map host 4000 -> container 80
+    restart: unless-stopped
