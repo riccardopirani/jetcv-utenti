@@ -17,6 +17,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 import 'package:jetcv__utenti/services/locale_service.dart';
+import 'package:jetcv__utenti/widgets/main_layout.dart';
 
 // Lista ridotta delle nazionalità più comuni
 const Map<String, Map<String, String>> NATIONALITIES = {
@@ -1525,26 +1526,23 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.personalInformation),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          if (_isSaving)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+    return MainLayout(
+      currentRoute: '/profile',
+      title: AppLocalizations.of(context)!.personalInformation,
+      actions: [
+        if (_isSaving)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-        ],
-      ),
-      body: GestureDetector(
+          ),
+      ],
+      child: GestureDetector(
         onTap: () {
           // Close country dropdown when tapping outside
           if (_showCountryDropdown) {

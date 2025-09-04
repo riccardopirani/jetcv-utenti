@@ -2620,7 +2620,8 @@ class _CVViewPageState extends State<CVViewPage> {
                 ],
               ),
               // NFT Link Section (only if nftMintTransactionUrl is present)
-              if (_cv?.nftMintTransactionUrl != null && _cv!.nftMintTransactionUrl!.isNotEmpty) ...[
+              if (_cv?.nftMintTransactionUrl != null &&
+                  _cv!.nftMintTransactionUrl!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 _buildNftLinkSection(),
               ],
@@ -2672,7 +2673,8 @@ class _CVViewPageState extends State<CVViewPage> {
 
   /// Apre il link NFT in una nuova finestra
   Future<void> _openNftLink() async {
-    if (_cv?.nftMintTransactionUrl != null && _cv!.nftMintTransactionUrl!.isNotEmpty) {
+    if (_cv?.nftMintTransactionUrl != null &&
+        _cv!.nftMintTransactionUrl!.isNotEmpty) {
       try {
         await launchUrl(
           Uri.parse(_cv!.nftMintTransactionUrl!),
@@ -2683,7 +2685,8 @@ class _CVViewPageState extends State<CVViewPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${AppLocalizations.of(context)!.errorOpeningNftLink}: $e'),
+              content: Text(
+                  '${AppLocalizations.of(context)!.errorOpeningNftLink}: $e'),
               backgroundColor: Colors.red,
             ),
           );

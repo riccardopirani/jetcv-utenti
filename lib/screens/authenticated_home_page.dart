@@ -8,6 +8,7 @@ import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
+import 'package:jetcv__utenti/widgets/main_layout.dart';
 
 class AuthenticatedHomePage extends StatefulWidget {
   const AuthenticatedHomePage({super.key});
@@ -108,8 +109,10 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
+    return MainLayout(
+      currentRoute: '/home',
+      title: AppLocalizations.of(context)!.home,
+      child: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +128,6 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(user: _user),
     );
   }
 }
