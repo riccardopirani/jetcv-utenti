@@ -1,0 +1,41 @@
+name: Deploy Flutter Web to Vercel
+
+on:
+  push:
+    branches: [ "main" ]   # change if your default branch differs
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Deploy to Vercel (prod)
+        env:
+          VERCEL_TOKEN: h9PNNz7gvsEYAMC8rAVnzzyN
+          VERCEL_ORG_ID: gm3nu3am4vZMhXfeBKSJdBup
+          VERCEL_PROJECT_ID: prj_LF4V6xANPGZg7i6HGpxeRU7EiPmm
+        run: |
+          vercel deploy \
+            --prod \
+            --yes \
+            --token $VERCEL_TOKEN \
+            --cwd build/web
