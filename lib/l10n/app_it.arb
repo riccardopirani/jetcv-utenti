@@ -166,6 +166,7 @@
   "noLanguageSpecified": "Nessuna lingua specificata",
   "certifications": "Certificazioni",
   "mostRecent": "Più Recenti",
+  "lessRecent": "Meno Recenti",
   "verifiedCertifications": "certificazioni verificate",
   "loadingCertifications": "Caricamento certificazioni...",
   "errorLoadingCertifications": "Errore nel caricamento delle certificazioni",

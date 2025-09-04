@@ -222,6 +222,7 @@
   "noLanguageSpecified": "No language specified",
   "certifications": "Certifications",
   "mostRecent": "Most Recent",
+  "lessRecent": "Less Recent",
   "verifiedCertifications": "verified certifications",
   "loadingCertifications": "Loading certifications...",
   "errorLoadingCertifications": "Error loading certifications",

@@ -536,6 +536,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mostRecent => 'Most Recent';
 
   @override
+  String get lessRecent => 'Less Recent';
+
+  @override
   String get verifiedCertifications => 'verified certifications';
 
   @override

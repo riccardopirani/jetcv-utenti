@@ -44,6 +44,8 @@ class _CVViewPageState extends State<CVViewPage> {
   List<UserCertificationDetail> _certifications = [];
   bool _certificationsLoading = false;
   String? _certificationsError;
+  bool _isMostRecentFirst =
+      true; // true = più recenti prima, false = meno recenti prima
 
   // Legal entities cache
   Map<String, String> _legalEntityNames = {};
@@ -138,11 +140,14 @@ class _CVViewPageState extends State<CVViewPage> {
           await CertificationService.getUserCertificationsDetails();
 
       if (response.success && response.data != null) {
-        // Sort certifications by date (most recent first)
+        // Sort certifications by date based on current sort order
         final sortedCertifications =
             List<UserCertificationDetail>.from(response.data!)
-              ..sort((a, b) => b.certificationUser.createdAt
-                  .compareTo(a.certificationUser.createdAt));
+              ..sort((a, b) => _isMostRecentFirst
+                  ? b.certificationUser.createdAt
+                      .compareTo(a.certificationUser.createdAt)
+                  : a.certificationUser.createdAt
+                      .compareTo(b.certificationUser.createdAt));
 
         setState(() {
           _certifications = sortedCertifications;
@@ -166,6 +171,91 @@ class _CVViewPageState extends State<CVViewPage> {
       });
       debugPrint('Error loading certifications: $e');
     }
+  }
+
+  void _toggleSortOrder() {
+    setState(() {
+      _isMostRecentFirst = !_isMostRecentFirst;
+      // Re-sort the existing certifications
+      _certifications.sort((a, b) => _isMostRecentFirst
+          ? b.certificationUser.createdAt
+              .compareTo(a.certificationUser.createdAt)
+          : a.certificationUser.createdAt
+              .compareTo(b.certificationUser.createdAt));
+    });
+    debugPrint(
+        '🔄 Sort order changed to: ${_isMostRecentFirst ? "Most recent first" : "Least recent first"}');
+  }
+
+  Widget _buildSortDropdown() {
+    return PopupMenuButton<String>(
+      onSelected: (String value) {
+        if (value == 'toggle') {
+          _toggleSortOrder();
+        }
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem<String>(
+          value: 'toggle',
+          child: Row(
+            children: [
+              Icon(
+                _isMostRecentFirst ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 16,
+                color: Colors.green,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _isMostRecentFirst
+                    ? AppLocalizations.of(context)!.lessRecent
+                    : AppLocalizations.of(context)!.mostRecent,
+                style: TextStyle(
+                  color: Colors.grey.shade800,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withValues(alpha: 0.3),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _isMostRecentFirst
+                  ? AppLocalizations.of(context)!.mostRecent
+                  : AppLocalizations.of(context)!.lessRecent,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   CountryModel? _getCountryByCode(String? countryCode) {
@@ -1285,42 +1375,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       ),
                     ),
                     const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            spreadRadius: 0,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.mostRecent,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildSortDropdown(),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -1384,42 +1439,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       ),
                     ),
                     const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            spreadRadius: 0,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.mostRecent,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildSortDropdown(),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -1504,42 +1524,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       ],
                     ),
                     const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            spreadRadius: 0,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.mostRecent,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildSortDropdown(),
                   ],
                 ),
                 const SizedBox(height: 32),

@@ -1094,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'Most Recent'**
   String get mostRecent;
 
+  /// No description provided for @lessRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Less Recent'**
+  String get lessRecent;
+
   /// No description provided for @verifiedCertifications.
   ///
   /// In en, this message translates to:
