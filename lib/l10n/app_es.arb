@@ -1,6 +1,7 @@
 {
   "@@locale": "es",
   "appTitle": "JetCV",
+  "comingSoon": "Próximamente",
   "personalInformation": "Información Personal",
   "yourProfile": "Tu perfil",
   "enterYourPersonalInfo": "Introduce tu información personal",
@@ -303,5 +304,8 @@
   "realTime": "TIEMPO REAL",
   "uploaded": "SUBIDO",
   "view": "Ver",
-  "download": "Descargar"
+  "download": "Descargar",
+  "addToLinkedIn": "Add to LinkedIn",
+  "errorOpeningLinkedIn": "Error opening LinkedIn",
+  "addCertificationsToLinkedIn": "Add Certification to LinkedIn"
 }

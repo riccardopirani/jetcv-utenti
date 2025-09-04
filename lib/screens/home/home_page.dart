@@ -170,8 +170,8 @@ class HomePage extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.shade50,
-                color.shade100,
+                Colors.blue.shade50,
+                Colors.blue.shade100,
               ],
             ),
           ),
@@ -181,7 +181,7 @@ class HomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.shade600,
+                  color: Colors.blue.shade600,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -196,7 +196,7 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: color.shade800,
+                  color: Colors.blue.shade800,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -205,7 +205,7 @@ class HomePage extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: color.shade600,
+                  color: Colors.blue.shade600,
                 ),
                 textAlign: TextAlign.center,
               ),

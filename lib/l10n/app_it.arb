@@ -1,6 +1,7 @@
 {
   "@@locale": "it",
   "appTitle": "JetCV",
+  "comingSoon": "Prossimamente",
   "personalInformation": "Informazioni Personali",
   "yourProfile": "Il tuo profilo",
   "enterYourPersonalInfo": "Inserisci le tue informazioni personali",
@@ -305,6 +306,7 @@
   "view": "Visualizza",
   "download": "Scarica",
   "addToLinkedIn": "Aggiungi a LinkedIn",
+  "errorOpeningLinkedIn": "Errore nell'aprire LinkedIn",
   "addCertificationsToLinkedIn": "Aggiungi Certificazione a LinkedIn",
   "linkedInIntegration": "Integrazione Certificazioni LinkedIn",
   "shareCertificationsOnLinkedIn": "Questo copierà i dettagli della certificazione negli appunti e aprirà LinkedIn. Poi vai al tuo profilo → Aggiungi sezione profilo → Licenze e certificazioni e incolla i dettagli.",

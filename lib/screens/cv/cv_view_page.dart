@@ -10,6 +10,7 @@ import 'package:jetcv__utenti/services/country_service.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
+import 'package:jetcv__utenti/services/legal_entity_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
@@ -17,6 +18,7 @@ import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 import 'package:jetcv__utenti/widgets/open_badge_button.dart';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CVViewPage extends StatefulWidget {
   final String? cvUserId;
@@ -42,6 +44,9 @@ class _CVViewPageState extends State<CVViewPage> {
   List<UserCertificationDetail> _certifications = [];
   bool _certificationsLoading = false;
   String? _certificationsError;
+
+  // Legal entities cache
+  Map<String, String> _legalEntityNames = {};
 
   @override
   void initState() {
@@ -605,7 +610,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       Padding(
                         padding: EdgeInsets.all(contentPadding),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // Profile picture
                             _buildEnhancedProfilePicture(),
@@ -1473,41 +1478,6 @@ class _CVViewPageState extends State<CVViewPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // LinkedIn Integration Button
-                if (_certifications.isNotEmpty) ...[
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: ElevatedButton.icon(
-                      onPressed: () => _addCertificationsToLinkedIn(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFF0077B5), // LinkedIn blue
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 2,
-                      ),
-                      icon: const Icon(
-                        Icons.work,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                      label: Text(
-                        AppLocalizations.of(context)!
-                            .addCertificationsToLinkedIn,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-
                 // Header with title and sort button - matching image exactly
                 Row(
                   children: [
@@ -2130,14 +2100,21 @@ class _CVViewPageState extends State<CVViewPage> {
 
     return Container(
       margin: EdgeInsets.only(top: spacing),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: OpenBadgeButton(
-              certification: cert,
-              isCompact: false,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: OpenBadgeButton(
+                  certification: cert,
+                  isCompact: false,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 8),
+          // LinkedIn Integration Button
+          _buildLinkedInButton(cert),
         ],
       ),
     );
@@ -2841,10 +2818,159 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  /// Gestisce l'aggiunta delle certificazioni a LinkedIn
+  /// Ottiene il nome dell'organizzazione per una certificazione
+  Future<String> _getOrganizationName(UserCertificationDetail cert) async {
+    final legalEntityId = cert.certification?.idLegalEntity;
+
+    if (legalEntityId == null) {
+      return 'JetCV';
+    }
+
+    // Controlla se abbiamo già il nome in cache
+    if (_legalEntityNames.containsKey(legalEntityId)) {
+      return _legalEntityNames[legalEntityId]!;
+    }
+
+    try {
+      // Ottiene l'entità legale dal servizio
+      final legalEntity =
+          await LegalEntityService.getLegalEntityById(legalEntityId);
+      final organizationName = LegalEntityService.getCompanyName(legalEntity);
+
+      // Memorizza in cache
+      _legalEntityNames[legalEntityId] = organizationName;
+
+      return organizationName;
+    } catch (e) {
+      debugPrint('❌ Error getting organization name: $e');
+      return 'JetCV';
+    }
+  }
+
+  /// Genera l'URL LinkedIn per una certificazione specifica
+  Future<String> _generateLinkedInUrl(UserCertificationDetail cert) async {
+    final certName = cert.certification?.category?.name ?? 'Certification';
+    final organizationName = await _getOrganizationName(cert);
+    final issueDate = cert.certificationUser.createdAt;
+    final certId = cert.certificationUser.idCertificationUser;
+
+    // URL di base per aggiungere certificazioni su LinkedIn
+    final baseUrl =
+        'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME';
+
+    // Genera URL del certificato (se disponibile)
+    final certUrl = cert.certification?.idCertification != null
+        ? 'https://jetcv.com/certification/${cert.certification!.idCertification}'
+        : 'https://jetcv.com';
+
+    // Parametri della certificazione
+    final params = {
+      'name': Uri.encodeComponent(certName),
+      'organizationName': Uri.encodeComponent(organizationName),
+      'issueYear': issueDate.year.toString(),
+      'issueMonth': issueDate.month.toString(),
+      'certUrl': Uri.encodeComponent(certUrl),
+      'certId': certId,
+    };
+
+    // Aggiungi parametri di scadenza se disponibili (opzionale)
+    // LinkedIn accetta anche expirationYear e expirationMonth
+    final expirationDate = cert.certification?.closedAt;
+    if (expirationDate != null) {
+      params['expirationYear'] = expirationDate.year.toString();
+      params['expirationMonth'] = expirationDate.month.toString();
+    }
+
+    // Costruisce l'URL finale
+    final queryString =
+        params.entries.map((e) => '${e.key}=${e.value}').join('&');
+
+    return '$baseUrl&$queryString';
+  }
+
+  /// Costruisce il pulsante LinkedIn per una certificazione specifica
+  Widget _buildLinkedInButton(UserCertificationDetail cert) {
+    return Container(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _openLinkedInForCertification(cert),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF0077B5), // LinkedIn blue
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        icon: const Icon(Icons.link, size: 16),
+        label: Text(
+          AppLocalizations.of(context)!.addToLinkedIn,
+          style: TextStyle(fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  /// Apre LinkedIn per una certificazione specifica
+  Future<void> _openLinkedInForCertification(
+      UserCertificationDetail cert) async {
+    try {
+      // Mostra un indicatore di caricamento
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text('Preparando LinkedIn...'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      final linkedInUrl = await _generateLinkedInUrl(cert);
+      debugPrint(
+          '🔗 Opening LinkedIn for certification: ${cert.certification?.category?.name}');
+      debugPrint('🔗 LinkedIn URL: $linkedInUrl');
+
+      // Apre l'URL in una nuova finestra/tab
+      await launchUrl(Uri.parse(linkedInUrl),
+          mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('❌ Error opening LinkedIn: $e');
+      // Mostra un messaggio di errore all'utente
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Gestisce l'aggiunta delle certificazioni a LinkedIn (metodo legacy - da rimuovere)
   Future<void> _addCertificationsToLinkedIn() async {
     try {
       debugPrint('🔗 Opening LinkedIn for certifications');
+
+      // Check if certifications are available
+      if (_certifications.isEmpty) {
+        debugPrint('❌ No certifications available for LinkedIn integration');
+        return;
+      }
 
       // Mostra un dialog di conferma con i dettagli della certificazione
       final firstCert = _certifications.first;

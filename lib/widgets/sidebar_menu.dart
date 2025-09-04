@@ -4,6 +4,9 @@ import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
+import 'package:jetcv__utenti/screens/home/home_page.dart';
+import 'package:jetcv__utenti/screens/otp/otp_page.dart';
+import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 
 class SidebarMenu extends StatefulWidget {
   final VoidCallback? onClose;
@@ -84,10 +87,20 @@ class _SidebarMenuState extends State<SidebarMenu> {
     // Navigate based on route
     switch (route) {
       case '/home':
-        // Already on home, do nothing
+        // Navigate to home page
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
         break;
       case '/profile':
-        // TODO: Navigate to profile page
+        // Navigate to personal info page (profile)
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const PersonalInfoPage(),
+          ),
+        );
         break;
       case '/cv':
         // Navigate to CV page
@@ -98,13 +111,30 @@ class _SidebarMenuState extends State<SidebarMenu> {
         );
         break;
       case '/certifications':
-        // TODO: Navigate to certifications page
+        // Navigate to CV page (certifications are shown there)
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CVViewPage(cvUserId: _currentUser?.idUser),
+          ),
+        );
         break;
       case '/otp':
-        // TODO: Navigate to OTP page
+        // Navigate to OTP page
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const OTPPage(),
+          ),
+        );
         break;
       case '/wallets':
-        // TODO: Navigate to wallets page
+        // Show coming soon message for wallets
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.comingSoon),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
         break;
       default:
         // Do nothing for unknown routes

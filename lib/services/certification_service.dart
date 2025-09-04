@@ -5,7 +5,8 @@ import 'package:functions_client/functions_client.dart';
 /// Helper function to safely parse DateTime from JSON
 DateTime parseDateTime(dynamic dateValue) {
   if (dateValue == null) {
-    throw ArgumentError('Date value cannot be null');
+    throw ArgumentError(
+        'Date value cannot be null - this indicates a data integrity issue');
   }
 
   if (dateValue is DateTime) {
@@ -13,10 +14,18 @@ DateTime parseDateTime(dynamic dateValue) {
   }
 
   if (dateValue is String) {
-    return DateTime.parse(dateValue);
+    if (dateValue.isEmpty) {
+      throw ArgumentError('Date string cannot be empty');
+    }
+    try {
+      return DateTime.parse(dateValue);
+    } catch (e) {
+      throw ArgumentError('Invalid date format: $dateValue - $e');
+    }
   }
 
-  throw ArgumentError('Invalid date format: $dateValue');
+  throw ArgumentError(
+      'Invalid date format: $dateValue (type: ${dateValue.runtimeType})');
 }
 
 class CertificationService {
@@ -128,7 +137,7 @@ class CertificationUser {
   final String idUser;
   final String status;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
   final String? serialNumber;
   final String? rejectionReason;
   final String? idOtp;
@@ -139,7 +148,7 @@ class CertificationUser {
     required this.idUser,
     required this.status,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
     this.serialNumber,
     this.rejectionReason,
     this.idOtp,
@@ -152,7 +161,8 @@ class CertificationUser {
       idUser: json['id_user']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       createdAt: parseDateTime(json['created_at']),
-      updatedAt: parseDateTime(json['updated_at']),
+      updatedAt:
+          json['updated_at'] != null ? parseDateTime(json['updated_at']) : null,
       serialNumber: json['serial_number']?.toString(),
       rejectionReason: json['rejection_reason']?.toString(),
       idOtp: json['id_otp']?.toString(),

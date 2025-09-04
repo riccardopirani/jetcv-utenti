@@ -110,6 +110,12 @@ abstract class AppLocalizations {
   /// **'JetCV'**
   String get appTitle;
 
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get comingSoon;
+
   /// No description provided for @personalInformation.
   ///
   /// In en, this message translates to:
@@ -1825,6 +1831,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to LinkedIn'**
   String get addToLinkedIn;
+
+  /// No description provided for @errorOpeningLinkedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Error opening LinkedIn'**
+  String get errorOpeningLinkedIn;
 
   /// No description provided for @addCertificationsToLinkedIn.
   ///

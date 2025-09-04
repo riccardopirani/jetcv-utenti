@@ -12,6 +12,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appTitle => 'JetCV';
 
   @override
+  String get comingSoon => 'Prossimamente';
+
+  @override
   String get personalInformation => 'Informazioni Personali';
 
   @override
@@ -932,6 +935,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get addToLinkedIn => 'Aggiungi a LinkedIn';
+
+  @override
+  String get errorOpeningLinkedIn => 'Errore nell\'aprire LinkedIn';
 
   @override
   String get addCertificationsToLinkedIn =>

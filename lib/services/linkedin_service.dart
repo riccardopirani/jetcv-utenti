@@ -11,6 +11,103 @@ import 'package:jetcv__utenti/config/linkedin_config.dart';
 class LinkedInService {
   static const String _linkedInBaseUrl = 'https://www.linkedin.com';
 
+  /// Apre LinkedIn per aggiungere una singola certificazione al profilo
+  static Future<void> addCertificationToLinkedInProfile({
+    required UserCertificationDetail certification,
+  }) async {
+    try {
+      debugPrint(
+          '🔗 LinkedInService: Opening LinkedIn to add certification to profile');
+
+      final certName =
+          certification.certification?.category?.name ?? 'Certification';
+      final issueDate = certification.certificationUser.createdAt;
+
+      // Ottiene le informazioni dell'azienda
+      String organizationName = 'JetCV';
+      String? companyWebsite;
+
+      if (certification.certification?.idLegalEntity != null) {
+        final legalEntity = await LegalEntityService.getLegalEntityById(
+          certification.certification!.idLegalEntity!,
+        );
+
+        if (legalEntity != null) {
+          organizationName = LegalEntityService.getCompanyName(legalEntity);
+          companyWebsite = LegalEntityService.getCompanyWebsite(legalEntity);
+        }
+      }
+
+      // Copia le informazioni della certificazione negli appunti
+      await copyCertificationToClipboard(
+        certName: certName,
+        organizationName: organizationName,
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl:
+            'https://amzhiche.com/certification/${certification.certificationUser.idCertificationUser}',
+        companyWebsite: companyWebsite,
+      );
+
+      // Mostra istruzioni dettagliate per l'utente
+      showLinkedInInstructions(
+        certName: certName,
+        organizationName: organizationName,
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl:
+            'https://amzhiche.com/certification/${certification.certificationUser.idCertificationUser}',
+        companyWebsite: companyWebsite,
+      );
+
+      // Costruisce l'URL per aprire LinkedIn
+      final linkedInUrl = _buildAddToProfileUrl(
+        certName: certName,
+        organizationName: organizationName,
+        issueYear: issueDate.year,
+        issueMonth: issueDate.month,
+        certUrl:
+            'https://amzhiche.com/certification/${certification.certificationUser.idCertificationUser}',
+        certId: certification.certificationUser.idCertificationUser,
+        companyWebsite: companyWebsite,
+      );
+
+      debugPrint('🔗 LinkedInService: LinkedIn URL: $linkedInUrl');
+
+      // Prova diversi URL di LinkedIn per trovare quello che funziona meglio
+      final urlsToTry = [
+        linkedInUrl, // URL con parametri di precompilazione
+        'https://www.linkedin.com/in/me/details/certifications/edit/forms/new/?profileFormEntryPoint=PROFILE_SECTION', // URL specifico per form certificazioni
+        'https://www.linkedin.com/in/me/details/certifications/add/', // URL diretto
+        'https://www.linkedin.com/in/me/', // Pagina principale del profilo
+      ];
+
+      bool opened = false;
+      for (final url in urlsToTry) {
+        final testUri = Uri.parse(url);
+        if (await canLaunchUrl(testUri)) {
+          await launchUrl(
+            testUri,
+            mode: LaunchMode.externalApplication,
+          );
+          debugPrint('✅ LinkedInService: LinkedIn opened with URL: $url');
+          opened = true;
+          break;
+        } else {
+          debugPrint('❌ LinkedInService: Could not launch URL: $url');
+        }
+      }
+
+      if (!opened) {
+        throw Exception(
+            'Could not launch LinkedIn. Please ensure the LinkedIn app is installed or try again later.');
+      }
+    } catch (e) {
+      debugPrint('❌ LinkedInService: Error opening LinkedIn: $e');
+      rethrow;
+    }
+  }
+
   /// Apre LinkedIn per aggiungere certificazioni al profilo tramite URL diretto
   static Future<void> addSkillsToLinkedInProfile({
     required List<UserCertificationDetail> certifications,
@@ -82,6 +179,7 @@ class LinkedInService {
 
       // Prova diversi URL di LinkedIn per trovare quello che funziona meglio
       final urlsToTry = [
+        linkedInUrl, // URL con parametri di precompilazione
         'https://www.linkedin.com/in/me/details/certifications/edit/forms/new/?profileFormEntryPoint=PROFILE_SECTION', // URL specifico per form certificazioni
         'https://www.linkedin.com/in/me/details/certifications/add/', // URL diretto
         'https://www.linkedin.com/in/me/', // Pagina principale del profilo
@@ -239,27 +337,27 @@ ${companyWebsite != null ? '• Sito web: $companyWebsite' : ''}
     required String certId,
     String? companyWebsite,
   }) {
-    // Usa l'URL specifico per aggiungere certificazioni che funziona meglio
+    // Usa il nuovo URL LinkedIn con parametri di precompilazione
     // Questo URL apre direttamente il form per aggiungere una nuova certificazione
     final addCertificationUrl =
-        'https://www.linkedin.com/in/me/details/certifications/edit/forms/new/?profileFormEntryPoint=PROFILE_SECTION';
+        'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME';
 
-    // Prova a precompilare alcuni campi usando i parametri URL
-    // Nota: LinkedIn potrebbe ignorare alcuni di questi parametri per motivi di sicurezza
+    // Codifica i parametri per l'URL
     final encodedCertName = Uri.encodeComponent(certName);
     final encodedOrgName = Uri.encodeComponent(organizationName);
     final encodedCertUrl = Uri.encodeComponent(certUrl);
 
-    // URL con parametri di precompilazione
+    // URL con parametri di precompilazione per LinkedIn
     final urlWithParams = '$addCertificationUrl&'
         'name=$encodedCertName&'
-        'organization=$encodedOrgName&'
-        'url=$encodedCertUrl&'
+        'organizationName=$encodedOrgName&'
         'issueYear=$issueYear&'
-        'issueMonth=$issueMonth';
+        'issueMonth=$issueMonth&'
+        'certUrl=$encodedCertUrl&'
+        'certId=$certId';
 
     debugPrint(
-        '🔗 LinkedInService: Using specific LinkedIn certification URL: $urlWithParams');
+        '🔗 LinkedInService: Using LinkedIn certification URL with parameters: $urlWithParams');
 
     return urlWithParams;
   }

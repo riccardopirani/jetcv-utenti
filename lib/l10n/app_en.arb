@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "appTitle": "JetCV",
+  "comingSoon": "Coming Soon",
   "personalInformation": "Personal Information",
   "yourProfile": "Your Profile",
   "enterYourPersonalInfo": "Enter your personal information",
@@ -404,6 +405,7 @@
   "otpStatusUsed": "Used",
   "otpStatusBurned": "Burned",
   "addToLinkedIn": "Add to LinkedIn",
+  "errorOpeningLinkedIn": "Error opening LinkedIn",
   "addCertificationsToLinkedIn": "Add Certification to LinkedIn",
   "linkedInIntegration": "LinkedIn Certification Integration",
   "shareCertificationsOnLinkedIn": "This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.",
