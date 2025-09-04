@@ -19,7 +19,6 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
@@ -557,44 +556,6 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: (_isLoading || _isGoogleLoading)
-                            ? null
-                            : _signUpWithGoogle,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                        icon: _isGoogleLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Image.asset(
-                                'assets/images/web_light_sq_na_3x.png',
-                                width: 20,
-                                height: 20,
-                              ),
-                        label: Text(
-                          AppLocalizations.of(context)!.continueWithGoogle,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 24),
                     Row(
