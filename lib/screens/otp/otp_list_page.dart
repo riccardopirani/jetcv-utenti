@@ -132,118 +132,19 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   void _deleteOtp(OtpModel otp) async {
-    showDialog(
+    // Mostra conferma
+    final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteOtp),
         content: Text(AppLocalizations.of(context)!.deleteOtpConfirmation),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-
-              // Show loading indicator and track dialog state
-              bool dialogOpen = true;
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => WillPopScope(
-                  onWillPop: () async => false, // Prevent back button
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              );
-
-              try {
-                final response = await OtpService.burnOtp(
-                  idOtp: otp.idOtp,
-                  idUser: otp.idUser,
-                );
-
-                // Close loading dialog if still open
-                if (dialogOpen && mounted) {
-                  try {
-                    Navigator.pop(context); // Close loading dialog
-                    dialogOpen = false;
-                  } catch (navigatorError) {
-                    // Navigator might be invalid, ignore the error
-                    debugPrint('Navigator pop failed: $navigatorError');
-                    dialogOpen = false;
-                  }
-                }
-
-                if (!mounted) return;
-
-                if (response.success) {
-                  setState(() {
-                    _otps.removeWhere((item) => item.idOtp == otp.idOtp);
-                    // Se la lista è vuota, aggiorna lo stato
-                    if (_otps.isEmpty) {
-                      _isLoading = false;
-                      _errorMessage = null;
-                    }
-                  });
-
-                  if (mounted &&
-                      _scaffoldMessenger != null &&
-                      _localizations != null) {
-                    try {
-                      _scaffoldMessenger!.showSnackBar(
-                        SnackBar(
-                          content: Text(_localizations!.otpBurnedSuccessfully),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    } catch (scaffoldError) {
-                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
-                    }
-                  }
-                } else {
-                  if (mounted &&
-                      _scaffoldMessenger != null &&
-                      _localizations != null) {
-                    try {
-                      _scaffoldMessenger!.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              response.error ?? _localizations!.otpBurnFailed),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    } catch (scaffoldError) {
-                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
-                    }
-                  }
-                }
-              } catch (e) {
-                if (mounted) {
-                  try {
-                    Navigator.pop(context); // Close loading dialog
-                  } catch (navigatorError) {
-                    // Navigator might be invalid, ignore the error
-                    debugPrint('Navigator pop failed: $navigatorError');
-                  }
-                  if (_scaffoldMessenger != null && _localizations != null) {
-                    try {
-                      _scaffoldMessenger!.showSnackBar(
-                        SnackBar(
-                          content: Text(_localizations!.otpBurnFailed),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    } catch (scaffoldError) {
-                      // ScaffoldMessenger might be invalid, ignore the error
-                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
-                    }
-                  }
-                }
-              }
-            },
+            onPressed: () => Navigator.pop(context, true),
             child: Text(
               AppLocalizations.of(context)!.delete,
               style: const TextStyle(color: Colors.red),
@@ -252,6 +153,79 @@ class _OtpListPageState extends State<OtpListPage> {
         ],
       ),
     );
+
+    if (shouldDelete != true || !mounted) return;
+
+    // Mostra loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+
+    try {
+      final response = await OtpService.burnOtp(
+        idOtp: otp.idOtp,
+        idUser: otp.idUser,
+      );
+
+      // Chiudi loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      if (!mounted) return;
+
+      if (response.success) {
+        setState(() {
+          _otps.removeWhere((item) => item.idOtp == otp.idOtp);
+          // Se la lista è vuota, aggiorna lo stato
+          if (_otps.isEmpty) {
+            _isLoading = false;
+            _errorMessage = null;
+          }
+        });
+
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          _scaffoldMessenger!.showSnackBar(
+            SnackBar(
+              content: Text(_localizations!.otpBurnedSuccessfully),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          _scaffoldMessenger!.showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? _localizations!.otpBurnFailed),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting OTP: $e');
+
+      // Chiudi loading dialog se ancora aperto
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      if (mounted && _scaffoldMessenger != null && _localizations != null) {
+        _scaffoldMessenger!.showSnackBar(
+          SnackBar(
+            content: Text('${_localizations!.otpBurnFailed}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -261,48 +235,154 @@ class _OtpListPageState extends State<OtpListPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       body: MainLayout(
         currentRoute: '/otp',
         title: AppLocalizations.of(context)!.myOtps,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-                ? _buildErrorState()
-                : _otps.isEmpty
-                    ? _buildEmptyState()
-                    : _buildOtpList(),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showNewOtpModal,
-        backgroundColor: const Color(0xFF6B46C1),
-        icon: Icon(
-          Icons.add,
-          color: Colors.white,
-          size: isMobile
-              ? 18
-              : isTablet
-                  ? 20
-                  : 24,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.grey.shade50,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: _isLoading
+              ? _buildLoadingState()
+              : _errorMessage != null
+                  ? _buildErrorState()
+                  : _otps.isEmpty
+                      ? _buildEmptyState()
+                      : _buildOtpList(),
         ),
-        label: Text(
-          AppLocalizations.of(context)!.newOtp,
-          style: TextStyle(
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6B46C1).withValues(alpha: 0.3),
+              spreadRadius: 0,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: _showNewOtpModal,
+          backgroundColor: const Color(0xFF6B46C1),
+          elevation: 0,
+          icon: Icon(
+            Icons.add_rounded,
             color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: isMobile
+            size: isMobile
+                ? 18
+                : isTablet
+                    ? 20
+                    : 24,
+          ),
+          label: Text(
+            AppLocalizations.of(context)!.newOtp,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: isMobile
+                  ? 12
+                  : isTablet
+                      ? 14
+                      : 16,
+            ),
+          ),
+          extendedPadding: EdgeInsets.symmetric(
+            horizontal: isMobile
+                ? 16
+                : isTablet
+                    ? 20
+                    : 24,
+            vertical: isMobile
                 ? 12
                 : isTablet
                     ? 14
                     : 16,
           ),
         ),
-        extendedPadding: EdgeInsets.symmetric(
-          horizontal: isMobile
-              ? 12
-              : isTablet
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(isMobile
+                ? 20
+                : isTablet
+                    ? 24
+                    : 28),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  spreadRadius: 0,
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                const Color(0xFF6B46C1),
+              ),
+              strokeWidth: 3,
+            ),
+          ),
+          SizedBox(
+              height: isMobile
+                  ? 20
+                  : isTablet
+                      ? 24
+                      : 28),
+          Text(
+            'Caricamento...',
+            style: TextStyle(
+              fontSize: isMobile
                   ? 16
-                  : 20,
-        ),
+                  : isTablet
+                      ? 18
+                      : 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          SizedBox(
+              height: isMobile
+                  ? 8
+                  : isTablet
+                      ? 10
+                      : 12),
+          Text(
+            'Attendere prego...',
+            style: TextStyle(
+              fontSize: isMobile
+                  ? 14
+                  : isTablet
+                      ? 15
+                      : 16,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -312,276 +392,238 @@ class _OtpListPageState extends State<OtpListPage> {
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    final containerPadding = isMobile
-        ? 16.0
-        : isTablet
-            ? 18.0
-            : 20.0;
-    final containerMargin = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-    final iconSize = isMobile
-        ? 18.0
-        : isTablet
-            ? 19.0
-            : 20.0;
-    final iconPadding = isMobile
-        ? 6.0
-        : isTablet
-            ? 7.0
-            : 8.0;
-    final titleFontSize = isMobile
-        ? 16.0
-        : isTablet
-            ? 17.0
-            : 18.0;
-    final subtitleFontSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 13.0
-            : 14.0;
-    final spacing = isMobile
-        ? 8.0
-        : isTablet
-            ? 10.0
-            : 12.0;
-    final sectionSpacing = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(isMobile
+            ? 24
+            : isTablet
+                ? 32
+                : 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon container with gradient
+            Container(
+              width: isMobile
+                  ? 120
+                  : isTablet
+                      ? 140
+                      : 160,
+              height: isMobile
+                  ? 120
+                  : isTablet
+                      ? 140
+                      : 160,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF6B46C1).withValues(alpha: 0.1),
+                    const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: const Color(0xFF6B46C1).withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.security,
+                size: isMobile
+                    ? 60
+                    : isTablet
+                        ? 70
+                        : 80,
+                color: const Color(0xFF6B46C1),
+              ),
+            ),
 
-    return Column(
-      children: [
-        // Permanent OTP Codes Section
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(containerPadding),
-          margin: EdgeInsets.all(containerMargin),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE0E7FF),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(iconPadding),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6B46C1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.security,
-                      color: Colors.white,
-                      size: iconSize,
-                    ),
-                  ),
-                  SizedBox(width: spacing),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.permanentOtpCodes,
-                          style: TextStyle(
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1F2937),
-                          ),
-                        ),
-                        SizedBox(height: isMobile ? 2 : 4),
-                        Text(
-                          AppLocalizations.of(context)!.manageSecureAccessCodes,
-                          style: TextStyle(
-                            fontSize: subtitleFontSize,
-                            color: const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
-                    ),
+            SizedBox(
+                height: isMobile
+                    ? 32
+                    : isTablet
+                        ? 36
+                        : 40),
+
+            // Title
+            Text(
+              'Nessun OTP ancora',
+              style: TextStyle(
+                fontSize: isMobile
+                    ? 24
+                    : isTablet
+                        ? 28
+                        : 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(
+                height: isMobile
+                    ? 16
+                    : isTablet
+                        ? 20
+                        : 24),
+
+            // Description
+            Text(
+              'Crea il tuo primo OTP per iniziare',
+              style: TextStyle(
+                fontSize: isMobile
+                    ? 16
+                    : isTablet
+                        ? 18
+                        : 20,
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(
+                height: isMobile
+                    ? 32
+                    : isTablet
+                        ? 36
+                        : 40),
+
+            // Features list
+            Container(
+              padding: EdgeInsets.all(isMobile
+                  ? 20
+                  : isTablet
+                      ? 24
+                      : 28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    spreadRadius: 0,
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              SizedBox(height: sectionSpacing),
-              Container(
-                padding: EdgeInsets.all(isMobile
-                    ? 12
-                    : isTablet
-                        ? 14
-                        : 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+              child: Column(
+                children: [
+                  _buildFeatureItem(
+                    Icons.shield,
+                    'Accesso Sicuro',
+                    'Codici di accesso sicuri e temporanei',
+                    isMobile,
+                    isTablet,
+                  ),
+                  SizedBox(
+                      height: isMobile
+                          ? 16
+                          : isTablet
+                              ? 20
+                              : 24),
+                  _buildFeatureItem(
+                    Icons.timer,
+                    'A Tempo Limitato',
+                    'Scadenza automatica per maggiore sicurezza',
+                    isMobile,
+                    isTablet,
+                  ),
+                  SizedBox(
+                      height: isMobile
+                          ? 16
+                          : isTablet
+                              ? 20
+                              : 24),
+                  _buildFeatureItem(
+                    Icons.qr_code,
+                    'Supporto QR Code',
+                    'Genera e condividi tramite codice QR',
+                    isMobile,
+                    isTablet,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(
+    IconData icon,
+    String title,
+    String description,
+    bool isMobile,
+    bool isTablet,
+  ) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(isMobile
+              ? 8
+              : isTablet
+                  ? 10
+                  : 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: isMobile
+                ? 20
+                : isTablet
+                    ? 22
+                    : 24,
+            color: const Color(0xFF6B46C1),
+          ),
+        ),
+        SizedBox(
+            width: isMobile
+                ? 12
+                : isTablet
+                    ? 14
+                    : 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: isMobile
+                      ? 14
+                      : isTablet
+                          ? 15
+                          : 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.vpn_key,
-                      color: const Color(0xFF6B46C1),
-                      size: iconSize,
-                    ),
-                    SizedBox(width: spacing),
-                    Text(
-                      '0',
-                      style: TextStyle(
-                        fontSize: isMobile
-                            ? 20
-                            : isTablet
-                                ? 22
-                                : 24,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1F2937),
-                      ),
-                    ),
-                    SizedBox(width: isMobile ? 6 : 8),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.activeOtps,
-                        style: TextStyle(
-                          fontSize: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 13
-                                  : 14,
-                          color: const Color(0xFF6B7280),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+              ),
+              SizedBox(
+                  height: isMobile
+                      ? 4
+                      : isTablet
+                          ? 6
+                          : 8),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: isMobile
+                      ? 12
+                      : isTablet
+                          ? 13
+                          : 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
                 ),
               ),
             ],
-          ),
-        ),
-
-        // Empty State
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: isMobile
-                      ? 80
-                      : isTablet
-                          ? 100
-                          : 120,
-                  height: isMobile
-                      ? 80
-                      : isTablet
-                          ? 100
-                          : 120,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE0E7FF),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.security,
-                    color: const Color(0xFF6B46C1),
-                    size: isMobile
-                        ? 32
-                        : isTablet
-                            ? 40
-                            : 48,
-                  ),
-                ),
-                SizedBox(
-                    height: isMobile
-                        ? 16
-                        : isTablet
-                            ? 20
-                            : 24),
-                Text(
-                  AppLocalizations.of(context)!.noOtpGenerated,
-                  style: TextStyle(
-                    fontSize: isMobile
-                        ? 16
-                        : isTablet
-                            ? 18
-                            : 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
-                ),
-                SizedBox(
-                    height: isMobile
-                        ? 8
-                        : isTablet
-                            ? 10
-                            : 12),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: isMobile
-                          ? 16
-                          : isTablet
-                              ? 24
-                              : 32),
-                  child: Text(
-                    AppLocalizations.of(context)!.createFirstOtpDescription,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: isMobile
-                          ? 12
-                          : isTablet
-                              ? 14
-                              : 16,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    height: isMobile
-                        ? 24
-                        : isTablet
-                            ? 28
-                            : 32),
-                ElevatedButton.icon(
-                  onPressed: _showNewOtpModal,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6B46C1),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                        horizontal: isMobile
-                            ? 16
-                            : isTablet
-                                ? 20
-                                : 24,
-                        vertical: isMobile
-                            ? 10
-                            : isTablet
-                                ? 11
-                                : 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: Icon(
-                    Icons.add,
-                    size: isMobile
-                        ? 16
-                        : isTablet
-                            ? 18
-                            : 20,
-                  ),
-                  label: Text(
-                    AppLocalizations.of(context)!.generateFirstOtp,
-                    style: TextStyle(
-                      fontSize: isMobile
-                          ? 12
-                          : isTablet
-                              ? 14
-                              : 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],
@@ -589,53 +631,117 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Widget _buildOtpList() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
     return Column(
       children: [
-        // Permanent OTP Codes Section
+        // Header Section
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.all(isMobile
+              ? 16
+              : isTablet
+                  ? 20
+                  : 24),
+          padding: EdgeInsets.all(isMobile
+              ? 20
+              : isTablet
+                  ? 24
+                  : 28),
           decoration: BoxDecoration(
-            color: const Color(0xFFE0E7FF),
-            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF6B46C1).withValues(alpha: 0.1),
+                const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF6B46C1).withValues(alpha: 0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
+                spreadRadius: 0,
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6B46C1),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF6B46C1),
+                          const Color(0xFF8B5CF6),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.security,
                       color: Colors.white,
-                      size: 20,
+                      size: isMobile
+                          ? 24
+                          : isTablet
+                              ? 28
+                              : 32,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(
+                      width: isMobile
+                          ? 16
+                          : isTablet
+                              ? 20
+                              : 24),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           AppLocalizations.of(context)!.permanentOtpCodes,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 20
+                                : isTablet
+                                    ? 24
+                                    : 28,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: Colors.grey.shade800,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(
+                            height: isMobile
+                                ? 8
+                                : isTablet
+                                    ? 10
+                                    : 12),
                         Text(
                           AppLocalizations.of(context)!.manageSecureAccessCodes,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 14
+                                : isTablet
+                                    ? 16
+                                    : 18,
+                            color: Colors.grey.shade600,
+                            height: 1.4,
                           ),
                         ),
                       ],
@@ -643,35 +749,88 @@ class _OtpListPageState extends State<OtpListPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: isMobile
+                      ? 20
+                      : isTablet
+                          ? 24
+                          : 28),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile
+                    ? 16
+                    : isTablet
+                        ? 20
+                        : 24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade200,
+                      spreadRadius: 0,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.vpn_key,
-                      color: Color(0xFF6B46C1),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${_otps.length}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
+                    Container(
+                      padding: EdgeInsets.all(isMobile
+                          ? 8
+                          : isTablet
+                              ? 10
+                              : 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.vpn_key,
+                        color: const Color(0xFF6B46C1),
+                        size: isMobile
+                            ? 20
+                            : isTablet
+                                ? 24
+                                : 28,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(
+                        width: isMobile
+                            ? 12
+                            : isTablet
+                                ? 16
+                                : 20),
                     Text(
-                      AppLocalizations.of(context)!.activeOtps,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
+                      '${_otps.length}',
+                      style: TextStyle(
+                        fontSize: isMobile
+                            ? 28
+                            : isTablet
+                                ? 32
+                                : 36,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF6B46C1),
+                      ),
+                    ),
+                    SizedBox(
+                        width: isMobile
+                            ? 8
+                            : isTablet
+                                ? 12
+                                : 16),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context)!.activeOtps,
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 16
+                              : isTablet
+                                  ? 18
+                                  : 20,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -684,7 +843,18 @@ class _OtpListPageState extends State<OtpListPage> {
         // OTP List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile
+                  ? 16
+                  : isTablet
+                      ? 20
+                      : 24,
+              vertical: isMobile
+                  ? 8
+                  : isTablet
+                      ? 12
+                      : 16,
+            ),
             itemCount: _otps.length,
             itemBuilder: (context, index) {
               final otp = _otps[index];
@@ -697,176 +867,560 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Widget _buildErrorState() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage ?? 'An error occurred',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.red,
+      child: Padding(
+        padding: EdgeInsets.all(isMobile
+            ? 24
+            : isTablet
+                ? 32
+                : 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Error icon container
+            Container(
+              width: isMobile
+                  ? 120
+                  : isTablet
+                      ? 140
+                      : 160,
+              height: isMobile
+                  ? 120
+                  : isTablet
+                      ? 140
+                      : 160,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.red.withValues(alpha: 0.1),
+                    Colors.red.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: Colors.red.withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: isMobile
+                    ? 60
+                    : isTablet
+                        ? 70
+                        : 80,
+                color: Colors.red.shade600,
+              ),
             ),
-            textAlign: TextAlign.center,
+
+            SizedBox(
+                height: isMobile
+                    ? 32
+                    : isTablet
+                        ? 36
+                        : 40),
+
+            // Error title
+            Text(
+              'Errore',
+              style: TextStyle(
+                fontSize: isMobile
+                    ? 24
+                    : isTablet
+                        ? 28
+                        : 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(
+                height: isMobile
+                    ? 16
+                    : isTablet
+                        ? 20
+                        : 24),
+
+            // Error message
+            Container(
+              padding: EdgeInsets.all(isMobile
+                  ? 20
+                  : isTablet
+                      ? 24
+                      : 28),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.red.shade200,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                _errorMessage ?? 'Errore sconosciuto',
+                style: TextStyle(
+                  fontSize: isMobile
+                      ? 16
+                      : isTablet
+                          ? 18
+                          : 20,
+                  color: Colors.red.shade700,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            SizedBox(
+                height: isMobile
+                    ? 32
+                    : isTablet
+                        ? 36
+                        : 40),
+
+            // Retry button
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.shade300.withValues(alpha: 0.3),
+                    spreadRadius: 0,
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: _loadOtps,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile
+                        ? 24
+                        : isTablet
+                            ? 28
+                            : 32,
+                    vertical: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: Icon(
+                  Icons.refresh,
+                  size: isMobile
+                      ? 20
+                      : isTablet
+                          ? 22
+                          : 24,
+                ),
+                label: Text(
+                  AppLocalizations.of(context)!.retry,
+                  style: TextStyle(
+                    fontSize: isMobile
+                        ? 16
+                        : isTablet
+                            ? 18
+                            : 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOtpCard(OtpModel otp) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return Container(
+      margin: EdgeInsets.only(
+          bottom: isMobile
+              ? 16
+              : isTablet
+                  ? 20
+                  : 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _getStatusColor(otp).withValues(alpha: 0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _getStatusColor(otp).withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadOtps,
-            child: const Text('Retry'),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header with status indicator
+          Container(
+            padding: EdgeInsets.all(isMobile
+                ? 20
+                : isTablet
+                    ? 24
+                    : 28),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _getStatusColor(otp).withValues(alpha: 0.1),
+                  _getStatusColor(otp).withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isMobile
+                      ? 10
+                      : isTablet
+                          ? 12
+                          : 14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _getStatusColor(otp),
+                        _getStatusColor(otp).withValues(alpha: 0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getStatusIcon(otp),
+                    color: Colors.white,
+                    size: isMobile
+                        ? 20
+                        : isTablet
+                            ? 24
+                            : 28,
+                  ),
+                ),
+                SizedBox(
+                    width: isMobile
+                        ? 16
+                        : isTablet
+                            ? 20
+                            : 24),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        otp.tag ?? AppLocalizations.of(context)!.otpNumber(1),
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 18
+                              : isTablet
+                                  ? 20
+                                  : 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      SizedBox(
+                          height: isMobile
+                              ? 4
+                              : isTablet
+                                  ? 6
+                                  : 8),
+                      Text(
+                        _formatCreatedAt(otp.createdAt),
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 14
+                                  : 16,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16,
+                    vertical: isMobile
+                        ? 6
+                        : isTablet
+                            ? 8
+                            : 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(otp).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _getStatusColor(otp).withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    _getStatusText(otp),
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 10
+                          : isTablet
+                              ? 11
+                              : 12,
+                      color: _getStatusColor(otp),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // OTP Code Section
+          Container(
+            padding: EdgeInsets.all(isMobile
+                ? 20
+                : isTablet
+                    ? 24
+                    : 28),
+            child: Column(
+              children: [
+                // OTP Code
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(isMobile
+                      ? 20
+                      : isTablet
+                          ? 24
+                          : 28),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.grey.shade50,
+                        Colors.white,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Codice OTP',
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 14
+                                  : 16,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                          height: isMobile
+                              ? 8
+                              : isTablet
+                                  ? 10
+                                  : 12),
+                      Text(
+                        otp.code,
+                        style: TextStyle(
+                          fontSize: isMobile
+                              ? 32
+                              : isTablet
+                                  ? 36
+                                  : 40,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF6B46C1),
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(
+                    height: isMobile
+                        ? 20
+                        : isTablet
+                            ? 24
+                            : 28),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.copy,
+                        label: AppLocalizations.of(context)!.copy,
+                        color: const Color(0xFF6B46C1),
+                        onPressed: () => _copyOtpCode(otp.code),
+                        isMobile: isMobile,
+                        isTablet: isTablet,
+                      ),
+                    ),
+                    SizedBox(
+                        width: isMobile
+                            ? 12
+                            : isTablet
+                                ? 16
+                                : 20),
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.qr_code,
+                        label: AppLocalizations.of(context)!.qrCode,
+                        color: Colors.green.shade600,
+                        onPressed: () => _showQrCodeModal(otp),
+                        isMobile: isMobile,
+                        isTablet: isTablet,
+                      ),
+                    ),
+                    SizedBox(
+                        width: isMobile
+                            ? 12
+                            : isTablet
+                                ? 16
+                                : 20),
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.delete,
+                        label: AppLocalizations.of(context)!.delete,
+                        color: Colors.red.shade600,
+                        onPressed: () => _deleteOtp(otp),
+                        isMobile: isMobile,
+                        isTablet: isTablet,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOtpCard(OtpModel otp) {
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+    required bool isMobile,
+    required bool isTablet,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
+            color: color.withValues(alpha: 0.2),
+            spreadRadius: 0,
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6B46C1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  Icons.security,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      otp.tag ?? AppLocalizations.of(context)!.otpNumber(1),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _formatCreatedAt(otp.createdAt),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _getStatusText(otp),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _getStatusColor(otp),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    _deleteOtp(otp);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete, color: Colors.red, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          AppLocalizations.of(context)!.delete,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                child: const Icon(
-                  Icons.more_vert,
-                  color: Color(0xFF6B7280),
-                ),
-              ),
-            ],
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: EdgeInsets.symmetric(
+            vertical: isMobile
+                ? 12
+                : isTablet
+                    ? 14
+                    : 16,
+            horizontal: isMobile
+                ? 8
+                : isTablet
+                    ? 10
+                    : 12,
           ),
-          const SizedBox(height: 16),
-          Text(
-            otp.code,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
-              letterSpacing: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: isMobile
+                  ? 18
+                  : isTablet
+                      ? 20
+                      : 22,
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _copyOtpCode(otp.code),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF6B46C1)),
-                    foregroundColor: const Color(0xFF6B46C1),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: const Icon(Icons.copy, size: 18),
-                  label: Text(AppLocalizations.of(context)!.copy),
-                ),
+            SizedBox(
+                height: isMobile
+                    ? 4
+                    : isTablet
+                        ? 6
+                        : 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isMobile
+                    ? 10
+                    : isTablet
+                        ? 11
+                        : 12,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _showQrCodeModal(otp),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF6B46C1)),
-                    foregroundColor: const Color(0xFF6B46C1),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: const Icon(Icons.qr_code, size: 18),
-                  label: Text(AppLocalizations.of(context)!.qrCode),
-                ),
-              ),
-            ],
-          ),
-        ],
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  IconData _getStatusIcon(OtpModel otp) {
+    if (otp.isBurned) return Icons.local_fire_department;
+    if (otp.isUsed) return Icons.check_circle;
+    if (otp.isExpired) return Icons.timer_off;
+    return Icons.timer;
   }
 
   String _formatCreatedAt(DateTime createdAt) {
@@ -874,22 +1428,21 @@ class _OtpListPageState extends State<OtpListPage> {
     final difference = now.difference(createdAt);
 
     if (difference.inMinutes < 1) {
-      return AppLocalizations.of(context)!.createdNow;
+      return 'Creato ora';
     } else if (difference.inMinutes < 60) {
-      return AppLocalizations.of(context)!
-          .createdMinutesAgo(difference.inMinutes);
+      return 'Creato ${difference.inMinutes} minuti fa';
     } else if (difference.inHours < 24) {
-      return AppLocalizations.of(context)!.createdHoursAgo(difference.inHours);
+      return 'Creato ${difference.inHours} ore fa';
     } else {
-      return AppLocalizations.of(context)!.createdDaysAgo(difference.inDays);
+      return 'Creato ${difference.inDays} giorni fa';
     }
   }
 
   String _getStatusText(OtpModel otp) {
-    if (otp.isBurned) return AppLocalizations.of(context)!.otpStatusBurned;
-    if (otp.isUsed) return AppLocalizations.of(context)!.otpStatusUsed;
-    if (otp.isExpired) return AppLocalizations.of(context)!.otpStatusExpired;
-    return AppLocalizations.of(context)!.otpStatusValid;
+    if (otp.isBurned) return 'Bruciato';
+    if (otp.isUsed) return 'Usato';
+    if (otp.isExpired) return 'Scaduto';
+    return 'Valido';
   }
 
   Color _getStatusColor(OtpModel otp) {
