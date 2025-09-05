@@ -637,200 +637,71 @@ class _OtpListPageState extends State<OtpListPage> {
 
     return Column(
       children: [
-        // Header Section
+        // Header Section - Compact
         Container(
           width: double.infinity,
-          margin: EdgeInsets.all(isMobile
-              ? 16
-              : isTablet
-                  ? 20
-                  : 24),
-          padding: EdgeInsets.all(isMobile
-              ? 20
-              : isTablet
-                  ? 24
-                  : 28),
+          margin: EdgeInsets.symmetric(
+            horizontal: isMobile ? 16 : isTablet ? 20 : 24,
+            vertical: isMobile ? 8 : isTablet ? 10 : 12,
+          ),
+          padding: EdgeInsets.all(isMobile ? 12 : isTablet ? 14 : 16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                const Color(0xFF6B46C1).withValues(alpha: 0.1),
-                const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF6B46C1).withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFF6B46C1).withValues(alpha: 0.2),
+              color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
-                spreadRadius: 0,
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child: Column(
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(isMobile
-                        ? 12
-                        : isTablet
-                            ? 14
-                            : 16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF6B46C1),
-                          const Color(0xFF8B5CF6),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.security,
-                      color: Colors.white,
-                      size: isMobile
-                          ? 24
-                          : isTablet
-                              ? 28
-                              : 32,
-                    ),
-                  ),
-                  SizedBox(
-                      width: isMobile
-                          ? 16
-                          : isTablet
-                              ? 20
-                              : 24),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.permanentOtpCodes,
-                          style: TextStyle(
-                            fontSize: isMobile
-                                ? 20
-                                : isTablet
-                                    ? 24
-                                    : 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                        SizedBox(
-                            height: isMobile
-                                ? 8
-                                : isTablet
-                                    ? 10
-                                    : 12),
-                        Text(
-                          AppLocalizations.of(context)!.manageSecureAccessCodes,
-                          style: TextStyle(
-                            fontSize: isMobile
-                                ? 14
-                                : isTablet
-                                    ? 16
-                                    : 18,
-                            color: Colors.grey.shade600,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                  height: isMobile
-                      ? 20
-                      : isTablet
-                          ? 24
-                          : 28),
               Container(
-                padding: EdgeInsets.all(isMobile
-                    ? 16
-                    : isTablet
-                        ? 20
-                        : 24),
+                padding: EdgeInsets.all(isMobile ? 6 : isTablet ? 8 : 10),
                 decoration: BoxDecoration(
+                  color: const Color(0xFF6B46C1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.security,
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade200,
-                      spreadRadius: 0,
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  size: isMobile ? 16 : isTablet ? 18 : 20,
+                ),
+              ),
+              SizedBox(width: isMobile ? 8 : isTablet ? 10 : 12),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!.permanentOtpCodes,
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : isTablet ? 16 : 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 8 : isTablet ? 10 : 12,
+                  vertical: isMobile ? 4 : isTablet ? 5 : 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(isMobile
-                          ? 8
-                          : isTablet
-                              ? 10
-                              : 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.vpn_key,
-                        color: const Color(0xFF6B46C1),
-                        size: isMobile
-                            ? 20
-                            : isTablet
-                                ? 24
-                                : 28,
-                      ),
+                    Icon(
+                      Icons.vpn_key,
+                      color: const Color(0xFF6B46C1),
+                      size: isMobile ? 14 : isTablet ? 16 : 18,
                     ),
-                    SizedBox(
-                        width: isMobile
-                            ? 12
-                            : isTablet
-                                ? 16
-                                : 20),
+                    SizedBox(width: isMobile ? 4 : isTablet ? 6 : 8),
                     Text(
                       '${_otps.length}',
                       style: TextStyle(
-                        fontSize: isMobile
-                            ? 28
-                            : isTablet
-                                ? 32
-                                : 36,
+                        fontSize: isMobile ? 14 : isTablet ? 16 : 18,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF6B46C1),
-                      ),
-                    ),
-                    SizedBox(
-                        width: isMobile
-                            ? 8
-                            : isTablet
-                                ? 12
-                                : 16),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.activeOtps,
-                        style: TextStyle(
-                          fontSize: isMobile
-                              ? 16
-                              : isTablet
-                                  ? 18
-                                  : 20,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
                       ),
                     ),
                   ],
