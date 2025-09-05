@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 // Import condizionale per web
 import 'dart:html' as html show Blob, Url, AnchorElement, document;
