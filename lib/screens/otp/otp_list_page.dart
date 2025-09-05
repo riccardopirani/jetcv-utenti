@@ -4,6 +4,7 @@ import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/services/otp_service.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
+import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:flutter/services.dart';
 
 class OtpListPage extends StatefulWidget {
@@ -17,11 +18,23 @@ class _OtpListPageState extends State<OtpListPage> {
   List<OtpModel> _otps = [];
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Riferimenti salvati per evitare errori di contesto invalidato
+  ScaffoldMessengerState? _scaffoldMessenger;
+  AppLocalizations? _localizations;
 
   @override
   void initState() {
     super.initState();
     _loadOtps();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Salva i riferimenti per evitare errori di contesto invalidato
+    _scaffoldMessenger = ScaffoldMessenger.of(context);
+    _localizations = AppLocalizations.of(context);
   }
 
   Future<void> _loadOtps() async {
@@ -35,14 +48,29 @@ class _OtpListPageState extends State<OtpListPage> {
       final userId = session?.user.id;
 
       if (userId != null) {
-        // Per ora, inizializziamo con una lista vuota
-        // In un'app reale, potresti voler recuperare gli OTP esistenti dal database
+        debugPrint('📋 Loading OTPs for user: $userId');
+        
+        final response = await OtpService.getUserOtps(
+          idUser: userId,
+          limit: 50,
+          offset: 0,
+        );
+
         if (mounted) {
-          setState(() {
-            _otps = [];
-            _isLoading = false;
-            _errorMessage = null;
-          });
+          if (response.success && response.data != null) {
+            setState(() {
+              _otps = response.data!;
+              _isLoading = false;
+              _errorMessage = null;
+            });
+            debugPrint('✅ Loaded ${_otps.length} OTPs');
+          } else {
+            setState(() {
+              _errorMessage = response.error ?? 'Failed to load OTPs';
+              _isLoading = false;
+            });
+            debugPrint('❌ Failed to load OTPs: ${response.error}');
+          }
         }
       } else {
         if (mounted) {
@@ -51,8 +79,10 @@ class _OtpListPageState extends State<OtpListPage> {
             _isLoading = false;
           });
         }
+        debugPrint('❌ User not authenticated');
       }
     } catch (e) {
+      debugPrint('❌ Error loading OTPs: $e');
       if (mounted) {
         setState(() {
           _errorMessage = 'Error loading OTPs: $e';
@@ -86,13 +116,17 @@ class _OtpListPageState extends State<OtpListPage> {
 
   void _copyOtpCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.otpCodeCopied),
-          backgroundColor: Colors.green,
-        ),
-      );
+    if (mounted && _scaffoldMessenger != null && _localizations != null) {
+      try {
+        _scaffoldMessenger!.showSnackBar(
+          SnackBar(
+            content: Text(_localizations!.otpCodeCopied),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (scaffoldError) {
+        debugPrint('ScaffoldMessenger failed: $scaffoldError');
+      }
     }
   }
 
@@ -127,7 +161,12 @@ class _OtpListPageState extends State<OtpListPage> {
                 );
 
                 if (!mounted) return;
-                Navigator.pop(context); // Close loading dialog
+                try {
+                  Navigator.pop(context); // Close loading dialog
+                } catch (navigatorError) {
+                  // Navigator might be invalid, ignore the error
+                  debugPrint('Navigator pop failed: $navigatorError');
+                }
 
                 if (response.success) {
                   setState(() {
@@ -139,36 +178,53 @@ class _OtpListPageState extends State<OtpListPage> {
                     }
                   });
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(AppLocalizations.of(context)!
-                            .otpBurnedSuccessfully),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                  if (mounted && _scaffoldMessenger != null && _localizations != null) {
+                    try {
+                      _scaffoldMessenger!.showSnackBar(
+                        SnackBar(
+                          content: Text(_localizations!.otpBurnedSuccessfully),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (scaffoldError) {
+                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
+                    }
                   }
                 } else {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(response.error ??
-                            AppLocalizations.of(context)!.otpBurnFailed),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                  if (mounted && _scaffoldMessenger != null && _localizations != null) {
+                    try {
+                      _scaffoldMessenger!.showSnackBar(
+                        SnackBar(
+                          content: Text(response.error ?? _localizations!.otpBurnFailed),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } catch (scaffoldError) {
+                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
+                    }
                   }
                 }
               } catch (e) {
                 if (mounted) {
-                  Navigator.pop(context); // Close loading dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                          Text(AppLocalizations.of(context)!.otpBurnFailed),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  try {
+                    Navigator.pop(context); // Close loading dialog
+                  } catch (navigatorError) {
+                    // Navigator might be invalid, ignore the error
+                    debugPrint('Navigator pop failed: $navigatorError');
+                  }
+                  if (_scaffoldMessenger != null && _localizations != null) {
+                    try {
+                      _scaffoldMessenger!.showSnackBar(
+                        SnackBar(
+                          content: Text(_localizations!.otpBurnFailed),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } catch (scaffoldError) {
+                      // ScaffoldMessenger might be invalid, ignore the error
+                      debugPrint('ScaffoldMessenger failed: $scaffoldError');
+                    }
+                  }
                 }
               }
             },
@@ -840,6 +896,18 @@ class NewOtpModal extends StatefulWidget {
 class _NewOtpModalState extends State<NewOtpModal> {
   final _tagController = TextEditingController();
   bool _isGenerating = false;
+  
+  // Riferimenti salvati per evitare errori di contesto invalidato
+  ScaffoldMessengerState? _scaffoldMessenger;
+  AppLocalizations? _localizations;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Salva i riferimenti per evitare errori di contesto invalidato
+    _scaffoldMessenger = ScaffoldMessenger.of(context);
+    _localizations = AppLocalizations.of(context);
+  }
 
   @override
   void dispose() {
@@ -857,14 +925,62 @@ class _NewOtpModalState extends State<NewOtpModal> {
       final userId = session?.user.id;
 
       if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.userNotLoaded),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text(_localizations!.userNotLoaded),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (scaffoldError) {
+            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+          }
+        }
         return;
       }
+
+      // First test database connection
+      debugPrint('🧪 Testing database connection before creating OTP...');
+      final dbTest = await OtpService.testDatabaseConnection();
+      if (!dbTest.success) {
+        debugPrint('❌ Database connection failed: ${dbTest.error}');
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text('Database connection failed: ${dbTest.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (scaffoldError) {
+            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+          }
+        }
+        return;
+      }
+      debugPrint('✅ Database connection successful');
+
+      // Test Edge Function accessibility
+      debugPrint('🧪 Testing Edge Function accessibility...');
+      final edgeTest = await OtpService.testEdgeFunction();
+      if (!edgeTest.success) {
+        debugPrint('❌ Edge Function test failed: ${edgeTest.error}');
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text('Edge Function not accessible: ${edgeTest.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (scaffoldError) {
+            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+          }
+        }
+        return;
+      }
+      debugPrint('✅ Edge Function accessible');
 
       final response = await OtpService.createOtp(
         idUser: userId,
@@ -880,28 +996,45 @@ class _NewOtpModalState extends State<NewOtpModal> {
         Navigator.pop(context);
         widget.onOtpCreated?.call(response.data!);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.otpCreatedSuccessfully),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text(_localizations!.otpCreatedSuccessfully),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } catch (scaffoldError) {
+            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+          }
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.error ??
-                AppLocalizations.of(context)!.otpCreationFailed),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text(response.error ?? _localizations!.otpCreationFailed),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (scaffoldError) {
+            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+          }
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.otpCreationFailed),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted && _scaffoldMessenger != null && _localizations != null) {
+        try {
+          _scaffoldMessenger!.showSnackBar(
+            SnackBar(
+              content: Text(_localizations!.otpCreationFailed),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } catch (scaffoldError) {
+          debugPrint('ScaffoldMessenger failed: $scaffoldError');
+        }
+      }
     } finally {
       setState(() {
         _isGenerating = false;
@@ -1015,12 +1148,20 @@ class QrCodeModal extends StatelessWidget {
 
   void _copyCode(BuildContext context) {
     Clipboard.setData(ClipboardData(text: otp.code));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.otpCodeCopied),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final localizations = AppLocalizations.of(context);
+      if (localizations != null) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(localizations.otpCodeCopied),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('ScaffoldMessenger failed in QrCodeModal: $e');
+    }
   }
 
   @override

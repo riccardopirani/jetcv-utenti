@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/services/media_download_service.dart';
+import 'package:http/http.dart' as http;
 
 class AttachedMediaWidget extends StatefulWidget {
   final UserCertificationDetail certification;
@@ -19,6 +20,150 @@ class AttachedMediaWidget extends StatefulWidget {
 
 class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   bool _isExpanded = false;
+
+  /// Verifica se il file esiste effettivamente sul backend
+  Future<bool> _checkFileExists(CertificationMediaItem media) async {
+    try {
+      // Costruisci l'URL del file come fa il MediaDownloadService
+      final filePath = '${media.idMediaHash}';
+      final extension = _getFileExtension(media.fileType, media);
+      final fullFilePath = '$filePath$extension';
+      
+      debugPrint('🔍 Media fileType: "${media.fileType}"');
+      debugPrint('🔍 Media name: "${media.name}"');
+      debugPrint('🔍 Determined extension: "$extension"');
+      debugPrint('🔍 Full file path: "$fullFilePath"');
+
+      // URL pubblico di Supabase Storage
+      final fileUrl =
+          'https://skqsuxmdfqxbkhmselaz.supabase.co/storage/v1/object/public/certification-media/$fullFilePath';
+
+      debugPrint('🔍 Checking file existence: $fileUrl');
+
+      // Fai una richiesta HEAD per verificare se il file esiste
+      final response = await http.head(Uri.parse(fileUrl));
+      
+      final exists = response.statusCode == 200;
+      debugPrint('🔍 File exists: $exists (status: ${response.statusCode})');
+      debugPrint('🔍 Response headers: ${response.headers}');
+      debugPrint('🔍 Response body: ${response.body}');
+
+      // Se il file con estensione non esiste, prova senza estensione
+      if (!exists && extension.isNotEmpty) {
+        final fallbackUrl =
+            'https://skqsuxmdfqxbkhmselaz.supabase.co/storage/v1/object/public/certification-media/$filePath';
+        debugPrint('🔍 Trying fallback URL: $fallbackUrl');
+
+        final fallbackResponse = await http.head(Uri.parse(fallbackUrl));
+        final fallbackExists = fallbackResponse.statusCode == 200;
+        debugPrint(
+            '🔍 Fallback file exists: $fallbackExists (status: ${fallbackResponse.statusCode})');
+        debugPrint('🔍 Fallback response headers: ${fallbackResponse.headers}');
+        debugPrint('🔍 Fallback response body: ${fallbackResponse.body}');
+
+        return fallbackExists;
+      }
+
+      return exists;
+    } catch (e) {
+      debugPrint('❌ Error checking file existence: $e');
+      // In caso di errore, assumiamo che il file non esista
+      return false;
+    }
+  }
+
+  /// Determina l'estensione del file basata sul tipo (usa la stessa logica di MediaDownloadService)
+  String _getFileExtension(String? fileType, CertificationMediaItem media) {
+    debugPrint('🔍 _getFileExtension called with fileType: "$fileType"');
+    debugPrint('🔍 _getFileExtension called with media.name: "${media.name}"');
+    
+    if (fileType == null) {
+      debugPrint('🔍 fileType is null, returning .bin');
+      return '.bin';
+    }
+
+    final lowerFileType = fileType.toLowerCase().trim();
+    debugPrint('🔍 lowerFileType: "$lowerFileType"');
+
+    switch (lowerFileType) {
+      case 'image/jpeg':
+      case 'jpeg':
+      case 'image': // Aggiunto caso generico per 'image' dal database
+        return '.jpg';
+      case 'image/png':
+      case 'png':
+        return '.png';
+      case 'image/gif':
+      case 'gif':
+        return '.gif';
+      case 'image/webp':
+      case 'webp':
+        return '.webp';
+      case 'application/pdf':
+      case 'pdf':
+      case 'pdf ':
+      case ' pdf':
+      case 'pdf.':
+      case '.pdf':
+      case 'document': // Aggiunto caso per 'document' dal database
+        debugPrint('🔍 Matched PDF case, returning .pdf');
+        return '.pdf';
+      case 'text/plain':
+      case 'txt':
+        return '.txt';
+      case 'application/msword':
+      case 'doc':
+        return '.doc';
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      case 'docx':
+        return '.docx';
+      case 'application/vnd.ms-excel':
+      case 'xls':
+        return '.xls';
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      case 'xlsx':
+        return '.xlsx';
+      case 'application/vnd.ms-powerpoint':
+      case 'ppt':
+        return '.ppt';
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      case 'pptx':
+        return '.pptx';
+      case 'video/mp4':
+      case 'mp4':
+      case 'video': // Aggiunto caso generico per 'video' dal database
+        return '.mp4';
+      case 'video/avi':
+      case 'avi':
+        return '.avi';
+      case 'video/mov':
+      case 'mov':
+        return '.mov';
+      case 'audio/mp3':
+      case 'mp3':
+        return '.mp3';
+      case 'audio/wav':
+      case 'wav':
+        return '.wav';
+      default:
+        debugPrint('🔍 No match found, trying to extract from name');
+        // Prova a estrarre l'estensione dal nome del file se disponibile
+        final extracted = _extractExtensionFromName(media.name);
+        debugPrint('🔍 Extracted from name: "$extracted"');
+        return extracted ?? '.bin';
+    }
+  }
+
+  /// Estrae l'estensione dal nome del file come fallback
+  String? _extractExtensionFromName(String? fileName) {
+    if (fileName == null || fileName.isEmpty) return null;
+
+    final lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex != -1 && lastDotIndex < fileName.length - 1) {
+      return fileName.substring(lastDotIndex);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -364,11 +509,37 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    final isRealTime = media.acquisitionType?.toLowerCase() == 'real-time';
+    // Debug per vedere il valore effettivo
+    debugPrint('🔍 Media acquisition_type: "${media.acquisitionType}"');
+    debugPrint(
+        '🔍 Media acquisition_type lowercase: "${media.acquisitionType?.toLowerCase()}"');
+
+    // Usa FutureBuilder per verificare l'esistenza del file in modo asincrono
+    return FutureBuilder<bool>(
+      future: _checkFileExists(media),
+      builder: (context, snapshot) {
+        final isFilePresent = snapshot.data ?? false;
+        final isRealTime = !isFilePresent; // Se il file NON esiste sul backend, è realtime
+
+        debugPrint('🔍 File present on backend: $isFilePresent');
+        debugPrint('🔍 Is realtime: $isRealTime');
+
+        return _buildMediaItemContent(
+            media, isRealTime, isMobile, isTablet, screenWidth);
+      },
+    );
+  }
+
+  Widget _buildMediaItemContent(CertificationMediaItem media, bool isRealTime,
+      bool isMobile, bool isTablet, double screenWidth) {
     final statusText = isRealTime
         ? AppLocalizations.of(context)!.realTime
         : AppLocalizations.of(context)!.uploaded;
-    final statusColor = isRealTime ? Colors.orange : Colors.green;
+    final statusColor = isRealTime ? Colors.green : Colors.yellow;
+    final statusTextColor = isRealTime ? Colors.white : Colors.black;
+
+    debugPrint('🔍 Status text: "$statusText"');
+    debugPrint('🔍 Status color: $statusColor');
 
     final icon = _getMediaIcon(media.fileType);
     final actionIcon = isRealTime ? Icons.visibility : Icons.download;
@@ -491,7 +662,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                         style: TextStyle(
                           fontSize: statusFontSize,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: statusTextColor,
                         ),
                       ),
                     ),

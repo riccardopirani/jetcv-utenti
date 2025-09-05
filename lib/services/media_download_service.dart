@@ -6,6 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 
+// Import condizionale per web
+import 'dart:html' as html show Blob, Url, AnchorElement, document;
+
 /// Servizio per il download dei media dalle certificazioni
 class MediaDownloadService {
   static const String _storageBucket = 'certification-media';
@@ -89,16 +92,40 @@ class MediaDownloadService {
       // Usa l'ID del media hash per costruire il path del file
       final filePath = '${media.idMediaHash}';
 
-      // Ottieni l'URL pubblico del file
+      // Aggiungi l'estensione del file se disponibile
+      final extension = _getFileExtension(media.fileType, media);
+      debugPrint(
+          '🔍 MediaDownloadService: URL extension determined: "$extension"');
+      final fullFilePath = '$filePath$extension';
+
+      // Ottieni l'URL pubblico del file con estensione
       final response = SupabaseConfig.client.storage
           .from(_storageBucket)
-          .getPublicUrl(filePath);
+          .getPublicUrl(fullFilePath);
 
       debugPrint('🔗 MediaDownloadService: Generated public URL: $response');
+      debugPrint(
+          '🔗 MediaDownloadService: File path with extension: $fullFilePath');
       return response;
     } catch (e) {
-      debugPrint('❌ MediaDownloadService: Error getting media URL: $e');
-      throw Exception('Failed to get media URL: $e');
+      debugPrint(
+          '❌ MediaDownloadService: Error getting media URL with extension: $e');
+
+      // Fallback: prova senza estensione se il file con estensione non esiste
+      try {
+        final filePath = '${media.idMediaHash}';
+        final response = SupabaseConfig.client.storage
+            .from(_storageBucket)
+            .getPublicUrl(filePath);
+
+        debugPrint(
+            '🔗 MediaDownloadService: Fallback URL without extension: $response');
+        return response;
+      } catch (fallbackError) {
+        debugPrint(
+            '❌ MediaDownloadService: Error getting media URL (fallback): $fallbackError');
+        throw Exception('Failed to get media URL: $e');
+      }
     }
   }
 
@@ -122,14 +149,19 @@ class MediaDownloadService {
   static Future<File> _saveFileLocally(
       CertificationMediaItem media, Uint8List data) async {
     try {
-      // Ottieni la directory dei download
+      // Gestione specifica per web
+      if (kIsWeb) {
+        return await _saveFileForWeb(media, data);
+      }
+
+      // Ottieni la directory dei download per mobile/desktop
       Directory? directory;
       if (Platform.isAndroid) {
         directory = await getExternalStorageDirectory();
       } else if (Platform.isIOS) {
         directory = await getApplicationDocumentsDirectory();
       } else {
-        // Per web, usa la directory temporanea
+        // Per desktop, usa la directory temporanea
         directory = await getTemporaryDirectory();
       }
 
@@ -144,11 +176,24 @@ class MediaDownloadService {
       }
 
       // Determina l'estensione del file
-      final extension = _getFileExtension(media.fileType);
+      String extension = _getFileExtension(media.fileType, media);
+      debugPrint(
+          '🔍 MediaDownloadService: File extension determined: "$extension"');
+
+      // Se l'estensione è .bin, prova a determinarla dal contenuto
+      if (extension == '.bin') {
+        final detectedExtension = _detectFileTypeFromContent(data);
+        if (detectedExtension != null) {
+          extension = detectedExtension;
+          debugPrint(
+              '🔍 MediaDownloadService: Updated extension from content: "$extension"');
+        }
+      }
 
       // Crea il nome del file
       final fileName =
           '${media.name ?? 'media'}_${media.idCertificationMedia}$extension';
+      debugPrint('🔍 MediaDownloadService: Final file name: "$fileName"');
       final filePath = '${downloadDir.path}/$fileName';
 
       // Salva il file
@@ -163,10 +208,26 @@ class MediaDownloadService {
   }
 
   /// Determina l'estensione del file basata sul tipo
-  static String _getFileExtension(String? fileType) {
-    if (fileType == null) return '.bin';
+  static String _getFileExtension(
+      String? fileType, CertificationMediaItem? media) {
+    debugPrint('🔍 MediaDownloadService: File type received: "$fileType"');
+    debugPrint(
+        '🔍 MediaDownloadService: File type length: ${fileType?.length ?? 0}');
+    debugPrint(
+        '🔍 MediaDownloadService: File type bytes: ${fileType?.codeUnits ?? []}');
 
-    switch (fileType.toLowerCase()) {
+    if (fileType == null) {
+      debugPrint('🔍 MediaDownloadService: File type is null, returning .bin');
+      return '.bin';
+    }
+
+    final lowerFileType = fileType.toLowerCase().trim();
+    debugPrint(
+        '🔍 MediaDownloadService: File type (lowercase, trimmed): "$lowerFileType"');
+    debugPrint(
+        '🔍 MediaDownloadService: File type (lowercase, trimmed) length: ${lowerFileType.length}');
+
+    switch (lowerFileType) {
       case 'image/jpeg':
       case 'jpeg':
         return '.jpg';
@@ -181,6 +242,12 @@ class MediaDownloadService {
         return '.webp';
       case 'application/pdf':
       case 'pdf':
+      case 'pdf ':
+      case ' pdf':
+      case 'pdf.':
+      case '.pdf':
+        debugPrint(
+            '🔍 MediaDownloadService: PDF file type detected, returning .pdf');
         return '.pdf';
       case 'text/plain':
       case 'txt':
@@ -219,7 +286,172 @@ class MediaDownloadService {
       case 'wav':
         return '.wav';
       default:
-        return '.bin';
+        debugPrint(
+            '🔍 MediaDownloadService: Unknown file type "$lowerFileType", trying to extract from name');
+        // Prova a estrarre l'estensione dal nome del file se disponibile
+        return _extractExtensionFromName(media?.name) ?? '.bin';
+    }
+  }
+
+  /// Estrae l'estensione dal nome del file come fallback
+  static String? _extractExtensionFromName(String? fileName) {
+    if (fileName == null || fileName.isEmpty) return null;
+
+    // Prima prova a estrarre l'estensione classica (con punto)
+    final lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex != -1 && lastDotIndex < fileName.length - 1) {
+      final extension = fileName.substring(lastDotIndex).toLowerCase();
+      debugPrint(
+          '🔍 MediaDownloadService: Extracted extension from name: "$extension"');
+
+      // Verifica che sia un'estensione valida
+      if (extension.length > 1 && extension.length <= 5) {
+        return extension;
+      }
+    }
+
+    // Se non trova un'estensione classica, cerca pattern comuni nel nome
+    final lowerFileName = fileName.toLowerCase();
+
+    // Cerca PDF tra parentesi o nel nome
+    if (lowerFileName.contains('(pdf)') || lowerFileName.contains('pdf')) {
+      debugPrint('🔍 MediaDownloadService: Found PDF in name, returning .pdf');
+      return '.pdf';
+    }
+
+    // Cerca altri formati comuni
+    if (lowerFileName.contains('(jpg)') || lowerFileName.contains('(jpeg)')) {
+      debugPrint('🔍 MediaDownloadService: Found JPEG in name, returning .jpg');
+      return '.jpg';
+    }
+
+    if (lowerFileName.contains('(png)')) {
+      debugPrint('🔍 MediaDownloadService: Found PNG in name, returning .png');
+      return '.png';
+    }
+
+    if (lowerFileName.contains('(doc)')) {
+      debugPrint('🔍 MediaDownloadService: Found DOC in name, returning .doc');
+      return '.doc';
+    }
+
+    if (lowerFileName.contains('(docx)')) {
+      debugPrint(
+          '🔍 MediaDownloadService: Found DOCX in name, returning .docx');
+      return '.docx';
+    }
+
+    debugPrint(
+        '🔍 MediaDownloadService: Could not extract valid extension from name: "$fileName"');
+    return null;
+  }
+
+  /// Determina il tipo di file dal contenuto (magic bytes)
+  static String? _detectFileTypeFromContent(Uint8List data) {
+    if (data.length < 4) return null;
+
+    // PDF: %PDF
+    if (data.length >= 4 &&
+        data[0] == 0x25 &&
+        data[1] == 0x50 &&
+        data[2] == 0x44 &&
+        data[3] == 0x46) {
+      debugPrint('🔍 MediaDownloadService: Detected PDF from content');
+      return '.pdf';
+    }
+
+    // JPEG: FF D8 FF
+    if (data.length >= 3 &&
+        data[0] == 0xFF &&
+        data[1] == 0xD8 &&
+        data[2] == 0xFF) {
+      debugPrint('🔍 MediaDownloadService: Detected JPEG from content');
+      return '.jpg';
+    }
+
+    // PNG: 89 50 4E 47
+    if (data.length >= 4 &&
+        data[0] == 0x89 &&
+        data[1] == 0x50 &&
+        data[2] == 0x4E &&
+        data[3] == 0x47) {
+      debugPrint('🔍 MediaDownloadService: Detected PNG from content');
+      return '.png';
+    }
+
+    debugPrint(
+        '🔍 MediaDownloadService: Could not detect file type from content');
+    return null;
+  }
+
+  /// Salva il file per la piattaforma web
+  static Future<File> _saveFileForWeb(
+      CertificationMediaItem media, Uint8List data) async {
+    try {
+      // Determina l'estensione del file
+      String extension = _getFileExtension(media.fileType, media);
+      debugPrint(
+          '🔍 MediaDownloadService: Web file extension determined: "$extension"');
+
+      // Se l'estensione è .bin, prova a determinarla dal contenuto
+      if (extension == '.bin') {
+        final detectedExtension = _detectFileTypeFromContent(data);
+        if (detectedExtension != null) {
+          extension = detectedExtension;
+          debugPrint(
+              '🔍 MediaDownloadService: Web updated extension from content: "$extension"');
+        }
+      }
+
+      // Crea il nome del file
+      final fileName =
+          '${media.name ?? 'media'}_${media.idCertificationMedia}$extension';
+      debugPrint('🔍 MediaDownloadService: Web final file name: "$fileName"');
+
+      // Per web, avvia il download del browser
+      await _triggerWebDownload(fileName, data);
+      debugPrint(
+          '💾 MediaDownloadService: Web download triggered for: $fileName');
+
+      // Restituisci un file fittizio per compatibilità
+      return File('/web/downloads/$fileName');
+    } catch (e) {
+      debugPrint('❌ MediaDownloadService: Error saving web file: $e');
+      throw Exception('Failed to save web file: $e');
+    }
+  }
+
+  /// Avvia il download del file nel browser web
+  static Future<void> _triggerWebDownload(
+      String fileName, Uint8List data) async {
+    try {
+      // Verifica che siamo su web
+      if (!kIsWeb) {
+        throw Exception('Web download can only be used on web platform');
+      }
+
+      // Crea un blob URL per il download
+      final blob = html.Blob([data]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      // Crea un elemento anchor temporaneo per il download
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', fileName)
+        ..style.display = 'none';
+
+      // Aggiungi al DOM, clicca e rimuovi
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+
+      // Pulisci l'URL del blob
+      html.Url.revokeObjectUrl(url);
+
+      debugPrint(
+          '💾 MediaDownloadService: Web download completed for: $fileName');
+    } catch (e) {
+      debugPrint('❌ MediaDownloadService: Error triggering web download: $e');
+      throw Exception('Failed to trigger web download: $e');
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/services/edge_function_service.dart';
+import 'package:jetcv__utenti/supabase/supabase_config.dart';
 
 /// Service for OTP operations using the deployed otp-crud Supabase function
 class OtpService {
@@ -19,6 +20,8 @@ class OtpService {
       debugPrint('🔐 OtpService: Creating OTP with tag: $tag');
       debugPrint('🔐 OtpService: Function name: $_functionName');
       debugPrint('🔐 OtpService: User ID: $idUser');
+      debugPrint('🔐 OtpService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
+      debugPrint('🔐 OtpService: Current user: ${SupabaseConfig.client.auth.currentUser?.id}');
 
       final requestBody = {
         'id_user': idUser,
@@ -36,6 +39,8 @@ class OtpService {
       );
 
       debugPrint('🔄 OtpService: Create OTP response: $response');
+      debugPrint('🔄 OtpService: Response type: ${response.runtimeType}');
+      debugPrint('🔄 OtpService: Response keys: ${response.keys.toList()}');
 
       // The function returns { ok: true, otp: {...} }
       final bool isSuccess = response['ok'] == true;
@@ -232,6 +237,168 @@ class OtpService {
       return EdgeFunctionResponse<OtpMetadataModel>(
         success: false,
         error: 'Error getting OTP metadata: $e',
+      );
+    }
+  }
+
+  /// Test database connection and OTP table existence
+  /// Returns success status
+  static Future<EdgeFunctionResponse<bool>> testDatabaseConnection() async {
+    try {
+      debugPrint('🧪 OtpService: Testing database connection...');
+      
+      // Test if we can query the OTP table
+      final response = await SupabaseConfig.client
+          .from('otp')
+          .select('count')
+          .limit(1);
+      
+      debugPrint('✅ OtpService: Database connection successful');
+      debugPrint('📊 OtpService: OTP table accessible, response: $response');
+      
+      return EdgeFunctionResponse<bool>(
+        success: true,
+        data: true,
+        message: 'Database connection successful',
+      );
+    } catch (e) {
+      debugPrint('❌ OtpService: Database connection failed: $e');
+      return EdgeFunctionResponse<bool>(
+        success: false,
+        error: 'Database connection failed: $e',
+      );
+    }
+  }
+
+  /// Get all OTPs for a user
+  /// Returns list of OTPs
+  static Future<EdgeFunctionResponse<List<OtpModel>>> getUserOtps({
+    String? idUser,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      debugPrint('📋 OtpService: Getting user OTPs for user: $idUser');
+      
+      // Query the OTP table directly
+      if (idUser == null) {
+        return EdgeFunctionResponse<List<OtpModel>>(
+          success: false,
+          error: 'User ID is required',
+        );
+      }
+      
+      final response = await SupabaseConfig.client
+          .from('otp')
+          .select('*')
+          .eq('id_user', idUser)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+      
+      debugPrint('📋 OtpService: Raw OTP response: $response');
+      
+      final List<OtpModel> otps = [];
+      for (final otpData in response) {
+        try {
+          final otp = OtpModel.fromJson(otpData);
+          otps.add(otp);
+        } catch (e) {
+          debugPrint('❌ OtpService: Error parsing OTP: $e, data: $otpData');
+        }
+      }
+      
+      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs');
+      
+      return EdgeFunctionResponse<List<OtpModel>>(
+        success: true,
+        data: otps,
+        message: 'OTPs retrieved successfully',
+      );
+    } catch (e) {
+      debugPrint('❌ OtpService: Error getting user OTPs: $e');
+      return EdgeFunctionResponse<List<OtpModel>>(
+        success: false,
+        error: 'Error getting user OTPs: $e',
+      );
+    }
+  }
+
+  /// Test Edge Function accessibility
+  /// Returns success status
+  static Future<EdgeFunctionResponse<bool>> testEdgeFunction() async {
+    try {
+      debugPrint('🧪 OtpService: Testing Edge Function accessibility...');
+      
+      // Check authentication first
+      final currentUser = SupabaseConfig.client.auth.currentUser;
+      final currentSession = SupabaseConfig.client.auth.currentSession;
+      
+      debugPrint('🔐 OtpService: Current user: ${currentUser?.id}');
+      debugPrint('🔐 OtpService: Current session: ${currentSession != null}');
+      debugPrint('🔐 OtpService: Session expires at: ${currentSession?.expiresAt}');
+      debugPrint('🔐 OtpService: Session is expired: ${currentSession?.isExpired}');
+      
+      if (currentUser == null || currentSession == null) {
+        return EdgeFunctionResponse<bool>(
+          success: false,
+          error: 'User not authenticated',
+        );
+      }
+      
+      if (currentSession.isExpired) {
+        return EdgeFunctionResponse<bool>(
+          success: false,
+          error: 'Session expired',
+        );
+      }
+      
+      // Test by creating a temporary OTP (this will be cleaned up)
+      final response = await EdgeFunctionService.invokeFunction(
+        _functionName,
+        {
+          'id_user': currentUser.id,
+          'tag': 'test-connection',
+          'ttl_seconds': 60, // Short TTL for test
+          'length': 6,
+          'numeric_only': true,
+        },
+      );
+      
+      debugPrint('✅ OtpService: Edge Function accessible');
+      debugPrint('📊 OtpService: Edge Function response: $response');
+      
+      // Clean up the test OTP if it was created successfully
+      if (response['ok'] == true && response['otp'] != null) {
+        final otpData = response['otp'] as Map<String, dynamic>;
+        final testOtpId = otpData['id_otp'] as String?;
+        
+        if (testOtpId != null) {
+          debugPrint('🧹 OtpService: Cleaning up test OTP: $testOtpId');
+          try {
+            await EdgeFunctionService.invokeFunction(
+              _functionName,
+              {
+                'id_otp': testOtpId,
+                'id_user': currentUser.id,
+              },
+            );
+            debugPrint('✅ OtpService: Test OTP cleaned up successfully');
+          } catch (e) {
+            debugPrint('⚠️ OtpService: Failed to clean up test OTP: $e');
+          }
+        }
+      }
+      
+      return EdgeFunctionResponse<bool>(
+        success: true,
+        data: true,
+        message: 'Edge Function accessible',
+      );
+    } catch (e) {
+      debugPrint('❌ OtpService: Edge Function test failed: $e');
+      return EdgeFunctionResponse<bool>(
+        success: false,
+        error: 'Edge Function test failed: $e',
       );
     }
   }

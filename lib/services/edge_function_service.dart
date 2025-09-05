@@ -7,6 +7,41 @@ import 'package:jetcv__utenti/models/models.dart';
 class EdgeFunctionService {
   static final _client = SupabaseConfig.client;
 
+  /// Metodo per health check GET (senza body)
+  static Future<Map<String, dynamic>> healthCheck(String functionName) async {
+    try {
+      debugPrint('🏥 EdgeFunctionService: Health check for function $functionName');
+      debugPrint('🏥 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
+      debugPrint('🏥 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
+      debugPrint('🏥 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
+
+      // Per health check, facciamo una chiamata HTTP diretta GET
+      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/$functionName';
+      final session = _client.auth.currentSession;
+      
+      if (session == null) {
+        throw Exception('No active session for health check');
+      }
+
+      final response = await _client.functions.invoke(
+        functionName,
+        body: null, // Body null per triggerare GET
+      );
+
+      debugPrint('🏥 EdgeFunctionService: Health check response status: ${response.status}');
+      debugPrint('🏥 EdgeFunctionService: Health check response data: ${response.data}');
+
+      if (response.data != null) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Risposta vuota dalla funzione $functionName');
+      }
+    } catch (e) {
+      debugPrint('❌ EdgeFunctionService: Health check failed for $functionName: $e');
+      throw Exception('Health check failed for $functionName: $e');
+    }
+  }
+
   /// Metodo generico per chiamare una Edge Function
   static Future<Map<String, dynamic>> invokeFunction(
     String functionName,
@@ -15,6 +50,9 @@ class EdgeFunctionService {
     try {
       debugPrint('🚀 EdgeFunctionService: Calling function $functionName');
       debugPrint('🚀 EdgeFunctionService: Request body: $body');
+      debugPrint('🚀 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
+      debugPrint('🚀 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
+      debugPrint('🚀 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
 
       final response = await _client.functions.invoke(
         functionName,
@@ -23,6 +61,7 @@ class EdgeFunctionService {
 
       debugPrint('🔄 EdgeFunctionService: Response status: ${response.status}');
       debugPrint('🔄 EdgeFunctionService: Response data: ${response.data}');
+      debugPrint('🔄 EdgeFunctionService: Response type: ${response.data.runtimeType}');
 
       if (response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -33,6 +72,7 @@ class EdgeFunctionService {
       debugPrint(
           '❌ EdgeFunctionService: Error calling function $functionName: $e');
       debugPrint('❌ EdgeFunctionService: Error type: ${e.runtimeType}');
+      debugPrint('❌ EdgeFunctionService: Error details: ${e.toString()}');
 
       // Handle specific error types
       if (e.toString().contains('Failed to fetch')) {
@@ -44,6 +84,12 @@ class EdgeFunctionService {
       } else if (e.toString().contains('TimeoutException')) {
         throw Exception(
             'Timeout error: $functionName took too long to respond. Please try again.');
+      } else if (e.toString().contains('Function not found')) {
+        throw Exception(
+            'Function $functionName not found. Please check if the function is deployed.');
+      } else if (e.toString().contains('Unauthorized')) {
+        throw Exception(
+            'Unauthorized: Please check your authentication and permissions.');
       }
 
       throw Exception('Errore chiamando la funzione $functionName: $e');

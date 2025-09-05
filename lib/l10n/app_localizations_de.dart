@@ -826,6 +826,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get realTime => 'ECHTZEIT';
 
   @override
+  String get uploadedInRealtime => 'in Echtzeit hochgeladen';
+
+  @override
   String get uploaded => 'HOCHGELADEN';
 
   @override

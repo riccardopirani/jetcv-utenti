@@ -1598,6 +1598,12 @@ abstract class AppLocalizations {
   /// **'REAL-TIME'**
   String get realTime;
 
+  /// No description provided for @uploadedInRealtime.
+  ///
+  /// In en, this message translates to:
+  /// **'uploaded in realtime'**
+  String get uploadedInRealtime;
+
   /// No description provided for @uploaded.
   ///
   /// In en, this message translates to:

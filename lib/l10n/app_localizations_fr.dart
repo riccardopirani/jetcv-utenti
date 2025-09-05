@@ -823,6 +823,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get realTime => 'TEMPS RÉEL';
 
   @override
+  String get uploadedInRealtime => 'téléchargé en temps réel';
+
+  @override
   String get uploaded => 'TÉLÉCHARGÉ';
 
   @override

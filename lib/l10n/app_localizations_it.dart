@@ -818,6 +818,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get realTime => 'REAL-TIME';
 
   @override
+  String get uploadedInRealtime => 'caricato in realtime';
+
+  @override
   String get uploaded => 'CARICATO';
 
   @override
