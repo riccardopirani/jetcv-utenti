@@ -801,14 +801,14 @@ class AppLocalizationsIt extends AppLocalizations {
       'I media sono suddivisi tra contenuti generici della certificazione e documenti specifici del tuo percorso.';
 
   @override
-  String get genericMedia => 'Media Generici';
+  String get genericMedia => 'Media di Contesto';
 
   @override
   String get didacticMaterialAndOfficialDocumentation =>
       'Materiale didattico e documentazione ufficiale';
 
   @override
-  String get personalMedia => 'Media Personali';
+  String get personalMedia => 'Media Certificativi';
 
   @override
   String get documentsAndContentOfYourCertificationPath =>

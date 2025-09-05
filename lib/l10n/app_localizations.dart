@@ -1571,7 +1571,7 @@ abstract class AppLocalizations {
   /// No description provided for @genericMedia.
   ///
   /// In en, this message translates to:
-  /// **'Generic Media'**
+  /// **'Context Media'**
   String get genericMedia;
 
   /// No description provided for @didacticMaterialAndOfficialDocumentation.
@@ -1583,7 +1583,7 @@ abstract class AppLocalizations {
   /// No description provided for @personalMedia.
   ///
   /// In en, this message translates to:
-  /// **'Personal Media'**
+  /// **'Certification Media'**
   String get personalMedia;
 
   /// No description provided for @documentsAndContentOfYourCertificationPath.

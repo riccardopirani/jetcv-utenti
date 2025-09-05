@@ -809,14 +809,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Medien sind zwischen generischen Zertifizierungsinhalten und spezifischen Dokumenten Ihres Weges aufgeteilt.';
 
   @override
-  String get genericMedia => 'Generische Medien';
+  String get genericMedia => 'Kontextmedien';
 
   @override
   String get didacticMaterialAndOfficialDocumentation =>
       'Didaktisches Material und offizielle Dokumentation';
 
   @override
-  String get personalMedia => 'Persönliche Medien';
+  String get personalMedia => 'Zertifizierungsmedien';
 
   @override
   String get documentsAndContentOfYourCertificationPath =>

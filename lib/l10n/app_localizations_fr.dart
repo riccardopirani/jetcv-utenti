@@ -806,14 +806,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les médias sont divisés entre le contenu générique de certification et les documents spécifiques de votre parcours.';
 
   @override
-  String get genericMedia => 'Médias Génériques';
+  String get genericMedia => 'Médias de Contexte';
 
   @override
   String get didacticMaterialAndOfficialDocumentation =>
       'Matériel didactique et documentation officielle';
 
   @override
-  String get personalMedia => 'Médias Personnels';
+  String get personalMedia => 'Médias Certificatifs';
 
   @override
   String get documentsAndContentOfYourCertificationPath =>

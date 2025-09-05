@@ -797,14 +797,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Media are divided between generic certification content and specific documents of your path.';
 
   @override
-  String get genericMedia => 'Generic Media';
+  String get genericMedia => 'Context Media';
 
   @override
   String get didacticMaterialAndOfficialDocumentation =>
       'Didactic material and official documentation';
 
   @override
-  String get personalMedia => 'Personal Media';
+  String get personalMedia => 'Certification Media';
 
   @override
   String get documentsAndContentOfYourCertificationPath =>
