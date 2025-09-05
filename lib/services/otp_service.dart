@@ -287,26 +287,35 @@ class OtpService {
         );
       }
 
-      final response = await SupabaseConfig.client
-          .from('otp')
-          .select('*')
-          .eq('id_user', idUser)
-          .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
+      // Use RPC function instead of direct table access
+      final response = await SupabaseConfig.client.rpc(
+        'otp_list_user_otps',
+        params: {
+          'p_id_user': idUser,
+          'p_limit': limit,
+          'p_offset': offset,
+        },
+      );
 
-      debugPrint('📋 OtpService: Raw OTP response: $response');
+      debugPrint('📋 OtpService: Raw OTP RPC response: $response');
 
       final List<OtpModel> otps = [];
       for (final otpData in response) {
         try {
-          final otp = OtpModel.fromJson(otpData);
+          // Convert RPC response to OtpModel format
+          final otpJson = Map<String, dynamic>.from(otpData);
+          // Add missing fields that OtpModel expects
+          otpJson['code'] = '***'; // Don't expose actual code
+          otpJson['code_hash'] = '***'; // Don't expose hash
+          
+          final otp = OtpModel.fromJson(otpJson);
           otps.add(otp);
         } catch (e) {
           debugPrint('❌ OtpService: Error parsing OTP: $e, data: $otpData');
         }
       }
 
-      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs');
+      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs via RPC');
 
       return EdgeFunctionResponse<List<OtpModel>>(
         success: true,

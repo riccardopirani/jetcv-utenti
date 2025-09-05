@@ -38,6 +38,7 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Future<void> _loadOtps() async {
+    debugPrint('🔄 _loadOtps() called');
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -97,10 +98,10 @@ class _OtpListPageState extends State<OtpListPage> {
       context: context,
       builder: (context) => NewOtpModal(
         onOtpCreated: (otp) {
+          debugPrint('🔄 OTP created callback called, reloading OTPs...');
           if (mounted) {
-            setState(() {
-              _otps.add(otp);
-            });
+            // Ricarica la lista completa per assicurarsi che sia aggiornata
+            _loadOtps();
           }
         },
       ),
@@ -999,6 +1000,7 @@ class _NewOtpModalState extends State<NewOtpModal> {
       );
 
       if (response.success && response.data != null) {
+        debugPrint('✅ OTP created successfully, calling callback...');
         Navigator.pop(context);
         widget.onOtpCreated?.call(response.data!);
 
