@@ -1301,11 +1301,11 @@ class _OtpListPageState extends State<OtpListPage> {
     if (difference.inMinutes < 1) {
       return AppLocalizations.of(context)!.createdNow;
     } else if (difference.inMinutes < 60) {
-      return AppLocalizations.of(context)!.createdMinutesAgo.replaceAll('{minutes}', difference.inMinutes.toString());
+      return 'Creato ${difference.inMinutes} minuti fa';
     } else if (difference.inHours < 24) {
-      return AppLocalizations.of(context)!.createdHoursAgo.replaceAll('{hours}', difference.inHours.toString());
+      return 'Creato ${difference.inHours} ore fa';
     } else {
-      return AppLocalizations.of(context)!.createdDaysAgo.replaceAll('{days}', difference.inDays.toString());
+      return 'Creato ${difference.inDays} giorni fa';
     }
   }
 
