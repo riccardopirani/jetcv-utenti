@@ -18,7 +18,7 @@ class _OtpListPageState extends State<OtpListPage> {
   List<OtpModel> _otps = [];
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
   AppLocalizations? _localizations;
@@ -49,7 +49,7 @@ class _OtpListPageState extends State<OtpListPage> {
 
       if (userId != null) {
         debugPrint('📋 Loading OTPs for user: $userId');
-        
+
         final response = await OtpService.getUserOtps(
           idUser: userId,
           limit: 50,
@@ -178,7 +178,9 @@ class _OtpListPageState extends State<OtpListPage> {
                     }
                   });
 
-                  if (mounted && _scaffoldMessenger != null && _localizations != null) {
+                  if (mounted &&
+                      _scaffoldMessenger != null &&
+                      _localizations != null) {
                     try {
                       _scaffoldMessenger!.showSnackBar(
                         SnackBar(
@@ -191,11 +193,14 @@ class _OtpListPageState extends State<OtpListPage> {
                     }
                   }
                 } else {
-                  if (mounted && _scaffoldMessenger != null && _localizations != null) {
+                  if (mounted &&
+                      _scaffoldMessenger != null &&
+                      _localizations != null) {
                     try {
                       _scaffoldMessenger!.showSnackBar(
                         SnackBar(
-                          content: Text(response.error ?? _localizations!.otpBurnFailed),
+                          content: Text(
+                              response.error ?? _localizations!.otpBurnFailed),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -896,7 +901,7 @@ class NewOtpModal extends StatefulWidget {
 class _NewOtpModalState extends State<NewOtpModal> {
   final _tagController = TextEditingController();
   bool _isGenerating = false;
-  
+
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
   AppLocalizations? _localizations;
@@ -970,7 +975,8 @@ class _NewOtpModalState extends State<NewOtpModal> {
           try {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
-                content: Text('Edge Function not accessible: ${edgeTest.error}'),
+                content:
+                    Text('Edge Function not accessible: ${edgeTest.error}'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -1013,7 +1019,8 @@ class _NewOtpModalState extends State<NewOtpModal> {
           try {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
-                content: Text(response.error ?? _localizations!.otpCreationFailed),
+                content:
+                    Text(response.error ?? _localizations!.otpCreationFailed),
                 backgroundColor: Colors.red,
               ),
             );

@@ -52,23 +52,23 @@ class BlockchainInfoPage extends StatelessWidget {
             // Header with Polygon logo and title
             _buildHeader(context, isMobile),
             const SizedBox(height: 24),
-            
+
             // Transaction ID section
             _buildTransactionSection(context, isMobile),
             const SizedBox(height: 24),
-            
+
             // NFT Information section
             _buildNftInfoSection(context, isMobile),
             const SizedBox(height: 24),
-            
+
             // Mint Information section
             _buildMintInfoSection(context, isMobile),
             const SizedBox(height: 24),
-            
+
             // Certificate Details section
             _buildCertificateDetailsSection(context, isMobile),
             const SizedBox(height: 24),
-            
+
             // Blockchain Verification section
             _buildVerificationSection(context, isMobile),
           ],

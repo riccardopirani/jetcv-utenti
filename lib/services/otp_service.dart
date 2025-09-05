@@ -21,7 +21,8 @@ class OtpService {
       debugPrint('🔐 OtpService: Function name: $_functionName');
       debugPrint('🔐 OtpService: User ID: $idUser');
       debugPrint('🔐 OtpService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
-      debugPrint('🔐 OtpService: Current user: ${SupabaseConfig.client.auth.currentUser?.id}');
+      debugPrint(
+          '🔐 OtpService: Current user: ${SupabaseConfig.client.auth.currentUser?.id}');
 
       final requestBody = {
         'id_user': idUser,
@@ -246,16 +247,14 @@ class OtpService {
   static Future<EdgeFunctionResponse<bool>> testDatabaseConnection() async {
     try {
       debugPrint('🧪 OtpService: Testing database connection...');
-      
+
       // Test if we can query the OTP table
-      final response = await SupabaseConfig.client
-          .from('otp')
-          .select('count')
-          .limit(1);
-      
+      final response =
+          await SupabaseConfig.client.from('otp').select('count').limit(1);
+
       debugPrint('✅ OtpService: Database connection successful');
       debugPrint('📊 OtpService: OTP table accessible, response: $response');
-      
+
       return EdgeFunctionResponse<bool>(
         success: true,
         data: true,
@@ -279,7 +278,7 @@ class OtpService {
   }) async {
     try {
       debugPrint('📋 OtpService: Getting user OTPs for user: $idUser');
-      
+
       // Query the OTP table directly
       if (idUser == null) {
         return EdgeFunctionResponse<List<OtpModel>>(
@@ -287,16 +286,16 @@ class OtpService {
           error: 'User ID is required',
         );
       }
-      
+
       final response = await SupabaseConfig.client
           .from('otp')
           .select('*')
           .eq('id_user', idUser)
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
-      
+
       debugPrint('📋 OtpService: Raw OTP response: $response');
-      
+
       final List<OtpModel> otps = [];
       for (final otpData in response) {
         try {
@@ -306,9 +305,9 @@ class OtpService {
           debugPrint('❌ OtpService: Error parsing OTP: $e, data: $otpData');
         }
       }
-      
+
       debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs');
-      
+
       return EdgeFunctionResponse<List<OtpModel>>(
         success: true,
         data: otps,
@@ -328,30 +327,32 @@ class OtpService {
   static Future<EdgeFunctionResponse<bool>> testEdgeFunction() async {
     try {
       debugPrint('🧪 OtpService: Testing Edge Function accessibility...');
-      
+
       // Check authentication first
       final currentUser = SupabaseConfig.client.auth.currentUser;
       final currentSession = SupabaseConfig.client.auth.currentSession;
-      
+
       debugPrint('🔐 OtpService: Current user: ${currentUser?.id}');
       debugPrint('🔐 OtpService: Current session: ${currentSession != null}');
-      debugPrint('🔐 OtpService: Session expires at: ${currentSession?.expiresAt}');
-      debugPrint('🔐 OtpService: Session is expired: ${currentSession?.isExpired}');
-      
+      debugPrint(
+          '🔐 OtpService: Session expires at: ${currentSession?.expiresAt}');
+      debugPrint(
+          '🔐 OtpService: Session is expired: ${currentSession?.isExpired}');
+
       if (currentUser == null || currentSession == null) {
         return EdgeFunctionResponse<bool>(
           success: false,
           error: 'User not authenticated',
         );
       }
-      
+
       if (currentSession.isExpired) {
         return EdgeFunctionResponse<bool>(
           success: false,
           error: 'Session expired',
         );
       }
-      
+
       // Test by creating a temporary OTP (this will be cleaned up)
       final response = await EdgeFunctionService.invokeFunction(
         _functionName,
@@ -363,15 +364,15 @@ class OtpService {
           'numeric_only': true,
         },
       );
-      
+
       debugPrint('✅ OtpService: Edge Function accessible');
       debugPrint('📊 OtpService: Edge Function response: $response');
-      
+
       // Clean up the test OTP if it was created successfully
       if (response['ok'] == true && response['otp'] != null) {
         final otpData = response['otp'] as Map<String, dynamic>;
         final testOtpId = otpData['id_otp'] as String?;
-        
+
         if (testOtpId != null) {
           debugPrint('🧹 OtpService: Cleaning up test OTP: $testOtpId');
           try {
@@ -388,7 +389,7 @@ class OtpService {
           }
         }
       }
-      
+
       return EdgeFunctionResponse<bool>(
         success: true,
         data: true,

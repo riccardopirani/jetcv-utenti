@@ -1741,6 +1741,83 @@ class _CVViewPageState extends State<CVViewPage> {
             ),
           ),
 
+          // Serial number directly under the image
+          if (cert.certificationUser.serialNumber != null) ...[
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile
+                    ? 8
+                    : isTablet
+                        ? 10
+                        : 12,
+                vertical: isMobile
+                    ? 6
+                    : isTablet
+                        ? 8
+                        : 10,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.green.shade200,
+                    width: 1,
+                  ),
+                  bottom: BorderSide(
+                    color: Colors.green.shade200,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.fingerprint,
+                    size: isMobile
+                        ? 14
+                        : isTablet
+                            ? 16
+                            : 18,
+                    color: Colors.green.shade700,
+                  ),
+                  SizedBox(
+                      width: isMobile
+                          ? 6
+                          : isTablet
+                              ? 8
+                              : 10),
+                  Text(
+                    '${AppLocalizations.of(context)!.serial}: ',
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 10
+                          : isTablet
+                              ? 11
+                              : 12,
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    cert.certificationUser.serialNumber!,
+                    style: TextStyle(
+                      fontSize: isMobile
+                          ? 10
+                          : isTablet
+                              ? 11
+                              : 12,
+                      color: Colors.green.shade900,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           Padding(
             padding: EdgeInsets.all(cardPadding),
             child: Column(
@@ -1902,7 +1979,7 @@ class _CVViewPageState extends State<CVViewPage> {
                             ? 10
                             : 12),
 
-                // Certifier name and serial number if available
+                // Certifier name and organization info
                 if (cert.certificationUser.serialNumber != null) ...[
                   // Certifier name
                   Row(
@@ -2001,48 +2078,6 @@ class _CVViewPageState extends State<CVViewPage> {
                       }
                       return const SizedBox.shrink();
                     },
-                  ),
-                  SizedBox(
-                      height: isMobile
-                          ? 6
-                          : isTablet
-                              ? 7
-                              : 8),
-
-                  // Serial number
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.fingerprint,
-                        size: isMobile
-                            ? 14
-                            : isTablet
-                                ? 15
-                                : 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      SizedBox(
-                          width: isMobile
-                              ? 6
-                              : isTablet
-                                  ? 7
-                                  : 8),
-                      Expanded(
-                        child: Text(
-                          '${AppLocalizations.of(context)!.serial}: ${cert.certificationUser.serialNumber}',
-                          style: TextStyle(
-                            fontSize: isMobile
-                                ? 8
-                                : isTablet
-                                    ? 9
-                                    : 10,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
                   ),
                   SizedBox(
                       height: isMobile
@@ -2731,7 +2766,6 @@ class _CVViewPageState extends State<CVViewPage> {
               ),
             ),
           ),
-       
         ],
       ),
     );
@@ -2767,7 +2801,7 @@ class _CVViewPageState extends State<CVViewPage> {
       // Usa la prima certificazione come esempio
       // In futuro potresti voler passare una certificazione specifica
       final certification = _certifications.first;
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(

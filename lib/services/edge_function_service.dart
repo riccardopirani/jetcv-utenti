@@ -10,15 +10,19 @@ class EdgeFunctionService {
   /// Metodo per health check GET (senza body)
   static Future<Map<String, dynamic>> healthCheck(String functionName) async {
     try {
-      debugPrint('🏥 EdgeFunctionService: Health check for function $functionName');
-      debugPrint('🏥 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
-      debugPrint('🏥 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
-      debugPrint('🏥 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
+      debugPrint(
+          '🏥 EdgeFunctionService: Health check for function $functionName');
+      debugPrint(
+          '🏥 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
+      debugPrint(
+          '🏥 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
+      debugPrint(
+          '🏥 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
 
       // Per health check, facciamo una chiamata HTTP diretta GET
       final url = '${SupabaseConfig.supabaseUrl}/functions/v1/$functionName';
       final session = _client.auth.currentSession;
-      
+
       if (session == null) {
         throw Exception('No active session for health check');
       }
@@ -28,8 +32,10 @@ class EdgeFunctionService {
         body: null, // Body null per triggerare GET
       );
 
-      debugPrint('🏥 EdgeFunctionService: Health check response status: ${response.status}');
-      debugPrint('🏥 EdgeFunctionService: Health check response data: ${response.data}');
+      debugPrint(
+          '🏥 EdgeFunctionService: Health check response status: ${response.status}');
+      debugPrint(
+          '🏥 EdgeFunctionService: Health check response data: ${response.data}');
 
       if (response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -37,7 +43,8 @@ class EdgeFunctionService {
         throw Exception('Risposta vuota dalla funzione $functionName');
       }
     } catch (e) {
-      debugPrint('❌ EdgeFunctionService: Health check failed for $functionName: $e');
+      debugPrint(
+          '❌ EdgeFunctionService: Health check failed for $functionName: $e');
       throw Exception('Health check failed for $functionName: $e');
     }
   }
@@ -50,9 +57,12 @@ class EdgeFunctionService {
     try {
       debugPrint('🚀 EdgeFunctionService: Calling function $functionName');
       debugPrint('🚀 EdgeFunctionService: Request body: $body');
-      debugPrint('🚀 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
-      debugPrint('🚀 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
-      debugPrint('🚀 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
+      debugPrint(
+          '🚀 EdgeFunctionService: Supabase URL: ${SupabaseConfig.supabaseUrl}');
+      debugPrint(
+          '🚀 EdgeFunctionService: Current user: ${_client.auth.currentUser?.id}');
+      debugPrint(
+          '🚀 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
 
       final response = await _client.functions.invoke(
         functionName,
@@ -61,7 +71,8 @@ class EdgeFunctionService {
 
       debugPrint('🔄 EdgeFunctionService: Response status: ${response.status}');
       debugPrint('🔄 EdgeFunctionService: Response data: ${response.data}');
-      debugPrint('🔄 EdgeFunctionService: Response type: ${response.data.runtimeType}');
+      debugPrint(
+          '🔄 EdgeFunctionService: Response type: ${response.data.runtimeType}');
 
       if (response.data != null) {
         return response.data as Map<String, dynamic>;

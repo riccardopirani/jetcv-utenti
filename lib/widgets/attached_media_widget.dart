@@ -28,7 +28,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
       final filePath = '${media.idMediaHash}';
       final extension = _getFileExtension(media.fileType, media);
       final fullFilePath = '$filePath$extension';
-      
+
       debugPrint('🔍 Media fileType: "${media.fileType}"');
       debugPrint('🔍 Media name: "${media.name}"');
       debugPrint('🔍 Determined extension: "$extension"');
@@ -42,7 +42,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
       // Fai una richiesta HEAD per verificare se il file esiste
       final response = await http.head(Uri.parse(fileUrl));
-      
+
       final exists = response.statusCode == 200;
       debugPrint('🔍 File exists: $exists (status: ${response.statusCode})');
       debugPrint('🔍 Response headers: ${response.headers}');
@@ -76,7 +76,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   String _getFileExtension(String? fileType, CertificationMediaItem media) {
     debugPrint('🔍 _getFileExtension called with fileType: "$fileType"');
     debugPrint('🔍 _getFileExtension called with media.name: "${media.name}"');
-    
+
     if (fileType == null) {
       debugPrint('🔍 fileType is null, returning .bin');
       return '.bin';
@@ -519,7 +519,8 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
       future: _checkFileExists(media),
       builder: (context, snapshot) {
         final isFilePresent = snapshot.data ?? false;
-        final isRealTime = !isFilePresent; // Se il file NON esiste sul backend, è realtime
+        final isRealTime =
+            !isFilePresent; // Se il file NON esiste sul backend, è realtime
 
         debugPrint('🔍 File present on backend: $isFilePresent');
         debugPrint('🔍 Is realtime: $isRealTime');
