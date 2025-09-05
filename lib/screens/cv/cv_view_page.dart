@@ -10,6 +10,7 @@ import 'package:jetcv__utenti/services/cv_edge_service.dart';
 import 'package:jetcv__utenti/services/country_service.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/screens/cv/blockchain_info_page.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
 import 'package:jetcv__utenti/services/image_cache_service.dart';
@@ -295,6 +296,10 @@ class _CVViewPageState extends State<CVViewPage> {
     final age = _calculateAge(birthDate);
 
     return '${birthDate.day.toString().padLeft(2, '0')}/${birthDate.month.toString().padLeft(2, '0')}/${birthDate.year} ($age ${AppLocalizations.of(context)!.years})';
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   String _generateCVSerial() {
@@ -688,43 +693,24 @@ class _CVViewPageState extends State<CVViewPage> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                   ),
-                  child: Stack(
-                    children: [
-                      // Serial chip in top-right corner
-                      Positioned(
-                        top: isMobile
-                            ? 12
-                            : isTablet
-                                ? 14
-                                : 16,
-                        right: isMobile
-                            ? 12
-                            : isTablet
-                                ? 14
-                                : 16,
-                        child: _buildSerialChip(),
-                      ),
-                      // Main content
-                      Padding(
-                        padding: EdgeInsets.all(contentPadding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Profile picture
-                            _buildEnhancedProfilePicture(),
-                            SizedBox(height: spacing),
-                            // Name
-                            _buildNameSection(),
-                            SizedBox(height: spacing),
-                            // Personal info (address and birth date)
-                            _buildPersonalInfoSection(country, localizations),
-                            SizedBox(height: spacing),
-                            // Premium certification badge
-                            _buildPremiumBadgeWithSerial(localizations),
-                          ],
-                        ),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: EdgeInsets.all(contentPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Profile picture
+                        _buildEnhancedProfilePicture(),
+                        SizedBox(height: spacing),
+                        // Name
+                        _buildNameSection(),
+                        SizedBox(height: spacing),
+                        // Personal info (address and birth date)
+                        _buildPersonalInfoSection(country, localizations),
+                        SizedBox(height: spacing),
+                        // Premium certification badge
+                        _buildPremiumBadgeWithSerial(localizations),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2708,29 +2694,45 @@ class _CVViewPageState extends State<CVViewPage> {
           width: 1,
         ),
       ),
-      child: GestureDetector(
-        onTap: () => _openNftLink(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.link,
-              color: Colors.blue.shade700,
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              AppLocalizations.of(context)!.nftLink,
-              style: TextStyle(
-                color: Colors.blue.shade600,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.blue.shade600,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Blockchain Info Button
+          GestureDetector(
+            onTap: () => _openBlockchainInfo(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: Colors.green.shade300,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.green.shade700,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Blockchain Info',
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+       
+        ],
       ),
     );
   }
@@ -2756,6 +2758,25 @@ class _CVViewPageState extends State<CVViewPage> {
           );
         }
       }
+    }
+  }
+
+  /// Apre la pagina delle informazioni blockchain
+  Future<void> _openBlockchainInfo() async {
+    if (_cv != null && _certifications.isNotEmpty) {
+      // Usa la prima certificazione come esempio
+      // In futuro potresti voler passare una certificazione specifica
+      final certification = _certifications.first;
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BlockchainInfoPage(
+            cv: _cv!,
+            certification: certification,
+          ),
+        ),
+      );
     }
   }
 
@@ -2826,7 +2847,66 @@ class _CVViewPageState extends State<CVViewPage> {
               ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 8),
+        // Serial number below name - larger and more prominent
+        _buildSerialDisplay(),
       ],
+    );
+  }
+
+  Widget _buildSerialDisplay() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.green.shade50,
+            Colors.green.shade100,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.green.shade300,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.fingerprint,
+            color: Colors.green.shade700,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            AppLocalizations.of(context)!.serialCode,
+            style: TextStyle(
+              color: Colors.green.shade700,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _generateCVSerial(),
+            style: TextStyle(
+              color: Colors.green.shade900,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2834,27 +2914,29 @@ class _CVViewPageState extends State<CVViewPage> {
       CountryModel? country, AppLocalizations localizations) {
     final infoItems = <Widget>[];
 
-    // Location info
-    if (_cv!.city != null || _cv!.state != null || country != null) {
-      final locationText = [
-        _cv!.city,
-        _cv!.state,
-        if (country != null) '${country.name} ${country.emoji ?? ''}',
-      ].where((element) => element != null && element.isNotEmpty).join(', ');
-
-      infoItems.add(_buildFormalInfoItem(
-        Icons.location_on,
-        AppLocalizations.of(context)!.address,
-        _toTitleCase(locationText),
-      ));
-    }
-
     // Birth info
     if (_cv!.dateOfBirth != null) {
       infoItems.add(_buildFormalInfoItem(
         Icons.person_outline,
         AppLocalizations.of(context)!.dateOfBirth,
         _formatFormalBirthInfo(),
+      ));
+    }
+
+    // CV Creation and Update dates
+    if (_cv!.createdAt != null) {
+      infoItems.add(_buildFormalInfoItem(
+        Icons.create,
+        'Data creazione CV',
+        _formatDate(_cv!.createdAt!),
+      ));
+    }
+
+    if (_cv!.updatedAt != null) {
+      infoItems.add(_buildFormalInfoItem(
+        Icons.update,
+        'Ultimo aggiornamento',
+        _formatDate(_cv!.updatedAt!),
       ));
     }
 
