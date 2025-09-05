@@ -146,12 +146,16 @@ class _OtpListPageState extends State<OtpListPage> {
             onPressed: () async {
               Navigator.pop(context);
 
-              // Show loading indicator
+              // Show loading indicator and track dialog state
+              bool dialogOpen = true;
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(
-                  child: CircularProgressIndicator(),
+                builder: (context) => WillPopScope(
+                  onWillPop: () async => false, // Prevent back button
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
               );
 
@@ -161,13 +165,19 @@ class _OtpListPageState extends State<OtpListPage> {
                   idUser: otp.idUser,
                 );
 
-                if (!mounted) return;
-                try {
-                  Navigator.pop(context); // Close loading dialog
-                } catch (navigatorError) {
-                  // Navigator might be invalid, ignore the error
-                  debugPrint('Navigator pop failed: $navigatorError');
+                // Close loading dialog if still open
+                if (dialogOpen && mounted) {
+                  try {
+                    Navigator.pop(context); // Close loading dialog
+                    dialogOpen = false;
+                  } catch (navigatorError) {
+                    // Navigator might be invalid, ignore the error
+                    debugPrint('Navigator pop failed: $navigatorError');
+                    dialogOpen = false;
+                  }
                 }
+
+                if (!mounted) return;
 
                 if (response.success) {
                   setState(() {

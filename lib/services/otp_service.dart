@@ -307,7 +307,7 @@ class OtpService {
           // Add missing fields that OtpModel expects
           otpJson['code'] = '***'; // Don't expose actual code
           otpJson['code_hash'] = '***'; // Don't expose hash
-          
+
           final otp = OtpModel.fromJson(otpJson);
           otps.add(otp);
         } catch (e) {
