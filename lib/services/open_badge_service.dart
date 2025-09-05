@@ -368,7 +368,7 @@ class OpenBadgeService {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -426,16 +426,16 @@ class OpenBadgeService {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Open Badge Created'),
+        title: Text(AppLocalizations.of(context)!.openBadgeCreated),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Your Open Badge has been created successfully!'),
+              Text(AppLocalizations.of(context)!.yourOpenBadgeCreatedSuccessfully),
               const SizedBox(height: 16),
-              Text('Badge: ${badge.name}'),
-              Text('Issuer: ${badge.issuer.name}'),
+              Text('${AppLocalizations.of(context)!.badge}: ${badge.name}'),
+              Text('${AppLocalizations.of(context)!.issuer}: ${badge.issuer.name}'),
               const SizedBox(height: 16),
               if (kIsWeb) ...[
                 Text(
@@ -443,7 +443,7 @@ class OpenBadgeService {
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ] else ...[
-                Text('Files saved to: ${jsonFile.path}'),
+                Text('${AppLocalizations.of(context)!.filesSavedTo}: ${jsonFile.path}'),
               ],
             ],
           ),
@@ -451,7 +451,7 @@ class OpenBadgeService {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
           ElevatedButton.icon(
             onPressed: () => _downloadBadgeImage(context, badge, imageData),
@@ -474,7 +474,7 @@ class OpenBadgeService {
                 ),
               );
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),

@@ -225,7 +225,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Connection Test Results'),
+          title: Text(AppLocalizations.of(context)!.connectionTestResults),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +244,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(AppLocalizations.of(context)!.close),
             ),
           ],
         ),
@@ -353,7 +353,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _createOtp,
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Create OTP'),
+                  label: Text(AppLocalizations.of(context)!.createOtp),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6B46C1),
                     foregroundColor: Colors.white,
@@ -362,7 +362,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _testConnectivity,
                   icon: const Icon(Icons.network_check, size: 18),
-                  label: const Text('Test Connection'),
+                  label: Text(AppLocalizations.of(context)!.testConnection),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
@@ -371,7 +371,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _cleanupExpiredOtps,
                   icon: const Icon(Icons.cleaning_services, size: 18),
-                  label: const Text('Cleanup Expired'),
+                  label: Text(AppLocalizations.of(context)!.cleanupExpired),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
@@ -380,7 +380,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _loadOtps,
                   icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Refresh'),
+                  label: Text(AppLocalizations.of(context)!.refresh),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -449,7 +449,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                     children: [
                       Icon(Icons.security, size: 48, color: Colors.grey),
                       SizedBox(height: 8),
-                      Text('No OTPs available'),
+                      Text(AppLocalizations.of(context)!.noOtpsAvailable),
                     ],
                   ),
                 ),
@@ -560,7 +560,7 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Code copied to clipboard!'),
+        content: Text(AppLocalizations.of(context)!.codeCopiedToClipboard),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),

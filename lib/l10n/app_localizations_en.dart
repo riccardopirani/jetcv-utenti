@@ -716,12 +716,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String createdMinutesAgo(int minutes) {
-    return 'Created ${minutes}min ago';
+    return 'Created $minutes minutes ago';
   }
 
   @override
   String createdHoursAgo(int hours) {
-    return 'Created ${hours}h ago';
+    return 'Created $hours hours ago';
   }
 
   @override
@@ -979,7 +979,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createBadge => 'Create Badge';
 
   @override
-  String get openBadgeCreated => 'Open Badge created successfully!';
+  String get openBadgeCreated => 'Open Badge Created';
 
   @override
   String get openBadgeError => 'Error creating Open Badge';
@@ -996,4 +996,112 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get saveImageAs =>
       'Right-click on the image above and select \"Save image as...\" to download the badge PNG.';
+
+  @override
+  String get noOtpsYet => 'No OTPs yet';
+
+  @override
+  String get createYourFirstOtp => 'Create your first OTP to get started';
+
+  @override
+  String get secureAccess => 'Secure Access';
+
+  @override
+  String get secureAccessDescription => 'Secure and temporary access codes';
+
+  @override
+  String get timeLimited => 'Automatic expiration for enhanced security';
+
+  @override
+  String get timeLimitedDescription =>
+      'Codes expire automatically to ensure security';
+
+  @override
+  String get qrCodeSupport => 'QR Code Support';
+
+  @override
+  String get qrCodeSupportDescription =>
+      'Generate and share QR codes for quick access';
+
+  @override
+  String get otpCode => 'OTP Code';
+
+  @override
+  String get errorOccurred => 'Error';
+
+  @override
+  String get unknownError => 'Unknown error';
+
+  @override
+  String get statusBurned => 'Burned';
+
+  @override
+  String get statusUsed => 'Used';
+
+  @override
+  String get statusExpired => 'Expired';
+
+  @override
+  String get statusValid => 'Valid';
+
+  @override
+  String get databaseConnectionFailed => 'Database connection failed';
+
+  @override
+  String get edgeFunctionNotAccessible => 'Edge Function not accessible';
+
+  @override
+  String get preparingLinkedIn => 'Preparing LinkedIn...';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get issuer => 'Issuer';
+
+  @override
+  String get downloadingMedia => 'Downloading media...';
+
+  @override
+  String get mediaDownloadedSuccessfully => 'Media downloaded successfully';
+
+  @override
+  String get errorDownloadingMedia => 'Error downloading media';
+
+  @override
+  String get errorCreatingOpenBadge => 'Error creating Open Badge';
+
+  @override
+  String get issueDate => 'Issue Date';
+
+  @override
+  String get yourOpenBadgeCreatedSuccessfully =>
+      'Your Open Badge has been created successfully!';
+
+  @override
+  String get badge => 'Badge';
+
+  @override
+  String get filesSavedTo => 'Files saved to';
+
+  @override
+  String get connectionTestResults => 'Connection Test Results';
+
+  @override
+  String get createOtp => 'Create OTP';
+
+  @override
+  String get testConnection => 'Test Connection';
+
+  @override
+  String get cleanupExpired => 'Cleanup Expired';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get noOtpsAvailable => 'No OTPs available';
+
+  @override
+  String get codeCopiedToClipboard => 'Code copied to clipboard!';
 }

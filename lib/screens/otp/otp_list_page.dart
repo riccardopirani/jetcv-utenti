@@ -449,7 +449,7 @@ class _OtpListPageState extends State<OtpListPage> {
 
             // Title
             Text(
-              'Nessun OTP ancora',
+              AppLocalizations.of(context)!.noOtpsYet,
               style: TextStyle(
                 fontSize: isMobile
                     ? 24
@@ -471,7 +471,7 @@ class _OtpListPageState extends State<OtpListPage> {
 
             // Description
             Text(
-              'Crea il tuo primo OTP per iniziare',
+              AppLocalizations.of(context)!.createYourFirstOtp,
               style: TextStyle(
                 fontSize: isMobile
                     ? 16
@@ -514,8 +514,8 @@ class _OtpListPageState extends State<OtpListPage> {
                 children: [
                   _buildFeatureItem(
                     Icons.shield,
-                    'Accesso Sicuro',
-                    'Codici di accesso sicuri e temporanei',
+                    AppLocalizations.of(context)!.secureAccess,
+                    AppLocalizations.of(context)!.secureAccessDescription,
                     isMobile,
                     isTablet,
                   ),
@@ -527,8 +527,8 @@ class _OtpListPageState extends State<OtpListPage> {
                               : 24),
                   _buildFeatureItem(
                     Icons.timer,
-                    'A Tempo Limitato',
-                    'Scadenza automatica per maggiore sicurezza',
+                    AppLocalizations.of(context)!.timeLimited,
+                    AppLocalizations.of(context)!.timeLimitedDescription,
                     isMobile,
                     isTablet,
                   ),
@@ -540,8 +540,8 @@ class _OtpListPageState extends State<OtpListPage> {
                               : 24),
                   _buildFeatureItem(
                     Icons.qr_code,
-                    'Supporto QR Code',
-                    'Genera e condividi tramite codice QR',
+                    AppLocalizations.of(context)!.qrCodeSupport,
+                    AppLocalizations.of(context)!.qrCodeSupportDescription,
                     isMobile,
                     isTablet,
                   ),
@@ -799,7 +799,7 @@ class _OtpListPageState extends State<OtpListPage> {
 
             // Error title
             Text(
-              'Errore',
+              AppLocalizations.of(context)!.errorOccurred,
               style: TextStyle(
                 fontSize: isMobile
                     ? 24
@@ -835,7 +835,7 @@ class _OtpListPageState extends State<OtpListPage> {
                 ),
               ),
               child: Text(
-                _errorMessage ?? 'Errore sconosciuto',
+                _errorMessage ?? AppLocalizations.of(context)!.unknownError,
                 style: TextStyle(
                   fontSize: isMobile
                       ? 16
@@ -1299,21 +1299,21 @@ class _OtpListPageState extends State<OtpListPage> {
     final difference = now.difference(createdAt);
 
     if (difference.inMinutes < 1) {
-      return 'Creato ora';
+      return AppLocalizations.of(context)!.createdNow;
     } else if (difference.inMinutes < 60) {
-      return 'Creato ${difference.inMinutes} minuti fa';
+      return AppLocalizations.of(context)!.createdMinutesAgo.replaceAll('{minutes}', difference.inMinutes.toString());
     } else if (difference.inHours < 24) {
-      return 'Creato ${difference.inHours} ore fa';
+      return AppLocalizations.of(context)!.createdHoursAgo.replaceAll('{hours}', difference.inHours.toString());
     } else {
-      return 'Creato ${difference.inDays} giorni fa';
+      return AppLocalizations.of(context)!.createdDaysAgo.replaceAll('{days}', difference.inDays.toString());
     }
   }
 
   String _getStatusText(OtpModel otp) {
-    if (otp.isBurned) return 'Bruciato';
-    if (otp.isUsed) return 'Usato';
-    if (otp.isExpired) return 'Scaduto';
-    return 'Valido';
+    if (otp.isBurned) return AppLocalizations.of(context)!.statusBurned;
+    if (otp.isUsed) return AppLocalizations.of(context)!.statusUsed;
+    if (otp.isExpired) return AppLocalizations.of(context)!.statusExpired;
+    return AppLocalizations.of(context)!.statusValid;
   }
 
   Color _getStatusColor(OtpModel otp) {
@@ -1389,7 +1389,7 @@ class _NewOtpModalState extends State<NewOtpModal> {
           try {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
-                content: Text('Database connection failed: ${dbTest.error}'),
+                content: Text('${AppLocalizations.of(context)!.databaseConnectionFailed}: ${dbTest.error}'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -1411,7 +1411,7 @@ class _NewOtpModalState extends State<NewOtpModal> {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
                 content:
-                    Text('Edge Function not accessible: ${edgeTest.error}'),
+                    Text('${AppLocalizations.of(context)!.edgeFunctionNotAccessible}: ${edgeTest.error}'),
                 backgroundColor: Colors.red,
               ),
             );

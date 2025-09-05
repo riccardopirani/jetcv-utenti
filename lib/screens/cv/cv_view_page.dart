@@ -3504,7 +3504,7 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                 ),
                 SizedBox(width: 12),
-                Text('Preparando LinkedIn...'),
+                Text(AppLocalizations.of(context)!.preparingLinkedIn),
               ],
             ),
             duration: Duration(seconds: 2),
@@ -3583,8 +3583,8 @@ class _CVViewPageState extends State<CVViewPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text('Name: $certName'),
-                      Text('Issuer: $issuer'),
+                      Text('${AppLocalizations.of(context)!.name}: $certName'),
+                      Text('${AppLocalizations.of(context)!.issuer}: $issuer'),
                       Text(
                           'Issue Date: ${issueDate.day}/${issueDate.month}/${issueDate.year}'),
                       const SizedBox(height: 8),
@@ -3640,7 +3640,7 @@ class _CVViewPageState extends State<CVViewPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening LinkedIn: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
             backgroundColor: Colors.red,
           ),
         );

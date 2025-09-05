@@ -725,12 +725,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String createdMinutesAgo(int minutes) {
-    return 'Créé il y a ${minutes}min';
+    return 'Créé il y a $minutes minutes';
   }
 
   @override
   String createdHoursAgo(int hours) {
-    return 'Créé il y a ${hours}h';
+    return 'Créé il y a $hours heures';
   }
 
   @override
@@ -948,7 +948,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addToLinkedIn => 'Add to LinkedIn';
 
   @override
-  String get errorOpeningLinkedIn => 'Error opening LinkedIn';
+  String get errorOpeningLinkedIn => 'Erreur lors de l\'ouverture de LinkedIn';
 
   @override
   String get addCertificationsToLinkedIn => 'Add Certification to LinkedIn';
@@ -988,7 +988,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createBadge => 'Create Badge';
 
   @override
-  String get openBadgeCreated => 'Open Badge created successfully!';
+  String get openBadgeCreated => 'Open Badge Créé';
 
   @override
   String get openBadgeError => 'Error creating Open Badge';
@@ -1005,4 +1005,116 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get saveImageAs =>
       'Right-click on the image above and select \"Save image as...\" to download the badge PNG.';
+
+  @override
+  String get noOtpsYet => 'Aucun OTP encore';
+
+  @override
+  String get createYourFirstOtp => 'Créez votre premier OTP pour commencer';
+
+  @override
+  String get secureAccess => 'Accès Sécurisé';
+
+  @override
+  String get secureAccessDescription =>
+      'Codes d\'accès sécurisés et temporaires';
+
+  @override
+  String get timeLimited =>
+      'Expiration automatique pour une sécurité renforcée';
+
+  @override
+  String get timeLimitedDescription =>
+      'Les codes expirent automatiquement pour assurer la sécurité';
+
+  @override
+  String get qrCodeSupport => 'Support QR Code';
+
+  @override
+  String get qrCodeSupportDescription =>
+      'Générez et partagez des codes QR pour un accès rapide';
+
+  @override
+  String get otpCode => 'Code OTP';
+
+  @override
+  String get errorOccurred => 'Erreur';
+
+  @override
+  String get unknownError => 'Erreur inconnue';
+
+  @override
+  String get statusBurned => 'Brûlé';
+
+  @override
+  String get statusUsed => 'Utilisé';
+
+  @override
+  String get statusExpired => 'Expiré';
+
+  @override
+  String get statusValid => 'Valide';
+
+  @override
+  String get databaseConnectionFailed =>
+      'Échec de la connexion à la base de données';
+
+  @override
+  String get edgeFunctionNotAccessible => 'Edge Function non accessible';
+
+  @override
+  String get preparingLinkedIn => 'Préparation de LinkedIn...';
+
+  @override
+  String get name => 'Nom';
+
+  @override
+  String get issuer => 'Émetteur';
+
+  @override
+  String get downloadingMedia => 'Téléchargement du média...';
+
+  @override
+  String get mediaDownloadedSuccessfully => 'Média téléchargé avec succès';
+
+  @override
+  String get errorDownloadingMedia => 'Erreur lors du téléchargement du média';
+
+  @override
+  String get errorCreatingOpenBadge =>
+      'Erreur lors de la création de l\'Open Badge';
+
+  @override
+  String get issueDate => 'Date d\'Émission';
+
+  @override
+  String get yourOpenBadgeCreatedSuccessfully =>
+      'Votre Open Badge a été créé avec succès !';
+
+  @override
+  String get badge => 'Badge';
+
+  @override
+  String get filesSavedTo => 'Fichiers sauvegardés dans';
+
+  @override
+  String get connectionTestResults => 'Résultats du Test de Connexion';
+
+  @override
+  String get createOtp => 'Créer OTP';
+
+  @override
+  String get testConnection => 'Tester la Connexion';
+
+  @override
+  String get cleanupExpired => 'Nettoyer les Expirés';
+
+  @override
+  String get refresh => 'Actualiser';
+
+  @override
+  String get noOtpsAvailable => 'Aucun OTP disponible';
+
+  @override
+  String get codeCopiedToClipboard => 'Code copié dans le presse-papiers !';
 }

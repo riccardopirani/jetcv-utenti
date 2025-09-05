@@ -1439,13 +1439,13 @@ abstract class AppLocalizations {
   /// No description provided for @createdMinutesAgo.
   ///
   /// In en, this message translates to:
-  /// **'Created {minutes}min ago'**
+  /// **'Created {minutes} minutes ago'**
   String createdMinutesAgo(int minutes);
 
   /// No description provided for @createdHoursAgo.
   ///
   /// In en, this message translates to:
-  /// **'Created {hours}h ago'**
+  /// **'Created {hours} hours ago'**
   String createdHoursAgo(int hours);
 
   /// No description provided for @createdDaysAgo.
@@ -1919,7 +1919,7 @@ abstract class AppLocalizations {
   /// No description provided for @openBadgeCreated.
   ///
   /// In en, this message translates to:
-  /// **'Open Badge created successfully!'**
+  /// **'Open Badge Created'**
   String get openBadgeCreated;
 
   /// No description provided for @openBadgeError.
@@ -1951,6 +1951,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Right-click on the image above and select \"Save image as...\" to download the badge PNG.'**
   String get saveImageAs;
+
+  /// No description provided for @noOtpsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No OTPs yet'**
+  String get noOtpsYet;
+
+  /// No description provided for @createYourFirstOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first OTP to get started'**
+  String get createYourFirstOtp;
+
+  /// No description provided for @secureAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Access'**
+  String get secureAccess;
+
+  /// No description provided for @secureAccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure and temporary access codes'**
+  String get secureAccessDescription;
+
+  /// No description provided for @timeLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic expiration for enhanced security'**
+  String get timeLimited;
+
+  /// No description provided for @timeLimitedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Codes expire automatically to ensure security'**
+  String get timeLimitedDescription;
+
+  /// No description provided for @qrCodeSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code Support'**
+  String get qrCodeSupport;
+
+  /// No description provided for @qrCodeSupportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate and share QR codes for quick access'**
+  String get qrCodeSupportDescription;
+
+  /// No description provided for @otpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Code'**
+  String get otpCode;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorOccurred;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @statusBurned.
+  ///
+  /// In en, this message translates to:
+  /// **'Burned'**
+  String get statusBurned;
+
+  /// No description provided for @statusUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get statusUsed;
+
+  /// No description provided for @statusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get statusExpired;
+
+  /// No description provided for @statusValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get statusValid;
+
+  /// No description provided for @databaseConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Database connection failed'**
+  String get databaseConnectionFailed;
+
+  /// No description provided for @edgeFunctionNotAccessible.
+  ///
+  /// In en, this message translates to:
+  /// **'Edge Function not accessible'**
+  String get edgeFunctionNotAccessible;
+
+  /// No description provided for @preparingLinkedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing LinkedIn...'**
+  String get preparingLinkedIn;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @issuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get issuer;
+
+  /// No description provided for @downloadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading media...'**
+  String get downloadingMedia;
+
+  /// No description provided for @mediaDownloadedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Media downloaded successfully'**
+  String get mediaDownloadedSuccessfully;
+
+  /// No description provided for @errorDownloadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Error downloading media'**
+  String get errorDownloadingMedia;
+
+  /// No description provided for @errorCreatingOpenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Error creating Open Badge'**
+  String get errorCreatingOpenBadge;
+
+  /// No description provided for @issueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Date'**
+  String get issueDate;
+
+  /// No description provided for @yourOpenBadgeCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Open Badge has been created successfully!'**
+  String get yourOpenBadgeCreatedSuccessfully;
+
+  /// No description provided for @badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge'**
+  String get badge;
+
+  /// No description provided for @filesSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Files saved to'**
+  String get filesSavedTo;
+
+  /// No description provided for @connectionTestResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Test Results'**
+  String get connectionTestResults;
+
+  /// No description provided for @createOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Create OTP'**
+  String get createOtp;
+
+  /// No description provided for @testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Connection'**
+  String get testConnection;
+
+  /// No description provided for @cleanupExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup Expired'**
+  String get cleanupExpired;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @noOtpsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No OTPs available'**
+  String get noOtpsAvailable;
+
+  /// No description provided for @codeCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied to clipboard!'**
+  String get codeCopiedToClipboard;
 }
 
 class _AppLocalizationsDelegate

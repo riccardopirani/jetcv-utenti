@@ -31,7 +31,7 @@ class MediaDownloadService {
             children: [
               CircularProgressIndicator(),
               SizedBox(width: 16),
-              Text('Downloading media...'),
+              Text(AppLocalizations.of(context)!.downloadingMedia),
             ],
           ),
         ),
@@ -59,7 +59,7 @@ class MediaDownloadService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Media downloaded successfully: ${savedFile.path}'),
+            content: Text('${AppLocalizations.of(context)!.mediaDownloadedSuccessfully}: ${savedFile.path}'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -77,7 +77,7 @@ class MediaDownloadService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error downloading media: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorDownloadingMedia}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
