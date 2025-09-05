@@ -432,10 +432,12 @@ class OpenBadgeService {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppLocalizations.of(context)!.yourOpenBadgeCreatedSuccessfully),
+              Text(AppLocalizations.of(context)!
+                  .yourOpenBadgeCreatedSuccessfully),
               const SizedBox(height: 16),
               Text('${AppLocalizations.of(context)!.badge}: ${badge.name}'),
-              Text('${AppLocalizations.of(context)!.issuer}: ${badge.issuer.name}'),
+              Text(
+                  '${AppLocalizations.of(context)!.issuer}: ${badge.issuer.name}'),
               const SizedBox(height: 16),
               if (kIsWeb) ...[
                 Text(
@@ -443,7 +445,8 @@ class OpenBadgeService {
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ] else ...[
-                Text('${AppLocalizations.of(context)!.filesSavedTo}: ${jsonFile.path}'),
+                Text(
+                    '${AppLocalizations.of(context)!.filesSavedTo}: ${jsonFile.path}'),
               ],
             ],
           ),

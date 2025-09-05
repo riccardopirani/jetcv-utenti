@@ -641,10 +641,22 @@ class _OtpListPageState extends State<OtpListPage> {
         Container(
           width: double.infinity,
           margin: EdgeInsets.symmetric(
-            horizontal: isMobile ? 16 : isTablet ? 20 : 24,
-            vertical: isMobile ? 8 : isTablet ? 10 : 12,
+            horizontal: isMobile
+                ? 16
+                : isTablet
+                    ? 20
+                    : 24,
+            vertical: isMobile
+                ? 8
+                : isTablet
+                    ? 10
+                    : 12,
           ),
-          padding: EdgeInsets.all(isMobile ? 12 : isTablet ? 14 : 16),
+          padding: EdgeInsets.all(isMobile
+              ? 12
+              : isTablet
+                  ? 14
+                  : 16),
           decoration: BoxDecoration(
             color: const Color(0xFF6B46C1).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
@@ -656,7 +668,11 @@ class _OtpListPageState extends State<OtpListPage> {
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(isMobile ? 6 : isTablet ? 8 : 10),
+                padding: EdgeInsets.all(isMobile
+                    ? 6
+                    : isTablet
+                        ? 8
+                        : 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFF6B46C1),
                   borderRadius: BorderRadius.circular(8),
@@ -664,15 +680,28 @@ class _OtpListPageState extends State<OtpListPage> {
                 child: Icon(
                   Icons.security,
                   color: Colors.white,
-                  size: isMobile ? 16 : isTablet ? 18 : 20,
+                  size: isMobile
+                      ? 16
+                      : isTablet
+                          ? 18
+                          : 20,
                 ),
               ),
-              SizedBox(width: isMobile ? 8 : isTablet ? 10 : 12),
+              SizedBox(
+                  width: isMobile
+                      ? 8
+                      : isTablet
+                          ? 10
+                          : 12),
               Expanded(
                 child: Text(
                   AppLocalizations.of(context)!.permanentOtpCodes,
                   style: TextStyle(
-                    fontSize: isMobile ? 14 : isTablet ? 16 : 18,
+                    fontSize: isMobile
+                        ? 14
+                        : isTablet
+                            ? 16
+                            : 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey.shade800,
                   ),
@@ -680,8 +709,16 @@ class _OtpListPageState extends State<OtpListPage> {
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 8 : isTablet ? 10 : 12,
-                  vertical: isMobile ? 4 : isTablet ? 5 : 6,
+                  horizontal: isMobile
+                      ? 8
+                      : isTablet
+                          ? 10
+                          : 12,
+                  vertical: isMobile
+                      ? 4
+                      : isTablet
+                          ? 5
+                          : 6,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
@@ -693,13 +730,26 @@ class _OtpListPageState extends State<OtpListPage> {
                     Icon(
                       Icons.vpn_key,
                       color: const Color(0xFF6B46C1),
-                      size: isMobile ? 14 : isTablet ? 16 : 18,
+                      size: isMobile
+                          ? 14
+                          : isTablet
+                              ? 16
+                              : 18,
                     ),
-                    SizedBox(width: isMobile ? 4 : isTablet ? 6 : 8),
+                    SizedBox(
+                        width: isMobile
+                            ? 4
+                            : isTablet
+                                ? 6
+                                : 8),
                     Text(
                       '${_otps.length}',
                       style: TextStyle(
-                        fontSize: isMobile ? 14 : isTablet ? 16 : 18,
+                        fontSize: isMobile
+                            ? 14
+                            : isTablet
+                                ? 16
+                                : 18,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF6B46C1),
                       ),
@@ -1389,7 +1439,8 @@ class _NewOtpModalState extends State<NewOtpModal> {
           try {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
-                content: Text('${AppLocalizations.of(context)!.databaseConnectionFailed}: ${dbTest.error}'),
+                content: Text(
+                    '${AppLocalizations.of(context)!.databaseConnectionFailed}: ${dbTest.error}'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -1410,8 +1461,8 @@ class _NewOtpModalState extends State<NewOtpModal> {
           try {
             _scaffoldMessenger!.showSnackBar(
               SnackBar(
-                content:
-                    Text('${AppLocalizations.of(context)!.edgeFunctionNotAccessible}: ${edgeTest.error}'),
+                content: Text(
+                    '${AppLocalizations.of(context)!.edgeFunctionNotAccessible}: ${edgeTest.error}'),
                 backgroundColor: Colors.red,
               ),
             );

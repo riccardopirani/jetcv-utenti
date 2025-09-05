@@ -121,7 +121,8 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context)!.errorCreatingOpenBadge}: $e'),
+            content: Text(
+                '${AppLocalizations.of(context)!.errorCreatingOpenBadge}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -173,7 +174,8 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
                     const SizedBox(height: 8),
                     Text('${AppLocalizations.of(context)!.name}: $certName'),
                     Text('${AppLocalizations.of(context)!.issuer}: $issuer'),
-                    Text('${AppLocalizations.of(context)!.issueDate}: ${date.day}/${date.month}/${date.year}'),
+                    Text(
+                        '${AppLocalizations.of(context)!.issueDate}: ${date.day}/${date.month}/${date.year}'),
                     const SizedBox(height: 8),
                     Text(
                       'Recipient: ${currentUser.fullName ?? currentUser.email}',

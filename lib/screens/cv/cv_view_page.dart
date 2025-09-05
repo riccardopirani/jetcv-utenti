@@ -3640,7 +3640,8 @@ class _CVViewPageState extends State<CVViewPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
+            content: Text(
+                '${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
             backgroundColor: Colors.red,
           ),
         );
