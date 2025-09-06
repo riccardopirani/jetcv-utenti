@@ -84,6 +84,7 @@ class OtpModel {
     DateTime? usedAt,
     String? usedByIdUser,
     DateTime? burnedAt,
+    String? idLegalEntity,
   }) =>
       OtpModel(
         idOtp: idOtp,
@@ -97,6 +98,7 @@ class OtpModel {
         usedAt: usedAt ?? this.usedAt,
         usedByIdUser: usedByIdUser ?? this.usedByIdUser,
         burnedAt: burnedAt ?? this.burnedAt,
+        idLegalEntity: idLegalEntity ?? this.idLegalEntity,
       );
 
   @override
