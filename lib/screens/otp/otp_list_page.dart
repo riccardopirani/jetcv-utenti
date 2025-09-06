@@ -537,7 +537,7 @@ class _OtpListPageState extends State<OtpListPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.all(isMobile
             ? 24
             : isTablet
