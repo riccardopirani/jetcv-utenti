@@ -287,26 +287,27 @@ class OtpService {
         );
       }
 
-      // Use RPC function instead of direct table access
-      final response = await SupabaseConfig.client.rpc(
-        'otp_list_user_otps',
-        params: {
-          'p_id_user': idUser,
-          'p_limit': limit,
-          'p_offset': offset,
-        },
-      );
+      // Use direct query to include id_legal_entity field
+      final response = await SupabaseConfig.client
+          .from('otp')
+          .select('*')
+          .eq('id_user', idUser)
+          .order('created_at', ascending: false)
+          .limit(limit)
+          .range(offset, offset + limit - 1);
 
-      debugPrint('📋 OtpService: Raw OTP RPC response: $response');
+      debugPrint('📋 OtpService: Raw OTP query response: $response');
 
       final List<OtpModel> otps = [];
       for (final otpData in response) {
         try {
-          // Convert RPC response to OtpModel format
+          // Convert query response to OtpModel format
           final otpJson = Map<String, dynamic>.from(otpData);
           // Add missing fields that OtpModel expects
           otpJson['code'] = '***'; // Don't expose actual code
           otpJson['code_hash'] = '***'; // Don't expose hash
+
+          debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}, id_legal_entity: ${otpJson['id_legal_entity']}');
 
           final otp = OtpModel.fromJson(otpJson);
           otps.add(otp);
@@ -315,7 +316,7 @@ class OtpService {
         }
       }
 
-      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs via RPC');
+      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs via direct query');
 
       return EdgeFunctionResponse<List<OtpModel>>(
         success: true,
