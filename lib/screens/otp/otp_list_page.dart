@@ -1035,8 +1035,10 @@ class _OtpListPageState extends State<OtpListPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isHighlighted = _highlightedOtpId == otp.idOtp;
 
-    return Container(
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
       margin: EdgeInsets.only(
           bottom: isMobile
               ? 16
@@ -1044,17 +1046,21 @@ class _OtpListPageState extends State<OtpListPage> {
                   ? 20
                   : 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isHighlighted ? Colors.orange.shade50 : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _getStatusColor(otp).withValues(alpha: 0.2),
-          width: 1,
+          color: isHighlighted 
+              ? Colors.orange.shade300
+              : _getStatusColor(otp).withValues(alpha: 0.2),
+          width: isHighlighted ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: _getStatusColor(otp).withValues(alpha: 0.1),
-            spreadRadius: 0,
-            blurRadius: 20,
+            color: isHighlighted 
+                ? Colors.orange.withValues(alpha: 0.2)
+                : _getStatusColor(otp).withValues(alpha: 0.1),
+            spreadRadius: isHighlighted ? 1 : 0,
+            blurRadius: isHighlighted ? 25 : 20,
             offset: const Offset(0, 4),
           ),
         ],
