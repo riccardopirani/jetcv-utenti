@@ -124,6 +124,14 @@ class _OtpListPageState extends State<OtpListPage> {
         onOtpUpdated: (updatedOtp) {
           // Update the OTP in the list and refresh UI
           _updateOtpInList(updatedOtp);
+          
+          // Fallback: reload the entire list after a short delay to ensure UI is updated
+          Future.delayed(Duration(milliseconds: 500), () {
+            if (mounted) {
+              debugPrint('🔄 Fallback: Reloading entire OTP list');
+              _loadOtps();
+            }
+          });
         },
       ),
     );
@@ -132,12 +140,28 @@ class _OtpListPageState extends State<OtpListPage> {
   void _updateOtpInList(OtpModel updatedOtp) {
     if (!mounted) return;
     
+    debugPrint('🔄 Updating OTP in list: ${updatedOtp.idOtp}');
+    debugPrint('🔄 Current list length: ${_otps.length}');
+    debugPrint('🔄 Updated OTP tag: ${updatedOtp.tag}');
+    _logCurrentOtps();
+    
     setState(() {
       final index = _otps.indexWhere((o) => o.idOtp == updatedOtp.idOtp);
       if (index != -1) {
-        // Replace the OTP in the list with the updated version
-        _otps[index] = updatedOtp;
-        debugPrint('✅ OTP updated in list: ${updatedOtp.tag}');
+        // Create a completely new list to ensure the ListView rebuilds
+        final newOtps = <OtpModel>[];
+        for (int i = 0; i < _otps.length; i++) {
+          if (i == index) {
+            newOtps.add(updatedOtp);
+          } else {
+            newOtps.add(_otps[i]);
+          }
+        }
+        _otps = newOtps;
+        
+        debugPrint('✅ OTP updated in list at index $index: ${updatedOtp.tag}');
+        debugPrint('✅ New list length: ${_otps.length}');
+        _logCurrentOtps();
         
         // Highlight the updated OTP briefly
         _highlightedOtpId = updatedOtp.idOtp;
@@ -174,8 +198,17 @@ class _OtpListPageState extends State<OtpListPage> {
         }
       } else {
         debugPrint('⚠️ OTP not found in list for update: ${updatedOtp.idOtp}');
+        debugPrint('⚠️ Available OTP IDs: ${_otps.map((o) => o.idOtp).toList()}');
       }
     });
+  }
+
+  void _logCurrentOtps() {
+    debugPrint('📋 Current OTPs in list:');
+    for (int i = 0; i < _otps.length; i++) {
+      final otp = _otps[i];
+      debugPrint('  [$i] ID: ${otp.idOtp}, Tag: ${otp.tag}');
+    }
   }
 
   void _copyOtpCode(String code) {
@@ -827,6 +860,7 @@ class _OtpListPageState extends State<OtpListPage> {
         // OTP List
         Expanded(
           child: ListView.builder(
+            key: ValueKey('otp_list_${_otps.length}'),
             padding: EdgeInsets.symmetric(
               horizontal: isMobile
                   ? 16
@@ -1038,6 +1072,7 @@ class _OtpListPageState extends State<OtpListPage> {
     final isHighlighted = _highlightedOtpId == otp.idOtp;
 
     return AnimatedContainer(
+      key: ValueKey('otp_card_${otp.idOtp}_${otp.tag}'),
       duration: Duration(milliseconds: 300),
       margin: EdgeInsets.only(
           bottom: isMobile
