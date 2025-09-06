@@ -19,6 +19,8 @@ class _OtpListPageState extends State<OtpListPage> {
   bool _isLoading = true;
   String? _errorMessage;
   String? _highlightedOtpId; // Track which OTP to highlight after update
+  Map<String, Map<String, dynamic>> _legalEntities =
+      {}; // Cache for legal entity data
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -209,6 +211,32 @@ class _OtpListPageState extends State<OtpListPage> {
     for (int i = 0; i < _otps.length; i++) {
       final otp = _otps[i];
       debugPrint('  [$i] ID: ${otp.idOtp}, Tag: ${otp.tag}');
+    }
+  }
+
+  Future<void> _loadLegalEntityForOtp(OtpModel otp) async {
+    if (otp.idLegalEntity == null) return;
+
+    // Check if we already have this legal entity data
+    if (_legalEntities.containsKey(otp.idLegalEntity)) return;
+
+    try {
+      debugPrint('🏢 Loading legal entity for OTP: ${otp.idOtp}');
+
+      final response = await OtpService.getLegalEntityForOtp(
+        idLegalEntity: otp.idLegalEntity!,
+      );
+
+      if (response.success && response.data != null) {
+        setState(() {
+          _legalEntities[otp.idLegalEntity!] = response.data!;
+        });
+        debugPrint('✅ Legal entity loaded for OTP: ${otp.idOtp}');
+      } else {
+        debugPrint('❌ Failed to load legal entity: ${response.error}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading legal entity: $e');
     }
   }
 
@@ -1072,6 +1100,11 @@ class _OtpListPageState extends State<OtpListPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isHighlighted = _highlightedOtpId == otp.idOtp;
 
+    // Load legal entity data if needed
+    if (otp.idLegalEntity != null) {
+      _loadLegalEntityForOtp(otp);
+    }
+
     return AnimatedContainer(
       key: ValueKey('otp_card_${otp.idOtp}_${otp.tag}'),
       duration: Duration(milliseconds: 300),
@@ -1351,6 +1384,18 @@ class _OtpListPageState extends State<OtpListPage> {
                             ? 24
                             : 28),
 
+                // Legal Entity Section (if available)
+                if (otp.idLegalEntity != null &&
+                    _legalEntities.containsKey(otp.idLegalEntity))
+                  _buildLegalEntitySection(otp, isMobile, isTablet),
+
+                SizedBox(
+                    height: isMobile
+                        ? 16
+                        : isTablet
+                            ? 20
+                            : 24),
+
                 // Action Buttons
                 if (_isOtpBlocked(otp))
                   // Mostra solo pulsante di informazioni per OTP bloccati
@@ -1579,6 +1624,200 @@ class _OtpListPageState extends State<OtpListPage> {
 
   bool _isOtpBlocked(OtpModel otp) {
     return otp.usedByIdUser != null;
+  }
+
+  Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
+    final legalEntityData = _legalEntities[otp.idLegalEntity!];
+    if (legalEntityData == null) return SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade50,
+            Colors.blue.shade100,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.blue.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with logo
+          Row(
+            children: [
+              // Logo
+              if (legalEntityData['logo_picture'] != null)
+                Container(
+                  width: isMobile ? 40 : 50,
+                  height: isMobile ? 40 : 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.blue.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      legalEntityData['logo_picture'],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.blue.shade100,
+                          child: Icon(
+                            Icons.business,
+                            color: Colors.blue.shade600,
+                            size: isMobile ? 20 : 24,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  width: isMobile ? 40 : 50,
+                  height: isMobile ? 40 : 50,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.blue.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.business,
+                    color: Colors.blue.shade600,
+                    size: isMobile ? 20 : 24,
+                  ),
+                ),
+              SizedBox(width: isMobile ? 12 : 16),
+              // Company info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      legalEntityData['legal_name'] ?? 'Azienda',
+                      style: TextStyle(
+                        fontSize: isMobile ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    if (legalEntityData['identifier_code'] != null)
+                      Text(
+                        'P.IVA: ${legalEntityData['identifier_code']}',
+                        style: TextStyle(
+                          fontSize: isMobile ? 12 : 14,
+                          color: Colors.blue.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: isMobile ? 12 : 16),
+
+          // Company details
+          if (legalEntityData['operational_address'] != null ||
+              legalEntityData['operational_city'] != null ||
+              legalEntityData['email'] != null)
+            Column(
+              children: [
+                if (legalEntityData['operational_address'] != null ||
+                    legalEntityData['operational_city'] != null)
+                  _buildInfoRow(
+                    Icons.location_on,
+                    'Indirizzo',
+                    '${legalEntityData['operational_address'] ?? ''} ${legalEntityData['operational_city'] ?? ''}'
+                        .trim(),
+                    isMobile,
+                    isTablet,
+                  ),
+                if (legalEntityData['email'] != null)
+                  _buildInfoRow(
+                    Icons.email,
+                    'Email',
+                    legalEntityData['email'],
+                    isMobile,
+                    isTablet,
+                  ),
+                if (legalEntityData['phone'] != null)
+                  _buildInfoRow(
+                    Icons.phone,
+                    'Telefono',
+                    legalEntityData['phone'],
+                    isMobile,
+                    isTablet,
+                  ),
+                if (legalEntityData['website'] != null)
+                  _buildInfoRow(
+                    Icons.web,
+                    'Sito Web',
+                    legalEntityData['website'],
+                    isMobile,
+                    isTablet,
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+      IconData icon, String label, String value, bool isMobile, bool isTablet) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isMobile ? 6 : 8),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: isMobile ? 14 : 16,
+            color: Colors.blue.shade600,
+          ),
+          SizedBox(width: isMobile ? 8 : 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label: ',
+                    style: TextStyle(
+                      fontSize: isMobile ? 12 : 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                  TextSpan(
+                    text: value,
+                    style: TextStyle(
+                      fontSize: isMobile ? 12 : 14,
+                      color: Colors.blue.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

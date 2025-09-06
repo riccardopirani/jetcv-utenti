@@ -467,6 +467,56 @@ class OtpService {
     }
   }
 
+  /// Get legal entity data for OTP
+  /// Returns legal entity information if OTP has idLegalEntity
+  static Future<EdgeFunctionResponse<Map<String, dynamic>>>
+      getLegalEntityForOtp({
+    required String idLegalEntity,
+  }) async {
+    try {
+      debugPrint('🏢 OtpService: Getting legal entity for OTP: $idLegalEntity');
+
+      final response = await EdgeFunctionService.invokeFunction(
+        'get-legal-entity',
+        {
+          'id_legal_entity': idLegalEntity,
+        },
+      );
+
+      debugPrint('🔄 OtpService: Get legal entity response: $response');
+
+      // The function returns { ok: true, legal_entity: {...} }
+      final bool isSuccess = response['ok'] == true;
+
+      if (isSuccess && response['legal_entity'] != null) {
+        final legalEntityData =
+            response['legal_entity'] as Map<String, dynamic>;
+
+        debugPrint('✅ OtpService: Legal entity retrieved successfully');
+
+        return EdgeFunctionResponse<Map<String, dynamic>>(
+          success: true,
+          data: legalEntityData,
+          message: 'Legal entity retrieved successfully',
+        );
+      } else {
+        debugPrint(
+            '❌ OtpService: Get legal entity failed - ok: ${response['ok']}, error: ${response['error']}');
+
+        return EdgeFunctionResponse<Map<String, dynamic>>(
+          success: false,
+          error: response['error'] as String? ?? 'Failed to get legal entity',
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ OtpService: Exception during legal entity retrieval: $e');
+      return EdgeFunctionResponse<Map<String, dynamic>>(
+        success: false,
+        error: 'Error getting legal entity: $e',
+      );
+    }
+  }
+
   /// Clean up expired OTPs (garbage collection)
   /// Returns number of OTPs cleaned up
   static Future<EdgeFunctionResponse<int>> cleanupExpiredOtps({
