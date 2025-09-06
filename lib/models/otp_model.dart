@@ -11,6 +11,7 @@ class OtpModel {
   final DateTime? usedAt;
   final String? usedByIdUser;
   final DateTime? burnedAt;
+  final String? idLegalEntity;
 
   OtpModel({
     required this.idOtp,
@@ -24,6 +25,7 @@ class OtpModel {
     this.usedAt,
     this.usedByIdUser,
     this.burnedAt,
+    this.idLegalEntity,
   });
 
   /// Create OtpModel from JSON/Map
@@ -44,6 +46,7 @@ class OtpModel {
         burnedAt: json['burned_at'] != null
             ? DateTime.parse(json['burned_at'])
             : null,
+        idLegalEntity: json['id_legal_entity'] as String?,
       );
 
   /// Convert OtpModel to JSON/Map
@@ -59,6 +62,7 @@ class OtpModel {
         'used_at': usedAt?.toIso8601String(),
         'used_by_id_user': usedByIdUser,
         'burned_at': burnedAt?.toIso8601String(),
+        'id_legal_entity': idLegalEntity,
       };
 
   /// Check if OTP is expired
