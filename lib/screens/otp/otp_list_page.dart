@@ -48,6 +48,10 @@ class _OtpListPageState extends State<OtpListPage> {
     });
 
     try {
+      // Test if id_legal_entity column exists
+      final columnExists = await OtpService.testLegalEntityColumn();
+      debugPrint('🔍 id_legal_entity column exists: $columnExists');
+      
       final session = SupabaseConfig.client.auth.currentSession;
       final userId = session?.user.id;
 
@@ -215,28 +219,43 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Future<void> _loadLegalEntityForOtp(OtpModel otp) async {
-    if (otp.idLegalEntity == null) return;
-
+    if (otp.idLegalEntity == null) {
+      debugPrint('⚠️ OTP ${otp.idOtp} has no idLegalEntity, skipping legal entity load');
+      return;
+    }
+    
     // Check if we already have this legal entity data
-    if (_legalEntities.containsKey(otp.idLegalEntity)) return;
-
+    if (_legalEntities.containsKey(otp.idLegalEntity)) {
+      debugPrint('✅ Legal entity already cached for OTP: ${otp.idOtp}');
+      return;
+    }
+    
     try {
-      debugPrint('🏢 Loading legal entity for OTP: ${otp.idOtp}');
-
+      debugPrint('🏢 Loading legal entity for OTP: ${otp.idOtp}, Legal Entity ID: ${otp.idLegalEntity}');
+      
       final response = await OtpService.getLegalEntityForOtp(
         idLegalEntity: otp.idLegalEntity!,
       );
-
+      
       if (response.success && response.data != null) {
         setState(() {
           _legalEntities[otp.idLegalEntity!] = response.data!;
         });
         debugPrint('✅ Legal entity loaded for OTP: ${otp.idOtp}');
+        debugPrint('📊 Legal entity data keys: ${response.data!.keys.toList()}');
       } else {
         debugPrint('❌ Failed to load legal entity: ${response.error}');
+        // Add empty entry to prevent retrying
+        setState(() {
+          _legalEntities[otp.idLegalEntity!] = {};
+        });
       }
     } catch (e) {
       debugPrint('❌ Error loading legal entity: $e');
+      // Add empty entry to prevent retrying
+      setState(() {
+        _legalEntities[otp.idLegalEntity!] = {};
+      });
     }
   }
 
@@ -1100,9 +1119,17 @@ class _OtpListPageState extends State<OtpListPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isHighlighted = _highlightedOtpId == otp.idOtp;
 
-    // Load legal entity data if needed
+    // Debug OTP data
+    debugPrint('🔍 Building OTP card for: ${otp.idOtp}');
+    debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
+    debugPrint('🔍 OTP tag: ${otp.tag}');
+
+    // Load legal entity data if needed (regardless of OTP status)
     if (otp.idLegalEntity != null) {
+      debugPrint('🏢 OTP has idLegalEntity, loading legal entity data (OTP blocked: ${_isOtpBlocked(otp)})');
       _loadLegalEntityForOtp(otp);
+    } else {
+      debugPrint('⚠️ OTP has no idLegalEntity, skipping legal entity load');
     }
 
     return AnimatedContainer(
@@ -1384,9 +1411,8 @@ class _OtpListPageState extends State<OtpListPage> {
                             ? 24
                             : 28),
 
-                // Legal Entity Section (if available)
-                if (otp.idLegalEntity != null &&
-                    _legalEntities.containsKey(otp.idLegalEntity))
+                // Legal Entity Section (if available) - Always show if idLegalEntity exists
+                if (otp.idLegalEntity != null)
                   _buildLegalEntitySection(otp, isMobile, isTablet),
 
                 SizedBox(
@@ -1628,7 +1654,21 @@ class _OtpListPageState extends State<OtpListPage> {
 
   Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
     final legalEntityData = _legalEntities[otp.idLegalEntity!];
-    if (legalEntityData == null) return SizedBox.shrink();
+    
+    // If data is not loaded yet, show loading indicator
+    if (legalEntityData == null) {
+      debugPrint('⏳ Legal entity data not loaded yet for OTP: ${otp.idOtp}, showing loading indicator');
+      return _buildLegalEntityLoadingSection(isMobile, isTablet);
+    }
+    
+    // If data is empty (error case), show error message
+    if (legalEntityData.isEmpty) {
+      debugPrint('⚠️ Legal entity data is empty for OTP: ${otp.idOtp}');
+      return _buildLegalEntityErrorSection(isMobile, isTablet);
+    }
+
+    debugPrint('🏢 Building legal entity section for OTP: ${otp.idOtp}');
+    debugPrint('📊 Legal entity data: $legalEntityData');
 
     return Container(
       width: double.infinity,
@@ -1812,6 +1852,93 @@ class _OtpListPageState extends State<OtpListPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegalEntityLoadingSection(bool isMobile, bool isTablet) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade50,
+            Colors.blue.shade100,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.blue.shade200,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: isMobile ? 20 : 24,
+            height: isMobile ? 20 : 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+            ),
+          ),
+          SizedBox(width: isMobile ? 12 : 16),
+          Expanded(
+            child: Text(
+              'Caricamento informazioni azienda...',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                color: Colors.blue.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegalEntityErrorSection(bool isMobile, bool isTablet) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.orange.shade50,
+            Colors.orange.shade100,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.orange.shade200,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_outlined,
+            color: Colors.orange.shade600,
+            size: isMobile ? 20 : 24,
+          ),
+          SizedBox(width: isMobile ? 12 : 16),
+          Expanded(
+            child: Text(
+              'Impossibile caricare le informazioni azienda',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                color: Colors.orange.shade700,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

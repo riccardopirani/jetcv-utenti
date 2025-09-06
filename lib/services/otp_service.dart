@@ -476,36 +476,62 @@ class OtpService {
     try {
       debugPrint('🏢 OtpService: Getting legal entity for OTP: $idLegalEntity');
 
-      final response = await EdgeFunctionService.invokeFunction(
-        'get-legal-entity',
-        {
-          'id_legal_entity': idLegalEntity,
-        },
-      );
+      // First try with Edge Function
+      try {
+        final response = await EdgeFunctionService.invokeFunction(
+          'get-legal-entity',
+          {
+            'id_legal_entity': idLegalEntity,
+          },
+        );
 
-      debugPrint('🔄 OtpService: Get legal entity response: $response');
+        debugPrint('🔄 OtpService: Get legal entity response: $response');
 
-      // The function returns { ok: true, legal_entity: {...} }
-      final bool isSuccess = response['ok'] == true;
+        // The function returns { ok: true, legal_entity: {...} }
+        final bool isSuccess = response['ok'] == true;
 
-      if (isSuccess && response['legal_entity'] != null) {
-        final legalEntityData =
-            response['legal_entity'] as Map<String, dynamic>;
+        if (isSuccess && response['legal_entity'] != null) {
+          final legalEntityData =
+              response['legal_entity'] as Map<String, dynamic>;
 
-        debugPrint('✅ OtpService: Legal entity retrieved successfully');
+          debugPrint('✅ OtpService: Legal entity retrieved successfully via Edge Function');
+
+          return EdgeFunctionResponse<Map<String, dynamic>>(
+            success: true,
+            data: legalEntityData,
+            message: 'Legal entity retrieved successfully',
+          );
+        } else {
+          debugPrint(
+              '❌ OtpService: Get legal entity failed via Edge Function - ok: ${response['ok']}, error: ${response['error']}');
+        }
+      } catch (edgeFunctionError) {
+        debugPrint('⚠️ OtpService: Edge Function failed, trying direct database query: $edgeFunctionError');
+      }
+
+      // Fallback: Direct database query using Supabase client
+      try {
+        debugPrint('🔄 OtpService: Trying direct database query for legal entity');
+        
+        final response = await SupabaseConfig.client
+            .from('legal_entity')
+            .select('*')
+            .eq('id_legal_entity', idLegalEntity)
+            .single();
+
+        debugPrint('✅ OtpService: Legal entity retrieved successfully via direct query');
+        debugPrint('📊 Legal entity data: $response');
 
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: true,
-          data: legalEntityData,
+          data: response,
           message: 'Legal entity retrieved successfully',
         );
-      } else {
-        debugPrint(
-            '❌ OtpService: Get legal entity failed - ok: ${response['ok']}, error: ${response['error']}');
-
+      } catch (dbError) {
+        debugPrint('❌ OtpService: Direct database query failed: $dbError');
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: false,
-          error: response['error'] as String? ?? 'Failed to get legal entity',
+          error: 'Failed to get legal entity: $dbError',
         );
       }
     } catch (e) {
@@ -514,6 +540,26 @@ class OtpService {
         success: false,
         error: 'Error getting legal entity: $e',
       );
+    }
+  }
+
+  /// Test if id_legal_entity column exists in OTP table
+  /// This is a diagnostic method to verify database schema
+  static Future<bool> testLegalEntityColumn() async {
+    try {
+      debugPrint('🔍 Testing if id_legal_entity column exists in OTP table');
+      
+      // Try to select id_legal_entity from a sample OTP
+      final response = await SupabaseConfig.client
+          .from('otp')
+          .select('id_legal_entity')
+          .limit(1);
+      
+      debugPrint('✅ id_legal_entity column exists in OTP table');
+      return true;
+    } catch (e) {
+      debugPrint('❌ id_legal_entity column does not exist in OTP table: $e');
+      return false;
     }
   }
 
