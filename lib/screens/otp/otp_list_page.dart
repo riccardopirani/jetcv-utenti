@@ -124,7 +124,7 @@ class _OtpListPageState extends State<OtpListPage> {
         onOtpUpdated: (updatedOtp) {
           // Update the OTP in the list and refresh UI
           _updateOtpInList(updatedOtp);
-          
+
           // Fallback: reload the entire list after a short delay to ensure UI is updated
           Future.delayed(Duration(milliseconds: 500), () {
             if (mounted) {
@@ -139,12 +139,12 @@ class _OtpListPageState extends State<OtpListPage> {
 
   void _updateOtpInList(OtpModel updatedOtp) {
     if (!mounted) return;
-    
+
     debugPrint('🔄 Updating OTP in list: ${updatedOtp.idOtp}');
     debugPrint('🔄 Current list length: ${_otps.length}');
     debugPrint('🔄 Updated OTP tag: ${updatedOtp.tag}');
     _logCurrentOtps();
-    
+
     setState(() {
       final index = _otps.indexWhere((o) => o.idOtp == updatedOtp.idOtp);
       if (index != -1) {
@@ -158,14 +158,14 @@ class _OtpListPageState extends State<OtpListPage> {
           }
         }
         _otps = newOtps;
-        
+
         debugPrint('✅ OTP updated in list at index $index: ${updatedOtp.tag}');
         debugPrint('✅ New list length: ${_otps.length}');
         _logCurrentOtps();
-        
+
         // Highlight the updated OTP briefly
         _highlightedOtpId = updatedOtp.idOtp;
-        
+
         // Remove highlight after 2 seconds
         Future.delayed(Duration(seconds: 2), () {
           if (mounted) {
@@ -174,7 +174,7 @@ class _OtpListPageState extends State<OtpListPage> {
             });
           }
         });
-        
+
         // Show a brief visual feedback that the list has been updated
         if (_scaffoldMessenger != null && _localizations != null) {
           try {
@@ -198,7 +198,8 @@ class _OtpListPageState extends State<OtpListPage> {
         }
       } else {
         debugPrint('⚠️ OTP not found in list for update: ${updatedOtp.idOtp}');
-        debugPrint('⚠️ Available OTP IDs: ${_otps.map((o) => o.idOtp).toList()}');
+        debugPrint(
+            '⚠️ Available OTP IDs: ${_otps.map((o) => o.idOtp).toList()}');
       }
     });
   }
@@ -1084,14 +1085,14 @@ class _OtpListPageState extends State<OtpListPage> {
         color: isHighlighted ? Colors.orange.shade50 : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isHighlighted 
+          color: isHighlighted
               ? Colors.orange.shade300
               : _getStatusColor(otp).withValues(alpha: 0.2),
           width: isHighlighted ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: isHighlighted 
+            color: isHighlighted
                 ? Colors.orange.withValues(alpha: 0.2)
                 : _getStatusColor(otp).withValues(alpha: 0.1),
             spreadRadius: isHighlighted ? 1 : 0,
@@ -1285,19 +1286,60 @@ class _OtpListPageState extends State<OtpListPage> {
                               : isTablet
                                   ? 10
                                   : 12),
-                      Text(
-                        otp.code,
-                        style: TextStyle(
-                          fontSize: isMobile
-                              ? 32
-                              : isTablet
-                                  ? 36
-                                  : 40,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF6B46C1),
-                          letterSpacing: 2,
+                      if (_isOtpBlocked(otp))
+                        // Mostra messaggio di blocco invece del codice
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 16 : 20,
+                            vertical: isMobile ? 12 : 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.red.shade200,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.block,
+                                color: Colors.red.shade600,
+                                size: isMobile ? 20 : 24,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                AppLocalizations.of(context)!.otpBlocked,
+                                style: TextStyle(
+                                  fontSize: isMobile
+                                      ? 16
+                                      : isTablet
+                                          ? 18
+                                          : 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        // Mostra il codice OTP normalmente
+                        Text(
+                          otp.code,
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 32
+                                : isTablet
+                                    ? 36
+                                    : 40,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF6B46C1),
+                            letterSpacing: 2,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -1310,68 +1352,106 @@ class _OtpListPageState extends State<OtpListPage> {
                             : 28),
 
                 // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        icon: Icons.copy,
-                        label: AppLocalizations.of(context)!.copy,
-                        color: const Color(0xFF6B46C1),
-                        onPressed: () => _copyOtpCode(otp.code),
-                        isMobile: isMobile,
-                        isTablet: isTablet,
+                if (_isOtpBlocked(otp))
+                  // Mostra solo pulsante di informazioni per OTP bloccati
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 20,
+                      vertical: isMobile ? 12 : 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.red.shade200,
+                        width: 1,
                       ),
                     ),
-                    SizedBox(
-                        width: isMobile
-                            ? 12
-                            : isTablet
-                                ? 16
-                                : 20),
-                    Expanded(
-                      child: _buildActionButton(
-                        icon: Icons.qr_code,
-                        label: AppLocalizations.of(context)!.qrCode,
-                        color: Colors.green.shade600,
-                        onPressed: () => _showQrCodeModal(otp),
-                        isMobile: isMobile,
-                        isTablet: isTablet,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.red.shade600,
+                          size: isMobile ? 18 : 20,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context)!.otpBlockedMessage,
+                          style: TextStyle(
+                            fontSize: isMobile ? 12 : 14,
+                            color: Colors.red.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                        width: isMobile
-                            ? 12
-                            : isTablet
-                                ? 16
-                                : 20),
-                    Expanded(
-                      child: _buildActionButton(
-                        icon: Icons.edit,
-                        label: AppLocalizations.of(context)!.editOtp,
-                        color: Colors.orange.shade600,
-                        onPressed: () => _showEditOtpModal(otp),
-                        isMobile: isMobile,
-                        isTablet: isTablet,
+                  )
+                else
+                  // Mostra pulsanti normali per OTP non bloccati
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionButton(
+                          icon: Icons.copy,
+                          label: AppLocalizations.of(context)!.copy,
+                          color: const Color(0xFF6B46C1),
+                          onPressed: () => _copyOtpCode(otp.code),
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                        width: isMobile
-                            ? 12
-                            : isTablet
-                                ? 16
-                                : 20),
-                    Expanded(
-                      child: _buildActionButton(
-                        icon: Icons.delete,
-                        label: AppLocalizations.of(context)!.delete,
-                        color: Colors.red.shade600,
-                        onPressed: () => _deleteOtp(otp),
-                        isMobile: isMobile,
-                        isTablet: isTablet,
+                      SizedBox(
+                          width: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 16
+                                  : 20),
+                      Expanded(
+                        child: _buildActionButton(
+                          icon: Icons.qr_code,
+                          label: AppLocalizations.of(context)!.qrCode,
+                          color: Colors.green.shade600,
+                          onPressed: () => _showQrCodeModal(otp),
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(
+                          width: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 16
+                                  : 20),
+                      Expanded(
+                        child: _buildActionButton(
+                          icon: Icons.edit,
+                          label: AppLocalizations.of(context)!.editOtp,
+                          color: Colors.orange.shade600,
+                          onPressed: () => _showEditOtpModal(otp),
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
+                      ),
+                      SizedBox(
+                          width: isMobile
+                              ? 12
+                              : isTablet
+                                  ? 16
+                                  : 20),
+                      Expanded(
+                        child: _buildActionButton(
+                          icon: Icons.delete,
+                          label: AppLocalizations.of(context)!.delete,
+                          color: Colors.red.shade600,
+                          onPressed: () => _deleteOtp(otp),
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -1458,6 +1538,7 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   IconData _getStatusIcon(OtpModel otp) {
+    if (otp.usedByIdUser != null) return Icons.block;
     if (otp.isBurned) return Icons.local_fire_department;
     if (otp.isUsed) return Icons.check_circle;
     if (otp.isExpired) return Icons.timer_off;
@@ -1480,6 +1561,8 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   String _getStatusText(OtpModel otp) {
+    if (otp.usedByIdUser != null)
+      return AppLocalizations.of(context)!.otpBlocked;
     if (otp.isBurned) return AppLocalizations.of(context)!.statusBurned;
     if (otp.isUsed) return AppLocalizations.of(context)!.statusUsed;
     if (otp.isExpired) return AppLocalizations.of(context)!.statusExpired;
@@ -1487,10 +1570,15 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Color _getStatusColor(OtpModel otp) {
+    if (otp.usedByIdUser != null) return Colors.red;
     if (otp.isBurned) return Colors.red;
     if (otp.isUsed) return Colors.orange;
     if (otp.isExpired) return Colors.grey;
     return Colors.green;
+  }
+
+  bool _isOtpBlocked(OtpModel otp) {
+    return otp.usedByIdUser != null;
   }
 }
 

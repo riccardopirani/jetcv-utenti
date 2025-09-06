@@ -782,6 +782,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpTagUpdateError => 'Error updating OTP tag. Please try again.';
 
   @override
+  String get otpBlocked => 'OTP Blocked';
+
+  @override
+  String get otpBlockedMessage => 'OTP blocked - Actions not available';
+
+  @override
   String get userNotLoaded => 'User not loaded';
 
   @override

@@ -337,6 +337,8 @@
   "updateTag": "Update Tag",
   "otpTagUpdated": "OTP tag updated successfully!",
   "otpTagUpdateError": "Error updating OTP tag. Please try again.",
+  "otpBlocked": "OTP Blocked",
+  "otpBlockedMessage": "OTP blocked - Actions not available",
   "userNotLoaded": "User not loaded",
   "trainingCourse": "Training Course",
   "otpNumber": "OTP #{number}",

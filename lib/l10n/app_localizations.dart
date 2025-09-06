@@ -1550,6 +1550,18 @@ abstract class AppLocalizations {
   /// **'Error updating OTP tag. Please try again.'**
   String get otpTagUpdateError;
 
+  /// No description provided for @otpBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Blocked'**
+  String get otpBlocked;
+
+  /// No description provided for @otpBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP blocked - Actions not available'**
+  String get otpBlockedMessage;
+
   /// No description provided for @userNotLoaded.
   ///
   /// In en, this message translates to:

@@ -281,6 +281,8 @@
   "updateTag": "Aggiorna Tag",
   "otpTagUpdated": "Tag OTP aggiornato con successo!",
   "otpTagUpdateError": "Errore nell'aggiornamento del tag OTP. Riprova.",
+  "otpBlocked": "OTP Bloccato",
+  "otpBlockedMessage": "OTP bloccato - Azioni non disponibili",
   "userNotLoaded": "Utente non caricato",
   "trainingCourse": "Corso Training",
   "otpNumber": "OTP #{number}",
