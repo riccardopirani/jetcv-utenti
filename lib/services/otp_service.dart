@@ -287,33 +287,54 @@ class OtpService {
         );
       }
 
-      // Use direct query to include id_legal_entity field (RPC doesn't include it)
-      final response = await SupabaseConfig.client
-          .from('otp')
-          .select('*')
-          .eq('id_user', idUser)
-          .order('created_at', ascending: false)
-          .limit(limit);
+      // Use RPC function as primary method
+      debugPrint('🔍 OtpService: Querying OTPs for user: $idUser using RPC function');
+      
+      final response = await SupabaseConfig.client.rpc(
+        'otp_list_user_otps',
+        params: {
+          'p_id_user': idUser,
+          'p_limit': limit,
+          'p_offset': offset,
+        },
+      );
+      
+      debugPrint('📋 OtpService: RPC function successful, found ${response.length} OTPs');
 
-      debugPrint('📋 OtpService: Raw OTP direct query response: $response');
+      debugPrint('📋 OtpService: Raw OTP response: $response');
+      debugPrint('📊 OtpService: Found ${response.length} OTPs for user $idUser');
 
       final List<OtpModel> otps = [];
       for (final otpData in response) {
         try {
-          // Convert direct query response to OtpModel format
+          // Convert RPC response to OtpModel format
           final otpJson = Map<String, dynamic>.from(otpData);
           // Add missing fields that OtpModel expects
           otpJson['code'] = '***'; // Don't expose actual code
           otpJson['code_hash'] = '***'; // Don't expose hash
           
-          // Log id_legal_entity status
-          if (otpJson['id_legal_entity'] == null) {
-            debugPrint('⚠️ OtpService: id_legal_entity is null for OTP: ${otpJson['id_otp']}');
-          } else {
-            debugPrint('✅ OtpService: id_legal_entity found for OTP: ${otpJson['id_otp']} -> ${otpJson['id_legal_entity']}');
+          // Get id_legal_entity from database since RPC doesn't include it
+          final otpId = otpJson['id_otp'];
+          try {
+            final legalEntityResponse = await SupabaseConfig.client
+                .from('otp')
+                .select('id_legal_entity')
+                .eq('id_otp', otpId)
+                .single();
+            
+            otpJson['id_legal_entity'] = legalEntityResponse['id_legal_entity'];
+            
+            if (otpJson['id_legal_entity'] == null) {
+              debugPrint('⚠️ OtpService: id_legal_entity is null for OTP: $otpId');
+            } else {
+              debugPrint('✅ OtpService: id_legal_entity found for OTP: $otpId -> ${otpJson['id_legal_entity']}');
+            }
+          } catch (legalEntityError) {
+            debugPrint('⚠️ OtpService: Could not fetch id_legal_entity for OTP $otpId: $legalEntityError');
+            otpJson['id_legal_entity'] = null;
           }
 
-          debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}, id_legal_entity: ${otpJson['id_legal_entity']}');
+          debugPrint('📋 OtpService: Processing OTP: $otpId, id_legal_entity: ${otpJson['id_legal_entity']}');
 
           final otp = OtpModel.fromJson(otpJson);
           otps.add(otp);
@@ -322,7 +343,7 @@ class OtpService {
         }
       }
 
-      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs via direct query');
+      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs successfully');
 
       return EdgeFunctionResponse<List<OtpModel>>(
         success: true,
