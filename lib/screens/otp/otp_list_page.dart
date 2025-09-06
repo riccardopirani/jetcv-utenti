@@ -18,6 +18,7 @@ class _OtpListPageState extends State<OtpListPage> {
   List<OtpModel> _otps = [];
   bool _isLoading = true;
   String? _errorMessage;
+  String? _highlightedOtpId; // Track which OTP to highlight after update
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -137,6 +138,40 @@ class _OtpListPageState extends State<OtpListPage> {
         // Replace the OTP in the list with the updated version
         _otps[index] = updatedOtp;
         debugPrint('✅ OTP updated in list: ${updatedOtp.tag}');
+        
+        // Highlight the updated OTP briefly
+        _highlightedOtpId = updatedOtp.idOtp;
+        
+        // Remove highlight after 2 seconds
+        Future.delayed(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              _highlightedOtpId = null;
+            });
+          }
+        });
+        
+        // Show a brief visual feedback that the list has been updated
+        if (_scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text('${_localizations!.otpTagUpdated}'),
+                  ],
+                ),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          } catch (e) {
+            debugPrint('Error showing update confirmation: $e');
+          }
+        }
       } else {
         debugPrint('⚠️ OTP not found in list for update: ${updatedOtp.idOtp}');
       }
@@ -1873,22 +1908,8 @@ class _EditOtpModalState extends State<EditOtpModal> {
 
         if (mounted) {
           if (response.success && response.data != null) {
-            // Callback per aggiornare la lista
+            // Callback per aggiornare la lista (this will show the success message)
             widget.onOtpUpdated?.call(response.data!);
-
-            // Mostra messaggio di successo
-            if (_scaffoldMessenger != null && _localizations != null) {
-              try {
-                _scaffoldMessenger!.showSnackBar(
-                  SnackBar(
-                    content: Text(_localizations!.otpTagUpdated),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } catch (e) {
-                debugPrint('Error showing success snackbar: $e');
-              }
-            }
 
             // Chiudi il modal
             Navigator.pop(context);
