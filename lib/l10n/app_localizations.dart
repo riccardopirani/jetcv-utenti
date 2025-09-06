@@ -1520,6 +1520,36 @@ abstract class AppLocalizations {
   /// **'Account deletion not implemented yet'**
   String get accountDeletionNotImplemented;
 
+  /// No description provided for @editOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit OTP'**
+  String get editOtp;
+
+  /// No description provided for @editOtpTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit OTP Tag'**
+  String get editOtpTag;
+
+  /// No description provided for @updateTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Tag'**
+  String get updateTag;
+
+  /// No description provided for @otpTagUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP tag updated successfully!'**
+  String get otpTagUpdated;
+
+  /// No description provided for @otpTagUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating OTP tag. Please try again.'**
+  String get otpTagUpdateError;
+
   /// No description provided for @userNotLoaded.
   ///
   /// In en, this message translates to:

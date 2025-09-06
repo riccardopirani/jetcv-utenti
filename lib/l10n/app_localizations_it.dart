@@ -771,6 +771,22 @@ class AppLocalizationsIt extends AppLocalizations {
       'Eliminazione account non ancora implementata';
 
   @override
+  String get editOtp => 'Modifica OTP';
+
+  @override
+  String get editOtpTag => 'Modifica Tag OTP';
+
+  @override
+  String get updateTag => 'Aggiorna Tag';
+
+  @override
+  String get otpTagUpdated => 'Tag OTP aggiornato con successo!';
+
+  @override
+  String get otpTagUpdateError =>
+      'Errore nell\'aggiornamento del tag OTP. Riprova.';
+
+  @override
   String get userNotLoaded => 'Utente non caricato';
 
   @override

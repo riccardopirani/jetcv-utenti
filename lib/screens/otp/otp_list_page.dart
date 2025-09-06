@@ -115,6 +115,34 @@ class _OtpListPageState extends State<OtpListPage> {
     );
   }
 
+  void _showEditOtpModal(OtpModel otp) {
+    showDialog(
+      context: context,
+      builder: (context) => EditOtpModal(
+        otp: otp,
+        onOtpUpdated: (updatedOtp) {
+          // Update the OTP in the list and refresh UI
+          _updateOtpInList(updatedOtp);
+        },
+      ),
+    );
+  }
+
+  void _updateOtpInList(OtpModel updatedOtp) {
+    if (!mounted) return;
+    
+    setState(() {
+      final index = _otps.indexWhere((o) => o.idOtp == updatedOtp.idOtp);
+      if (index != -1) {
+        // Replace the OTP in the list with the updated version
+        _otps[index] = updatedOtp;
+        debugPrint('✅ OTP updated in list: ${updatedOtp.tag}');
+      } else {
+        debugPrint('⚠️ OTP not found in list for update: ${updatedOtp.idOtp}');
+      }
+    });
+  }
+
   void _copyOtpCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
     if (mounted && _scaffoldMessenger != null && _localizations != null) {
@@ -1242,6 +1270,22 @@ class _OtpListPageState extends State<OtpListPage> {
                                 : 20),
                     Expanded(
                       child: _buildActionButton(
+                        icon: Icons.edit,
+                        label: AppLocalizations.of(context)!.editOtp,
+                        color: Colors.orange.shade600,
+                        onPressed: () => _showEditOtpModal(otp),
+                        isMobile: isMobile,
+                        isTablet: isTablet,
+                      ),
+                    ),
+                    SizedBox(
+                        width: isMobile
+                            ? 12
+                            : isTablet
+                                ? 16
+                                : 20),
+                    Expanded(
+                      child: _buildActionButton(
                         icon: Icons.delete,
                         label: AppLocalizations.of(context)!.delete,
                         color: Colors.red.shade600,
@@ -1746,6 +1790,325 @@ class QrCodeModal extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: Text(AppLocalizations.of(context)!.copy),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EditOtpModal extends StatefulWidget {
+  final OtpModel otp;
+  final Function(OtpModel)? onOtpUpdated;
+
+  const EditOtpModal({super.key, required this.otp, this.onOtpUpdated});
+
+  @override
+  State<EditOtpModal> createState() => _EditOtpModalState();
+}
+
+class _EditOtpModalState extends State<EditOtpModal> {
+  final _tagController = TextEditingController();
+  bool _isUpdating = false;
+
+  // Riferimenti salvati per evitare errori di contesto invalidato
+  ScaffoldMessengerState? _scaffoldMessenger;
+  AppLocalizations? _localizations;
+
+  @override
+  void initState() {
+    super.initState();
+    _tagController.text = widget.otp.tag ?? '';
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Salva i riferimenti per evitare errori di contesto invalidato
+    _scaffoldMessenger = ScaffoldMessenger.of(context);
+    _localizations = AppLocalizations.of(context);
+  }
+
+  @override
+  void dispose() {
+    _tagController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateOtpTag() async {
+    if (_tagController.text.trim().isEmpty) {
+      if (mounted && _scaffoldMessenger != null && _localizations != null) {
+        try {
+          _scaffoldMessenger!.showSnackBar(
+            SnackBar(
+              content: Text(_localizations!.tagOptional),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } catch (e) {
+          debugPrint('Error showing snackbar: $e');
+        }
+      }
+      return;
+    }
+
+    setState(() {
+      _isUpdating = true;
+    });
+
+    try {
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      if (userId != null) {
+        final response = await OtpService.updateOtpTag(
+          idOtp: widget.otp.idOtp,
+          idUser: userId,
+          newTag: _tagController.text.trim(),
+        );
+
+        if (mounted) {
+          if (response.success && response.data != null) {
+            // Callback per aggiornare la lista
+            widget.onOtpUpdated?.call(response.data!);
+
+            // Mostra messaggio di successo
+            if (_scaffoldMessenger != null && _localizations != null) {
+              try {
+                _scaffoldMessenger!.showSnackBar(
+                  SnackBar(
+                    content: Text(_localizations!.otpTagUpdated),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                debugPrint('Error showing success snackbar: $e');
+              }
+            }
+
+            // Chiudi il modal
+            Navigator.pop(context);
+          } else {
+            // Mostra messaggio di errore
+            if (_scaffoldMessenger != null && _localizations != null) {
+              try {
+                _scaffoldMessenger!.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        response.error ?? _localizations!.otpTagUpdateError),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              } catch (e) {
+                debugPrint('Error showing error snackbar: $e');
+              }
+            }
+          }
+        }
+      } else {
+        if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          try {
+            _scaffoldMessenger!.showSnackBar(
+              SnackBar(
+                content: Text(_localizations!.userNotLoaded),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } catch (e) {
+            debugPrint('Error showing user not loaded snackbar: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating OTP tag: $e');
+      if (mounted && _scaffoldMessenger != null && _localizations != null) {
+        try {
+          _scaffoldMessenger!.showSnackBar(
+            SnackBar(
+              content: Text(_localizations!.otpTagUpdateError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } catch (e) {
+          debugPrint('Error showing error snackbar: $e');
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdating = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        width: isMobile ? double.infinity : 500,
+        padding: EdgeInsets.all(isMobile ? 24 : 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: EdgeInsets.all(isMobile ? 16 : 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.orange.shade50,
+                    Colors.orange.shade100,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(isMobile ? 12 : 14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.orange.shade600,
+                          Colors.orange.shade700,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                      size: isMobile ? 24 : 28,
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 16 : 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.editOtpTag,
+                          style: TextStyle(
+                            fontSize: isMobile ? 20 : 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        SizedBox(height: isMobile ? 4 : 6),
+                        Text(
+                          'Modifica il tag per identificare questo OTP',
+                          style: TextStyle(
+                            fontSize: isMobile ? 14 : 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: isMobile ? 24 : 32),
+
+            // Tag Input
+            TextField(
+              controller: _tagController,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.tagOptional,
+                hintText: 'Inserisci un tag per identificare questo OTP',
+                prefixIcon: const Icon(Icons.label_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.orange.shade600,
+                    width: 2,
+                  ),
+                ),
+              ),
+              maxLength: 50,
+              textCapitalization: TextCapitalization.words,
+            ),
+
+            SizedBox(height: isMobile ? 24 : 32),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed:
+                        _isUpdating ? null : () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade400),
+                      foregroundColor: Colors.grey.shade700,
+                      padding: EdgeInsets.symmetric(
+                        vertical: isMobile ? 12 : 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.close,
+                      style: TextStyle(
+                        fontSize: isMobile ? 14 : 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: isMobile ? 12 : 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isUpdating ? null : _updateOtpTag,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange.shade600,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        vertical: isMobile ? 12 : 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: _isUpdating
+                        ? SizedBox(
+                            height: isMobile ? 20 : 24,
+                            width: isMobile ? 20 : 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            AppLocalizations.of(context)!.updateTag,
+                            style: TextStyle(
+                              fontSize: isMobile ? 14 : 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ],

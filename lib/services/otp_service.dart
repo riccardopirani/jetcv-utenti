@@ -413,6 +413,60 @@ class OtpService {
     }
   }
 
+  /// Update OTP tag
+  /// Returns the updated OTP
+  static Future<EdgeFunctionResponse<OtpModel>> updateOtpTag({
+    required String idOtp,
+    String? idUser,
+    required String newTag,
+  }) async {
+    try {
+      debugPrint('✏️ OtpService: Updating OTP tag for: $idOtp');
+      debugPrint('✏️ OtpService: New tag: $newTag');
+
+      final response = await EdgeFunctionService.invokeFunction(
+        _functionName,
+        {
+          'id_otp': idOtp,
+          'id_user': idUser,
+          'tag': newTag,
+        },
+      );
+
+      debugPrint('🔄 OtpService: Update OTP tag response: $response');
+
+      // The function returns { ok: true, otp: {...} }
+      final bool isSuccess = response['ok'] == true;
+
+      if (isSuccess && response['otp'] != null) {
+        final otpData = response['otp'] as Map<String, dynamic>;
+        final otp = OtpModel.fromJson(otpData);
+
+        debugPrint('✅ OtpService: OTP tag updated successfully');
+
+        return EdgeFunctionResponse<OtpModel>(
+          success: true,
+          data: otp,
+          message: 'OTP tag updated successfully',
+        );
+      } else {
+        debugPrint(
+            '❌ OtpService: Update OTP tag failed - ok: ${response['ok']}, error: ${response['error']}');
+
+        return EdgeFunctionResponse<OtpModel>(
+          success: false,
+          error: response['error'] as String? ?? 'Failed to update OTP tag',
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ OtpService: Exception during OTP tag update: $e');
+      return EdgeFunctionResponse<OtpModel>(
+        success: false,
+        error: 'Error updating OTP tag: $e',
+      );
+    }
+  }
+
   /// Clean up expired OTPs (garbage collection)
   /// Returns number of OTPs cleaned up
   static Future<EdgeFunctionResponse<int>> cleanupExpiredOtps({

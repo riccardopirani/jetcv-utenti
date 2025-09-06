@@ -332,6 +332,11 @@
     }
   },
   "accountDeletionNotImplemented": "Account deletion not implemented yet",
+  "editOtp": "Edit OTP",
+  "editOtpTag": "Edit OTP Tag",
+  "updateTag": "Update Tag",
+  "otpTagUpdated": "OTP tag updated successfully!",
+  "otpTagUpdateError": "Error updating OTP tag. Please try again.",
   "userNotLoaded": "User not loaded",
   "trainingCourse": "Training Course",
   "otpNumber": "OTP #{number}",
