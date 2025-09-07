@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/services/edge_function_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
+import 'package:http/http.dart' as http;
 
 /// Service for OTP operations using the deployed otp-crud Supabase function
 class OtpService {
@@ -279,7 +281,6 @@ class OtpService {
     try {
       debugPrint('📋 OtpService: Getting user OTPs for user: $idUser');
 
-      // Query the OTP table directly
       if (idUser == null) {
         return EdgeFunctionResponse<List<OtpModel>>(
           success: false,
@@ -287,78 +288,101 @@ class OtpService {
         );
       }
 
-      // Use RPC function as primary method
-      debugPrint(
-          '🔍 OtpService: Querying OTPs for user: $idUser using RPC function');
+      // Use Edge Function otp-crud with /by-user endpoint
+      debugPrint('🔍 OtpService: Calling Edge Function otp-crud /by-user endpoint');
+      debugPrint('🔍 OtpService: Parameters: id_user=$idUser, limit=$limit, offset=$offset');
 
-      final response = await SupabaseConfig.client.rpc(
-        'otp_list_user_otps',
-        params: {
-          'p_id_user': idUser,
-          'p_limit': limit,
-          'p_offset': offset,
+      // Build URL with query parameters
+      final queryParams = {
+        'id_user': idUser,
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      };
+      
+      final queryString = queryParams.entries
+          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+      
+      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/otp-crud/by-user?$queryString';
+      debugPrint('🔍 OtpService: Full URL: $url');
+
+      // Get current session for authentication
+      final session = SupabaseConfig.client.auth.currentSession;
+      if (session == null) {
+        throw Exception('No active session');
+      }
+
+      // Make HTTP GET request
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'Content-Type': 'application/json',
         },
       );
 
-      debugPrint(
-          '📋 OtpService: RPC function successful, found ${response.length} OTPs');
+      debugPrint('📋 OtpService: HTTP response status: ${response.statusCode}');
+      debugPrint('📋 OtpService: HTTP response body: ${response.body}');
 
-      debugPrint('📋 OtpService: Raw OTP response: $response');
-      debugPrint(
-          '📊 OtpService: Found ${response.length} OTPs for user $idUser');
-
-      final List<OtpModel> otps = [];
-      for (final otpData in response) {
-        try {
-          // Convert RPC response to OtpModel format
-          final otpJson = Map<String, dynamic>.from(otpData);
-          // Add missing fields that OtpModel expects
-          otpJson['code'] = '***'; // Don't expose actual code
-          otpJson['code_hash'] = '***'; // Don't expose hash
-
-          // Get id_legal_entity from database since RPC doesn't include it
-          final otpId = otpJson['id_otp'];
-          try {
-            final legalEntityResponse = await SupabaseConfig.client
-                .from('otp')
-                .select('id_legal_entity')
-                .eq('id_otp', otpId)
-                .single();
-
-            otpJson['id_legal_entity'] = legalEntityResponse['id_legal_entity'];
-
-            if (otpJson['id_legal_entity'] == null) {
-              debugPrint(
-                  '⚠️ OtpService: id_legal_entity is null for OTP: $otpId');
-            } else {
-              debugPrint(
-                  '✅ OtpService: id_legal_entity found for OTP: $otpId -> ${otpJson['id_legal_entity']}');
-            }
-          } catch (legalEntityError) {
-            debugPrint(
-                '⚠️ OtpService: Could not fetch id_legal_entity for OTP $otpId: $legalEntityError');
-            otpJson['id_legal_entity'] = null;
-          }
-
-          debugPrint(
-              '📋 OtpService: Processing OTP: $otpId, id_legal_entity: ${otpJson['id_legal_entity']}');
-
-          final otp = OtpModel.fromJson(otpJson);
-          otps.add(otp);
-        } catch (e) {
-          debugPrint('❌ OtpService: Error parsing OTP: $e, data: $otpData');
-        }
+      if (response.statusCode != 200) {
+        throw Exception('HTTP request failed with status ${response.statusCode}: ${response.body}');
       }
 
-      debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs successfully');
-
-      return EdgeFunctionResponse<List<OtpModel>>(
-        success: true,
-        data: otps,
-        message: 'OTPs retrieved successfully',
+      final responseData = Map<String, dynamic>.from(
+        json.decode(response.body),
       );
+
+      debugPrint('📋 OtpService: Edge Function response: $responseData');
+      debugPrint('📋 OtpService: Response type: ${responseData.runtimeType}');
+      debugPrint('📋 OtpService: Response keys: ${responseData.keys.toList()}');
+
+      // The function returns { ok: true, count: number, items: [...] }
+      final bool isSuccess = responseData['ok'] == true;
+
+      if (isSuccess && responseData['items'] != null) {
+        final List<dynamic> items = responseData['items'] as List<dynamic>;
+        debugPrint('📋 OtpService: Found ${items.length} OTPs via Edge Function');
+
+        final List<OtpModel> otps = [];
+        for (final otpData in items) {
+          try {
+            // Convert Edge Function response to OtpModel format
+            final otpJson = Map<String, dynamic>.from(otpData);
+            
+            // Add missing fields that OtpModel expects
+            otpJson['code'] = '***'; // Don't expose actual code
+            otpJson['code_hash'] = '***'; // Don't expose hash
+
+            debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}');
+            debugPrint('📋 OtpService: id_legal_entity: ${otpJson['id_legal_entity']}');
+            debugPrint('📋 OtpService: id_legal_entity type: ${otpJson['id_legal_entity'].runtimeType}');
+            debugPrint('📋 OtpService: id_legal_entity is null: ${otpJson['id_legal_entity'] == null}');
+
+            final otp = OtpModel.fromJson(otpJson);
+            otps.add(otp);
+          } catch (e) {
+            debugPrint('❌ OtpService: Error parsing OTP: $e, data: $otpData');
+          }
+        }
+
+        debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs successfully via Edge Function');
+
+        return EdgeFunctionResponse<List<OtpModel>>(
+          success: true,
+          data: otps,
+          message: 'OTPs retrieved successfully',
+        );
+      } else {
+        debugPrint('❌ OtpService: Edge Function failed: ${responseData['error']}');
+        return EdgeFunctionResponse<List<OtpModel>>(
+          success: false,
+          error: 'Edge Function failed: ${responseData['error']}',
+        );
+      }
     } catch (e) {
       debugPrint('❌ OtpService: Error getting user OTPs: $e');
+      debugPrint('❌ OtpService: Error type: ${e.runtimeType}');
+      debugPrint('❌ OtpService: Error details: $e');
       return EdgeFunctionResponse<List<OtpModel>>(
         success: false,
         error: 'Error getting user OTPs: $e',
@@ -513,33 +537,63 @@ class OtpService {
       debugPrint('🔍 OtpService: idLegalEntity type: ${idLegalEntity.runtimeType}');
       debugPrint('🔍 OtpService: idLegalEntity is empty: ${idLegalEntity.isEmpty}');
 
-      // First try with Edge Function
+      // Use Edge Function get-legal-entity-by-id
       try {
-        debugPrint('🔍 OtpService: Calling Edge Function get-legal-entity');
-        debugPrint('🔍 OtpService: Parameters: {id_legal_entity: $idLegalEntity}');
+        debugPrint('🔍 OtpService: Calling Edge Function get-legal-entity-by-id');
+        debugPrint('🔍 OtpService: Parameters: id_legal_entity=$idLegalEntity');
         
-        final response = await EdgeFunctionService.invokeFunction(
-          'get-legal-entity',
-          {
-            'id_legal_entity': idLegalEntity,
+        // Get current session for authentication
+        final session = SupabaseConfig.client.auth.currentSession;
+        if (session == null) {
+          throw Exception('No active session');
+        }
+
+        // Build URL with query parameters
+        final queryParams = {
+          'id_legal_entity': idLegalEntity,
+        };
+        
+        final queryString = queryParams.entries
+            .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+            .join('&');
+        
+        final url = '${SupabaseConfig.supabaseUrl}/functions/v1/get-legal-entity-by-id?$queryString';
+        debugPrint('🔍 OtpService: Full URL: $url');
+
+        // Make HTTP GET request
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer ${session.accessToken}',
+            'Content-Type': 'application/json',
           },
         );
 
+        debugPrint('📋 OtpService: HTTP response status: ${response.statusCode}');
+        debugPrint('📋 OtpService: HTTP response body: ${response.body}');
+
+        if (response.statusCode != 200) {
+          throw Exception('HTTP request failed with status ${response.statusCode}: ${response.body}');
+        }
+
+        final responseData = Map<String, dynamic>.from(
+          json.decode(response.body),
+        );
+
         debugPrint('🔄 OtpService: Get legal entity response received');
-        debugPrint('🔄 OtpService: Response type: ${response.runtimeType}');
-        debugPrint('🔄 OtpService: Response: $response');
-        debugPrint('🔄 OtpService: Response keys: ${response.keys.toList()}');
+        debugPrint('🔄 OtpService: Response type: ${responseData.runtimeType}');
+        debugPrint('🔄 OtpService: Response: $responseData');
+        debugPrint('🔄 OtpService: Response keys: ${responseData.keys.toList()}');
 
-        // The function returns { ok: true, legal_entity: {...} }
-        final bool isSuccess = response['ok'] == true;
-        debugPrint('🔍 OtpService: Response ok: ${response['ok']}');
+        // The function returns { ok: true, data: {...}, request_id }
+        final bool isSuccess = responseData['ok'] == true;
+        debugPrint('🔍 OtpService: Response ok: ${responseData['ok']}');
         debugPrint('🔍 OtpService: isSuccess: $isSuccess');
-        debugPrint('🔍 OtpService: legal_entity exists: ${response['legal_entity'] != null}');
-        debugPrint('🔍 OtpService: legal_entity: ${response['legal_entity']}');
+        debugPrint('🔍 OtpService: data exists: ${responseData['data'] != null}');
+        debugPrint('🔍 OtpService: data: ${responseData['data']}');
 
-        if (isSuccess && response['legal_entity'] != null) {
-          final legalEntityData =
-              response['legal_entity'] as Map<String, dynamic>;
+        if (isSuccess && responseData['data'] != null) {
+          final legalEntityData = responseData['data'] as Map<String, dynamic>;
 
           debugPrint(
               '✅ OtpService: Legal entity retrieved successfully via Edge Function');
@@ -553,43 +607,21 @@ class OtpService {
           );
         } else {
           debugPrint(
-              '❌ OtpService: Get legal entity failed via Edge Function - ok: ${response['ok']}, error: ${response['error']}');
+              '❌ OtpService: Get legal entity failed via Edge Function - ok: ${responseData['ok']}, code: ${responseData['code']}, message: ${responseData['message']}');
+          return EdgeFunctionResponse<Map<String, dynamic>>(
+            success: false,
+            error: 'Legal entity not found: ${responseData['message']}',
+          );
         }
       } catch (edgeFunctionError) {
         debugPrint(
-            '⚠️ OtpService: Edge Function failed, trying direct database query: $edgeFunctionError');
-      }
-
-      // Fallback: Direct database query using Supabase client
-      try {
-        debugPrint(
-            '🔄 OtpService: Trying direct database query for legal entity');
-        debugPrint('🔍 OtpService: Querying legal_entity table with id_legal_entity: $idLegalEntity');
-
-        final response = await SupabaseConfig.client
-            .from('legal_entity')
-            .select('*')
-            .eq('id_legal_entity', idLegalEntity)
-            .single();
-
-        debugPrint(
-            '✅ OtpService: Legal entity retrieved successfully via direct query');
-        debugPrint('📊 OtpService: Direct query response type: ${response.runtimeType}');
-        debugPrint('📊 OtpService: Direct query response: $response');
-        debugPrint('📊 OtpService: Direct query response keys: ${response.keys.toList()}');
-
-        return EdgeFunctionResponse<Map<String, dynamic>>(
-          success: true,
-          data: response,
-          message: 'Legal entity retrieved successfully',
-        );
-      } catch (dbError) {
-        debugPrint('❌ OtpService: Direct database query failed: $dbError');
+            '⚠️ OtpService: Edge Function failed: $edgeFunctionError');
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: false,
-          error: 'Failed to get legal entity: $dbError',
+          error: 'Failed to get legal entity: $edgeFunctionError',
         );
       }
+
     } catch (e) {
       debugPrint('❌ OtpService: Exception during legal entity retrieval: $e');
       return EdgeFunctionResponse<Map<String, dynamic>>(
