@@ -1683,20 +1683,63 @@ class _OtpListPageState extends State<OtpListPage> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.shade50,
-            Colors.blue.shade100,
-          ],
+          colors: isBlocked
+              ? [
+                  Colors.red.shade50,
+                  Colors.red.shade100,
+                ]
+              : [
+                  Colors.blue.shade50,
+                  Colors.blue.shade100,
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.blue.shade200,
+          color: isBlocked ? Colors.red.shade200 : Colors.blue.shade200,
           width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header with blocked indicator
+          if (isBlocked)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 12 : 16,
+                vertical: isMobile ? 8 : 10,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.red.shade300,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.block,
+                    color: Colors.red.shade700,
+                    size: isMobile ? 16 : 18,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    AppLocalizations.of(context)!.blockedByLegalEntity,
+                    style: TextStyle(
+                      fontSize: isMobile ? 12 : 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
+          if (isBlocked) SizedBox(height: isMobile ? 12 : 16),
+
           // Header with logo
           Row(
             children: [
@@ -1708,7 +1751,7 @@ class _OtpListPageState extends State<OtpListPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.blue.shade300,
+                      color: isBlocked ? Colors.red.shade300 : Colors.blue.shade300,
                       width: 1,
                     ),
                   ),
@@ -1719,10 +1762,10 @@ class _OtpListPageState extends State<OtpListPage> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: Colors.blue.shade100,
+                          color: isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
                           child: Icon(
                             Icons.business,
-                            color: Colors.blue.shade600,
+                            color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
                             size: isMobile ? 20 : 24,
                           ),
                         );
