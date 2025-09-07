@@ -36,30 +36,40 @@ class OpenBadgeModel {
 
   /// Create OpenBadgeModel from JSON
   factory OpenBadgeModel.fromJson(Map<String, dynamic> json) {
-    return OpenBadgeModel(
-      idOpenBadge: json['id_openbadge'] as String,
-      idUser: json['id_user'] as String,
-      assertionJson: Map<String, dynamic>.from(json['assertion_json'] as Map),
-      assertionId: json['assertion_id'] as String?,
-      badgeClassId: json['badge_class_id'] as String?,
-      issuerId: json['issuer_id'] as String?,
-      isRevoked: json['is_revoked'] as bool? ?? false,
-      revokedAt: json['revoked_at'] != null
-          ? DateTime.parse(json['revoked_at'] as String)
-          : null,
-      issuedAt: json['issued_at'] != null
-          ? DateTime.parse(json['issued_at'] as String)
-          : null,
-      expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'] as String)
-          : null,
-      source: json['source'] as String?,
-      note: json['note'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
-    );
+    try {
+      debugPrint('🔍 OpenBadgeModel: Parsing JSON: $json');
+      debugPrint('🔍 OpenBadgeModel: JSON keys: ${json.keys.toList()}');
+      
+      return OpenBadgeModel(
+        idOpenBadge: json['id_openbadge'] as String,
+        idUser: json['id_user'] as String,
+        assertionJson: Map<String, dynamic>.from(json['assertion_json'] as Map),
+        assertionId: json['assertion_id'] as String?,
+        badgeClassId: json['badge_class_id'] as String?,
+        issuerId: json['issuer_id'] as String?,
+        isRevoked: json['is_revoked'] as bool? ?? false,
+        revokedAt: json['revoked_at'] != null
+            ? DateTime.parse(json['revoked_at'] as String)
+            : null,
+        issuedAt: json['issued_at'] != null
+            ? DateTime.parse(json['issued_at'] as String)
+            : null,
+        expiresAt: json['expires_at'] != null
+            ? DateTime.parse(json['expires_at'] as String)
+            : null,
+        source: json['source'] as String?,
+        note: json['note'] as String?,
+        createdAt: DateTime.parse(json['created_at'] as String),
+        updatedAt: json['updated_at'] != null
+            ? DateTime.parse(json['updated_at'] as String)
+            : null,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('❌ OpenBadgeModel: Error parsing JSON: $e');
+      debugPrint('❌ OpenBadgeModel: Stack trace: $stackTrace');
+      debugPrint('❌ OpenBadgeModel: JSON that caused error: $json');
+      rethrow;
+    }
   }
 
   /// Convert OpenBadgeModel to JSON
