@@ -23,7 +23,8 @@ class WalletService {
       }
 
       // Fallback to direct database query if Edge Function fails
-      debugPrint('🔄 WalletService: Edge Function failed, trying direct query...');
+      debugPrint(
+          '🔄 WalletService: Edge Function failed, trying direct query...');
       return await _getWalletByUserIdDirectQuery(userId);
     } catch (e) {
       debugPrint('❌ WalletService: Error getting wallet for user $userId: $e');
@@ -32,7 +33,8 @@ class WalletService {
   }
 
   /// Get wallet using Edge Function
-  static Future<WalletModel?> _getWalletByUserIdEdgeFunction(String userId) async {
+  static Future<WalletModel?> _getWalletByUserIdEdgeFunction(
+      String userId) async {
     try {
       final session = _client.auth.currentSession;
       if (session == null) {
@@ -40,7 +42,8 @@ class WalletService {
         return null;
       }
 
-      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/get-wallet-byuser';
+      final url =
+          '${SupabaseConfig.supabaseUrl}/functions/v1/get-wallet-byuser';
       debugPrint('🔍 WalletService: Making POST request to: $url');
       debugPrint('🔍 WalletService: User ID: $userId');
 
@@ -54,8 +57,10 @@ class WalletService {
         body: json.encode({'idUser': userId}),
       );
 
-      debugPrint('📋 WalletService: Edge Function response status: ${response.statusCode}');
-      debugPrint('📋 WalletService: Edge Function response body: ${response.body}');
+      debugPrint(
+          '📋 WalletService: Edge Function response status: ${response.statusCode}');
+      debugPrint(
+          '📋 WalletService: Edge Function response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -78,7 +83,8 @@ class WalletService {
           }
         }
       } else if (response.statusCode == 500) {
-        debugPrint('⚠️ WalletService: Edge Function error 500 - will try direct query');
+        debugPrint(
+            '⚠️ WalletService: Edge Function error 500 - will try direct query');
         return null;
       }
 
@@ -90,13 +96,15 @@ class WalletService {
   }
 
   /// Get wallet using direct database query as fallback
-  static Future<WalletModel?> _getWalletByUserIdDirectQuery(String userId) async {
+  static Future<WalletModel?> _getWalletByUserIdDirectQuery(
+      String userId) async {
     try {
       debugPrint('🔍 WalletService: Trying direct database query...');
-      
+
       final response = await _client
           .from('wallet')
-          .select('idWallet, idUser, publicAddress, secretKey, createdAt, updatedAt, createdBy')
+          .select(
+              'idWallet, idUser, publicAddress, secretKey, createdAt, updatedAt, createdBy')
           .eq('idUser', userId)
           .maybeSingle();
 
@@ -181,13 +189,14 @@ class WalletService {
         debugPrint('🔍 WalletService: Testing direct database query...');
         final directQuery = await _client
             .from('wallet')
-            .select('idWallet, idUser, publicAddress, createdAt, updatedAt, createdBy')
+            .select(
+                'idWallet, idUser, publicAddress, createdAt, updatedAt, createdBy')
             .limit(1);
         debugPrint(
             '✅ WalletService: Direct query successful, found ${directQuery.length} wallets');
         if (directQuery.isNotEmpty) {
           debugPrint('📋 WalletService: Sample wallet: ${directQuery.first}');
-          
+
           // Test parsing the sample wallet
           try {
             final wallet = WalletModel.fromJson(directQuery.first);
@@ -198,7 +207,8 @@ class WalletService {
             debugPrint('  - createdAt: ${wallet.createdAt}');
             debugPrint('  - createdBy: ${wallet.createdBy}');
           } catch (parseError) {
-            debugPrint('❌ WalletService: WalletModel parsing failed: $parseError');
+            debugPrint(
+                '❌ WalletService: WalletModel parsing failed: $parseError');
           }
         }
       } catch (directError) {
@@ -207,24 +217,28 @@ class WalletService {
 
       // Test Edge Function with a dummy user ID
       final testUserId = '00000000-0000-0000-0000-000000000000';
-      debugPrint('🔍 WalletService: Testing Edge Function with dummy user: $testUserId');
-      
+      debugPrint(
+          '🔍 WalletService: Testing Edge Function with dummy user: $testUserId');
+
       final wallet = await _getWalletByUserIdEdgeFunction(testUserId);
       if (wallet != null) {
-        debugPrint('✅ WalletService: Edge Function returned wallet for test user');
+        debugPrint(
+            '✅ WalletService: Edge Function returned wallet for test user');
       } else {
-        debugPrint('⚠️ WalletService: Edge Function returned null for test user (expected)');
+        debugPrint(
+            '⚠️ WalletService: Edge Function returned null for test user (expected)');
       }
 
       // Test the main method with fallback
       debugPrint('🔍 WalletService: Testing main method with fallback...');
       final mainResult = await getWalletByUserId(testUserId);
       if (mainResult != null) {
-        debugPrint('✅ WalletService: Main method returned wallet for test user');
+        debugPrint(
+            '✅ WalletService: Main method returned wallet for test user');
       } else {
-        debugPrint('⚠️ WalletService: Main method returned null for test user (expected)');
+        debugPrint(
+            '⚠️ WalletService: Main method returned null for test user (expected)');
       }
-
     } catch (e) {
       debugPrint('❌ WalletService: Error testing wallet service: $e');
     }

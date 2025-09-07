@@ -117,7 +117,8 @@ class OpenBadgeService {
 
       debugPrint('🔍 OpenBadgeService: Database response: $response');
       debugPrint('🔍 OpenBadgeService: Response type: ${response.runtimeType}');
-      debugPrint('🔍 OpenBadgeService: Response keys: ${response.keys.toList()}');
+      debugPrint(
+          '🔍 OpenBadgeService: Response keys: ${response.keys.toList()}');
 
       final openBadge = OpenBadgeModel.fromJson(response);
 

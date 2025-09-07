@@ -39,7 +39,7 @@ class OpenBadgeModel {
     try {
       debugPrint('🔍 OpenBadgeModel: Parsing JSON: $json');
       debugPrint('🔍 OpenBadgeModel: JSON keys: ${json.keys.toList()}');
-      
+
       return OpenBadgeModel(
         idOpenBadge: json['id_openbadge'] as String,
         idUser: json['id_user'] as String,
@@ -137,12 +137,12 @@ class OpenBadgeModel {
           return badge['name'] as String;
         }
       }
-      
+
       // Try to get name from assertion directly
       if (assertionJson['name'] is String) {
         return assertionJson['name'] as String;
       }
-      
+
       // If badge is a URL, extract name from URL or use a default
       if (assertionJson['badge'] is String) {
         final badgeUrl = assertionJson['badge'] as String;
@@ -153,13 +153,16 @@ class OpenBadgeModel {
           if (pathSegments.isNotEmpty) {
             final lastSegment = pathSegments.last;
             if (lastSegment.endsWith('.json')) {
-              return lastSegment.replaceAll('.json', '').replaceAll('-', ' ').replaceAll('_', ' ');
+              return lastSegment
+                  .replaceAll('.json', '')
+                  .replaceAll('-', ' ')
+                  .replaceAll('_', ' ');
             }
             return lastSegment.replaceAll('-', ' ').replaceAll('_', ' ');
           }
         }
       }
-      
+
       return 'Unknown Badge';
     } catch (e) {
       debugPrint('Error getting badge name: $e');
@@ -177,12 +180,12 @@ class OpenBadgeModel {
           return badge['description'] as String;
         }
       }
-      
+
       // Try to get description from assertion directly
       if (assertionJson['description'] is String) {
         return assertionJson['description'] as String;
       }
-      
+
       // Try to get description from evidence
       if (assertionJson['evidence'] is List) {
         final evidence = assertionJson['evidence'] as List;
@@ -193,7 +196,7 @@ class OpenBadgeModel {
           }
         }
       }
-      
+
       return 'No description available';
     } catch (e) {
       debugPrint('Error getting badge description: $e');
@@ -211,12 +214,12 @@ class OpenBadgeModel {
           return badge['image'] as String;
         }
       }
-      
+
       // Try to get image from assertion directly
       if (assertionJson['image'] is String) {
         return assertionJson['image'] as String;
       }
-      
+
       return null;
     } catch (e) {
       debugPrint('Error getting badge image URL: $e');
@@ -237,7 +240,7 @@ class OpenBadgeModel {
           }
         }
       }
-      
+
       // Try to get issuer from assertion directly
       if (assertionJson['issuer'] is Map<String, dynamic>) {
         final issuer = assertionJson['issuer'] as Map<String, dynamic>;
@@ -245,7 +248,7 @@ class OpenBadgeModel {
           return issuer['name'] as String;
         }
       }
-      
+
       return 'Unknown Issuer';
     } catch (e) {
       debugPrint('Error getting issuer name: $e');
@@ -266,7 +269,7 @@ class OpenBadgeModel {
           }
         }
       }
-      
+
       // Try to get issuer from assertion directly
       if (assertionJson['issuer'] is Map<String, dynamic>) {
         final issuer = assertionJson['issuer'] as Map<String, dynamic>;
@@ -274,7 +277,7 @@ class OpenBadgeModel {
           return issuer['url'] as String;
         }
       }
-      
+
       return null;
     } catch (e) {
       debugPrint('Error getting issuer URL: $e');
