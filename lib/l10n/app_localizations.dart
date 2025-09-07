@@ -2329,6 +2329,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code copied to clipboard!'**
   String get codeCopiedToClipboard;
+
+  /// No description provided for @openBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Badges'**
+  String get openBadges;
+
+  /// No description provided for @badges.
+  ///
+  /// In en, this message translates to:
+  /// **'badges'**
+  String get badges;
+
+  /// No description provided for @loadingOpenBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Open Badges...'**
+  String get loadingOpenBadges;
+
+  /// No description provided for @errorLoadingOpenBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Loading Open Badges'**
+  String get errorLoadingOpenBadges;
+
+  /// No description provided for @noOpenBadgesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Open Badges Found'**
+  String get noOpenBadgesFound;
+
+  /// No description provided for @noOpenBadgesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your first OpenBadge to get started'**
+  String get noOpenBadgesDescription;
+
+  /// No description provided for @importOpenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Import OpenBadge'**
+  String get importOpenBadge;
+
+  /// No description provided for @valid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get valid;
+
+  /// No description provided for @invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid'**
+  String get invalid;
+
+  /// No description provided for @revoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get revoked;
+
+  /// No description provided for @source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source (optional)'**
+  String get source;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get note;
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
 }
 
 class _AppLocalizationsDelegate

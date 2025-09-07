@@ -1199,4 +1199,44 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get codeCopiedToClipboard => 'Codice copiato negli appunti!';
+
+  @override
+  String get openBadges => 'Open Badge';
+
+  @override
+  String get badges => 'badge';
+
+  @override
+  String get loadingOpenBadges => 'Caricamento Open Badge...';
+
+  @override
+  String get errorLoadingOpenBadges => 'Errore nel Caricamento Open Badge';
+
+  @override
+  String get noOpenBadgesFound => 'Nessun Open Badge Trovato';
+
+  @override
+  String get noOpenBadgesDescription =>
+      'Importa il tuo primo OpenBadge per iniziare';
+
+  @override
+  String get importOpenBadge => 'Importa OpenBadge';
+
+  @override
+  String get valid => 'Valido';
+
+  @override
+  String get invalid => 'Non Valido';
+
+  @override
+  String get revoked => 'Revocato';
+
+  @override
+  String get source => 'Fonte (opzionale)';
+
+  @override
+  String get note => 'Nota (opzionale)';
+
+  @override
+  String get import => 'Importa';
 }

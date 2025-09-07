@@ -499,5 +499,19 @@
   "cleanupExpired": "Cleanup Expired",
   "refresh": "Refresh",
   "noOtpsAvailable": "No OTPs available",
-  "codeCopiedToClipboard": "Code copied to clipboard!"
+  "codeCopiedToClipboard": "Code copied to clipboard!",
+  "openBadges": "Open Badges",
+  "badges": "badges",
+  "loadingOpenBadges": "Loading Open Badges...",
+  "errorLoadingOpenBadges": "Error Loading Open Badges",
+  "noOpenBadgesFound": "No Open Badges Found",
+  "noOpenBadgesDescription": "Import your first OpenBadge to get started",
+  "importOpenBadge": "Import OpenBadge",
+  "valid": "Valid",
+  "invalid": "Invalid",
+  "revoked": "Revoked",
+  "source": "Source (optional)",
+  "note": "Note (optional)",
+  "import": "Import",
+  "cancel": "Cancel"
 }

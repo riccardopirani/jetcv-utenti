@@ -1,292 +1,202 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
-/// Modello per Open Badge conforme allo standard Open Badges v2.0
+/// Model for OpenBadge data
 class OpenBadgeModel {
-  final String id;
-  final String type;
-  final String name;
-  final String description;
-  final String image;
-  final String criteria;
-  final OpenBadgeIssuer issuer;
-  final OpenBadgeRecipient recipient;
-  final OpenBadgeVerification verification;
-  final DateTime issuedOn;
-  final DateTime? expires;
-  final List<String> tags;
-  final Map<String, dynamic>? evidence;
-  final Map<String, dynamic>? alignment;
+  final String idOpenBadge;
+  final String idUser;
+  final Map<String, dynamic> assertionJson;
+  final String? assertionId;
+  final String? badgeClassId;
+  final String? issuerId;
+  final bool isRevoked;
+  final DateTime? revokedAt;
+  final DateTime? issuedAt;
+  final DateTime? expiresAt;
+  final String? source;
+  final String? note;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   OpenBadgeModel({
-    required this.id,
-    this.type = 'BadgeClass',
-    required this.name,
-    required this.description,
-    required this.image,
-    required this.criteria,
-    required this.issuer,
-    required this.recipient,
-    required this.verification,
-    required this.issuedOn,
-    this.expires,
-    this.tags = const [],
-    this.evidence,
-    this.alignment,
+    required this.idOpenBadge,
+    required this.idUser,
+    required this.assertionJson,
+    this.assertionId,
+    this.badgeClassId,
+    this.issuerId,
+    this.isRevoked = false,
+    this.revokedAt,
+    this.issuedAt,
+    this.expiresAt,
+    this.source,
+    this.note,
+    required this.createdAt,
+    this.updatedAt,
   });
 
-  /// Crea un Open Badge da una certificazione
-  factory OpenBadgeModel.fromCertification({
-    required String certificationId,
-    required String certificationName,
-    required String certificationDescription,
-    required String issuerName,
-    required String issuerUrl,
-    required String recipientEmail,
-    required String recipientName,
-    required String badgeImageUrl,
-    required String criteriaUrl,
-    required String verificationUrl,
-    DateTime? expires,
-    List<String>? tags,
-    Map<String, dynamic>? evidence,
-  }) {
+  /// Create OpenBadgeModel from JSON
+  factory OpenBadgeModel.fromJson(Map<String, dynamic> json) {
     return OpenBadgeModel(
-      id: 'urn:uuid:$certificationId',
-      name: certificationName,
-      description: certificationDescription,
-      image: badgeImageUrl,
-      criteria: criteriaUrl,
-      issuer: OpenBadgeIssuer(
-        id: issuerUrl,
-        name: issuerName,
-        url: issuerUrl,
-      ),
-      recipient: OpenBadgeRecipient(
-        identity: recipientEmail,
-        hashed: false,
-        type: 'email',
-        name: recipientName,
-      ),
-      verification: OpenBadgeVerification(
-        type: 'HostedBadge',
-        url: verificationUrl,
-      ),
-      issuedOn: DateTime.now(),
-      expires: expires,
-      tags: tags ?? [],
-      evidence: evidence,
+      idOpenBadge: json['id_openbadge'] as String,
+      idUser: json['id_user'] as String,
+      assertionJson: Map<String, dynamic>.from(json['assertion_json'] as Map),
+      assertionId: json['assertion_id'] as String?,
+      badgeClassId: json['badge_class_id'] as String?,
+      issuerId: json['issuer_id'] as String?,
+      isRevoked: json['is_revoked'] as bool? ?? false,
+      revokedAt: json['revoked_at'] != null 
+          ? DateTime.parse(json['revoked_at'] as String)
+          : null,
+      issuedAt: json['issued_at'] != null 
+          ? DateTime.parse(json['issued_at'] as String)
+          : null,
+      expiresAt: json['expires_at'] != null 
+          ? DateTime.parse(json['expires_at'] as String)
+          : null,
+      source: json['source'] as String?,
+      note: json['note'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] != null 
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 
-  /// Converte il badge in JSON-LD conforme allo standard Open Badges
-  Map<String, dynamic> toJsonLd() {
-    final jsonLd = {
-      '@context': 'https://w3id.org/openbadges/v2',
-      'type': type,
-      'id': id,
-      'name': name,
-      'description': description,
-      'image': image,
-      'criteria': criteria,
-      'issuer': issuer.toJson(),
-      'recipient': recipient.toJson(),
-      'verification': verification.toJson(),
-      'issuedOn': issuedOn.toIso8601String(),
+  /// Convert OpenBadgeModel to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id_openbadge': idOpenBadge,
+      'id_user': idUser,
+      'assertion_json': assertionJson,
+      'assertion_id': assertionId,
+      'badge_class_id': badgeClassId,
+      'issuer_id': issuerId,
+      'is_revoked': isRevoked,
+      'revoked_at': revokedAt?.toIso8601String(),
+      'issued_at': issuedAt?.toIso8601String(),
+      'expires_at': expiresAt?.toIso8601String(),
+      'source': source,
+      'note': note,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
-
-    if (expires != null) {
-      jsonLd['expires'] = expires!.toIso8601String();
-    }
-
-    if (tags.isNotEmpty) {
-      jsonLd['tags'] = tags;
-    }
-
-    if (evidence != null) {
-      jsonLd['evidence'] = evidence as Object;
-    }
-
-    if (alignment != null) {
-      jsonLd['alignment'] = alignment as Object;
-    }
-
-    return jsonLd;
   }
 
-  /// Converte il badge in JSON-LD string
-  String toJsonLdString() {
-    return jsonEncode(toJsonLd());
-  }
-
-  /// Crea una copia del badge con campi aggiornati
+  /// Create a copy of OpenBadgeModel with updated fields
   OpenBadgeModel copyWith({
-    String? newId,
-    String? newType,
-    String? newName,
-    String? newDescription,
-    String? newImage,
-    String? newCriteria,
-    OpenBadgeIssuer? newIssuer,
-    OpenBadgeRecipient? newRecipient,
-    OpenBadgeVerification? newVerification,
-    DateTime? newIssuedOn,
-    DateTime? newExpires,
-    List<String>? newTags,
-    Map<String, dynamic>? newEvidence,
-    Map<String, dynamic>? newAlignment,
+    String? idOpenBadge,
+    String? idUser,
+    Map<String, dynamic>? assertionJson,
+    String? assertionId,
+    String? badgeClassId,
+    String? issuerId,
+    bool? isRevoked,
+    DateTime? revokedAt,
+    DateTime? issuedAt,
+    DateTime? expiresAt,
+    String? source,
+    String? note,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return OpenBadgeModel(
-      id: newId ?? id,
-      type: newType ?? type,
-      name: newName ?? name,
-      description: newDescription ?? description,
-      image: newImage ?? image,
-      criteria: newCriteria ?? criteria,
-      issuer: newIssuer ?? issuer,
-      recipient: newRecipient ?? recipient,
-      verification: newVerification ?? verification,
-      issuedOn: newIssuedOn ?? issuedOn,
-      expires: newExpires ?? expires,
-      tags: newTags ?? tags,
-      evidence: newEvidence ?? evidence,
-      alignment: newAlignment ?? alignment,
+      idOpenBadge: idOpenBadge ?? this.idOpenBadge,
+      idUser: idUser ?? this.idUser,
+      assertionJson: assertionJson ?? this.assertionJson,
+      assertionId: assertionId ?? this.assertionId,
+      badgeClassId: badgeClassId ?? this.badgeClassId,
+      issuerId: issuerId ?? this.issuerId,
+      isRevoked: isRevoked ?? this.isRevoked,
+      revokedAt: revokedAt ?? this.revokedAt,
+      issuedAt: issuedAt ?? this.issuedAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      source: source ?? this.source,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  /// Get badge name from assertion JSON
+  String get badgeName {
+    try {
+      return assertionJson['badge']?['name'] as String? ?? 
+             assertionJson['name'] as String? ?? 
+             'Unknown Badge';
+    } catch (e) {
+      debugPrint('Error getting badge name: $e');
+      return 'Unknown Badge';
+    }
+  }
+
+  /// Get badge description from assertion JSON
+  String get badgeDescription {
+    try {
+      return assertionJson['badge']?['description'] as String? ?? 
+             assertionJson['description'] as String? ?? 
+             'No description available';
+    } catch (e) {
+      debugPrint('Error getting badge description: $e');
+      return 'No description available';
+    }
+  }
+
+  /// Get badge image URL from assertion JSON
+  String? get badgeImageUrl {
+    try {
+      return assertionJson['badge']?['image'] as String? ?? 
+             assertionJson['image'] as String?;
+    } catch (e) {
+      debugPrint('Error getting badge image URL: $e');
+      return null;
+    }
+  }
+
+  /// Get issuer name from assertion JSON
+  String get issuerName {
+    try {
+      return assertionJson['badge']?['issuer']?['name'] as String? ?? 
+             assertionJson['issuer']?['name'] as String? ?? 
+             'Unknown Issuer';
+    } catch (e) {
+      debugPrint('Error getting issuer name: $e');
+      return 'Unknown Issuer';
+    }
+  }
+
+  /// Get issuer URL from assertion JSON
+  String? get issuerUrl {
+    try {
+      return assertionJson['badge']?['issuer']?['url'] as String? ?? 
+             assertionJson['issuer']?['url'] as String?;
+    } catch (e) {
+      debugPrint('Error getting issuer URL: $e');
+      return null;
+    }
+  }
+
+  /// Check if badge is expired
+  bool get isExpired {
+    if (expiresAt == null) return false;
+    return DateTime.now().isAfter(expiresAt!);
+  }
+
+  /// Check if badge is valid (not revoked and not expired)
+  bool get isValid {
+    return !isRevoked && !isExpired;
   }
 
   @override
   String toString() {
-    return 'OpenBadgeModel(id: $id, name: $name, issuer: ${issuer.name})';
+    return 'OpenBadgeModel(idOpenBadge: $idOpenBadge, badgeName: $badgeName, issuerName: $issuerName, isValid: $isValid)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is OpenBadgeModel && other.id == id;
+    return other is OpenBadgeModel && other.idOpenBadge == idOpenBadge;
   }
 
   @override
-  int get hashCode => id.hashCode;
-}
-
-/// Modello per l'emittente del badge
-class OpenBadgeIssuer {
-  final String id;
-  final String name;
-  final String url;
-  final String? email;
-  final String? description;
-  final String? image;
-
-  OpenBadgeIssuer({
-    required this.id,
-    required this.name,
-    required this.url,
-    this.email,
-    this.description,
-    this.image,
-  });
-
-  Map<String, dynamic> toJson() {
-    final json = {
-      'id': id,
-      'name': name,
-      'url': url,
-    };
-
-    if (email != null) json['email'] = email!;
-    if (description != null) json['description'] = description!;
-    if (image != null) json['image'] = image!;
-
-    return json;
-  }
-
-  factory OpenBadgeIssuer.fromJson(Map<String, dynamic> json) {
-    return OpenBadgeIssuer(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      url: json['url'] as String,
-      email: json['email'] as String?,
-      description: json['description'] as String?,
-      image: json['image'] as String?,
-    );
-  }
-}
-
-/// Modello per il destinatario del badge
-class OpenBadgeRecipient {
-  final String identity;
-  final bool hashed;
-  final String type;
-  final String? name;
-  final String? salt;
-
-  OpenBadgeRecipient({
-    required this.identity,
-    this.hashed = false,
-    this.type = 'email',
-    this.name,
-    this.salt,
-  });
-
-  Map<String, dynamic> toJson() {
-    final json = {
-      'identity': identity,
-      'hashed': hashed,
-      'type': type,
-    };
-
-    if (name != null) json['name'] = name!;
-    if (salt != null) json['salt'] = salt!;
-
-    return json;
-  }
-
-  factory OpenBadgeRecipient.fromJson(Map<String, dynamic> json) {
-    return OpenBadgeRecipient(
-      identity: json['identity'] as String,
-      hashed: json['hashed'] as bool? ?? false,
-      type: json['type'] as String? ?? 'email',
-      name: json['name'] as String?,
-      salt: json['salt'] as String?,
-    );
-  }
-}
-
-/// Modello per la verifica del badge
-class OpenBadgeVerification {
-  final String type;
-  final String? url;
-  final String? allowedOrigins;
-  final Map<String, dynamic>? verificationProperty;
-
-  OpenBadgeVerification({
-    required this.type,
-    this.url,
-    this.allowedOrigins,
-    this.verificationProperty,
-  });
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{
-      'type': type,
-    };
-
-    if (url != null) json['url'] = url!;
-    if (allowedOrigins != null) json['allowedOrigins'] = allowedOrigins!;
-    if (verificationProperty != null) {
-      json['verificationProperty'] = verificationProperty!;
-    }
-
-    return json;
-  }
-
-  factory OpenBadgeVerification.fromJson(Map<String, dynamic> json) {
-    return OpenBadgeVerification(
-      type: json['type'] as String,
-      url: json['url'] as String?,
-      allowedOrigins: json['allowedOrigins'] as String?,
-      verificationProperty:
-          json['verificationProperty'] as Map<String, dynamic>?,
-    );
-  }
+  int get hashCode => idOpenBadge.hashCode;
 }

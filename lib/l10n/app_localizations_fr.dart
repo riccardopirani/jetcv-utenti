@@ -1203,4 +1203,44 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get codeCopiedToClipboard => 'Code copié dans le presse-papiers !';
+
+  @override
+  String get openBadges => 'Open Badges';
+
+  @override
+  String get badges => 'badges';
+
+  @override
+  String get loadingOpenBadges => 'Loading Open Badges...';
+
+  @override
+  String get errorLoadingOpenBadges => 'Error Loading Open Badges';
+
+  @override
+  String get noOpenBadgesFound => 'No Open Badges Found';
+
+  @override
+  String get noOpenBadgesDescription =>
+      'Import your first OpenBadge to get started';
+
+  @override
+  String get importOpenBadge => 'Import OpenBadge';
+
+  @override
+  String get valid => 'Valid';
+
+  @override
+  String get invalid => 'Invalid';
+
+  @override
+  String get revoked => 'Revoked';
+
+  @override
+  String get source => 'Source (optional)';
+
+  @override
+  String get note => 'Note (optional)';
+
+  @override
+  String get import => 'Import';
 }

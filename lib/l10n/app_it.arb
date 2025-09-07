@@ -400,5 +400,19 @@
   "cleanupExpired": "Pulisci Scaduti",
   "refresh": "Aggiorna",
   "noOtpsAvailable": "Nessun OTP disponibile",
-  "codeCopiedToClipboard": "Codice copiato negli appunti!"
+  "codeCopiedToClipboard": "Codice copiato negli appunti!",
+  "openBadges": "Open Badge",
+  "badges": "badge",
+  "loadingOpenBadges": "Caricamento Open Badge...",
+  "errorLoadingOpenBadges": "Errore nel Caricamento Open Badge",
+  "noOpenBadgesFound": "Nessun Open Badge Trovato",
+  "noOpenBadgesDescription": "Importa il tuo primo OpenBadge per iniziare",
+  "importOpenBadge": "Importa OpenBadge",
+  "valid": "Valido",
+  "invalid": "Non Valido",
+  "revoked": "Revocato",
+  "source": "Fonte (opzionale)",
+  "note": "Nota (opzionale)",
+  "import": "Importa",
+  "cancel": "Annulla"
 }
