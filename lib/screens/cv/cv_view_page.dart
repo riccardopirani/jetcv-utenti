@@ -11,6 +11,7 @@ import 'package:jetcv__utenti/services/country_service.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/screens/cv/blockchain_info_page.dart';
+import 'package:jetcv__utenti/screens/cv/open_badges_page.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
 import 'package:jetcv__utenti/services/image_cache_service.dart';
@@ -514,6 +515,11 @@ class _CVViewPageState extends State<CVViewPage> {
 
             // Certifications timeline section
             _buildCertificationsSection(),
+
+            SizedBox(height: sectionSpacing),
+
+            // OpenBadge section
+            _buildOpenBadgeSection(),
 
             SizedBox(height: sectionSpacing),
           ],
@@ -1662,6 +1668,190 @@ class _CVViewPageState extends State<CVViewPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildOpenBadgeSection() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+            ? 20.0
+            : 24.0;
+    final titleFontSize = isMobile
+        ? 20.0
+        : isTablet
+            ? 24.0
+            : 28.0;
+    final subtitleFontSize = isMobile
+        ? 12.0
+        : isTablet
+            ? 13.0
+            : 14.0;
+    final buttonFontSize = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue.shade50,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(cardPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with title and view all button
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.openBadges,
+                          style: TextStyle(
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Digital credentials and achievements',
+                          style: TextStyle(
+                            fontSize: subtitleFontSize,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const OpenBadgesPage(),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.workspace_premium,
+                      size: isMobile ? 16 : 18,
+                    ),
+                    label: Text(
+                      AppLocalizations.of(context)!.viewAll ?? 'View All',
+                      style: TextStyle(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade600,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 12 : 16,
+                        vertical: isMobile ? 8 : 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 16),
+              
+              // OpenBadge preview cards (show first 3)
+              _buildOpenBadgePreview(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOpenBadgePreview() {
+    // This would typically load and show a preview of OpenBadges
+    // For now, show a placeholder that encourages users to import badges
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade25,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.blue.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.workspace_premium,
+            size: 48,
+            color: Colors.blue.shade400,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Import your Open Badges',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade700,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Showcase your digital credentials and achievements',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.blue.shade600,
+            ),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const OpenBadgesPage(),
+                ),
+              );
+            },
+            icon: Icon(Icons.upload_file, size: 16),
+            label: Text(
+              AppLocalizations.of(context)?.importOpenBadge ?? 'Import OpenBadge',
+              style: TextStyle(fontSize: 12),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade600,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
