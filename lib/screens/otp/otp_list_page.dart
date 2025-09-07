@@ -1870,7 +1870,7 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Widget _buildInfoRow(
-      IconData icon, String label, String value, bool isMobile, bool isTablet) {
+      IconData icon, String label, String value, bool isMobile, bool isTablet, {bool isBlocked = false}) {
     return Padding(
       padding: EdgeInsets.only(bottom: isMobile ? 6 : 8),
       child: Row(
@@ -1878,7 +1878,7 @@ class _OtpListPageState extends State<OtpListPage> {
           Icon(
             icon,
             size: isMobile ? 14 : 16,
-            color: Colors.blue.shade600,
+            color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
           ),
           SizedBox(width: isMobile ? 8 : 10),
           Expanded(
@@ -1890,14 +1890,14 @@ class _OtpListPageState extends State<OtpListPage> {
                     style: TextStyle(
                       fontSize: isMobile ? 12 : 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade700,
+                      color: isBlocked ? Colors.red.shade700 : Colors.blue.shade700,
                     ),
                   ),
                   TextSpan(
                     text: value,
                     style: TextStyle(
                       fontSize: isMobile ? 12 : 14,
-                      color: Colors.blue.shade600,
+                      color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
                     ),
                   ),
                 ],
