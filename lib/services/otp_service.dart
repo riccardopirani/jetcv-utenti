@@ -289,8 +289,10 @@ class OtpService {
       }
 
       // Use Edge Function otp-crud with /by-user endpoint
-      debugPrint('🔍 OtpService: Calling Edge Function otp-crud /by-user endpoint');
-      debugPrint('🔍 OtpService: Parameters: id_user=$idUser, limit=$limit, offset=$offset');
+      debugPrint(
+          '🔍 OtpService: Calling Edge Function otp-crud /by-user endpoint');
+      debugPrint(
+          '🔍 OtpService: Parameters: id_user=$idUser, limit=$limit, offset=$offset');
 
       // Build URL with query parameters
       final queryParams = {
@@ -298,12 +300,14 @@ class OtpService {
         'limit': limit.toString(),
         'offset': offset.toString(),
       };
-      
+
       final queryString = queryParams.entries
-          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .map((e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
           .join('&');
-      
-      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/otp-crud/by-user?$queryString';
+
+      final url =
+          '${SupabaseConfig.supabaseUrl}/functions/v1/otp-crud/by-user?$queryString';
       debugPrint('🔍 OtpService: Full URL: $url');
 
       // Get current session for authentication
@@ -325,7 +329,8 @@ class OtpService {
       debugPrint('📋 OtpService: HTTP response body: ${response.body}');
 
       if (response.statusCode != 200) {
-        throw Exception('HTTP request failed with status ${response.statusCode}: ${response.body}');
+        throw Exception(
+            'HTTP request failed with status ${response.statusCode}: ${response.body}');
       }
 
       final responseData = Map<String, dynamic>.from(
@@ -341,22 +346,26 @@ class OtpService {
 
       if (isSuccess && responseData['items'] != null) {
         final List<dynamic> items = responseData['items'] as List<dynamic>;
-        debugPrint('📋 OtpService: Found ${items.length} OTPs via Edge Function');
+        debugPrint(
+            '📋 OtpService: Found ${items.length} OTPs via Edge Function');
 
         final List<OtpModel> otps = [];
         for (final otpData in items) {
           try {
             // Convert Edge Function response to OtpModel format
             final otpJson = Map<String, dynamic>.from(otpData);
-            
+
             // Add missing fields that OtpModel expects
             otpJson['code'] = '***'; // Don't expose actual code
             otpJson['code_hash'] = '***'; // Don't expose hash
 
             debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}');
-            debugPrint('📋 OtpService: id_legal_entity: ${otpJson['id_legal_entity']}');
-            debugPrint('📋 OtpService: id_legal_entity type: ${otpJson['id_legal_entity'].runtimeType}');
-            debugPrint('📋 OtpService: id_legal_entity is null: ${otpJson['id_legal_entity'] == null}');
+            debugPrint(
+                '📋 OtpService: id_legal_entity: ${otpJson['id_legal_entity']}');
+            debugPrint(
+                '📋 OtpService: id_legal_entity type: ${otpJson['id_legal_entity'].runtimeType}');
+            debugPrint(
+                '📋 OtpService: id_legal_entity is null: ${otpJson['id_legal_entity'] == null}');
 
             final otp = OtpModel.fromJson(otpJson);
             otps.add(otp);
@@ -365,7 +374,8 @@ class OtpService {
           }
         }
 
-        debugPrint('✅ OtpService: Retrieved ${otps.length} OTPs successfully via Edge Function');
+        debugPrint(
+            '✅ OtpService: Retrieved ${otps.length} OTPs successfully via Edge Function');
 
         return EdgeFunctionResponse<List<OtpModel>>(
           success: true,
@@ -373,7 +383,8 @@ class OtpService {
           message: 'OTPs retrieved successfully',
         );
       } else {
-        debugPrint('❌ OtpService: Edge Function failed: ${responseData['error']}');
+        debugPrint(
+            '❌ OtpService: Edge Function failed: ${responseData['error']}');
         return EdgeFunctionResponse<List<OtpModel>>(
           success: false,
           error: 'Edge Function failed: ${responseData['error']}',
@@ -534,14 +545,17 @@ class OtpService {
   }) async {
     try {
       debugPrint('🏢 OtpService: Getting legal entity for OTP: $idLegalEntity');
-      debugPrint('🔍 OtpService: idLegalEntity type: ${idLegalEntity.runtimeType}');
-      debugPrint('🔍 OtpService: idLegalEntity is empty: ${idLegalEntity.isEmpty}');
+      debugPrint(
+          '🔍 OtpService: idLegalEntity type: ${idLegalEntity.runtimeType}');
+      debugPrint(
+          '🔍 OtpService: idLegalEntity is empty: ${idLegalEntity.isEmpty}');
 
       // Use Edge Function get-legal-entity-by-id
       try {
-        debugPrint('🔍 OtpService: Calling Edge Function get-legal-entity-by-id');
+        debugPrint(
+            '🔍 OtpService: Calling Edge Function get-legal-entity-by-id');
         debugPrint('🔍 OtpService: Parameters: id_legal_entity=$idLegalEntity');
-        
+
         // Get current session for authentication
         final session = SupabaseConfig.client.auth.currentSession;
         if (session == null) {
@@ -552,12 +566,14 @@ class OtpService {
         final queryParams = {
           'id_legal_entity': idLegalEntity,
         };
-        
+
         final queryString = queryParams.entries
-            .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+            .map((e) =>
+                '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
             .join('&');
-        
-        final url = '${SupabaseConfig.supabaseUrl}/functions/v1/get-legal-entity-by-id?$queryString';
+
+        final url =
+            '${SupabaseConfig.supabaseUrl}/functions/v1/get-legal-entity-by-id?$queryString';
         debugPrint('🔍 OtpService: Full URL: $url');
 
         // Make HTTP GET request
@@ -569,11 +585,13 @@ class OtpService {
           },
         );
 
-        debugPrint('📋 OtpService: HTTP response status: ${response.statusCode}');
+        debugPrint(
+            '📋 OtpService: HTTP response status: ${response.statusCode}');
         debugPrint('📋 OtpService: HTTP response body: ${response.body}');
 
         if (response.statusCode != 200) {
-          throw Exception('HTTP request failed with status ${response.statusCode}: ${response.body}');
+          throw Exception(
+              'HTTP request failed with status ${response.statusCode}: ${response.body}');
         }
 
         final responseData = Map<String, dynamic>.from(
@@ -583,13 +601,15 @@ class OtpService {
         debugPrint('🔄 OtpService: Get legal entity response received');
         debugPrint('🔄 OtpService: Response type: ${responseData.runtimeType}');
         debugPrint('🔄 OtpService: Response: $responseData');
-        debugPrint('🔄 OtpService: Response keys: ${responseData.keys.toList()}');
+        debugPrint(
+            '🔄 OtpService: Response keys: ${responseData.keys.toList()}');
 
         // The function returns { ok: true, data: {...}, request_id }
         final bool isSuccess = responseData['ok'] == true;
         debugPrint('🔍 OtpService: Response ok: ${responseData['ok']}');
         debugPrint('🔍 OtpService: isSuccess: $isSuccess');
-        debugPrint('🔍 OtpService: data exists: ${responseData['data'] != null}');
+        debugPrint(
+            '🔍 OtpService: data exists: ${responseData['data'] != null}');
         debugPrint('🔍 OtpService: data: ${responseData['data']}');
 
         if (isSuccess && responseData['data'] != null) {
@@ -597,7 +617,8 @@ class OtpService {
 
           debugPrint(
               '✅ OtpService: Legal entity retrieved successfully via Edge Function');
-          debugPrint('📊 OtpService: Legal entity data keys: ${legalEntityData.keys.toList()}');
+          debugPrint(
+              '📊 OtpService: Legal entity data keys: ${legalEntityData.keys.toList()}');
           debugPrint('📊 OtpService: Legal entity data: $legalEntityData');
 
           return EdgeFunctionResponse<Map<String, dynamic>>(
@@ -614,14 +635,12 @@ class OtpService {
           );
         }
       } catch (edgeFunctionError) {
-        debugPrint(
-            '⚠️ OtpService: Edge Function failed: $edgeFunctionError');
+        debugPrint('⚠️ OtpService: Edge Function failed: $edgeFunctionError');
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: false,
           error: 'Failed to get legal entity: $edgeFunctionError',
         );
       }
-
     } catch (e) {
       debugPrint('❌ OtpService: Exception during legal entity retrieval: $e');
       return EdgeFunctionResponse<Map<String, dynamic>>(

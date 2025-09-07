@@ -75,17 +75,21 @@ class _OtpListPageState extends State<OtpListPage> {
             });
             // Apply current filter to the loaded OTPs
             _applyFilter();
-            debugPrint('✅ Loaded ${_otps.length} OTPs, filtered to ${_filteredOtps.length}');
-            
+            debugPrint(
+                '✅ Loaded ${_otps.length} OTPs, filtered to ${_filteredOtps.length}');
+
             // Debug: Check id_legal_entity for each OTP
             debugPrint('🔍 Debugging OTP id_legal_entity fields:');
             for (int i = 0; i < _otps.length; i++) {
               final otp = _otps[i];
               debugPrint('  OTP $i: ${otp.idOtp}');
               debugPrint('    - idLegalEntity: ${otp.idLegalEntity}');
-              debugPrint('    - idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
-              debugPrint('    - idLegalEntity is null: ${otp.idLegalEntity == null}');
-              debugPrint('    - idLegalEntity is empty: ${otp.idLegalEntity?.isEmpty}');
+              debugPrint(
+                  '    - idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
+              debugPrint(
+                  '    - idLegalEntity is null: ${otp.idLegalEntity == null}');
+              debugPrint(
+                  '    - idLegalEntity is empty: ${otp.idLegalEntity?.isEmpty}');
               debugPrint('    - usedByIdUser: ${otp.usedByIdUser}');
               debugPrint('    - isBlocked: ${_isOtpBlocked(otp)}');
             }
@@ -267,7 +271,7 @@ class _OtpListPageState extends State<OtpListPage> {
     debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
     debugPrint('🔍 OTP idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
     debugPrint('🔍 OTP idLegalEntity is null: ${otp.idLegalEntity == null}');
-    
+
     if (otp.idLegalEntity == null) {
       debugPrint(
           '⚠️ OTP ${otp.idOtp} has no idLegalEntity, skipping legal entity load');
@@ -284,7 +288,8 @@ class _OtpListPageState extends State<OtpListPage> {
     try {
       debugPrint(
           '🏢 Loading legal entity for OTP: ${otp.idOtp}, Legal Entity ID: ${otp.idLegalEntity}');
-      debugPrint('🔍 Calling OtpService.getLegalEntityForOtp with ID: ${otp.idLegalEntity}');
+      debugPrint(
+          '🔍 Calling OtpService.getLegalEntityForOtp with ID: ${otp.idLegalEntity}');
 
       final response = await OtpService.getLegalEntityForOtp(
         idLegalEntity: otp.idLegalEntity!,
@@ -297,13 +302,14 @@ class _OtpListPageState extends State<OtpListPage> {
 
       if (response.success && response.data != null) {
         debugPrint('✅ Legal entity loaded successfully for OTP: ${otp.idOtp}');
-        debugPrint('📊 Legal entity data keys: ${response.data!.keys.toList()}');
+        debugPrint(
+            '📊 Legal entity data keys: ${response.data!.keys.toList()}');
         debugPrint('📊 Legal entity data values: ${response.data}');
-        
+
         setState(() {
           _legalEntities[otp.idLegalEntity!] = response.data!;
         });
-        
+
         debugPrint('✅ Legal entity cached for OTP: ${otp.idOtp}');
         debugPrint('📊 Cache now contains: ${_legalEntities.keys.toList()}');
       } else {
@@ -844,7 +850,11 @@ class _OtpListPageState extends State<OtpListPage> {
   Widget _buildFilterSection(bool isMobile, bool isTablet) {
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : isTablet ? 24 : 32,
+        horizontal: isMobile
+            ? 16
+            : isTablet
+                ? 24
+                : 32,
         vertical: isMobile ? 8 : 12,
       ),
       child: Column(
@@ -888,15 +898,16 @@ class _OtpListPageState extends State<OtpListPage> {
     );
   }
 
-  Widget _buildFilterButton(String filter, String label, bool isMobile, bool isTablet) {
+  Widget _buildFilterButton(
+      String filter, String label, bool isMobile, bool isTablet) {
     final isSelected = _currentFilter == filter;
     final isBlocked = filter == 'blocked';
     final isActive = filter == 'active';
-    
+
     Color backgroundColor;
     Color textColor;
     Color borderColor;
-    
+
     if (isSelected) {
       if (isBlocked) {
         backgroundColor = Colors.red.shade100;
@@ -975,13 +986,25 @@ class _OtpListPageState extends State<OtpListPage> {
   Widget _buildEmptyFilteredState(bool isMobile, bool isTablet) {
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile ? 24 : isTablet ? 32 : 40),
+        padding: EdgeInsets.all(isMobile
+            ? 24
+            : isTablet
+                ? 32
+                : 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: isMobile ? 100 : isTablet ? 120 : 140,
-              height: isMobile ? 100 : isTablet ? 120 : 140,
+              width: isMobile
+                  ? 100
+                  : isTablet
+                      ? 120
+                      : 140,
+              height: isMobile
+                  ? 100
+                  : isTablet
+                      ? 120
+                      : 140,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -999,7 +1022,11 @@ class _OtpListPageState extends State<OtpListPage> {
               ),
               child: Icon(
                 Icons.filter_list,
-                size: isMobile ? 50 : isTablet ? 60 : 70,
+                size: isMobile
+                    ? 50
+                    : isTablet
+                        ? 60
+                        : 70,
                 color: Colors.grey.shade600,
               ),
             ),
@@ -1411,7 +1438,7 @@ class _OtpListPageState extends State<OtpListPage> {
     debugPrint('🔍 OTP idLegalEntity is null: ${otp.idLegalEntity == null}');
     debugPrint('🔍 OTP idLegalEntity is empty: ${otp.idLegalEntity?.isEmpty}');
     debugPrint('🔍 OTP idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
-    
+
     if (otp.idLegalEntity != null) {
       debugPrint(
           '🏢 OTP has idLegalEntity, loading legal entity data (OTP blocked: ${_isOtpBlocked(otp)})');
@@ -1946,7 +1973,7 @@ class _OtpListPageState extends State<OtpListPage> {
     debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
     debugPrint('🔍 Legal entities cache keys: ${_legalEntities.keys.toList()}');
     debugPrint('🔍 Legal entities cache: $_legalEntities');
-    
+
     final legalEntityData = _legalEntities[otp.idLegalEntity!];
     final isBlocked = _isOtpBlocked(otp);
 
@@ -1971,7 +1998,8 @@ class _OtpListPageState extends State<OtpListPage> {
     debugPrint('🏢 Building legal entity section for OTP: ${otp.idOtp}');
     debugPrint('📊 Legal entity data: $legalEntityData');
     debugPrint('📊 Legal entity data keys: ${legalEntityData.keys.toList()}');
-    debugPrint('📊 Legal entity data values: ${legalEntityData.values.toList()}');
+    debugPrint(
+        '📊 Legal entity data values: ${legalEntityData.values.toList()}');
 
     return Container(
       width: double.infinity,
@@ -2034,7 +2062,7 @@ class _OtpListPageState extends State<OtpListPage> {
                 ],
               ),
             ),
-          
+
           if (isBlocked) SizedBox(height: isMobile ? 12 : 16),
 
           // Header with logo
@@ -2048,7 +2076,9 @@ class _OtpListPageState extends State<OtpListPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isBlocked ? Colors.red.shade300 : Colors.blue.shade300,
+                      color: isBlocked
+                          ? Colors.red.shade300
+                          : Colors.blue.shade300,
                       width: 1,
                     ),
                   ),
@@ -2059,10 +2089,14 @@ class _OtpListPageState extends State<OtpListPage> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
+                          color: isBlocked
+                              ? Colors.red.shade100
+                              : Colors.blue.shade100,
                           child: Icon(
                             Icons.business,
-                            color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+                            color: isBlocked
+                                ? Colors.red.shade600
+                                : Colors.blue.shade600,
                             size: isMobile ? 20 : 24,
                           ),
                         );
@@ -2075,16 +2109,20 @@ class _OtpListPageState extends State<OtpListPage> {
                   width: isMobile ? 40 : 50,
                   height: isMobile ? 40 : 50,
                   decoration: BoxDecoration(
-                    color: isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
+                    color:
+                        isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isBlocked ? Colors.red.shade300 : Colors.blue.shade300,
+                      color: isBlocked
+                          ? Colors.red.shade300
+                          : Colors.blue.shade300,
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     Icons.business,
-                    color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+                    color:
+                        isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
                     size: isMobile ? 20 : 24,
                   ),
                 ),
@@ -2095,11 +2133,14 @@ class _OtpListPageState extends State<OtpListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      legalEntityData['legal_name'] ?? AppLocalizations.of(context)!.company,
+                      legalEntityData['legal_name'] ??
+                          AppLocalizations.of(context)!.company,
                       style: TextStyle(
                         fontSize: isMobile ? 16 : 18,
                         fontWeight: FontWeight.bold,
-                        color: isBlocked ? Colors.red.shade800 : Colors.blue.shade800,
+                        color: isBlocked
+                            ? Colors.red.shade800
+                            : Colors.blue.shade800,
                       ),
                     ),
                     if (legalEntityData['identifier_code'] != null)
@@ -2107,7 +2148,9 @@ class _OtpListPageState extends State<OtpListPage> {
                         '${AppLocalizations.of(context)!.vatNumber}: ${legalEntityData['identifier_code']}',
                         style: TextStyle(
                           fontSize: isMobile ? 12 : 14,
-                          color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+                          color: isBlocked
+                              ? Colors.red.shade600
+                              : Colors.blue.shade600,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -2171,7 +2214,8 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Widget _buildInfoRow(
-      IconData icon, String label, String value, bool isMobile, bool isTablet, {bool isBlocked = false}) {
+      IconData icon, String label, String value, bool isMobile, bool isTablet,
+      {bool isBlocked = false}) {
     return Padding(
       padding: EdgeInsets.only(bottom: isMobile ? 6 : 8),
       child: Row(
@@ -2191,14 +2235,18 @@ class _OtpListPageState extends State<OtpListPage> {
                     style: TextStyle(
                       fontSize: isMobile ? 12 : 14,
                       fontWeight: FontWeight.w600,
-                      color: isBlocked ? Colors.red.shade700 : Colors.blue.shade700,
+                      color: isBlocked
+                          ? Colors.red.shade700
+                          : Colors.blue.shade700,
                     ),
                   ),
                   TextSpan(
                     text: value,
                     style: TextStyle(
                       fontSize: isMobile ? 12 : 14,
-                      color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+                      color: isBlocked
+                          ? Colors.red.shade600
+                          : Colors.blue.shade600,
                     ),
                   ),
                 ],
