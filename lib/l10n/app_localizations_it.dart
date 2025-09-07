@@ -665,6 +665,27 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non hai ancora un wallet associato al tuo account';
 
   @override
+  String get blockedByLegalEntity => 'Bloccato da';
+
+  @override
+  String get legalEntity => 'Entità Legale';
+
+  @override
+  String get company => 'Azienda';
+
+  @override
+  String get vatNumber => 'P.IVA';
+
+  @override
+  String get website => 'Sito Web';
+
+  @override
+  String get loadingLegalEntity => 'Caricamento dati azienda...';
+
+  @override
+  String get legalEntityError => 'Errore nel caricamento dati azienda';
+
+  @override
   String get deleteAccount => 'Elimina account';
 
   @override

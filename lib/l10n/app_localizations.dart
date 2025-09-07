@@ -1334,6 +1334,48 @@ abstract class AppLocalizations {
   /// **'You don\'t have a wallet associated with your account yet'**
   String get walletNotFoundDescription;
 
+  /// No description provided for @blockedByLegalEntity.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by'**
+  String get blockedByLegalEntity;
+
+  /// No description provided for @legalEntity.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Entity'**
+  String get legalEntity;
+
+  /// No description provided for @company.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get company;
+
+  /// No description provided for @vatNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT Number'**
+  String get vatNumber;
+
+  /// No description provided for @website.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get website;
+
+  /// No description provided for @loadingLegalEntity.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading company data...'**
+  String get loadingLegalEntity;
+
+  /// No description provided for @legalEntityError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading company data'**
+  String get legalEntityError;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:
