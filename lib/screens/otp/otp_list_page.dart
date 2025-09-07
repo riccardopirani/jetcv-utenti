@@ -1658,6 +1658,7 @@ class _OtpListPageState extends State<OtpListPage> {
 
   Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
     final legalEntityData = _legalEntities[otp.idLegalEntity!];
+    final isBlocked = _isOtpBlocked(otp);
 
     // If data is not loaded yet, show loading indicator
     if (legalEntityData == null) {
