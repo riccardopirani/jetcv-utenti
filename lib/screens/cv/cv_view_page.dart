@@ -503,6 +503,11 @@ class _CVViewPageState extends State<CVViewPage> {
 
             SizedBox(height: sectionSpacing),
 
+            // OpenBadge section
+            _buildOpenBadgeSection(),
+
+            SizedBox(height: sectionSpacing),
+
             // Contact information section
             _buildContactSection(),
 
@@ -515,11 +520,6 @@ class _CVViewPageState extends State<CVViewPage> {
 
             // Certifications timeline section
             _buildCertificationsSection(),
-
-            SizedBox(height: sectionSpacing),
-
-            // OpenBadge section
-            _buildOpenBadgeSection(),
 
             SizedBox(height: sectionSpacing),
           ],

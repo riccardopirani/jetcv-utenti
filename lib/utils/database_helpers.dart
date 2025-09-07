@@ -98,9 +98,9 @@ class DatabaseHelpers {
         switch (status) {
           case CertificationStatus.draft:
             return 'orange';
-          case CertificationStatus.accepted:
+          case CertificationStatus.sent:
             return 'green';
-          case CertificationStatus.rejected:
+          case CertificationStatus.closed:
             return 'red';
         }
       case LegalEntityStatus:

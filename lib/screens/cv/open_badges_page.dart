@@ -26,14 +26,13 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
   @override
   void initState() {
     super.initState();
-    _scaffoldMessenger = ScaffoldMessenger.of(context);
-    _localizations = AppLocalizations.of(context);
     _loadOpenBadges();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _scaffoldMessenger = ScaffoldMessenger.of(context);
     _localizations = AppLocalizations.of(context);
   }
 

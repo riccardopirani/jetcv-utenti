@@ -102,17 +102,21 @@ class _OpenBadgeButtonState extends State<OpenBadgeButton> {
       }
 
       // Crea l'Open Badge
-      final badge = await OpenBadgeService.createBadgeForCertification(
+      final response = await OpenBadgeService.createBadgeForCertification(
         certification: widget.certification,
         recipientEmail: currentUser.email ?? 'user@example.com',
         recipientName: currentUser.fullName ?? 'User',
       );
 
+      if (!response.success || response.data == null) {
+        throw Exception(response.error ?? 'Failed to create OpenBadge');
+      }
+
       // Condividi il badge
       if (mounted) {
         await OpenBadgeService.shareBadge(
-          badge: badge,
-          context: context,
+          badge: response.data!,
+          message: 'Check out my OpenBadge!',
         );
       }
     } catch (e) {

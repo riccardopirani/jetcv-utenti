@@ -18,9 +18,9 @@ class EnumExamples {
     print('Display label: ${userType.displayLabel}'); // "Ente Giuridico"
 
     // Example 3: CertificationStatus
-    const status = CertificationStatus.accepted;
-    print('Database value: ${status.toDbString()}'); // "accepted"
-    print('Display label: ${status.displayLabel}'); // "Accettata"
+    const status = CertificationStatus.sent;
+    print('Database value: ${status.toDbString()}'); // "sent"
+    print('Display label: ${status.displayLabel}'); // "Inviata"
 
     // Example 4: Parsing from database
     const dbValue = 'prefer_not_to_say';
