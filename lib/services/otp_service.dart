@@ -357,7 +357,7 @@ class OtpService {
 
             // Check if OTP is blocked (used by another user)
             final isBlocked = otpJson['used_by_id_user'] != null;
-            
+
             // Add missing fields that OtpModel expects
             if (isBlocked) {
               // Hide code for blocked OTPs
@@ -377,7 +377,8 @@ class OtpService {
             debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}');
             debugPrint('📋 OtpService: isBlocked: $isBlocked');
             debugPrint('📋 OtpService: code: ${otpJson['code']}');
-            debugPrint('📋 OtpService: used_by_id_user: ${otpJson['used_by_id_user']}');
+            debugPrint(
+                '📋 OtpService: used_by_id_user: ${otpJson['used_by_id_user']}');
             debugPrint(
                 '📋 OtpService: id_legal_entity: ${otpJson['id_legal_entity']}');
             debugPrint(

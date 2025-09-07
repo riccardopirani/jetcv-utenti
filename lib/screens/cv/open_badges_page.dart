@@ -77,8 +77,9 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
       final jsonText = await _showJsonInputDialog();
       if (jsonText != null && jsonText.isNotEmpty) {
         // Parse OpenBadge JSON
-        final parseResponse = await OpenBadgeService.parseOpenBadgeFromFile(jsonText);
-        
+        final parseResponse =
+            await OpenBadgeService.parseOpenBadgeFromFile(jsonText);
+
         if (!parseResponse.success) {
           _showSnackBar(parseResponse.error ?? 'Failed to parse OpenBadge');
           return;
@@ -98,7 +99,7 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
 
   Future<String?> _showJsonInputDialog() async {
     final controller = TextEditingController();
-    
+
     return await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -134,9 +135,11 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
 
   Future<bool> _showImportDialog(Map<String, dynamic> assertionJson) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => ImportOpenBadgeDialog(assertionJson: assertionJson),
-    ) ?? false;
+          context: context,
+          builder: (context) =>
+              ImportOpenBadgeDialog(assertionJson: assertionJson),
+        ) ??
+        false;
   }
 
   void _showSnackBar(String message) {
@@ -144,9 +147,10 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
       _scaffoldMessenger!.showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: message.contains('Error') || message.contains('Failed') 
-              ? Colors.red 
-              : Colors.green,
+          backgroundColor:
+              message.contains('Error') || message.contains('Failed')
+                  ? Colors.red
+                  : Colors.green,
         ),
       );
     }
@@ -155,8 +159,8 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
-    final isTablet = MediaQuery.of(context).size.width >= 768 && 
-                    MediaQuery.of(context).size.width < 1024;
+    final isTablet = MediaQuery.of(context).size.width >= 768 &&
+        MediaQuery.of(context).size.width < 1024;
 
     return Scaffold(
       appBar: AppBar(
@@ -239,7 +243,8 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
             ),
             SizedBox(height: 16),
             Text(
-              _localizations?.errorLoadingOpenBadges ?? 'Error Loading Open Badges',
+              _localizations?.errorLoadingOpenBadges ??
+                  'Error Loading Open Badges',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -294,8 +299,8 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
             ),
             SizedBox(height: 8),
             Text(
-              _localizations?.noOpenBadgesDescription ?? 
-              'Import your first OpenBadge to get started',
+              _localizations?.noOpenBadgesDescription ??
+                  'Import your first OpenBadge to get started',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -306,7 +311,8 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
             ElevatedButton.icon(
               onPressed: _importOpenBadge,
               icon: Icon(Icons.upload_file),
-              label: Text(_localizations?.importOpenBadge ?? 'Import OpenBadge'),
+              label:
+                  Text(_localizations?.importOpenBadge ?? 'Import OpenBadge'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade600,
                 foregroundColor: Colors.white,
@@ -346,7 +352,7 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
             ],
           ),
           SizedBox(height: 24),
-          
+
           // OpenBadges Grid
           GridView.builder(
             shrinkWrap: true,
@@ -368,9 +374,10 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
     );
   }
 
-  Widget _buildOpenBadgeCard(OpenBadgeModel badge, bool isMobile, bool isTablet) {
+  Widget _buildOpenBadgeCard(
+      OpenBadgeModel badge, bool isMobile, bool isTablet) {
     final isHighlighted = _highlightedBadgeId == badge.idOpenBadge;
-    
+
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       decoration: BoxDecoration(
@@ -426,7 +433,7 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
                         ),
                 ),
                 SizedBox(width: 12),
-                
+
                 // Status
                 Expanded(
                   child: Column(
@@ -435,22 +442,23 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
                       Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: badge.isValid 
-                                  ? Colors.green.shade100 
+                              color: badge.isValid
+                                  ? Colors.green.shade100
                                   : Colors.red.shade100,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              badge.isValid 
+                              badge.isValid
                                   ? (_localizations?.valid ?? 'Valid')
                                   : (_localizations?.invalid ?? 'Invalid'),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: badge.isValid 
-                                    ? Colors.green.shade700 
+                                color: badge.isValid
+                                    ? Colors.green.shade700
                                     : Colors.red.shade700,
                               ),
                             ),
@@ -458,7 +466,8 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
                           if (badge.isRevoked) ...[
                             SizedBox(width: 8),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade100,
                                 borderRadius: BorderRadius.circular(12),
@@ -480,9 +489,9 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 12),
-            
+
             // Badge Name
             Text(
               badge.badgeName,
@@ -494,9 +503,9 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             SizedBox(height: 8),
-            
+
             // Issuer
             Text(
               badge.issuerName,
@@ -507,9 +516,9 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             SizedBox(height: 8),
-            
+
             // Description
             Text(
               badge.badgeDescription,
@@ -520,9 +529,9 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             Spacer(),
-            
+
             // Dates
             if (badge.issuedAt != null || badge.expiresAt != null) ...[
               SizedBox(height: 12),
@@ -607,7 +616,8 @@ class _ImportOpenBadgeDialogState extends State<ImportOpenBadgeDialog> {
       final response = await OpenBadgeService.importOpenBadge(
         userId: userId,
         assertionJson: widget.assertionJson,
-        source: _sourceController.text.isNotEmpty ? _sourceController.text : null,
+        source:
+            _sourceController.text.isNotEmpty ? _sourceController.text : null,
         note: _noteController.text.isNotEmpty ? _noteController.text : null,
       );
 
@@ -638,14 +648,15 @@ class _ImportOpenBadgeDialogState extends State<ImportOpenBadgeDialog> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     // Extract badge info
-    final badgeName = widget.assertionJson['badge']?['name'] as String? ?? 
-                      widget.assertionJson['name'] as String? ?? 
-                      'Unknown Badge';
-    final issuerName = widget.assertionJson['badge']?['issuer']?['name'] as String? ?? 
-                       widget.assertionJson['issuer']?['name'] as String? ?? 
-                       'Unknown Issuer';
+    final badgeName = widget.assertionJson['badge']?['name'] as String? ??
+        widget.assertionJson['name'] as String? ??
+        'Unknown Badge';
+    final issuerName =
+        widget.assertionJson['badge']?['issuer']?['name'] as String? ??
+            widget.assertionJson['issuer']?['name'] as String? ??
+            'Unknown Issuer';
 
     return AlertDialog(
       title: Text(localizations?.importOpenBadge ?? 'Import OpenBadge'),
@@ -683,9 +694,9 @@ class _ImportOpenBadgeDialogState extends State<ImportOpenBadgeDialog> {
                 ],
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Source field
             TextField(
               controller: _sourceController,
@@ -695,9 +706,9 @@ class _ImportOpenBadgeDialogState extends State<ImportOpenBadgeDialog> {
                 border: OutlineInputBorder(),
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Note field
             TextField(
               controller: _noteController,
@@ -713,7 +724,8 @@ class _ImportOpenBadgeDialogState extends State<ImportOpenBadgeDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isImporting ? null : () => Navigator.of(context).pop(false),
+          onPressed:
+              _isImporting ? null : () => Navigator.of(context).pop(false),
           child: Text(localizations?.cancel ?? 'Cancel'),
         ),
         ElevatedButton(

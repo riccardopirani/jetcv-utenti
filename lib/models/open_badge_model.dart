@@ -44,19 +44,19 @@ class OpenBadgeModel {
       badgeClassId: json['badge_class_id'] as String?,
       issuerId: json['issuer_id'] as String?,
       isRevoked: json['is_revoked'] as bool? ?? false,
-      revokedAt: json['revoked_at'] != null 
+      revokedAt: json['revoked_at'] != null
           ? DateTime.parse(json['revoked_at'] as String)
           : null,
-      issuedAt: json['issued_at'] != null 
+      issuedAt: json['issued_at'] != null
           ? DateTime.parse(json['issued_at'] as String)
           : null,
-      expiresAt: json['expires_at'] != null 
+      expiresAt: json['expires_at'] != null
           ? DateTime.parse(json['expires_at'] as String)
           : null,
       source: json['source'] as String?,
       note: json['note'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null 
+      updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
     );
@@ -120,9 +120,9 @@ class OpenBadgeModel {
   /// Get badge name from assertion JSON
   String get badgeName {
     try {
-      return assertionJson['badge']?['name'] as String? ?? 
-             assertionJson['name'] as String? ?? 
-             'Unknown Badge';
+      return assertionJson['badge']?['name'] as String? ??
+          assertionJson['name'] as String? ??
+          'Unknown Badge';
     } catch (e) {
       debugPrint('Error getting badge name: $e');
       return 'Unknown Badge';
@@ -132,9 +132,9 @@ class OpenBadgeModel {
   /// Get badge description from assertion JSON
   String get badgeDescription {
     try {
-      return assertionJson['badge']?['description'] as String? ?? 
-             assertionJson['description'] as String? ?? 
-             'No description available';
+      return assertionJson['badge']?['description'] as String? ??
+          assertionJson['description'] as String? ??
+          'No description available';
     } catch (e) {
       debugPrint('Error getting badge description: $e');
       return 'No description available';
@@ -144,8 +144,8 @@ class OpenBadgeModel {
   /// Get badge image URL from assertion JSON
   String? get badgeImageUrl {
     try {
-      return assertionJson['badge']?['image'] as String? ?? 
-             assertionJson['image'] as String?;
+      return assertionJson['badge']?['image'] as String? ??
+          assertionJson['image'] as String?;
     } catch (e) {
       debugPrint('Error getting badge image URL: $e');
       return null;
@@ -155,9 +155,9 @@ class OpenBadgeModel {
   /// Get issuer name from assertion JSON
   String get issuerName {
     try {
-      return assertionJson['badge']?['issuer']?['name'] as String? ?? 
-             assertionJson['issuer']?['name'] as String? ?? 
-             'Unknown Issuer';
+      return assertionJson['badge']?['issuer']?['name'] as String? ??
+          assertionJson['issuer']?['name'] as String? ??
+          'Unknown Issuer';
     } catch (e) {
       debugPrint('Error getting issuer name: $e');
       return 'Unknown Issuer';
@@ -167,8 +167,8 @@ class OpenBadgeModel {
   /// Get issuer URL from assertion JSON
   String? get issuerUrl {
     try {
-      return assertionJson['badge']?['issuer']?['url'] as String? ?? 
-             assertionJson['issuer']?['url'] as String?;
+      return assertionJson['badge']?['issuer']?['url'] as String? ??
+          assertionJson['issuer']?['url'] as String?;
     } catch (e) {
       debugPrint('Error getting issuer URL: $e');
       return null;

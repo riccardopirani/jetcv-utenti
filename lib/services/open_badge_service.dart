@@ -25,16 +25,18 @@ class OpenBadgeService {
         try {
           final openBadge = OpenBadgeModel.fromJson(badgeData);
           openBadges.add(openBadge);
-          
-          debugPrint('📋 OpenBadgeService: Processed badge: ${openBadge.badgeName}');
+
+          debugPrint(
+              '📋 OpenBadgeService: Processed badge: ${openBadge.badgeName}');
           debugPrint('📋 OpenBadgeService: Issuer: ${openBadge.issuerName}');
           debugPrint('📋 OpenBadgeService: Valid: ${openBadge.isValid}');
-    } catch (e) {
+        } catch (e) {
           debugPrint('❌ OpenBadgeService: Error parsing OpenBadge: $e');
         }
       }
 
-      debugPrint('✅ OpenBadgeService: Retrieved ${openBadges.length} OpenBadges successfully');
+      debugPrint(
+          '✅ OpenBadgeService: Retrieved ${openBadges.length} OpenBadges successfully');
 
       return EdgeFunctionResponse<List<OpenBadgeModel>>(
         success: true,
@@ -59,10 +61,11 @@ class OpenBadgeService {
   }) async {
     try {
       debugPrint('🏆 OpenBadgeService: Importing OpenBadge for user: $userId');
-      debugPrint('🏆 OpenBadgeService: Assertion JSON keys: ${assertionJson.keys.toList()}');
+      debugPrint(
+          '🏆 OpenBadgeService: Assertion JSON keys: ${assertionJson.keys.toList()}');
 
       // Validate assertion JSON structure
-      if (!assertionJson.containsKey('@context') || 
+      if (!assertionJson.containsKey('@context') ||
           !assertionJson.containsKey('type')) {
         return EdgeFunctionResponse<OpenBadgeModel>(
           success: false,
@@ -74,11 +77,11 @@ class OpenBadgeService {
       final assertionId = assertionJson['id'] as String?;
       final badgeClassId = assertionJson['badge']?['id'] as String?;
       final issuerId = assertionJson['badge']?['issuer']?['id'] as String?;
-      
+
       // Parse dates
       DateTime? issuedAt;
       DateTime? expiresAt;
-      
+
       if (assertionJson['issuedOn'] != null) {
         try {
           issuedAt = DateTime.parse(assertionJson['issuedOn'] as String);
@@ -86,7 +89,7 @@ class OpenBadgeService {
           debugPrint('⚠️ OpenBadgeService: Error parsing issuedOn: $e');
         }
       }
-      
+
       if (assertionJson['expires'] != null) {
         try {
           expiresAt = DateTime.parse(assertionJson['expires'] as String);
@@ -196,8 +199,7 @@ class OpenBadgeService {
   static bool validateOpenBadgeJson(Map<String, dynamic> json) {
     try {
       // Check required fields
-      if (!json.containsKey('@context') || 
-          !json.containsKey('type')) {
+      if (!json.containsKey('@context') || !json.containsKey('type')) {
         return false;
       }
 
@@ -217,13 +219,13 @@ class OpenBadgeService {
   }
 
   /// Parse OpenBadge from file content
-  static Future<EdgeFunctionResponse<Map<String, dynamic>>> parseOpenBadgeFromFile(
-      String fileContent) async {
+  static Future<EdgeFunctionResponse<Map<String, dynamic>>>
+      parseOpenBadgeFromFile(String fileContent) async {
     try {
       debugPrint('🏆 OpenBadgeService: Parsing OpenBadge from file content');
 
       final Map<String, dynamic> assertionJson = json.decode(fileContent);
-      
+
       if (!validateOpenBadgeJson(assertionJson)) {
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: false,
@@ -248,18 +250,19 @@ class OpenBadgeService {
   }
 
   /// Create OpenBadge for certification (placeholder method)
-  static Future<EdgeFunctionResponse<OpenBadgeModel>> createBadgeForCertification({
+  static Future<EdgeFunctionResponse<OpenBadgeModel>>
+      createBadgeForCertification({
     required dynamic certification,
     required String recipientEmail,
     required String recipientName,
   }) async {
     try {
       debugPrint('🏆 OpenBadgeService: Creating OpenBadge for certification');
-      
+
       // This is a placeholder implementation
       // In a real implementation, you would create an OpenBadge assertion
       // based on the certification data
-      
+
       return EdgeFunctionResponse<OpenBadgeModel>(
         success: false,
         error: 'OpenBadge creation not yet implemented',
@@ -280,11 +283,11 @@ class OpenBadgeService {
   }) async {
     try {
       debugPrint('🏆 OpenBadgeService: Sharing OpenBadge');
-      
+
       // This is a placeholder implementation
       // In a real implementation, you would share the badge
       // using the platform's sharing mechanism
-      
+
       debugPrint('✅ OpenBadgeService: OpenBadge sharing not yet implemented');
     } catch (e) {
       debugPrint('❌ OpenBadgeService: Error sharing OpenBadge: $e');

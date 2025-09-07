@@ -353,7 +353,8 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _createOtp,
                   icon: const Icon(Icons.add, size: 18),
-                  label: Text(AppLocalizations.of(context)?.createOtp ?? 'Create OTP'),
+                  label: Text(
+                      AppLocalizations.of(context)?.createOtp ?? 'Create OTP'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6B46C1),
                     foregroundColor: Colors.white,
@@ -449,7 +450,8 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
                     children: [
                       Icon(Icons.security, size: 48, color: Colors.grey),
                       SizedBox(height: 8),
-                      Text(AppLocalizations.of(context)?.noOtpsAvailable ?? 'No OTPs available'),
+                      Text(AppLocalizations.of(context)?.noOtpsAvailable ??
+                          'No OTPs available'),
                     ],
                   ),
                 ),

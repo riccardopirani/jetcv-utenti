@@ -1778,9 +1778,9 @@ class _CVViewPageState extends State<CVViewPage> {
                   ),
                 ],
               ),
-              
+
               SizedBox(height: 16),
-              
+
               // OpenBadge preview cards (show first 3)
               _buildOpenBadgePreview(),
             ],
@@ -1839,7 +1839,8 @@ class _CVViewPageState extends State<CVViewPage> {
             },
             icon: Icon(Icons.upload_file, size: 16),
             label: Text(
-              AppLocalizations.of(context)?.importOpenBadge ?? 'Import OpenBadge',
+              AppLocalizations.of(context)?.importOpenBadge ??
+                  'Import OpenBadge',
               style: TextStyle(fontSize: 12),
             ),
             style: ElevatedButton.styleFrom(
