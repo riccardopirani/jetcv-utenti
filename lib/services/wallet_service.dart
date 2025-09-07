@@ -3,6 +3,8 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/models/wallet_model.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/supabase/structure/enumerated_types.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 /// Service for wallet-related database operations
 class WalletService {
@@ -14,25 +16,45 @@ class WalletService {
       debugPrint(
           '🔍 WalletService: Getting wallet for user: $userId using Edge Function');
 
-      final response = await _client.functions.invoke(
-        'get-wallet-byuser',
-        body: {'idUser': userId},
+      // Use direct HTTP GET request to ensure GET method is used
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        debugPrint('❌ WalletService: No active session');
+        return null;
+      }
+
+      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/get-wallet-byuser?idUser=$userId';
+      debugPrint('🔍 WalletService: Making GET request to: $url');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'Content-Type': 'application/json',
+          'apikey': SupabaseConfig.supabaseAnonKey,
+        },
       );
 
-      if (response.status == 200 && response.data != null) {
-        final data = response.data as Map<String, dynamic>;
-        final walletData = data['wallet'] as Map<String, dynamic>;
+      debugPrint('📋 WalletService: Response status: ${response.statusCode}');
+      debugPrint('📋 WalletService: Response body: ${response.body}');
 
-        debugPrint('✅ WalletService: Wallet found for user: $userId');
-        debugPrint('📋 WalletService: Wallet data: $walletData');
-
-        return WalletModel.fromJson(walletData);
-      } else if (response.status == 404) {
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        if (data.containsKey('wallet')) {
+          final walletData = data['wallet'] as Map<String, dynamic>;
+          debugPrint('✅ WalletService: Wallet found for user: $userId');
+          debugPrint('📋 WalletService: Wallet data: $walletData');
+          return WalletModel.fromJson(walletData);
+        } else {
+          debugPrint('⚠️ WalletService: Response does not contain wallet data: $data');
+          return null;
+        }
+      } else if (response.statusCode == 404) {
         debugPrint('⚠️ WalletService: No wallet found for user: $userId');
         return null;
       } else {
         debugPrint(
-            '❌ WalletService: Edge Function error ${response.status}: ${response.data}');
+            '❌ WalletService: Edge Function error ${response.statusCode}: ${response.body}');
         return null;
       }
     } catch (e) {
@@ -108,17 +130,28 @@ class WalletService {
       final testUserId = '00000000-0000-0000-0000-000000000000';
 
       try {
-        final response = await _client.functions.invoke(
-          'get-wallet-byuser',
-          body: {'idUser': testUserId},
+        final session = _client.auth.currentSession;
+        if (session == null) {
+          debugPrint('❌ WalletService: No active session for test');
+          return;
+        }
+
+        final url = '${SupabaseConfig.supabaseUrl}/functions/v1/get-wallet-byuser?idUser=$testUserId';
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer ${session.accessToken}',
+            'Content-Type': 'application/json',
+            'apikey': SupabaseConfig.supabaseAnonKey,
+          },
         );
 
         debugPrint('📋 WalletService: Edge Function response structure:');
-        debugPrint('  - Status: ${response.status}');
-        debugPrint('  - Data: ${response.data}');
+        debugPrint('  - Status: ${response.statusCode}');
+        debugPrint('  - Body: ${response.body}');
 
-        if (response.status == 200 && response.data != null) {
-          final data = response.data as Map<String, dynamic>;
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body) as Map<String, dynamic>;
           if (data['wallet'] != null) {
             final walletData = data['wallet'] as Map<String, dynamic>;
             debugPrint('📋 WalletService: Wallet data structure:');
@@ -140,12 +173,12 @@ class WalletService {
                   '❌ WalletService: WalletModel parsing failed: $parseError');
             }
           }
-        } else if (response.status == 404) {
+        } else if (response.statusCode == 404) {
           debugPrint(
               '✅ WalletService: Edge Function working correctly (404 for test user)');
         } else {
           debugPrint(
-              '⚠️ WalletService: Edge Function returned status ${response.status}');
+              '⚠️ WalletService: Edge Function returned status ${response.statusCode}');
         }
       } catch (edgeFunctionError) {
         debugPrint(
