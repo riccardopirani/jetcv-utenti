@@ -513,5 +513,6 @@
   "source": "Source (optional)",
   "note": "Note (optional)",
   "import": "Import",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "viewAll": "View All"
 }

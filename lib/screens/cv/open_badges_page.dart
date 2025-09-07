@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/services/open_badge_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
@@ -76,18 +74,11 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
 
   Future<void> _importOpenBadge() async {
     try {
-      // Pick JSON file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = File(result.files.first.path!);
-        final fileContent = await file.readAsString();
-        
+      // For now, show a dialog to manually enter JSON
+      final jsonText = await _showJsonInputDialog();
+      if (jsonText != null && jsonText.isNotEmpty) {
         // Parse OpenBadge JSON
-        final parseResponse = await OpenBadgeService.parseOpenBadgeFromFile(fileContent);
+        final parseResponse = await OpenBadgeService.parseOpenBadgeFromFile(jsonText);
         
         if (!parseResponse.success) {
           _showSnackBar(parseResponse.error ?? 'Failed to parse OpenBadge');
@@ -104,6 +95,42 @@ class _OpenBadgesPageState extends State<OpenBadgesPage> {
       _showSnackBar('Error importing OpenBadge: $e');
       debugPrint('❌ Error importing OpenBadge: $e');
     }
+  }
+
+  Future<String?> _showJsonInputDialog() async {
+    final controller = TextEditingController();
+    
+    return await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_localizations?.importOpenBadge ?? 'Import OpenBadge'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Paste your OpenBadge JSON here:'),
+            SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              maxLines: 10,
+              decoration: InputDecoration(
+                hintText: '{"@context": "https://w3id.org/openbadges/v2", ...}',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_localizations?.cancel ?? 'Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: Text(_localizations?.import ?? 'Import'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<bool> _showImportDialog(Map<String, dynamic> assertionJson) async {

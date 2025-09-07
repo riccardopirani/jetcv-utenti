@@ -1757,7 +1757,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       size: isMobile ? 16 : 18,
                     ),
                     label: Text(
-                      AppLocalizations.of(context)!.viewAll ?? 'View All',
+                      AppLocalizations.of(context)?.viewAll ?? 'View All',
                       style: TextStyle(
                         fontSize: buttonFontSize,
                         fontWeight: FontWeight.w600,
@@ -1796,7 +1796,7 @@ class _CVViewPageState extends State<CVViewPage> {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue.shade25,
+        color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Colors.blue.shade200,
@@ -2334,7 +2334,7 @@ class _CVViewPageState extends State<CVViewPage> {
                 _buildAttachedMediaSection(cert),
 
                 // Open Badge Section
-                _buildOpenBadgeSection(cert),
+                _buildOpenBadgeButtonSection(cert),
               ],
             ),
           ),
@@ -2357,7 +2357,7 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  Widget _buildOpenBadgeSection(UserCertificationDetail cert) {
+  Widget _buildOpenBadgeButtonSection(UserCertificationDetail cert) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;

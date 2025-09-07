@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
+import 'package:jetcv__utenti/services/edge_function_service.dart';
 
 /// Service for OpenBadge operations
 class OpenBadgeService {
@@ -28,7 +29,7 @@ class OpenBadgeService {
           debugPrint('📋 OpenBadgeService: Processed badge: ${openBadge.badgeName}');
           debugPrint('📋 OpenBadgeService: Issuer: ${openBadge.issuerName}');
           debugPrint('📋 OpenBadgeService: Valid: ${openBadge.isValid}');
-        } catch (e) {
+    } catch (e) {
           debugPrint('❌ OpenBadgeService: Error parsing OpenBadge: $e');
         }
       }
@@ -243,6 +244,50 @@ class OpenBadgeService {
         success: false,
         error: 'Failed to parse OpenBadge JSON: $e',
       );
+    }
+  }
+
+  /// Create OpenBadge for certification (placeholder method)
+  static Future<EdgeFunctionResponse<OpenBadgeModel>> createBadgeForCertification({
+    required dynamic certification,
+    required String recipientEmail,
+    required String recipientName,
+  }) async {
+    try {
+      debugPrint('🏆 OpenBadgeService: Creating OpenBadge for certification');
+      
+      // This is a placeholder implementation
+      // In a real implementation, you would create an OpenBadge assertion
+      // based on the certification data
+      
+      return EdgeFunctionResponse<OpenBadgeModel>(
+        success: false,
+        error: 'OpenBadge creation not yet implemented',
+      );
+    } catch (e) {
+      debugPrint('❌ OpenBadgeService: Error creating OpenBadge: $e');
+      return EdgeFunctionResponse<OpenBadgeModel>(
+        success: false,
+        error: 'Failed to create OpenBadge: $e',
+      );
+    }
+  }
+
+  /// Share OpenBadge (placeholder method)
+  static Future<void> shareBadge({
+    required OpenBadgeModel badge,
+    required String message,
+  }) async {
+    try {
+      debugPrint('🏆 OpenBadgeService: Sharing OpenBadge');
+      
+      // This is a placeholder implementation
+      // In a real implementation, you would share the badge
+      // using the platform's sharing mechanism
+      
+      debugPrint('✅ OpenBadgeService: OpenBadge sharing not yet implemented');
+    } catch (e) {
+      debugPrint('❌ OpenBadgeService: Error sharing OpenBadge: $e');
     }
   }
 }

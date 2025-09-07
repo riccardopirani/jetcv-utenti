@@ -414,5 +414,6 @@
   "source": "Fonte (opzionale)",
   "note": "Nota (opzionale)",
   "import": "Importa",
-  "cancel": "Annulla"
+  "cancel": "Annulla",
+  "viewAll": "Visualizza Tutti"
 }

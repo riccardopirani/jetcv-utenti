@@ -1239,4 +1239,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get import => 'Importa';
+
+  @override
+  String get viewAll => 'Visualizza Tutti';
 }

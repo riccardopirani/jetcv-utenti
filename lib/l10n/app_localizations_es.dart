@@ -1238,4 +1238,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get import => 'Import';
+
+  @override
+  String get viewAll => 'View All';
 }
