@@ -94,41 +94,56 @@ class WalletService {
     }
   }
 
-  /// Test method to verify database schema compatibility
+  /// Test method to verify Edge Function compatibility
   static Future<void> testWalletSchema() async {
     try {
-      debugPrint('🔍 WalletService: Testing wallet schema compatibility');
+      debugPrint('🔍 WalletService: Testing Edge Function compatibility');
       
-      // Test query to get raw data structure
-      final response = await _client
-          .from('wallet')
-          .select('*')
-          .limit(1);
+      // Test Edge Function with a dummy user ID to see response structure
+      final testUserId = '00000000-0000-0000-0000-000000000000';
       
-      if (response.isNotEmpty) {
-        final rawData = response.first;
-        debugPrint('📋 WalletService: Raw wallet data structure:');
-        rawData.forEach((key, value) {
-          debugPrint('  - $key: ${value.runtimeType} = $value');
-        });
+      try {
+        final response = await _client.functions.invoke(
+          'get-wallet-byuser',
+          body: {'idUser': testUserId},
+        );
         
-        // Test parsing
-        try {
-          final wallet = WalletModel.fromJson(rawData);
-          debugPrint('✅ WalletService: WalletModel parsing successful');
-          debugPrint('  - idWallet: ${wallet.idWallet}');
-          debugPrint('  - idUser: ${wallet.idUser}');
-          debugPrint('  - publicAddress: ${wallet.publicAddress}');
-          debugPrint('  - createdAt: ${wallet.createdAt}');
-          debugPrint('  - createdBy: ${wallet.createdBy}');
-        } catch (parseError) {
-          debugPrint('❌ WalletService: WalletModel parsing failed: $parseError');
+        debugPrint('📋 WalletService: Edge Function response structure:');
+        debugPrint('  - Status: ${response.status}');
+        debugPrint('  - Data: ${response.data}');
+        
+        if (response.status == 200 && response.data != null) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['wallet'] != null) {
+            final walletData = data['wallet'] as Map<String, dynamic>;
+            debugPrint('📋 WalletService: Wallet data structure:');
+            walletData.forEach((key, value) {
+              debugPrint('  - $key: ${value.runtimeType} = $value');
+            });
+            
+            // Test parsing
+            try {
+              final wallet = WalletModel.fromJson(walletData);
+              debugPrint('✅ WalletService: WalletModel parsing successful');
+              debugPrint('  - idWallet: ${wallet.idWallet}');
+              debugPrint('  - idUser: ${wallet.idUser}');
+              debugPrint('  - publicAddress: ${wallet.publicAddress}');
+              debugPrint('  - createdAt: ${wallet.createdAt}');
+              debugPrint('  - createdBy: ${wallet.createdBy}');
+            } catch (parseError) {
+              debugPrint('❌ WalletService: WalletModel parsing failed: $parseError');
+            }
+          }
+        } else if (response.status == 404) {
+          debugPrint('✅ WalletService: Edge Function working correctly (404 for test user)');
+        } else {
+          debugPrint('⚠️ WalletService: Edge Function returned status ${response.status}');
         }
-      } else {
-        debugPrint('⚠️ WalletService: No wallet data found for schema test');
+      } catch (edgeFunctionError) {
+        debugPrint('❌ WalletService: Edge Function test failed: $edgeFunctionError');
       }
     } catch (e) {
-      debugPrint('❌ WalletService: Error testing wallet schema: $e');
+      debugPrint('❌ WalletService: Error testing Edge Function: $e');
     }
   }
 }
