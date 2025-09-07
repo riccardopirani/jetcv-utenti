@@ -1778,16 +1778,16 @@ class _OtpListPageState extends State<OtpListPage> {
                   width: isMobile ? 40 : 50,
                   height: isMobile ? 40 : 50,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
+                    color: isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.blue.shade300,
+                      color: isBlocked ? Colors.red.shade300 : Colors.blue.shade300,
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     Icons.business,
-                    color: Colors.blue.shade600,
+                    color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
                     size: isMobile ? 20 : 24,
                   ),
                 ),
