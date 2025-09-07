@@ -51,7 +51,7 @@ class _OtpListPageState extends State<OtpListPage> {
       // Test if id_legal_entity column exists
       final columnExists = await OtpService.testLegalEntityColumn();
       debugPrint('🔍 id_legal_entity column exists: $columnExists');
-      
+
       final session = SupabaseConfig.client.auth.currentSession;
       final userId = session?.user.id;
 
@@ -220,29 +220,32 @@ class _OtpListPageState extends State<OtpListPage> {
 
   Future<void> _loadLegalEntityForOtp(OtpModel otp) async {
     if (otp.idLegalEntity == null) {
-      debugPrint('⚠️ OTP ${otp.idOtp} has no idLegalEntity, skipping legal entity load');
+      debugPrint(
+          '⚠️ OTP ${otp.idOtp} has no idLegalEntity, skipping legal entity load');
       return;
     }
-    
+
     // Check if we already have this legal entity data
     if (_legalEntities.containsKey(otp.idLegalEntity)) {
       debugPrint('✅ Legal entity already cached for OTP: ${otp.idOtp}');
       return;
     }
-    
+
     try {
-      debugPrint('🏢 Loading legal entity for OTP: ${otp.idOtp}, Legal Entity ID: ${otp.idLegalEntity}');
-      
+      debugPrint(
+          '🏢 Loading legal entity for OTP: ${otp.idOtp}, Legal Entity ID: ${otp.idLegalEntity}');
+
       final response = await OtpService.getLegalEntityForOtp(
         idLegalEntity: otp.idLegalEntity!,
       );
-      
+
       if (response.success && response.data != null) {
         setState(() {
           _legalEntities[otp.idLegalEntity!] = response.data!;
         });
         debugPrint('✅ Legal entity loaded for OTP: ${otp.idOtp}');
-        debugPrint('📊 Legal entity data keys: ${response.data!.keys.toList()}');
+        debugPrint(
+            '📊 Legal entity data keys: ${response.data!.keys.toList()}');
       } else {
         debugPrint('❌ Failed to load legal entity: ${response.error}');
         // Add empty entry to prevent retrying
@@ -1126,7 +1129,8 @@ class _OtpListPageState extends State<OtpListPage> {
 
     // Load legal entity data if needed (regardless of OTP status)
     if (otp.idLegalEntity != null) {
-      debugPrint('🏢 OTP has idLegalEntity, loading legal entity data (OTP blocked: ${_isOtpBlocked(otp)})');
+      debugPrint(
+          '🏢 OTP has idLegalEntity, loading legal entity data (OTP blocked: ${_isOtpBlocked(otp)})');
       _loadLegalEntityForOtp(otp);
     } else {
       debugPrint('⚠️ OTP has no idLegalEntity, skipping legal entity load');
@@ -1654,13 +1658,14 @@ class _OtpListPageState extends State<OtpListPage> {
 
   Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
     final legalEntityData = _legalEntities[otp.idLegalEntity!];
-    
+
     // If data is not loaded yet, show loading indicator
     if (legalEntityData == null) {
-      debugPrint('⏳ Legal entity data not loaded yet for OTP: ${otp.idOtp}, showing loading indicator');
+      debugPrint(
+          '⏳ Legal entity data not loaded yet for OTP: ${otp.idOtp}, showing loading indicator');
       return _buildLegalEntityLoadingSection(isMobile, isTablet);
     }
-    
+
     // If data is empty (error case), show error message
     if (legalEntityData.isEmpty) {
       debugPrint('⚠️ Legal entity data is empty for OTP: ${otp.idOtp}');

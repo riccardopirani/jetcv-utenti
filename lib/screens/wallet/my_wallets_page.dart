@@ -45,7 +45,7 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
 
       // Get wallet data with user info
       final walletData = await WalletService.getWalletWithUserInfo(user.idUser);
-      
+
       setState(() {
         _walletData = walletData;
         _isLoading = false;
@@ -90,14 +90,15 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
 
   String _getUserDisplayName(Map<String, dynamic>? userData) {
     if (userData == null) return 'Unknown User';
-    
-    if (userData['fullName'] != null && userData['fullName'].toString().isNotEmpty) {
+
+    if (userData['fullName'] != null &&
+        userData['fullName'].toString().isNotEmpty) {
       return userData['fullName'];
     }
-    
+
     final firstName = userData['firstName'] ?? '';
     final lastName = userData['lastName'] ?? '';
-    
+
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       return '$firstName $lastName';
     } else if (firstName.isNotEmpty) {
@@ -105,7 +106,7 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
     } else if (lastName.isNotEmpty) {
       return lastName;
     }
-    
+
     return 'Unknown User';
   }
 
@@ -225,7 +226,8 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
     );
   }
 
-  Widget _buildWalletContent(AppLocalizations l10n, ThemeData theme, bool isMobile) {
+  Widget _buildWalletContent(
+      AppLocalizations l10n, ThemeData theme, bool isMobile) {
     final wallet = _walletData!['wallet'] as WalletModel;
     final userData = _walletData!['user'] as Map<String, dynamic>?;
     final userName = _getUserDisplayName(userData);
@@ -254,7 +256,8 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
           const SizedBox(height: 32),
 
           // Wallet card
-          _buildWalletCard(l10n, theme, wallet, userName, formattedAddress, isMobile),
+          _buildWalletCard(
+              l10n, theme, wallet, userName, formattedAddress, isMobile),
         ],
       ),
     );

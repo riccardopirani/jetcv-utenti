@@ -288,8 +288,9 @@ class OtpService {
       }
 
       // Use RPC function as primary method
-      debugPrint('🔍 OtpService: Querying OTPs for user: $idUser using RPC function');
-      
+      debugPrint(
+          '🔍 OtpService: Querying OTPs for user: $idUser using RPC function');
+
       final response = await SupabaseConfig.client.rpc(
         'otp_list_user_otps',
         params: {
@@ -298,11 +299,13 @@ class OtpService {
           'p_offset': offset,
         },
       );
-      
-      debugPrint('📋 OtpService: RPC function successful, found ${response.length} OTPs');
+
+      debugPrint(
+          '📋 OtpService: RPC function successful, found ${response.length} OTPs');
 
       debugPrint('📋 OtpService: Raw OTP response: $response');
-      debugPrint('📊 OtpService: Found ${response.length} OTPs for user $idUser');
+      debugPrint(
+          '📊 OtpService: Found ${response.length} OTPs for user $idUser');
 
       final List<OtpModel> otps = [];
       for (final otpData in response) {
@@ -312,7 +315,7 @@ class OtpService {
           // Add missing fields that OtpModel expects
           otpJson['code'] = '***'; // Don't expose actual code
           otpJson['code_hash'] = '***'; // Don't expose hash
-          
+
           // Get id_legal_entity from database since RPC doesn't include it
           final otpId = otpJson['id_otp'];
           try {
@@ -321,20 +324,24 @@ class OtpService {
                 .select('id_legal_entity')
                 .eq('id_otp', otpId)
                 .single();
-            
+
             otpJson['id_legal_entity'] = legalEntityResponse['id_legal_entity'];
-            
+
             if (otpJson['id_legal_entity'] == null) {
-              debugPrint('⚠️ OtpService: id_legal_entity is null for OTP: $otpId');
+              debugPrint(
+                  '⚠️ OtpService: id_legal_entity is null for OTP: $otpId');
             } else {
-              debugPrint('✅ OtpService: id_legal_entity found for OTP: $otpId -> ${otpJson['id_legal_entity']}');
+              debugPrint(
+                  '✅ OtpService: id_legal_entity found for OTP: $otpId -> ${otpJson['id_legal_entity']}');
             }
           } catch (legalEntityError) {
-            debugPrint('⚠️ OtpService: Could not fetch id_legal_entity for OTP $otpId: $legalEntityError');
+            debugPrint(
+                '⚠️ OtpService: Could not fetch id_legal_entity for OTP $otpId: $legalEntityError');
             otpJson['id_legal_entity'] = null;
           }
 
-          debugPrint('📋 OtpService: Processing OTP: $otpId, id_legal_entity: ${otpJson['id_legal_entity']}');
+          debugPrint(
+              '📋 OtpService: Processing OTP: $otpId, id_legal_entity: ${otpJson['id_legal_entity']}');
 
           final otp = OtpModel.fromJson(otpJson);
           otps.add(otp);
@@ -522,7 +529,8 @@ class OtpService {
           final legalEntityData =
               response['legal_entity'] as Map<String, dynamic>;
 
-          debugPrint('✅ OtpService: Legal entity retrieved successfully via Edge Function');
+          debugPrint(
+              '✅ OtpService: Legal entity retrieved successfully via Edge Function');
 
           return EdgeFunctionResponse<Map<String, dynamic>>(
             success: true,
@@ -534,20 +542,23 @@ class OtpService {
               '❌ OtpService: Get legal entity failed via Edge Function - ok: ${response['ok']}, error: ${response['error']}');
         }
       } catch (edgeFunctionError) {
-        debugPrint('⚠️ OtpService: Edge Function failed, trying direct database query: $edgeFunctionError');
+        debugPrint(
+            '⚠️ OtpService: Edge Function failed, trying direct database query: $edgeFunctionError');
       }
 
       // Fallback: Direct database query using Supabase client
       try {
-        debugPrint('🔄 OtpService: Trying direct database query for legal entity');
-        
+        debugPrint(
+            '🔄 OtpService: Trying direct database query for legal entity');
+
         final response = await SupabaseConfig.client
             .from('legal_entity')
             .select('*')
             .eq('id_legal_entity', idLegalEntity)
             .single();
 
-        debugPrint('✅ OtpService: Legal entity retrieved successfully via direct query');
+        debugPrint(
+            '✅ OtpService: Legal entity retrieved successfully via direct query');
         debugPrint('📊 Legal entity data: $response');
 
         return EdgeFunctionResponse<Map<String, dynamic>>(
@@ -576,13 +587,13 @@ class OtpService {
   static Future<bool> testLegalEntityColumn() async {
     try {
       debugPrint('🔍 Testing if id_legal_entity column exists in OTP table');
-      
+
       // Try to select id_legal_entity from a sample OTP
       final response = await SupabaseConfig.client
           .from('otp')
           .select('id_legal_entity')
           .limit(1);
-      
+
       debugPrint('✅ id_legal_entity column exists in OTP table');
       return true;
     } catch (e) {
