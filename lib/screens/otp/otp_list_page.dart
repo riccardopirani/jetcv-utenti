@@ -1798,19 +1798,19 @@ class _OtpListPageState extends State<OtpListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      legalEntityData['legal_name'] ?? 'Azienda',
+                      legalEntityData['legal_name'] ?? AppLocalizations.of(context)!.company,
                       style: TextStyle(
                         fontSize: isMobile ? 16 : 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
+                        color: isBlocked ? Colors.red.shade800 : Colors.blue.shade800,
                       ),
                     ),
                     if (legalEntityData['identifier_code'] != null)
                       Text(
-                        'P.IVA: ${legalEntityData['identifier_code']}',
+                        '${AppLocalizations.of(context)!.vatNumber}: ${legalEntityData['identifier_code']}',
                         style: TextStyle(
                           fontSize: isMobile ? 12 : 14,
-                          color: Colors.blue.shade600,
+                          color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
