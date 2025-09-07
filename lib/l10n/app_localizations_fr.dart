@@ -640,6 +640,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myWallets => 'Mes Portefeuilles';
 
   @override
+  String get viewYourDigitalWallets => 'View your digital wallets';
+
+  @override
+  String get wallet => 'Wallet';
+
+  @override
+  String get walletDescription =>
+      'Your CV is saved in this wallet on the blockchain to always guarantee its authenticity';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get walletAddress => 'Wallet Address';
+
+  @override
+  String get copyAddress => 'Copy address';
+
+  @override
+  String get addressCopied => 'Address copied to clipboard';
+
+  @override
+  String get noWalletFound => 'No wallet found';
+
+  @override
+  String get walletNotFoundDescription =>
+      'You don\'t have a wallet associated with your account yet';
+
+  @override
   String get deleteAccount => 'Supprimer le Compte';
 
   @override

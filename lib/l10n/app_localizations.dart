@@ -1280,6 +1280,60 @@ abstract class AppLocalizations {
   /// **'My Wallets'**
   String get myWallets;
 
+  /// No description provided for @viewYourDigitalWallets.
+  ///
+  /// In en, this message translates to:
+  /// **'View your digital wallets'**
+  String get viewYourDigitalWallets;
+
+  /// No description provided for @wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get wallet;
+
+  /// No description provided for @walletDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your CV is saved in this wallet on the blockchain to always guarantee its authenticity'**
+  String get walletDescription;
+
+  /// No description provided for @owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// No description provided for @walletAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Address'**
+  String get walletAddress;
+
+  /// No description provided for @copyAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy address'**
+  String get copyAddress;
+
+  /// No description provided for @addressCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Address copied to clipboard'**
+  String get addressCopied;
+
+  /// No description provided for @noWalletFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No wallet found'**
+  String get noWalletFound;
+
+  /// No description provided for @walletNotFoundDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have a wallet associated with your account yet'**
+  String get walletNotFoundDescription;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:

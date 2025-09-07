@@ -7,6 +7,7 @@ import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 import 'package:jetcv__utenti/screens/home/home_page.dart';
 import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
+import 'package:jetcv__utenti/screens/wallet/my_wallets_page.dart';
 
 class SidebarMenu extends StatefulWidget {
   final VoidCallback? onClose;
@@ -127,12 +128,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
         );
         break;
       case '/wallets':
-        // Show coming soon message for wallets
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.comingSoon),
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 2),
+        // Navigate to wallets page
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const MyWalletsPage(),
           ),
         );
         break;
