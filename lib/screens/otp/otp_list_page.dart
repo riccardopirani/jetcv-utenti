@@ -1832,7 +1832,7 @@ class _OtpListPageState extends State<OtpListPage> {
                     legalEntityData['operational_city'] != null)
                   _buildInfoRow(
                     Icons.location_on,
-                    'Indirizzo',
+                    AppLocalizations.of(context)!.address,
                     '${legalEntityData['operational_address'] ?? ''} ${legalEntityData['operational_city'] ?? ''}'
                         .trim(),
                     isMobile,
@@ -1841,7 +1841,7 @@ class _OtpListPageState extends State<OtpListPage> {
                 if (legalEntityData['email'] != null)
                   _buildInfoRow(
                     Icons.email,
-                    'Email',
+                    AppLocalizations.of(context)!.email,
                     legalEntityData['email'],
                     isMobile,
                     isTablet,
@@ -1849,7 +1849,7 @@ class _OtpListPageState extends State<OtpListPage> {
                 if (legalEntityData['phone'] != null)
                   _buildInfoRow(
                     Icons.phone,
-                    'Telefono',
+                    AppLocalizations.of(context)!.phone,
                     legalEntityData['phone'],
                     isMobile,
                     isTablet,
@@ -1857,7 +1857,7 @@ class _OtpListPageState extends State<OtpListPage> {
                 if (legalEntityData['website'] != null)
                   _buildInfoRow(
                     Icons.web,
-                    'Sito Web',
+                    AppLocalizations.of(context)!.website,
                     legalEntityData['website'],
                     isMobile,
                     isTablet,
