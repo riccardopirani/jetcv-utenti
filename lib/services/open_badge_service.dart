@@ -115,6 +115,10 @@ class OpenBadgeService {
           .select()
           .single();
 
+      debugPrint('🔍 OpenBadgeService: Database response: $response');
+      debugPrint('🔍 OpenBadgeService: Response type: ${response.runtimeType}');
+      debugPrint('🔍 OpenBadgeService: Response keys: ${response.keys.toList()}');
+
       final openBadge = OpenBadgeModel.fromJson(response);
 
       debugPrint('✅ OpenBadgeService: OpenBadge imported successfully');
