@@ -355,11 +355,29 @@ class OtpService {
             // Convert Edge Function response to OtpModel format
             final otpJson = Map<String, dynamic>.from(otpData);
 
+            // Check if OTP is blocked (used by another user)
+            final isBlocked = otpJson['used_by_id_user'] != null;
+            
             // Add missing fields that OtpModel expects
-            otpJson['code'] = '***'; // Don't expose actual code
-            otpJson['code_hash'] = '***'; // Don't expose hash
+            if (isBlocked) {
+              // Hide code for blocked OTPs
+              otpJson['code'] = '***'; // Don't expose actual code
+              otpJson['code_hash'] = '***'; // Don't expose hash
+            } else {
+              // Show real code for non-blocked OTPs
+              // The code should already be in the database response
+              if (otpJson['code'] == null) {
+                otpJson['code'] = '***'; // Fallback if no code in DB
+              }
+              if (otpJson['code_hash'] == null) {
+                otpJson['code_hash'] = '***'; // Fallback if no hash in DB
+              }
+            }
 
             debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}');
+            debugPrint('📋 OtpService: isBlocked: $isBlocked');
+            debugPrint('📋 OtpService: code: ${otpJson['code']}');
+            debugPrint('📋 OtpService: used_by_id_user: ${otpJson['used_by_id_user']}');
             debugPrint(
                 '📋 OtpService: id_legal_entity: ${otpJson['id_legal_entity']}');
             debugPrint(

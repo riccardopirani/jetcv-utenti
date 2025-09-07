@@ -22,7 +22,7 @@ class _OtpListPageState extends State<OtpListPage> {
   String? _highlightedOtpId; // Track which OTP to highlight after update
   Map<String, Map<String, dynamic>> _legalEntities =
       {}; // Cache for legal entity data
-  String _currentFilter = 'all'; // 'all', 'blocked', 'active'
+  String _currentFilter = 'active'; // 'all', 'blocked', 'active'
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -253,7 +253,8 @@ class _OtpListPageState extends State<OtpListPage> {
           break;
         case 'all':
         default:
-          _filteredOtps = List.from(_otps);
+          // Mostra solo OTP non bloccati di default
+          _filteredOtps = _otps.where((otp) => !_isOtpBlocked(otp)).toList();
           break;
       }
     });
