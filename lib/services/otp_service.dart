@@ -510,9 +510,14 @@ class OtpService {
   }) async {
     try {
       debugPrint('🏢 OtpService: Getting legal entity for OTP: $idLegalEntity');
+      debugPrint('🔍 OtpService: idLegalEntity type: ${idLegalEntity.runtimeType}');
+      debugPrint('🔍 OtpService: idLegalEntity is empty: ${idLegalEntity.isEmpty}');
 
       // First try with Edge Function
       try {
+        debugPrint('🔍 OtpService: Calling Edge Function get-legal-entity');
+        debugPrint('🔍 OtpService: Parameters: {id_legal_entity: $idLegalEntity}');
+        
         final response = await EdgeFunctionService.invokeFunction(
           'get-legal-entity',
           {
@@ -520,10 +525,17 @@ class OtpService {
           },
         );
 
-        debugPrint('🔄 OtpService: Get legal entity response: $response');
+        debugPrint('🔄 OtpService: Get legal entity response received');
+        debugPrint('🔄 OtpService: Response type: ${response.runtimeType}');
+        debugPrint('🔄 OtpService: Response: $response');
+        debugPrint('🔄 OtpService: Response keys: ${response.keys.toList()}');
 
         // The function returns { ok: true, legal_entity: {...} }
         final bool isSuccess = response['ok'] == true;
+        debugPrint('🔍 OtpService: Response ok: ${response['ok']}');
+        debugPrint('🔍 OtpService: isSuccess: $isSuccess');
+        debugPrint('🔍 OtpService: legal_entity exists: ${response['legal_entity'] != null}');
+        debugPrint('🔍 OtpService: legal_entity: ${response['legal_entity']}');
 
         if (isSuccess && response['legal_entity'] != null) {
           final legalEntityData =
@@ -531,6 +543,8 @@ class OtpService {
 
           debugPrint(
               '✅ OtpService: Legal entity retrieved successfully via Edge Function');
+          debugPrint('📊 OtpService: Legal entity data keys: ${legalEntityData.keys.toList()}');
+          debugPrint('📊 OtpService: Legal entity data: $legalEntityData');
 
           return EdgeFunctionResponse<Map<String, dynamic>>(
             success: true,
@@ -550,6 +564,7 @@ class OtpService {
       try {
         debugPrint(
             '🔄 OtpService: Trying direct database query for legal entity');
+        debugPrint('🔍 OtpService: Querying legal_entity table with id_legal_entity: $idLegalEntity');
 
         final response = await SupabaseConfig.client
             .from('legal_entity')
@@ -559,7 +574,9 @@ class OtpService {
 
         debugPrint(
             '✅ OtpService: Legal entity retrieved successfully via direct query');
-        debugPrint('📊 Legal entity data: $response');
+        debugPrint('📊 OtpService: Direct query response type: ${response.runtimeType}');
+        debugPrint('📊 OtpService: Direct query response: $response');
+        debugPrint('📊 OtpService: Direct query response keys: ${response.keys.toList()}');
 
         return EdgeFunctionResponse<Map<String, dynamic>>(
           success: true,

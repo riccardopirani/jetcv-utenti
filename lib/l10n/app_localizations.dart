@@ -1376,6 +1376,42 @@ abstract class AppLocalizations {
   /// **'Error loading company data'**
   String get legalEntityError;
 
+  /// No description provided for @filterOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter OTPs'**
+  String get filterOtps;
+
+  /// No description provided for @allOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allOtps;
+
+  /// No description provided for @blockedOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get blockedOtps;
+
+  /// No description provided for @activeOtps.
+  ///
+  /// In en, this message translates to:
+  /// **'Active OTPs'**
+  String get activeOtps;
+
+  /// No description provided for @noOtpsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No OTPs found'**
+  String get noOtpsFound;
+
+  /// No description provided for @noOtpsFoundDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No OTPs match the selected filter'**
+  String get noOtpsFoundDescription;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:
@@ -1477,12 +1513,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage your secure access codes'**
   String get manageSecureAccessCodes;
-
-  /// No description provided for @activeOtps.
-  ///
-  /// In en, this message translates to:
-  /// **'Active OTPs'**
-  String get activeOtps;
 
   /// No description provided for @noOtpGenerated.
   ///

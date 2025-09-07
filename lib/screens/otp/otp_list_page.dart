@@ -16,11 +16,13 @@ class OtpListPage extends StatefulWidget {
 
 class _OtpListPageState extends State<OtpListPage> {
   List<OtpModel> _otps = [];
+  List<OtpModel> _filteredOtps = []; // Filtered OTPs based on current filter
   bool _isLoading = true;
   String? _errorMessage;
   String? _highlightedOtpId; // Track which OTP to highlight after update
   Map<String, Map<String, dynamic>> _legalEntities =
       {}; // Cache for legal entity data
+  String _currentFilter = 'all'; // 'all', 'blocked', 'active'
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -71,7 +73,22 @@ class _OtpListPageState extends State<OtpListPage> {
               _isLoading = false;
               _errorMessage = null;
             });
-            debugPrint('✅ Loaded ${_otps.length} OTPs');
+            // Apply current filter to the loaded OTPs
+            _applyFilter();
+            debugPrint('✅ Loaded ${_otps.length} OTPs, filtered to ${_filteredOtps.length}');
+            
+            // Debug: Check id_legal_entity for each OTP
+            debugPrint('🔍 Debugging OTP id_legal_entity fields:');
+            for (int i = 0; i < _otps.length; i++) {
+              final otp = _otps[i];
+              debugPrint('  OTP $i: ${otp.idOtp}');
+              debugPrint('    - idLegalEntity: ${otp.idLegalEntity}');
+              debugPrint('    - idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
+              debugPrint('    - idLegalEntity is null: ${otp.idLegalEntity == null}');
+              debugPrint('    - idLegalEntity is empty: ${otp.idLegalEntity?.isEmpty}');
+              debugPrint('    - usedByIdUser: ${otp.usedByIdUser}');
+              debugPrint('    - isBlocked: ${_isOtpBlocked(otp)}');
+            }
           } else {
             setState(() {
               _errorMessage = response.error ?? 'Failed to load OTPs';
@@ -181,6 +198,9 @@ class _OtpListPageState extends State<OtpListPage> {
           }
         });
 
+        // Apply current filter to update filtered list
+        _applyFilter();
+
         // Show a brief visual feedback that the list has been updated
         if (_scaffoldMessenger != null && _localizations != null) {
           try {
@@ -218,7 +238,36 @@ class _OtpListPageState extends State<OtpListPage> {
     }
   }
 
+  void _applyFilter() {
+    setState(() {
+      switch (_currentFilter) {
+        case 'blocked':
+          _filteredOtps = _otps.where((otp) => _isOtpBlocked(otp)).toList();
+          break;
+        case 'active':
+          _filteredOtps = _otps.where((otp) => !_isOtpBlocked(otp)).toList();
+          break;
+        case 'all':
+        default:
+          _filteredOtps = List.from(_otps);
+          break;
+      }
+    });
+  }
+
+  void _setFilter(String filter) {
+    setState(() {
+      _currentFilter = filter;
+    });
+    _applyFilter();
+  }
+
   Future<void> _loadLegalEntityForOtp(OtpModel otp) async {
+    debugPrint('🔍 _loadLegalEntityForOtp called for OTP: ${otp.idOtp}');
+    debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
+    debugPrint('🔍 OTP idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
+    debugPrint('🔍 OTP idLegalEntity is null: ${otp.idLegalEntity == null}');
+    
     if (otp.idLegalEntity == null) {
       debugPrint(
           '⚠️ OTP ${otp.idOtp} has no idLegalEntity, skipping legal entity load');
@@ -228,26 +277,39 @@ class _OtpListPageState extends State<OtpListPage> {
     // Check if we already have this legal entity data
     if (_legalEntities.containsKey(otp.idLegalEntity)) {
       debugPrint('✅ Legal entity already cached for OTP: ${otp.idOtp}');
+      debugPrint('📊 Cached data: ${_legalEntities[otp.idLegalEntity]}');
       return;
     }
 
     try {
       debugPrint(
           '🏢 Loading legal entity for OTP: ${otp.idOtp}, Legal Entity ID: ${otp.idLegalEntity}');
+      debugPrint('🔍 Calling OtpService.getLegalEntityForOtp with ID: ${otp.idLegalEntity}');
 
       final response = await OtpService.getLegalEntityForOtp(
         idLegalEntity: otp.idLegalEntity!,
       );
 
+      debugPrint('🔍 Legal entity response received');
+      debugPrint('🔍 Response success: ${response.success}');
+      debugPrint('🔍 Response data: ${response.data}');
+      debugPrint('🔍 Response error: ${response.error}');
+
       if (response.success && response.data != null) {
+        debugPrint('✅ Legal entity loaded successfully for OTP: ${otp.idOtp}');
+        debugPrint('📊 Legal entity data keys: ${response.data!.keys.toList()}');
+        debugPrint('📊 Legal entity data values: ${response.data}');
+        
         setState(() {
           _legalEntities[otp.idLegalEntity!] = response.data!;
         });
-        debugPrint('✅ Legal entity loaded for OTP: ${otp.idOtp}');
-        debugPrint(
-            '📊 Legal entity data keys: ${response.data!.keys.toList()}');
+        
+        debugPrint('✅ Legal entity cached for OTP: ${otp.idOtp}');
+        debugPrint('📊 Cache now contains: ${_legalEntities.keys.toList()}');
       } else {
         debugPrint('❌ Failed to load legal entity: ${response.error}');
+        debugPrint('❌ Response success: ${response.success}');
+        debugPrint('❌ Response data: ${response.data}');
         // Add empty entry to prevent retrying
         setState(() {
           _legalEntities[otp.idLegalEntity!] = {};
@@ -255,6 +317,8 @@ class _OtpListPageState extends State<OtpListPage> {
       }
     } catch (e) {
       debugPrint('❌ Error loading legal entity: $e');
+      debugPrint('❌ Error type: ${e.runtimeType}');
+      debugPrint('❌ Error stack trace: ${StackTrace.current}');
       // Add empty entry to prevent retrying
       setState(() {
         _legalEntities[otp.idLegalEntity!] = {};
@@ -777,6 +841,215 @@ class _OtpListPageState extends State<OtpListPage> {
     );
   }
 
+  Widget _buildFilterSection(bool isMobile, bool isTablet) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : isTablet ? 24 : 32,
+        vertical: isMobile ? 8 : 12,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.filterOtps,
+            style: TextStyle(
+              fontSize: isMobile ? 16 : 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          SizedBox(height: isMobile ? 8 : 12),
+          Row(
+            children: [
+              _buildFilterButton(
+                'all',
+                AppLocalizations.of(context)!.allOtps,
+                isMobile,
+                isTablet,
+              ),
+              SizedBox(width: isMobile ? 8 : 12),
+              _buildFilterButton(
+                'active',
+                AppLocalizations.of(context)!.activeOtps,
+                isMobile,
+                isTablet,
+              ),
+              SizedBox(width: isMobile ? 8 : 12),
+              _buildFilterButton(
+                'blocked',
+                AppLocalizations.of(context)!.blockedOtps,
+                isMobile,
+                isTablet,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String filter, String label, bool isMobile, bool isTablet) {
+    final isSelected = _currentFilter == filter;
+    final isBlocked = filter == 'blocked';
+    final isActive = filter == 'active';
+    
+    Color backgroundColor;
+    Color textColor;
+    Color borderColor;
+    
+    if (isSelected) {
+      if (isBlocked) {
+        backgroundColor = Colors.red.shade100;
+        textColor = Colors.red.shade700;
+        borderColor = Colors.red.shade300;
+      } else if (isActive) {
+        backgroundColor = Colors.green.shade100;
+        textColor = Colors.green.shade700;
+        borderColor = Colors.green.shade300;
+      } else {
+        backgroundColor = Colors.blue.shade100;
+        textColor = Colors.blue.shade700;
+        borderColor = Colors.blue.shade300;
+      }
+    } else {
+      backgroundColor = Colors.grey.shade100;
+      textColor = Colors.grey.shade600;
+      borderColor = Colors.grey.shade300;
+    }
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _setFilter(filter),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12 : 16,
+            vertical: isMobile ? 8 : 10,
+          ),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: borderColor,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isBlocked)
+                Icon(
+                  Icons.block,
+                  size: isMobile ? 14 : 16,
+                  color: textColor,
+                ),
+              if (isBlocked) SizedBox(width: 4),
+              if (isActive)
+                Icon(
+                  Icons.check_circle,
+                  size: isMobile ? 14 : 16,
+                  color: textColor,
+                ),
+              if (isActive) SizedBox(width: 4),
+              if (filter == 'all')
+                Icon(
+                  Icons.list,
+                  size: isMobile ? 14 : 16,
+                  color: textColor,
+                ),
+              if (filter == 'all') SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isMobile ? 12 : 14,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyFilteredState(bool isMobile, bool isTablet) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(isMobile ? 24 : isTablet ? 32 : 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: isMobile ? 100 : isTablet ? 120 : 140,
+              height: isMobile ? 100 : isTablet ? 120 : 140,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.grey.shade100,
+                    Colors.grey.shade200,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.filter_list,
+                size: isMobile ? 50 : isTablet ? 60 : 70,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            SizedBox(height: isMobile ? 16 : 20),
+            Text(
+              AppLocalizations.of(context)!.noOtpsFound,
+              style: TextStyle(
+                fontSize: isMobile ? 18 : 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            SizedBox(height: isMobile ? 8 : 12),
+            Text(
+              AppLocalizations.of(context)!.noOtpsFoundDescription,
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                color: Colors.grey.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: isMobile ? 24 : 32),
+            ElevatedButton.icon(
+              onPressed: () => _setFilter('all'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade600,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 24 : 32,
+                  vertical: isMobile ? 12 : 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: Icon(Icons.refresh, size: isMobile ? 16 : 18),
+              label: Text(
+                AppLocalizations.of(context)!.allOtps,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildOtpList() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
@@ -890,7 +1163,7 @@ class _OtpListPageState extends State<OtpListPage> {
                                 ? 6
                                 : 8),
                     Text(
-                      '${_otps.length}',
+                      '${_filteredOtps.length}',
                       style: TextStyle(
                         fontSize: isMobile
                             ? 14
@@ -909,27 +1182,32 @@ class _OtpListPageState extends State<OtpListPage> {
         ),
 
         // OTP List
+        // Filter Section
+        _buildFilterSection(isMobile, isTablet),
+
         Expanded(
-          child: ListView.builder(
-            key: ValueKey('otp_list_${_otps.length}'),
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile
-                  ? 16
-                  : isTablet
-                      ? 20
-                      : 24,
-              vertical: isMobile
-                  ? 8
-                  : isTablet
-                      ? 12
-                      : 16,
-            ),
-            itemCount: _otps.length,
-            itemBuilder: (context, index) {
-              final otp = _otps[index];
-              return _buildOtpCard(otp);
-            },
-          ),
+          child: _filteredOtps.isEmpty && !_isLoading
+              ? _buildEmptyFilteredState(isMobile, isTablet)
+              : ListView.builder(
+                  key: ValueKey('otp_list_${_filteredOtps.length}'),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile
+                        ? 16
+                        : isTablet
+                            ? 20
+                            : 24,
+                    vertical: isMobile
+                        ? 8
+                        : isTablet
+                            ? 12
+                            : 16,
+                  ),
+                  itemCount: _filteredOtps.length,
+                  itemBuilder: (context, index) {
+                    final otp = _filteredOtps[index];
+                    return _buildOtpCard(otp);
+                  },
+                ),
         ),
       ],
     );
@@ -1128,9 +1406,16 @@ class _OtpListPageState extends State<OtpListPage> {
     debugPrint('🔍 OTP tag: ${otp.tag}');
 
     // Load legal entity data if needed (regardless of OTP status)
+    debugPrint('🔍 Checking legal entity for OTP: ${otp.idOtp}');
+    debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
+    debugPrint('🔍 OTP idLegalEntity is null: ${otp.idLegalEntity == null}');
+    debugPrint('🔍 OTP idLegalEntity is empty: ${otp.idLegalEntity?.isEmpty}');
+    debugPrint('🔍 OTP idLegalEntity type: ${otp.idLegalEntity.runtimeType}');
+    
     if (otp.idLegalEntity != null) {
       debugPrint(
           '🏢 OTP has idLegalEntity, loading legal entity data (OTP blocked: ${_isOtpBlocked(otp)})');
+      debugPrint('🔍 Calling _loadLegalEntityForOtp for OTP: ${otp.idOtp}');
       _loadLegalEntityForOtp(otp);
     } else {
       debugPrint('⚠️ OTP has no idLegalEntity, skipping legal entity load');
@@ -1657,8 +1942,18 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
+    debugPrint('🔍 _buildLegalEntitySection called for OTP: ${otp.idOtp}');
+    debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
+    debugPrint('🔍 Legal entities cache keys: ${_legalEntities.keys.toList()}');
+    debugPrint('🔍 Legal entities cache: $_legalEntities');
+    
     final legalEntityData = _legalEntities[otp.idLegalEntity!];
     final isBlocked = _isOtpBlocked(otp);
+
+    debugPrint('🔍 Legal entity data for OTP ${otp.idOtp}: $legalEntityData');
+    debugPrint('🔍 Legal entity data is null: ${legalEntityData == null}');
+    debugPrint('🔍 Legal entity data is empty: ${legalEntityData?.isEmpty}');
+    debugPrint('🔍 OTP is blocked: $isBlocked');
 
     // If data is not loaded yet, show loading indicator
     if (legalEntityData == null) {
@@ -1675,6 +1970,8 @@ class _OtpListPageState extends State<OtpListPage> {
 
     debugPrint('🏢 Building legal entity section for OTP: ${otp.idOtp}');
     debugPrint('📊 Legal entity data: $legalEntityData');
+    debugPrint('📊 Legal entity data keys: ${legalEntityData.keys.toList()}');
+    debugPrint('📊 Legal entity data values: ${legalEntityData.values.toList()}');
 
     return Container(
       width: double.infinity,
@@ -1837,6 +2134,7 @@ class _OtpListPageState extends State<OtpListPage> {
                         .trim(),
                     isMobile,
                     isTablet,
+                    isBlocked: isBlocked,
                   ),
                 if (legalEntityData['email'] != null)
                   _buildInfoRow(
@@ -1845,6 +2143,7 @@ class _OtpListPageState extends State<OtpListPage> {
                     legalEntityData['email'],
                     isMobile,
                     isTablet,
+                    isBlocked: isBlocked,
                   ),
                 if (legalEntityData['phone'] != null)
                   _buildInfoRow(
@@ -1853,6 +2152,7 @@ class _OtpListPageState extends State<OtpListPage> {
                     legalEntityData['phone'],
                     isMobile,
                     isTablet,
+                    isBlocked: isBlocked,
                   ),
                 if (legalEntityData['website'] != null)
                   _buildInfoRow(
@@ -1861,6 +2161,7 @@ class _OtpListPageState extends State<OtpListPage> {
                     legalEntityData['website'],
                     isMobile,
                     isTablet,
+                    isBlocked: isBlocked,
                   ),
               ],
             ),

@@ -691,6 +691,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get legalEntityError => 'Error loading company data';
 
   @override
+  String get filterOtps => 'Filter OTPs';
+
+  @override
+  String get allOtps => 'All';
+
+  @override
+  String get blockedOtps => 'Blocked';
+
+  @override
+  String get activeOtps => 'Aktive OTPs';
+
+  @override
+  String get noOtpsFound => 'No OTPs found';
+
+  @override
+  String get noOtpsFoundDescription => 'No OTPs match the selected filter';
+
+  @override
   String get deleteAccount => 'Konto löschen';
 
   @override
@@ -746,9 +764,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get manageSecureAccessCodes =>
       'Verwalten Sie Ihre sicheren Zugangscodes';
-
-  @override
-  String get activeOtps => 'Aktive OTPs';
 
   @override
   String get noOtpGenerated => 'Kein OTP Generiert';
