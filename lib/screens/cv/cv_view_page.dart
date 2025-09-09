@@ -427,30 +427,27 @@ class _CVViewPageState extends State<CVViewPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.viewMyCV),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        body: const Center(
+      return MainLayout(
+        currentRoute: '/cv',
+        title: AppLocalizations.of(context)!.viewMyCV,
+        child: const Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
 
     if (_cv == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.viewMyCV),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        body: Center(
-          child: Text(
-            _errorMessage ?? 'CV data not available', // TODO: localize
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
+      return MainLayout(
+        currentRoute: '/cv',
+        title: AppLocalizations.of(context)!.viewMyCV,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              _errorMessage ?? 'CV data not available', // TODO: localize
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       );
