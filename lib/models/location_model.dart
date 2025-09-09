@@ -156,3 +156,5 @@ class LocationModel {
   int get hashCode => idLocation.hashCode;
 }
 
+
+

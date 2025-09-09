@@ -4,7 +4,7 @@ import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/theme.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/splash_screen.dart';
-import 'package:jetcv__utenti/screens/home_page.dart';
+import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -139,7 +139,7 @@ class _AppRouterState extends State<AppRouter> {
       return const SplashScreen();
     } else {
       // Utente non autenticato → mostra home page pubblica
-      return const HomePage();
+      return const HomePagePublic();
     }
   }
 }

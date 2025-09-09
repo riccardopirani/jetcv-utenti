@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
-import 'package:jetcv__utenti/screens/home_page.dart';
+import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 class SignupPage extends StatefulWidget {
@@ -151,7 +151,7 @@ class _SignupPageState extends State<SignupPage> {
           ),
           onPressed: () {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(builder: (context) => const HomePagePublic()),
             );
           },
         ),

@@ -49,3 +49,5 @@ class CertificationCategoryHasInformationModel {
   int get hashCode => idCertificationCategoryHasInformation.hashCode;
 }
 
+
+

@@ -88,3 +88,5 @@ class CertificationUserModel {
   int get hashCode => idCertificationUser.hashCode;
 }
 
+
+

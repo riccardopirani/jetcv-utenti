@@ -279,6 +279,358 @@ $$;
 ALTER FUNCTION "public"."handle_profile_picture_upload"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."openbadge_denormalize"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.assertion_id   := COALESCE(NEW.assertion_json->>'id', NEW.assertion_id);
+  NEW.badge_class_id := COALESCE(NEW.assertion_json->'badge'->>'id', NEW.badge_class_id);
+  NEW.issuer_id      := COALESCE(NEW.assertion_json->'issuer'->>'id', NEW.issuer_id);
+
+  -- issuedOn / expires come ISO8601 nel JSON
+  IF (NEW.issued_at IS NULL) AND (NEW.assertion_json ? 'issuedOn') THEN
+    NEW.issued_at := (NEW.assertion_json->>'issuedOn')::timestamptz;
+  END IF;
+
+  IF (NEW.expires_at IS NULL) AND (NEW.assertion_json ? 'expires') THEN
+    NEW.expires_at := (NEW.assertion_json->>'expires')::timestamptz;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."openbadge_denormalize"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_burn"("p_id_otp" "uuid", "p_id_user" "uuid" DEFAULT NULL::"uuid") RETURNS boolean
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    v_updated_count INTEGER;
+BEGIN
+    -- Validate input
+    IF p_id_otp IS NULL THEN
+        RAISE EXCEPTION 'OTP ID cannot be null';
+    END IF;
+    
+    -- Update the OTP to mark it as burned
+    UPDATE public.otp
+    SET 
+        burned_at = NOW(),
+        updated_at = NOW()
+    WHERE public.otp.id_otp = p_id_otp
+    AND (p_id_user IS NULL OR public.otp.id_user = p_id_user)
+    AND public.otp.burned_at IS NULL;
+    
+    GET DIAGNOSTICS v_updated_count = ROW_COUNT;
+    
+    RETURN v_updated_count > 0;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_burn"("p_id_otp" "uuid", "p_id_user" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_create"("p_id_user" "uuid" DEFAULT NULL::"uuid", "p_tag" "text" DEFAULT NULL::"text", "p_ttl_seconds" integer DEFAULT 300, "p_length" integer DEFAULT 6, "p_numeric_only" boolean DEFAULT true) RETURNS TABLE("id_otp" "uuid", "id_user" "uuid", "code" "text", "code_hash" "text", "tag" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "expires_at" timestamp with time zone, "used_at" timestamp with time zone, "used_by_id_user" "uuid", "burned_at" timestamp with time zone)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    v_code TEXT;
+    v_code_hash TEXT;
+    v_expires_at TIMESTAMPTZ;
+    v_result RECORD;
+    v_attempts INTEGER := 0;
+    v_max_attempts INTEGER := 10;
+BEGIN
+    -- Validate input parameters
+    IF p_length < 4 OR p_length > 10 THEN
+        RAISE EXCEPTION 'OTP length must be between 4 and 10 characters';
+    END IF;
+    
+    IF p_ttl_seconds < 60 OR p_ttl_seconds > 86400 THEN
+        RAISE EXCEPTION 'TTL must be between 60 seconds and 24 hours';
+    END IF;
+    
+    -- Generate unique code (retry if collision)
+    LOOP
+        v_attempts := v_attempts + 1;
+        
+        IF v_attempts > v_max_attempts THEN
+            RAISE EXCEPTION 'Failed to generate unique OTP code after % attempts', v_max_attempts;
+        END IF;
+        
+        -- Generate code based on parameters
+        IF p_numeric_only THEN
+            -- Generate numeric code
+            v_code := LPAD(FLOOR(RANDOM() * POWER(10, p_length))::TEXT, p_length, '0');
+        ELSE
+            -- Generate alphanumeric code (uppercase letters and numbers)
+            v_code := '';
+            FOR i IN 1..p_length LOOP
+                IF RANDOM() < 0.5 THEN
+                    -- Add a number
+                    v_code := v_code || FLOOR(RANDOM() * 10)::TEXT;
+                ELSE
+                    -- Add a letter
+                    v_code := v_code || CHR(65 + FLOOR(RANDOM() * 26)::INTEGER);
+                END IF;
+            END LOOP;
+        END IF;
+        
+        -- Hash the code
+        v_code_hash := ENCODE(DIGEST(v_code, 'sha256'), 'hex');
+        
+        -- Check if this hash already exists and is still valid
+        IF NOT EXISTS (
+            SELECT 1 FROM public.otp 
+            WHERE public.otp.code_hash = v_code_hash 
+            AND public.otp.burned_at IS NULL 
+            AND public.otp.used_at IS NULL 
+            AND public.otp.expires_at > NOW()
+        ) THEN
+            EXIT; -- Unique code found
+        END IF;
+    END LOOP;
+    
+    -- Calculate expiration time
+    v_expires_at := NOW() + (p_ttl_seconds || ' seconds')::INTERVAL;
+    
+    -- Insert the OTP
+    INSERT INTO public.otp (
+        id_user,
+        code,
+        code_hash,
+        tag,
+        created_at,
+        updated_at,
+        expires_at
+    ) VALUES (
+        p_id_user,
+        v_code,
+        v_code_hash,
+        p_tag,
+        NOW(),
+        NOW(),
+        v_expires_at
+    ) RETURNING * INTO v_result;
+    
+    -- Return the created OTP
+    RETURN QUERY SELECT 
+        v_result.id_otp,
+        v_result.id_user,
+        v_result.code,
+        v_result.code_hash,
+        v_result.tag,
+        v_result.created_at,
+        v_result.updated_at,
+        v_result.expires_at,
+        v_result.used_at,
+        v_result.used_by_id_user,
+        v_result.burned_at;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_create"("p_id_user" "uuid", "p_tag" "text", "p_ttl_seconds" integer, "p_length" integer, "p_numeric_only" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_gc"("p_before" timestamp with time zone DEFAULT NULL::timestamp with time zone) RETURNS integer
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    v_before TIMESTAMPTZ;
+    v_burned_count INTEGER;
+BEGIN
+    -- Use provided time or default to now
+    v_before := COALESCE(p_before, NOW());
+    
+    -- Mark expired OTPs as burned
+    UPDATE public.otp
+    SET 
+        burned_at = NOW(),
+        updated_at = NOW()
+    WHERE public.otp.expires_at <= v_before
+    AND public.otp.burned_at IS NULL;
+    
+    GET DIAGNOSTICS v_burned_count = ROW_COUNT;
+    
+    RETURN v_burned_count;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_gc"("p_before" timestamp with time zone) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_get_metadata"("p_id_otp" "uuid") RETURNS TABLE("id_otp" "uuid", "id_user" "uuid", "tag" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "expires_at" timestamp with time zone, "used_at" timestamp with time zone, "used_by_id_user" "uuid", "burned_at" timestamp with time zone, "is_expired" boolean, "is_used" boolean, "is_burned" boolean, "is_valid" boolean)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    v_otp RECORD;
+BEGIN
+    -- Validate input
+    IF p_id_otp IS NULL THEN
+        RAISE EXCEPTION 'OTP ID cannot be null';
+    END IF;
+    
+    -- Get the OTP metadata
+    SELECT 
+        id_otp,
+        id_user,
+        tag,
+        created_at,
+        updated_at,
+        expires_at,
+        used_at,
+        used_by_id_user,
+        burned_at,
+        (expires_at <= NOW()) as is_expired,
+        (used_at IS NOT NULL) as is_used,
+        (burned_at IS NOT NULL) as is_burned,
+        (expires_at > NOW() AND used_at IS NULL AND burned_at IS NULL) as is_valid
+    INTO v_otp
+    FROM public.otp
+    WHERE public.otp.id_otp = p_id_otp;
+    
+    -- Return the result
+    RETURN QUERY SELECT 
+        v_otp.id_otp,
+        v_otp.id_user,
+        v_otp.tag,
+        v_otp.created_at,
+        v_otp.updated_at,
+        v_otp.expires_at,
+        v_otp.used_at,
+        v_otp.used_by_id_user,
+        v_otp.burned_at,
+        v_otp.is_expired,
+        v_otp.is_used,
+        v_otp.is_burned,
+        v_otp.is_valid;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_get_metadata"("p_id_otp" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_list_user_otps"("p_id_user" "uuid", "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS TABLE("id_otp" "uuid", "id_user" "uuid", "tag" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "expires_at" timestamp with time zone, "used_at" timestamp with time zone, "used_by_id_user" "uuid", "burned_at" timestamp with time zone, "is_expired" boolean, "is_used" boolean, "is_burned" boolean, "is_valid" boolean)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+BEGIN
+    -- Validate input
+    IF p_id_user IS NULL THEN
+        RAISE EXCEPTION 'User ID cannot be null';
+    END IF;
+    
+    IF p_limit < 1 OR p_limit > 100 THEN
+        RAISE EXCEPTION 'Limit must be between 1 and 100';
+    END IF;
+    
+    IF p_offset < 0 THEN
+        RAISE EXCEPTION 'Offset cannot be negative';
+    END IF;
+    
+    -- Return user's OTPs
+    RETURN QUERY 
+    SELECT 
+        o.id_otp,
+        o.id_user,
+        o.tag,
+        o.created_at,
+        o.updated_at,
+        o.expires_at,
+        o.used_at,
+        o.used_by_id_user,
+        o.burned_at,
+        (o.expires_at <= NOW()) as is_expired,
+        (o.used_at IS NOT NULL) as is_used,
+        (o.burned_at IS NOT NULL) as is_burned,
+        (o.expires_at > NOW() AND o.used_at IS NULL AND o.burned_at IS NULL) as is_valid
+    FROM public.otp o
+    WHERE o.id_user = p_id_user
+    ORDER BY o.created_at DESC
+    LIMIT p_limit
+    OFFSET p_offset;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_list_user_otps"("p_id_user" "uuid", "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."otp_verify"("p_code" "text", "p_id_user" "uuid" DEFAULT NULL::"uuid", "p_tag" "text" DEFAULT NULL::"text", "p_mark_used" boolean DEFAULT true, "p_used_by" "uuid" DEFAULT NULL::"uuid") RETURNS TABLE("id_otp" "uuid", "id_user" "uuid", "code" "text", "code_hash" "text", "tag" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "expires_at" timestamp with time zone, "used_at" timestamp with time zone, "used_by_id_user" "uuid", "burned_at" timestamp with time zone, "is_valid" boolean)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    v_otp RECORD;
+    v_code_hash TEXT;
+    v_is_valid BOOLEAN := FALSE;
+BEGIN
+    -- Validate input
+    IF p_code IS NULL OR LENGTH(TRIM(p_code)) = 0 THEN
+        RAISE EXCEPTION 'OTP code cannot be empty';
+    END IF;
+    
+    -- Hash the provided code
+    v_code_hash := ENCODE(DIGEST(TRIM(p_code), 'sha256'), 'hex');
+    
+    -- Find the OTP
+    SELECT * INTO v_otp
+    FROM public.otp
+    WHERE public.otp.code_hash = v_code_hash
+    AND (p_id_user IS NULL OR public.otp.id_user = p_id_user)
+    AND (p_tag IS NULL OR public.otp.tag = p_tag)
+    AND public.otp.burned_at IS NULL
+    AND public.otp.used_at IS NULL
+    AND public.otp.expires_at > NOW()
+    ORDER BY public.otp.created_at DESC
+    LIMIT 1;
+    
+    -- Check if OTP was found and is valid
+    IF v_otp.id_otp IS NOT NULL THEN
+        v_is_valid := TRUE;
+        
+        -- Mark as used if requested
+        IF p_mark_used THEN
+            UPDATE public.otp
+            SET 
+                used_at = NOW(),
+                used_by_id_user = p_used_by,
+                updated_at = NOW()
+            WHERE public.otp.id_otp = v_otp.id_otp;
+            
+            -- Update the record
+            v_otp.used_at := NOW();
+            v_otp.used_by_id_user := p_used_by;
+            v_otp.updated_at := NOW();
+        END IF;
+    END IF;
+    
+    -- Return the result
+    RETURN QUERY SELECT 
+        v_otp.id_otp,
+        v_otp.id_user,
+        v_otp.code,
+        v_otp.code_hash,
+        v_otp.tag,
+        v_otp.created_at,
+        v_otp.updated_at,
+        v_otp.expires_at,
+        v_otp.used_at,
+        v_otp.used_by_id_user,
+        v_otp.burned_at,
+        v_is_valid;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."otp_verify"("p_code" "text", "p_id_user" "uuid", "p_tag" "text", "p_mark_used" boolean, "p_used_by" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."refresh_user_profile_pictures"("p_base_url" "text" DEFAULT 'https://ammryjdbnqedwlguhqpv.supabase.co'::"text") RETURNS integer
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'storage', 'pg_temp'
@@ -318,6 +670,19 @@ $_$;
 
 
 ALTER FUNCTION "public"."refresh_user_profile_pictures"("p_base_url" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."set_updated_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."set_updated_at"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_user_profile_picture"() RETURNS "trigger"
@@ -450,7 +815,9 @@ CREATE TABLE IF NOT EXISTS "public"."certification_information_value" (
     "id_certification_information" "uuid" NOT NULL,
     "value" "text",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone
+    "updated_at" timestamp with time zone,
+    "id_certification" "uuid",
+    "id_certification_user" "uuid"
 );
 
 
@@ -705,6 +1072,28 @@ CREATE TABLE IF NOT EXISTS "public"."location" (
 ALTER TABLE "public"."location" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."openbadge" (
+    "id_openbadge" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id_user" "uuid" NOT NULL,
+    "assertion_json" "jsonb" NOT NULL,
+    "assertion_id" "text",
+    "badge_class_id" "text",
+    "issuer_id" "text",
+    "is_revoked" boolean DEFAULT false NOT NULL,
+    "revoked_at" timestamp with time zone,
+    "issued_at" timestamp with time zone,
+    "expires_at" timestamp with time zone,
+    "source" "text",
+    "note" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    CONSTRAINT "openbadge_is_assertion_check" CHECK ((("assertion_json" ? '@context'::"text") AND ("assertion_json" ? 'type'::"text") AND ((("jsonb_typeof"(("assertion_json" -> 'type'::"text")) = 'string'::"text") AND (("assertion_json" ->> 'type'::"text") = 'Assertion'::"text")) OR (("jsonb_typeof"(("assertion_json" -> 'type'::"text")) = 'array'::"text") AND (("assertion_json" -> 'type'::"text") ? 'Assertion'::"text")))))
+);
+
+
+ALTER TABLE "public"."openbadge" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."otp" (
     "id_otp" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "id_user" "uuid" NOT NULL,
@@ -716,7 +1105,8 @@ CREATE TABLE IF NOT EXISTS "public"."otp" (
     "expires_at" timestamp with time zone NOT NULL,
     "used_at" timestamp with time zone,
     "used_by_id_user" "uuid",
-    "burned_at" timestamp with time zone
+    "burned_at" timestamp with time zone,
+    "id_legal_entity" "uuid"
 );
 
 
@@ -880,6 +1270,16 @@ ALTER TABLE ONLY "public"."location"
 
 
 
+ALTER TABLE ONLY "public"."openbadge"
+    ADD CONSTRAINT "openbadge_pkey" PRIMARY KEY ("id_openbadge");
+
+
+
+ALTER TABLE ONLY "public"."openbadge"
+    ADD CONSTRAINT "openbadge_user_assertion_unique" UNIQUE ("id_user", "assertion_id");
+
+
+
 ALTER TABLE ONLY "public"."otp"
     ADD CONSTRAINT "otp_pkey" PRIMARY KEY ("id_otp");
 
@@ -905,6 +1305,38 @@ CREATE INDEX "legal_entity_invitations_email_idx" ON "public"."legal_entity_invi
 
 
 CREATE INDEX "legal_entity_invitations_id_legal_entity_idx" ON "public"."legal_entity_invitation" USING "btree" ("id_legal_entity");
+
+
+
+CREATE INDEX "openbadge_assertion_gin_idx" ON "public"."openbadge" USING "gin" ("assertion_json" "jsonb_path_ops");
+
+
+
+CREATE INDEX "openbadge_expires_at_idx" ON "public"."openbadge" USING "btree" ("expires_at" DESC NULLS LAST);
+
+
+
+CREATE INDEX "openbadge_id_user_idx" ON "public"."openbadge" USING "btree" ("id_user");
+
+
+
+CREATE INDEX "openbadge_is_revoked_idx" ON "public"."openbadge" USING "btree" ("is_revoked");
+
+
+
+CREATE INDEX "openbadge_issued_at_idx" ON "public"."openbadge" USING "btree" ("issued_at" DESC NULLS LAST);
+
+
+
+CREATE OR REPLACE TRIGGER "trg_openbadge_denormalize_ins" BEFORE INSERT ON "public"."openbadge" FOR EACH ROW EXECUTE FUNCTION "public"."openbadge_denormalize"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_openbadge_denormalize_upd" BEFORE UPDATE ON "public"."openbadge" FOR EACH ROW EXECUTE FUNCTION "public"."openbadge_denormalize"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_openbadge_set_updated_at" BEFORE UPDATE ON "public"."openbadge" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
 
 
 
@@ -965,6 +1397,16 @@ ALTER TABLE ONLY "public"."certification_information"
 
 ALTER TABLE ONLY "public"."certification_information_value"
     ADD CONSTRAINT "certification_information_val_id_certification_information_fkey" FOREIGN KEY ("id_certification_information") REFERENCES "public"."certification_information"("id_certification_information");
+
+
+
+ALTER TABLE ONLY "public"."certification_information_value"
+    ADD CONSTRAINT "certification_information_value_id_certification_fkey" FOREIGN KEY ("id_certification") REFERENCES "public"."certification"("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."certification_information_value"
+    ADD CONSTRAINT "certification_information_value_id_certification_user_fkey" FOREIGN KEY ("id_certification_user") REFERENCES "public"."certification_user"("id_certification_user");
 
 
 
@@ -1035,6 +1477,16 @@ ALTER TABLE ONLY "public"."location"
 
 ALTER TABLE ONLY "public"."certification_media"
     ADD CONSTRAINT "media_id_certification_fkey" FOREIGN KEY ("id_certification") REFERENCES "public"."certification"("id_certification");
+
+
+
+ALTER TABLE ONLY "public"."openbadge"
+    ADD CONSTRAINT "openbadge_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "public"."user"("idUser") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."otp"
+    ADD CONSTRAINT "otp_id_legal_entity_fkey" FOREIGN KEY ("id_legal_entity") REFERENCES "public"."legal_entity"("id_legal_entity");
 
 
 
@@ -1168,9 +1620,57 @@ GRANT ALL ON FUNCTION "public"."handle_profile_picture_upload"() TO "service_rol
 
 
 
+GRANT ALL ON FUNCTION "public"."openbadge_denormalize"() TO "anon";
+GRANT ALL ON FUNCTION "public"."openbadge_denormalize"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."openbadge_denormalize"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_burn"("p_id_otp" "uuid", "p_id_user" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_burn"("p_id_otp" "uuid", "p_id_user" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_burn"("p_id_otp" "uuid", "p_id_user" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_create"("p_id_user" "uuid", "p_tag" "text", "p_ttl_seconds" integer, "p_length" integer, "p_numeric_only" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_create"("p_id_user" "uuid", "p_tag" "text", "p_ttl_seconds" integer, "p_length" integer, "p_numeric_only" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_create"("p_id_user" "uuid", "p_tag" "text", "p_ttl_seconds" integer, "p_length" integer, "p_numeric_only" boolean) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_gc"("p_before" timestamp with time zone) TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_gc"("p_before" timestamp with time zone) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_gc"("p_before" timestamp with time zone) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_get_metadata"("p_id_otp" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_get_metadata"("p_id_otp" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_get_metadata"("p_id_otp" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_list_user_otps"("p_id_user" "uuid", "p_limit" integer, "p_offset" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_list_user_otps"("p_id_user" "uuid", "p_limit" integer, "p_offset" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_list_user_otps"("p_id_user" "uuid", "p_limit" integer, "p_offset" integer) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."otp_verify"("p_code" "text", "p_id_user" "uuid", "p_tag" "text", "p_mark_used" boolean, "p_used_by" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."otp_verify"("p_code" "text", "p_id_user" "uuid", "p_tag" "text", "p_mark_used" boolean, "p_used_by" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."otp_verify"("p_code" "text", "p_id_user" "uuid", "p_tag" "text", "p_mark_used" boolean, "p_used_by" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."refresh_user_profile_pictures"("p_base_url" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."refresh_user_profile_pictures"("p_base_url" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."refresh_user_profile_pictures"("p_base_url" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "anon";
+GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "service_role";
 
 
 
@@ -1285,6 +1785,12 @@ GRANT ALL ON TABLE "public"."legal_entity_invitation" TO "service_role";
 GRANT ALL ON TABLE "public"."location" TO "anon";
 GRANT ALL ON TABLE "public"."location" TO "authenticated";
 GRANT ALL ON TABLE "public"."location" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."openbadge" TO "anon";
+GRANT ALL ON TABLE "public"."openbadge" TO "authenticated";
+GRANT ALL ON TABLE "public"."openbadge" TO "service_role";
 
 
 

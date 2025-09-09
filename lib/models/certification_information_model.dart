@@ -95,3 +95,5 @@ class CertificationInformationModel {
   int get hashCode => idCertificationInformation.hashCode;
 }
 
+
+

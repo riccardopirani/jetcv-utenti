@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
-import 'package:jetcv__utenti/screens/home_page.dart';
+import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
@@ -72,7 +72,7 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
     debugPrint('🔄 Navigating to HomePage immediately...');
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (context) => const HomePage(),
+        builder: (context) => const HomePagePublic(),
       ),
       (route) => false,
     );

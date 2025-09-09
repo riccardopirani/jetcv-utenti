@@ -4,6 +4,7 @@ import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/wallet_service.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/models/wallet_model.dart';
+import 'package:jetcv__utenti/widgets/main_layout.dart';
 
 class MyWalletsPage extends StatefulWidget {
   const MyWalletsPage({super.key});
@@ -117,34 +118,19 @@ class _MyWalletsPageState extends State<MyWalletsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.grey[50],
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () {
-            // TODO: Implement drawer/sidebar
-          },
-        ),
-        title: Text(
-          l10n.myWallets,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
+    return MainLayout(
+      currentRoute: '/wallets',
+      title: l10n.myWallets,
+      child: Container(
+        color: Colors.grey[50],
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? _buildErrorState(l10n, theme)
+                : _walletData == null
+                    ? _buildNoWalletState(l10n, theme)
+                    : _buildWalletContent(l10n, theme, isMobile),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? _buildErrorState(l10n, theme)
-              : _walletData == null
-                  ? _buildNoWalletState(l10n, theme)
-                  : _buildWalletContent(l10n, theme, isMobile),
     );
   }
 

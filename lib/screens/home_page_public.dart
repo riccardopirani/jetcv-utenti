@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePagePublic extends StatelessWidget {
+  const HomePagePublic({super.key});
 
   @override
   Widget build(BuildContext context) {

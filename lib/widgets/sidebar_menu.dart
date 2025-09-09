@@ -36,14 +36,18 @@ class _SidebarMenuState extends State<SidebarMenu> {
   Future<void> _loadUserData() async {
     try {
       final user = await UserService.getCurrentUser();
-      setState(() {
-        _currentUser = user;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -144,10 +148,16 @@ class _SidebarMenuState extends State<SidebarMenu> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
-    final isDesktop = screenWidth >= 1024;
+
+    // Theme-aware colors
+    final sidebarColor = colorScheme.primaryContainer;
+    final sidebarOnColor = colorScheme.onPrimaryContainer;
+    final accentColor = colorScheme.primary;
 
     // Responsive sizing
     final sidebarWidth = isMobile
@@ -180,12 +190,12 @@ class _SidebarMenuState extends State<SidebarMenu> {
       width: sidebarWidth,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF6B46C1), // Dark purple background
+        color: sidebarColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: colorScheme.shadow.withValues(alpha: 0.15),
             spreadRadius: 0,
-            blurRadius: 10,
+            blurRadius: 12,
             offset: const Offset(2, 0),
           ),
         ],
@@ -200,12 +210,12 @@ class _SidebarMenuState extends State<SidebarMenu> {
                 Container(
                   padding: EdgeInsets.all(iconPadding),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.rocket_launch,
-                    color: const Color(0xFF6B46C1),
+                    color: colorScheme.onPrimary,
                     size: iconSize,
                   ),
                 ),
@@ -214,7 +224,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                   child: Text(
                     AppLocalizations.of(context)!.appTitle,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: sidebarOnColor,
                       fontSize: titleFontSize,
                       fontWeight: FontWeight.bold,
                     ),
@@ -238,7 +248,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
             child: _isLoading
                 ? Center(
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: sidebarOnColor,
                       strokeWidth: isMobile ? 1.5 : 2,
                     ),
                   )
@@ -259,7 +269,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Colors.white,
+                                color: sidebarOnColor.withValues(alpha: 0.3),
                                 width: isMobile ? 1.5 : 2,
                               ),
                             ),
@@ -271,7 +281,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                       errorBuilder:
                                           (context, error, stackTrace) => Icon(
                                         Icons.person,
-                                        color: Colors.white,
+                                        color: sidebarOnColor.withValues(
+                                            alpha: 0.7),
                                         size: isMobile
                                             ? 20
                                             : isTablet
@@ -281,7 +292,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                     )
                                   : Icon(
                                       Icons.person,
-                                      color: Colors.white,
+                                      color:
+                                          sidebarOnColor.withValues(alpha: 0.7),
                                       size: isMobile
                                           ? 20
                                           : isTablet
@@ -299,7 +311,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                   '${_currentUser!.firstName ?? ''} ${_currentUser!.lastName ?? ''}'
                                       .trim(),
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: sidebarOnColor,
                                     fontSize: isMobile
                                         ? 14
                                         : isTablet
@@ -313,7 +325,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                 Text(
                                   _currentUser!.email ?? '',
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    color:
+                                        sidebarOnColor.withValues(alpha: 0.7),
                                     fontSize: isMobile
                                         ? 10
                                         : isTablet
@@ -332,7 +345,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                         child: Text(
                           AppLocalizations.of(context)!.userNotLoaded,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: sidebarOnColor.withValues(alpha: 0.7),
                             fontSize: isMobile
                                 ? 12
                                 : isTablet
@@ -391,7 +404,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                     : isTablet
                         ? 18
                         : 20),
-            color: Colors.white.withValues(alpha: 0.2),
+            color: sidebarOnColor.withValues(alpha: 0.2),
           ),
 
           // Action Items
@@ -429,11 +442,17 @@ class _SidebarMenuState extends State<SidebarMenu> {
     required String title,
     required String route,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     final isSelected = widget.currentRoute == route;
+
+    // Theme-aware colors
+    final sidebarOnColor = colorScheme.onPrimaryContainer;
+    final selectedColor = colorScheme.primary.withValues(alpha: 0.15);
 
     // Responsive sizing
     final iconSize = isMobile
@@ -473,16 +492,14 @@ class _SidebarMenuState extends State<SidebarMenu> {
             padding: EdgeInsets.symmetric(
                 horizontal: horizontalPadding, vertical: verticalPadding),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.transparent,
+              color: isSelected ? selectedColor : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: Colors.white,
+                  color: isSelected ? colorScheme.primary : sidebarOnColor,
                   size: iconSize,
                 ),
                 SizedBox(width: spacing),
@@ -490,7 +507,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isSelected ? colorScheme.primary : sidebarOnColor,
                       fontSize: fontSize,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -512,9 +529,15 @@ class _SidebarMenuState extends State<SidebarMenu> {
     required bool isDestructive,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    // Theme-aware colors
+    final sidebarOnColor = colorScheme.onPrimaryContainer;
+    final destructiveColorLight = colorScheme.error.withValues(alpha: 0.7);
 
     // Responsive sizing
     final iconSize = isMobile
@@ -555,7 +578,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
             children: [
               Icon(
                 icon,
-                color: isDestructive ? Colors.red.shade300 : Colors.white,
+                color: isDestructive ? destructiveColorLight : sidebarOnColor,
                 size: iconSize,
               ),
               SizedBox(width: spacing),
@@ -563,7 +586,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: isDestructive ? Colors.red.shade300 : Colors.white,
+                    color:
+                        isDestructive ? destructiveColorLight : sidebarOnColor,
                     fontSize: fontSize,
                     fontWeight: FontWeight.w500,
                   ),

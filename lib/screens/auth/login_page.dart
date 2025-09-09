@@ -3,7 +3,7 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/signup_page.dart';
 import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
-import 'package:jetcv__utenti/screens/home_page.dart';
+import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           onPressed: () {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(builder: (context) => const HomePagePublic()),
             );
           },
         ),
