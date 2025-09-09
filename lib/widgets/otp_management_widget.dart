@@ -443,13 +443,13 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
               const SizedBox(height: 8),
               ..._otps.map((otp) => _buildOtpCard(otp)),
             ] else if (!_isLoading && _errorMessage == null) ...[
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),
                   child: Column(
                     children: [
-                      Icon(Icons.security, size: 48, color: Colors.grey),
-                      SizedBox(height: 8),
+                      const Icon(Icons.security, size: 48, color: Colors.grey),
+                      const SizedBox(height: 8),
                       Text(AppLocalizations.of(context)?.noOtpsAvailable ??
                           'No OTPs available'),
                     ],
@@ -561,10 +561,10 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(AppLocalizations.of(context)!.codeCopiedToClipboard),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

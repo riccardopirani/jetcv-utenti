@@ -87,3 +87,4 @@ class CertificationUserModel {
   @override
   int get hashCode => idCertificationUser.hashCode;
 }
+

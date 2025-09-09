@@ -100,3 +100,4 @@ class CertificationMediaModel {
   @override
   int get hashCode => idCertificationMedia.hashCode;
 }
+

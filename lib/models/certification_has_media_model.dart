@@ -68,3 +68,4 @@ class CertificationHasMediaModel {
   @override
   int get hashCode => idCertificationHasMedia.hashCode;
 }
+
