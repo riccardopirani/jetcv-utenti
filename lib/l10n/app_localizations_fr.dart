@@ -223,7 +223,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcome => 'Bienvenue,';
 
   @override
-  String get verifiedOnBlockchain => 'Compte vérifié sur blockchain';
+  String get verifiedOnBlockchain => 'Curriculum certifié sur blockchain';
 
   @override
   String get quickActions => 'Actions rapides';

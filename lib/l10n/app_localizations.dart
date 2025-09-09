@@ -503,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @verifiedOnBlockchain.
   ///
   /// In en, this message translates to:
-  /// **'Account verified on blockchain'**
+  /// **'Curriculum certified on blockchain'**
   String get verifiedOnBlockchain;
 
   /// No description provided for @quickActions.
