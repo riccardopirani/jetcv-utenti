@@ -277,58 +277,84 @@ class QuickActionsSection extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          // Mostra singola card basata sullo stato hasCv
-          if (user?.hasCv == false) ...[
-            QuickActionCard(
-              icon: Icons.add_circle_outline,
-              title: AppLocalizations.of(context)!.newCV,
-              subtitle: AppLocalizations.of(context)!.createYourDigitalCV,
-              color: Theme.of(context).colorScheme.primary,
-              onTap: () {
-                Navigator.of(context)
-                    .push(
-                  MaterialPageRoute(
-                    builder: (context) => PersonalInfoPage(initialUser: user),
+          // Wrap per mostrare le card affiancate
+          Wrap(
+            spacing: 16, // Spazio orizzontale tra le card
+            runSpacing: 16, // Spazio verticale tra le righe
+            children: [
+              // Card CV (Nuova o Visualizza)
+              if (user?.hasCv == false)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width < 768
+                      ? double.infinity
+                      : (MediaQuery.of(context).size.width - 80) /
+                          2, // 80 = padding + spacing
+                  child: QuickActionCard(
+                    icon: Icons.add_circle_outline,
+                    title: AppLocalizations.of(context)!.newCV,
+                    subtitle: AppLocalizations.of(context)!.createYourDigitalCV,
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.of(context)
+                          .push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PersonalInfoPage(initialUser: user),
+                        ),
+                      )
+                          .then((result) {
+                        if (result == true) {
+                          // Ricarica i dati utente se sono stati aggiornati
+                          onDataChanged();
+                        }
+                      });
+                    },
                   ),
                 )
-                    .then((result) {
-                  if (result == true) {
-                    // Ricarica i dati utente se sono stati aggiornati
-                    onDataChanged();
-                  }
-                });
-              },
-            ),
-          ] else if (user?.hasCv == true) ...[
-            QuickActionCard(
-              icon: Icons.visibility,
-              title: AppLocalizations.of(context)!.viewMyCV,
-              subtitle: AppLocalizations.of(context)!.yourDigitalCV,
-              color: Theme.of(context).colorScheme.primary,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => CVViewPage(cvUserId: user?.idUser),
+              else if (user?.hasCv == true)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width < 768
+                      ? double.infinity
+                      : (MediaQuery.of(context).size.width - 80) /
+                          2, // 80 = padding + spacing
+                  child: QuickActionCard(
+                    icon: Icons.visibility,
+                    title: AppLocalizations.of(context)!.viewMyCV,
+                    subtitle: AppLocalizations.of(context)!.yourDigitalCV,
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CVViewPage(cvUserId: user?.idUser),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ],
-
-          // OTP Card
-          const SizedBox(height: 16),
-          QuickActionCard(
-            icon: Icons.key,
-            title: AppLocalizations.of(context)!.myOtps,
-            subtitle: AppLocalizations.of(context)!.manageSecureAccessCodes,
-            color: const Color(0xFF6B46C1),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OtpListPage(),
                 ),
-              );
-            },
+
+              // OTP Card
+              SizedBox(
+                width: MediaQuery.of(context).size.width < 768
+                    ? double.infinity
+                    : (MediaQuery.of(context).size.width - 80) /
+                        2, // 80 = padding + spacing
+                child: QuickActionCard(
+                  icon: Icons.key,
+                  title: AppLocalizations.of(context)!.myOtps,
+                  subtitle:
+                      AppLocalizations.of(context)!.manageSecureAccessCodes,
+                  color: const Color(0xFF6B46C1),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const OtpListPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -2036,6 +2036,12 @@ abstract class AppLocalizations {
   /// **'Error opening NFT link'**
   String get errorOpeningNftLink;
 
+  /// No description provided for @viewBlockchainDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View blockchain details'**
+  String get viewBlockchainDetails;
+
   /// No description provided for @linkedInIntegration.
   ///
   /// In en, this message translates to:
@@ -2119,6 +2125,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Right-click on the image above and select \"Save image as...\" to download the badge PNG.'**
   String get saveImageAs;
+
+  /// No description provided for @digitalCredentialsAndAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital credentials and achievements'**
+  String get digitalCredentialsAndAchievements;
+
+  /// No description provided for @importYourOpenBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Import your Open Badges'**
+  String get importYourOpenBadges;
+
+  /// No description provided for @showcaseYourDigitalCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Showcase your digital credentials and achievements'**
+  String get showcaseYourDigitalCredentials;
+
+  /// No description provided for @languageName_en.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageName_en;
+
+  /// No description provided for @languageName_it.
+  ///
+  /// In en, this message translates to:
+  /// **'Italian'**
+  String get languageName_it;
+
+  /// No description provided for @languageName_fr.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get languageName_fr;
+
+  /// No description provided for @languageName_es.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get languageName_es;
+
+  /// No description provided for @languageName_de.
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get languageName_de;
+
+  /// No description provided for @languageName_pt.
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get languageName_pt;
+
+  /// No description provided for @languageName_ru.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get languageName_ru;
+
+  /// No description provided for @languageName_zh.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get languageName_zh;
+
+  /// No description provided for @languageName_ja.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get languageName_ja;
+
+  /// No description provided for @languageName_ko.
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get languageName_ko;
+
+  /// No description provided for @languageName_ar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get languageName_ar;
+
+  /// No description provided for @languageName_hi.
+  ///
+  /// In en, this message translates to:
+  /// **'Hindi'**
+  String get languageName_hi;
+
+  /// No description provided for @languageName_tr.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish'**
+  String get languageName_tr;
+
+  /// No description provided for @languageName_pl.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get languageName_pl;
+
+  /// No description provided for @languageName_nl.
+  ///
+  /// In en, this message translates to:
+  /// **'Dutch'**
+  String get languageName_nl;
+
+  /// No description provided for @countryName_IT.
+  ///
+  /// In en, this message translates to:
+  /// **'Italy'**
+  String get countryName_IT;
+
+  /// No description provided for @countryName_FR.
+  ///
+  /// In en, this message translates to:
+  /// **'France'**
+  String get countryName_FR;
+
+  /// No description provided for @countryName_DE.
+  ///
+  /// In en, this message translates to:
+  /// **'Germany'**
+  String get countryName_DE;
+
+  /// No description provided for @countryName_ES.
+  ///
+  /// In en, this message translates to:
+  /// **'Spain'**
+  String get countryName_ES;
+
+  /// No description provided for @countryName_GB.
+  ///
+  /// In en, this message translates to:
+  /// **'United Kingdom'**
+  String get countryName_GB;
+
+  /// No description provided for @countryName_US.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get countryName_US;
+
+  /// No description provided for @countryName_CA.
+  ///
+  /// In en, this message translates to:
+  /// **'Canada'**
+  String get countryName_CA;
+
+  /// No description provided for @countryName_AU.
+  ///
+  /// In en, this message translates to:
+  /// **'Australia'**
+  String get countryName_AU;
+
+  /// No description provided for @countryName_JP.
+  ///
+  /// In en, this message translates to:
+  /// **'Japan'**
+  String get countryName_JP;
+
+  /// No description provided for @countryName_CN.
+  ///
+  /// In en, this message translates to:
+  /// **'China'**
+  String get countryName_CN;
+
+  /// No description provided for @countryName_BR.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazil'**
+  String get countryName_BR;
+
+  /// No description provided for @countryName_IN.
+  ///
+  /// In en, this message translates to:
+  /// **'India'**
+  String get countryName_IN;
+
+  /// No description provided for @countryName_RU.
+  ///
+  /// In en, this message translates to:
+  /// **'Russia'**
+  String get countryName_RU;
+
+  /// No description provided for @countryName_MX.
+  ///
+  /// In en, this message translates to:
+  /// **'Mexico'**
+  String get countryName_MX;
+
+  /// No description provided for @countryName_AR.
+  ///
+  /// In en, this message translates to:
+  /// **'Argentina'**
+  String get countryName_AR;
+
+  /// No description provided for @countryName_NL.
+  ///
+  /// In en, this message translates to:
+  /// **'Netherlands'**
+  String get countryName_NL;
+
+  /// No description provided for @countryName_CH.
+  ///
+  /// In en, this message translates to:
+  /// **'Switzerland'**
+  String get countryName_CH;
+
+  /// No description provided for @countryName_AT.
+  ///
+  /// In en, this message translates to:
+  /// **'Austria'**
+  String get countryName_AT;
+
+  /// No description provided for @countryName_BE.
+  ///
+  /// In en, this message translates to:
+  /// **'Belgium'**
+  String get countryName_BE;
+
+  /// No description provided for @countryName_PT.
+  ///
+  /// In en, this message translates to:
+  /// **'Portugal'**
+  String get countryName_PT;
+
+  /// No description provided for @lastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update'**
+  String get lastUpdate;
+
+  /// No description provided for @certificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get certificationTitle;
+
+  /// No description provided for @certificationOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get certificationOutcome;
+
+  /// No description provided for @certificationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get certificationDetails;
+
+  /// No description provided for @certType_attestato_di_frequenza.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate of attendance'**
+  String get certType_attestato_di_frequenza;
+
+  /// No description provided for @certType_certificato_di_competenza.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate of competence'**
+  String get certType_certificato_di_competenza;
+
+  /// No description provided for @certType_diploma.
+  ///
+  /// In en, this message translates to:
+  /// **'Diploma'**
+  String get certType_diploma;
+
+  /// No description provided for @certType_laurea.
+  ///
+  /// In en, this message translates to:
+  /// **'Degree'**
+  String get certType_laurea;
+
+  /// No description provided for @certType_master.
+  ///
+  /// In en, this message translates to:
+  /// **'Master\'s degree'**
+  String get certType_master;
+
+  /// No description provided for @certType_corso_di_formazione.
+  ///
+  /// In en, this message translates to:
+  /// **'Training course'**
+  String get certType_corso_di_formazione;
+
+  /// No description provided for @certType_certificazione_professionale.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional certification'**
+  String get certType_certificazione_professionale;
+
+  /// No description provided for @certType_patente.
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get certType_patente;
+
+  /// No description provided for @certType_abilitazione.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualification'**
+  String get certType_abilitazione;
+
+  /// No description provided for @serialNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial'**
+  String get serialNumber;
 
   /// No description provided for @noOtpsYet.
   ///

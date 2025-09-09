@@ -1044,6 +1044,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorOpeningNftLink => 'Error opening NFT link';
 
   @override
+  String get viewBlockchainDetails => 'Ver detalles de la blockchain';
+
+  @override
   String get linkedInIntegration => 'LinkedIn Certification Integration';
 
   @override
@@ -1089,6 +1092,165 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get saveImageAs =>
       'Right-click on the image above and select \"Save image as...\" to download the badge PNG.';
+
+  @override
+  String get digitalCredentialsAndAchievements =>
+      'Credenciales digitales y logros';
+
+  @override
+  String get importYourOpenBadges => 'Importa tus Open Badges';
+
+  @override
+  String get showcaseYourDigitalCredentials =>
+      'Muestra tus credenciales digitales y logros';
+
+  @override
+  String get languageName_en => 'Inglés';
+
+  @override
+  String get languageName_it => 'Italiano';
+
+  @override
+  String get languageName_fr => 'Francés';
+
+  @override
+  String get languageName_es => 'Español';
+
+  @override
+  String get languageName_de => 'Alemán';
+
+  @override
+  String get languageName_pt => 'Portugués';
+
+  @override
+  String get languageName_ru => 'Ruso';
+
+  @override
+  String get languageName_zh => 'Chino';
+
+  @override
+  String get languageName_ja => 'Japonés';
+
+  @override
+  String get languageName_ko => 'Coreano';
+
+  @override
+  String get languageName_ar => 'Árabe';
+
+  @override
+  String get languageName_hi => 'Hindi';
+
+  @override
+  String get languageName_tr => 'Turco';
+
+  @override
+  String get languageName_pl => 'Polaco';
+
+  @override
+  String get languageName_nl => 'Neerlandés';
+
+  @override
+  String get countryName_IT => 'Italia';
+
+  @override
+  String get countryName_FR => 'Francia';
+
+  @override
+  String get countryName_DE => 'Alemania';
+
+  @override
+  String get countryName_ES => 'España';
+
+  @override
+  String get countryName_GB => 'Reino Unido';
+
+  @override
+  String get countryName_US => 'Estados Unidos';
+
+  @override
+  String get countryName_CA => 'Canadá';
+
+  @override
+  String get countryName_AU => 'Australia';
+
+  @override
+  String get countryName_JP => 'Japón';
+
+  @override
+  String get countryName_CN => 'China';
+
+  @override
+  String get countryName_BR => 'Brasil';
+
+  @override
+  String get countryName_IN => 'India';
+
+  @override
+  String get countryName_RU => 'Rusia';
+
+  @override
+  String get countryName_MX => 'México';
+
+  @override
+  String get countryName_AR => 'Argentina';
+
+  @override
+  String get countryName_NL => 'Países Bajos';
+
+  @override
+  String get countryName_CH => 'Suiza';
+
+  @override
+  String get countryName_AT => 'Austria';
+
+  @override
+  String get countryName_BE => 'Bélgica';
+
+  @override
+  String get countryName_PT => 'Portugal';
+
+  @override
+  String get lastUpdate => 'Última actualización';
+
+  @override
+  String get certificationTitle => 'Título';
+
+  @override
+  String get certificationOutcome => 'Resultado';
+
+  @override
+  String get certificationDetails => 'Detalles';
+
+  @override
+  String get certType_attestato_di_frequenza => 'Certificado de asistencia';
+
+  @override
+  String get certType_certificato_di_competenza => 'Certificado de competencia';
+
+  @override
+  String get certType_diploma => 'Diploma';
+
+  @override
+  String get certType_laurea => 'Licenciatura';
+
+  @override
+  String get certType_master => 'Máster';
+
+  @override
+  String get certType_corso_di_formazione => 'Curso de formación';
+
+  @override
+  String get certType_certificazione_professionale =>
+      'Certificación profesional';
+
+  @override
+  String get certType_patente => 'Licencia';
+
+  @override
+  String get certType_abilitazione => 'Habilitación';
+
+  @override
+  String get serialNumber => 'Serie';
 
   @override
   String get noOtpsYet => 'Aún no hay OTPs';

@@ -316,6 +316,175 @@ class _CVViewPageState extends State<CVViewPage> {
     }).join(' ');
   }
 
+  /// Ottiene il nome localizzato di una lingua
+  String _getLocalizedLanguageName(String languageCode) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Prova a ottenere il nome localizzato usando le stringhe di localizzazione
+    try {
+      switch (languageCode.toLowerCase()) {
+        case 'en':
+          return localizations.languageName_en;
+        case 'it':
+          return localizations.languageName_it;
+        case 'fr':
+          return localizations.languageName_fr;
+        case 'es':
+          return localizations.languageName_es;
+        case 'de':
+          return localizations.languageName_de;
+        case 'pt':
+          return localizations.languageName_pt;
+        case 'ru':
+          return localizations.languageName_ru;
+        case 'zh':
+          return localizations.languageName_zh;
+        case 'ja':
+          return localizations.languageName_ja;
+        case 'ko':
+          return localizations.languageName_ko;
+        case 'ar':
+          return localizations.languageName_ar;
+        case 'hi':
+          return localizations.languageName_hi;
+        case 'tr':
+          return localizations.languageName_tr;
+        case 'pl':
+          return localizations.languageName_pl;
+        case 'nl':
+          return localizations.languageName_nl;
+        default:
+          // Fallback al nome nativo se non è localizzato
+          return LocaleService.languageNames[languageCode] ??
+              languageCode.toUpperCase();
+      }
+    } catch (e) {
+      // Fallback al nome nativo se c'è un errore
+      return LocaleService.languageNames[languageCode] ??
+          languageCode.toUpperCase();
+    }
+  }
+
+  /// Ottiene il nome localizzato di un paese
+  String _getLocalizedCountryName(CountryModel country) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Prova a ottenere il nome localizzato usando le stringhe di localizzazione
+    try {
+      switch (country.code.toUpperCase()) {
+        case 'IT':
+          return localizations.countryName_IT;
+        case 'FR':
+          return localizations.countryName_FR;
+        case 'DE':
+          return localizations.countryName_DE;
+        case 'ES':
+          return localizations.countryName_ES;
+        case 'GB':
+          return localizations.countryName_GB;
+        case 'US':
+          return localizations.countryName_US;
+        case 'CA':
+          return localizations.countryName_CA;
+        case 'AU':
+          return localizations.countryName_AU;
+        case 'JP':
+          return localizations.countryName_JP;
+        case 'CN':
+          return localizations.countryName_CN;
+        case 'BR':
+          return localizations.countryName_BR;
+        case 'IN':
+          return localizations.countryName_IN;
+        case 'RU':
+          return localizations.countryName_RU;
+        case 'MX':
+          return localizations.countryName_MX;
+        case 'AR':
+          return localizations.countryName_AR;
+        case 'NL':
+          return localizations.countryName_NL;
+        case 'CH':
+          return localizations.countryName_CH;
+        case 'AT':
+          return localizations.countryName_AT;
+        case 'BE':
+          return localizations.countryName_BE;
+        case 'PT':
+          return localizations.countryName_PT;
+        default:
+          // Fallback al nome originale del paese se non è localizzato
+          return country.name;
+      }
+    } catch (e) {
+      // Se c'è un errore, usa il fallback
+      return country.name;
+    }
+  }
+
+  /// Ottiene la label localizzata per le informazioni delle certificazioni
+  String _getLocalizedCertificationLabel(String originalLabel) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Prova a localizzare le label più comuni
+    try {
+      switch (originalLabel.toLowerCase().trim()) {
+        case 'titolo':
+          return localizations.certificationTitle;
+        case 'esito':
+          return localizations.certificationOutcome;
+        case 'dettaglio':
+        case 'dettagli':
+          return localizations.certificationDetails;
+        default:
+          // Fallback alla label originale se non è localizzata
+          return originalLabel;
+      }
+    } catch (e) {
+      // Se c'è un errore, usa il fallback
+      return originalLabel;
+    }
+  }
+
+  /// Ottiene il nome localizzato del tipo di certificazione
+  String _getLocalizedCertificationType(String originalType) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Normalizza il nome del tipo (rimuove spazi extra, converte in lowercase)
+    final normalizedType =
+        originalType.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '_');
+
+    // Prova a localizzare i tipi di certificazione più comuni
+    try {
+      switch (normalizedType) {
+        case 'attestato_di_frequenza':
+          return localizations.certType_attestato_di_frequenza;
+        case 'certificato_di_competenza':
+          return localizations.certType_certificato_di_competenza;
+        case 'diploma':
+          return localizations.certType_diploma;
+        case 'laurea':
+          return localizations.certType_laurea;
+        case 'master':
+          return localizations.certType_master;
+        case 'corso_di_formazione':
+          return localizations.certType_corso_di_formazione;
+        case 'certificazione_professionale':
+          return localizations.certType_certificazione_professionale;
+        case 'patente':
+          return localizations.certType_patente;
+        case 'abilitazione':
+          return localizations.certType_abilitazione;
+        default:
+          // Fallback al nome originale se non è localizzato
+          return originalType;
+      }
+    } catch (e) {
+      // Se c'è un errore, usa il fallback
+      return originalType;
+    }
+  }
+
   Future<void> _shareCV() async {
     final localizations = AppLocalizations.of(context)!;
 
@@ -1042,7 +1211,7 @@ class _CVViewPageState extends State<CVViewPage> {
                               const SizedBox(width: 4),
                             ],
                             Text(
-                              country.name,
+                              _getLocalizedCountryName(country),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -1135,9 +1304,7 @@ class _CVViewPageState extends State<CVViewPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: languageCodes.map((languageCode) {
-                  final languageName =
-                      LocaleService.languageNames[languageCode] ??
-                          languageCode.toUpperCase();
+                  final languageName = _getLocalizedLanguageName(languageCode);
                   final languageEmoji =
                       LocaleService.languageEmojis[languageCode];
 
@@ -1598,10 +1765,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                         color: Colors.blue.shade800,
                                         fontWeight: FontWeight.w600,
                                         fontSize: isMobile
-                                            ? 7
+                                            ? 12
                                             : isTablet
-                                                ? 8
-                                                : 9,
+                                                ? 14
+                                                : 16,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -1732,7 +1899,8 @@ class _CVViewPageState extends State<CVViewPage> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Digital credentials and achievements',
+                          AppLocalizations.of(context)!
+                              .digitalCredentialsAndAchievements,
                           style: TextStyle(
                             fontSize: subtitleFontSize,
                             color: Colors.grey.shade600,
@@ -1790,66 +1958,68 @@ class _CVViewPageState extends State<CVViewPage> {
   Widget _buildOpenBadgePreview() {
     // This would typically load and show a preview of OpenBadges
     // For now, show a placeholder that encourages users to import badges
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.blue.shade200,
-          width: 1,
+    return Center(
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.blue.shade200,
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.workspace_premium,
-            size: 48,
-            color: Colors.blue.shade400,
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Import your Open Badges',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue.shade700,
+        child: Column(
+          children: [
+            Icon(
+              Icons.workspace_premium,
+              size: 48,
+              color: Colors.blue.shade400,
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Showcase your digital credentials and achievements',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.blue.shade600,
-            ),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OpenBadgesPage(),
-                ),
-              );
-            },
-            icon: Icon(Icons.upload_file, size: 16),
-            label: Text(
-              AppLocalizations.of(context)?.importOpenBadge ??
-                  'Import OpenBadge',
-              style: TextStyle(fontSize: 12),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade600,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+            SizedBox(height: 12),
+            Text(
+              AppLocalizations.of(context)!.importYourOpenBadges,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade700,
               ),
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Text(
+              AppLocalizations.of(context)!.showcaseYourDigitalCredentials,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue.shade600,
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const OpenBadgesPage(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.upload_file, size: 16),
+              label: Text(
+                AppLocalizations.of(context)?.importOpenBadge ??
+                    'Import OpenBadge',
+                style: TextStyle(fontSize: 12),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade600,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1929,83 +2099,6 @@ class _CVViewPageState extends State<CVViewPage> {
             ),
           ),
 
-          // Serial number directly under the image
-          if (cert.certificationUser.serialNumber != null) ...[
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile
-                    ? 8
-                    : isTablet
-                        ? 10
-                        : 12,
-                vertical: isMobile
-                    ? 6
-                    : isTablet
-                        ? 8
-                        : 10,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.green.shade200,
-                    width: 1,
-                  ),
-                  bottom: BorderSide(
-                    color: Colors.green.shade200,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.fingerprint,
-                    size: isMobile
-                        ? 14
-                        : isTablet
-                            ? 16
-                            : 18,
-                    color: Colors.green.shade700,
-                  ),
-                  SizedBox(
-                      width: isMobile
-                          ? 6
-                          : isTablet
-                              ? 8
-                              : 10),
-                  Text(
-                    '${AppLocalizations.of(context)!.serial}: ',
-                    style: TextStyle(
-                      fontSize: isMobile
-                          ? 10
-                          : isTablet
-                              ? 11
-                              : 12,
-                      color: Colors.green.shade700,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    cert.certificationUser.serialNumber!,
-                    style: TextStyle(
-                      fontSize: isMobile
-                          ? 10
-                          : isTablet
-                              ? 11
-                              : 12,
-                      color: Colors.green.shade900,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
           Padding(
             padding: EdgeInsets.all(cardPadding),
             child: Column(
@@ -2016,19 +2109,59 @@ class _CVViewPageState extends State<CVViewPage> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            cert.certification?.category?.name ??
-                                AppLocalizations.of(context)!.certification,
-                            style: TextStyle(
-                              fontSize: isMobile
-                                  ? 11
-                                  : isTablet
-                                      ? 12
-                                      : 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade800,
+                          // Serial number badge
+                          if (cert.certificationUser.serialNumber != null)
+                            Container(
+                              margin:
+                                  EdgeInsets.only(bottom: isMobile ? 8 : 12),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isMobile ? 8 : 10,
+                                vertical: isMobile ? 4 : 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.green.shade300,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.tag,
+                                    size: isMobile ? 14 : 16,
+                                    color: Colors.green.shade700,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '${AppLocalizations.of(context)!.serialNumber}: ${cert.certificationUser.serialNumber}',
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 11 : 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green.shade800,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          // Certification type
+                          if (cert.certification?.category?.name != null &&
+                              cert.certification!.category!.name.isNotEmpty)
+                            Text(
+                              _getLocalizedCertificationType(
+                                  cert.certification!.category!.name),
+                              style: TextStyle(
+                                fontSize: isMobile
+                                    ? 16
+                                    : isTablet
+                                        ? 18
+                                        : 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
                           SizedBox(height: isMobile ? 8 : 12),
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -2053,10 +2186,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.w600,
                                 fontSize: isMobile
-                                    ? 9
+                                    ? 11
                                     : isTablet
-                                        ? 10
-                                        : 11,
+                                        ? 12
+                                        : 13,
                               ),
                             ),
                           ),
@@ -2088,10 +2221,10 @@ class _CVViewPageState extends State<CVViewPage> {
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.w600,
                                 fontSize: isMobile
-                                    ? 9
+                                    ? 11
                                     : isTablet
-                                        ? 10
-                                        : 11,
+                                        ? 12
+                                        : 13,
                               ),
                             ),
                           ),
@@ -2103,6 +2236,67 @@ class _CVViewPageState extends State<CVViewPage> {
                         : isTablet
                             ? 14
                             : 16),
+
+                // Serial number badge and certification type for desktop
+                if (!isMobile) ...[
+                  // Serial number badge
+                  if (cert.certificationUser.serialNumber != null)
+                    Container(
+                      margin: EdgeInsets.only(bottom: isTablet ? 8 : 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isTablet ? 8 : 10,
+                              vertical: isTablet ? 4 : 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.green.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.tag,
+                                  size: isTablet ? 14 : 16,
+                                  color: Colors.green.shade700,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  '${AppLocalizations.of(context)!.serialNumber}: ${cert.certificationUser.serialNumber}',
+                                  style: TextStyle(
+                                    fontSize: isTablet ? 11 : 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green.shade800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Certification type for desktop
+                  if (cert.certification?.category?.name != null &&
+                      cert.certification!.category!.name.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(bottom: isTablet ? 8 : 12),
+                      child: Text(
+                        _getLocalizedCertificationType(
+                            cert.certification!.category!.name),
+                        style: TextStyle(
+                          fontSize: isTablet ? 18 : 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                ],
 
                 // Issuer with circular logo
                 Row(
@@ -2144,14 +2338,17 @@ class _CVViewPageState extends State<CVViewPage> {
                                 : 10),
                     Expanded(
                       child: Text(
-                        cert.certification?.category?.name ??
+                        (cert.certification?.category?.name != null
+                                ? _getLocalizedCertificationType(
+                                    cert.certification!.category!.name)
+                                : null) ??
                             AppLocalizations.of(context)!.certifyingBody,
                         style: TextStyle(
                           fontSize: isMobile
-                              ? 9
+                              ? 12
                               : isTablet
-                                  ? 10
-                                  : 11,
+                                  ? 13
+                                  : 14,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey.shade700,
                         ),
@@ -2167,113 +2364,111 @@ class _CVViewPageState extends State<CVViewPage> {
                             ? 10
                             : 12),
 
-                // Certifier name and organization info
-                if (cert.certificationUser.serialNumber != null) ...[
-                  // Certifier name
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.business,
-                        size: isMobile
-                            ? 14
-                            : isTablet
-                                ? 15
-                                : 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      SizedBox(
-                          width: isMobile
-                              ? 6
-                              : isTablet
-                                  ? 7
-                                  : 8),
-                      Expanded(
-                        child: FutureBuilder<String>(
-                          future: _getCertifierDisplayName(cert),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Text(
-                                '${AppLocalizations.of(context)!.certifier}: ${snapshot.data}',
-                                style: TextStyle(
-                                  fontSize: isMobile
-                                      ? 8
-                                      : isTablet
-                                          ? 9
-                                          : 10,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              );
-                            }
-                            return Text(
-                              '${AppLocalizations.of(context)!.certifier}: ${AppLocalizations.of(context)!.certifyingBody}',
+                // Legal Entity and Certifier info
+                // Legal Entity name with logo (moved first)
+                FutureBuilder<String>(
+                  future: _getOrganizationName(cert),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      return Row(
+                        children: [
+                          // Legal Entity logo from database
+                          _buildLegalEntityLogo(cert, isMobile, isTablet),
+                          SizedBox(
+                              width: isMobile
+                                  ? 6
+                                  : isTablet
+                                      ? 7
+                                      : 8),
+                          Expanded(
+                            child: Text(
+                              'Legal Entity: ${snapshot.data}',
                               style: TextStyle(
                                 fontSize: isMobile
-                                    ? 8
+                                    ? 14
                                     : isTablet
-                                        ? 9
-                                        : 10,
+                                        ? 15
+                                        : 16,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                SizedBox(
+                    height: isMobile
+                        ? 6
+                        : isTablet
+                            ? 7
+                            : 8),
+
+                // Certifier name (moved second with person icon)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person,
+                      size: isMobile
+                          ? 14
+                          : isTablet
+                              ? 15
+                              : 16,
+                      color: Colors.grey.shade600,
+                    ),
+                    SizedBox(
+                        width: isMobile
+                            ? 6
+                            : isTablet
+                                ? 7
+                                : 8),
+                    Expanded(
+                      child: FutureBuilder<String>(
+                        future: _getCertifierDisplayName(cert),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              '${AppLocalizations.of(context)!.certifier}: ${snapshot.data}',
+                              style: TextStyle(
+                                fontSize: isMobile
+                                    ? 12
+                                    : isTablet
+                                        ? 13
+                                        : 14,
                                 color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
                             );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                      height: isMobile
-                          ? 6
-                          : isTablet
-                              ? 7
-                              : 8),
-
-                  // Legal Entity name with logo
-                  FutureBuilder<String>(
-                    future: _getOrganizationName(cert),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                        return Row(
-                          children: [
-                            // Legal Entity logo from database
-                            _buildLegalEntityLogo(cert, isMobile, isTablet),
-                            SizedBox(
-                                width: isMobile
-                                    ? 6
-                                    : isTablet
-                                        ? 7
-                                        : 8),
-                            Expanded(
-                              child: Text(
-                                'Legal Entity: ${snapshot.data}',
-                                style: TextStyle(
-                                  fontSize: isMobile
-                                      ? 8
-                                      : isTablet
-                                          ? 9
-                                          : 10,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          }
+                          return Text(
+                            '${AppLocalizations.of(context)!.certifier}: ${AppLocalizations.of(context)!.certifyingBody}',
+                            style: TextStyle(
+                              fontSize: isMobile
+                                  ? 12
+                                  : isTablet
+                                      ? 13
+                                      : 14,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                  SizedBox(
-                      height: isMobile
-                          ? 12
-                          : isTablet
-                              ? 14
-                              : 16),
-                ],
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                    height: isMobile
+                        ? 12
+                        : isTablet
+                            ? 14
+                            : 16),
 
                 // Description from category information
                 if (cert.certification?.categoryInformation.isNotEmpty ==
@@ -2282,24 +2477,26 @@ class _CVViewPageState extends State<CVViewPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: cert.certification!.categoryInformation
-                        .where(
-                            (info) => info.label != null && info.value != null)
+                        .where((info) =>
+                            info.label != null &&
+                            info.value != null &&
+                            info.label!.toLowerCase().trim() != 'codice')
                         .map((info) {
                       debugPrint(
                           'Category info - label: ${info.label}, value: ${info.value}');
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
                         child: Text(
-                          '${info.label}: ${info.value}',
+                          '${_getLocalizedCertificationLabel(info.label!)}: ${info.value}',
                           style: TextStyle(
                             fontSize: isMobile
-                                ? 9
+                                ? 14
                                 : isTablet
-                                    ? 10
-                                    : 11,
+                                    ? 15
+                                    : 16,
                             color: Colors.grey.shade700,
                             height: 1.4,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       );
@@ -2310,13 +2507,13 @@ class _CVViewPageState extends State<CVViewPage> {
                     AppLocalizations.of(context)!.verifiedAndAuthenticated,
                     style: TextStyle(
                       fontSize: isMobile
-                          ? 9
+                          ? 14
                           : isTablet
-                              ? 10
-                              : 11,
+                              ? 15
+                              : 16,
                       color: Colors.grey.shade700,
                       height: 1.4,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -2774,15 +2971,15 @@ class _CVViewPageState extends State<CVViewPage> {
               Icon(
                 Icons.fingerprint,
                 color: Colors.green.shade700,
-                size: 14,
+                size: 18,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)!.serialCode,
                 style: TextStyle(
                   color: Colors.green.shade700,
                   fontWeight: FontWeight.w600,
-                  fontSize: 10,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -2793,7 +2990,7 @@ class _CVViewPageState extends State<CVViewPage> {
             style: TextStyle(
               color: Colors.green.shade900,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 16,
               fontFamily: 'monospace',
               letterSpacing: 1,
             ),
@@ -2907,55 +3104,44 @@ class _CVViewPageState extends State<CVViewPage> {
 
   /// Costruisce la sezione del Link Blockchain
   Widget _buildNftLinkSection() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.blue.shade200,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Blockchain Info Button
-          GestureDetector(
-            onTap: () => _openBlockchainInfo(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.green.shade100,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: Colors.green.shade300,
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.green.shade700,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Blockchain Info',
-                    style: TextStyle(
-                      color: Colors.green.shade700,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Blockchain Info Button
+        GestureDetector(
+          onTap: () => _openBlockchainInfo(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.green.shade100,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: Colors.green.shade300,
+                width: 1,
               ),
             ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.green.shade700,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  AppLocalizations.of(context)!.viewBlockchainDetails,
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -3157,7 +3343,7 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_cv!.updatedAt != null) {
       infoItems.add(_buildFormalInfoItem(
         Icons.update,
-        'Ultimo aggiornamento',
+        AppLocalizations.of(context)!.lastUpdate,
         _formatDate(_cv!.updatedAt!),
       ));
     }
@@ -3278,7 +3464,7 @@ class _CVViewPageState extends State<CVViewPage> {
         cert.certification!.category!.name.isNotEmpty) {
       debugPrint(
           'Using category name as fallback: ${cert.certification!.category!.name}');
-      return cert.certification!.category!.name;
+      return _getLocalizedCertificationType(cert.certification!.category!.name);
     }
 
     // Ultimo fallback
@@ -3614,7 +3800,9 @@ class _CVViewPageState extends State<CVViewPage> {
 
   /// Genera l'URL LinkedIn per una certificazione specifica
   Future<String> _generateLinkedInUrl(UserCertificationDetail cert) async {
-    final certName = cert.certification?.category?.name ?? 'Certification';
+    final certName = cert.certification?.category?.name != null
+        ? _getLocalizedCertificationType(cert.certification!.category!.name)
+        : 'Certification';
     final organizationName = await _getOrganizationName(cert);
     final issueDate = cert.certificationUser.createdAt;
     final certId = cert.certificationUser.idCertificationUser;
@@ -3736,8 +3924,10 @@ class _CVViewPageState extends State<CVViewPage> {
 
       // Mostra un dialog di conferma con i dettagli della certificazione
       final firstCert = _certifications.first;
-      final certName =
-          firstCert.certification?.category?.name ?? 'Certification';
+      final certName = firstCert.certification?.category?.name != null
+          ? _getLocalizedCertificationType(
+              firstCert.certification!.category!.name)
+          : 'Certification';
       final issuer = firstCert.certification?.idCertifier ?? 'JetCV';
       final issueDate = firstCert.certificationUser.createdAt;
 
