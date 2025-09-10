@@ -4,7 +4,6 @@ import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/services/otp_service.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
-import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:flutter/services.dart';
 
 class OtpListPage extends StatefulWidget {
@@ -214,7 +213,7 @@ class _OtpListPageState extends State<OtpListPage> {
                   children: [
                     Icon(Icons.check_circle, color: Colors.white, size: 20),
                     SizedBox(width: 8),
-                    Text('${_localizations!.otpTagUpdated}'),
+                    Text(_localizations!.otpTagUpdated),
                   ],
                 ),
                 backgroundColor: Colors.green,
@@ -378,8 +377,8 @@ class _OtpListPageState extends State<OtpListPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: const Center(
           child: CircularProgressIndicator(),
         ),
@@ -1247,7 +1246,7 @@ class _OtpListPageState extends State<OtpListPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.all(isMobile
             ? 24
             : isTablet
@@ -1949,8 +1948,9 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   String _getStatusText(OtpModel otp) {
-    if (otp.usedByIdUser != null)
+    if (otp.usedByIdUser != null) {
       return AppLocalizations.of(context)!.otpBlocked;
+    }
     if (otp.isBurned) return AppLocalizations.of(context)!.statusBurned;
     if (otp.isUsed) return AppLocalizations.of(context)!.statusUsed;
     if (otp.isExpired) return AppLocalizations.of(context)!.statusExpired;
