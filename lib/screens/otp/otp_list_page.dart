@@ -5,6 +5,7 @@ import 'package:jetcv__utenti/services/otp_service.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 
 class OtpListPage extends StatefulWidget {
   const OtpListPage({super.key});
@@ -23,6 +24,12 @@ class _OtpListPageState extends State<OtpListPage> {
       {}; // Cache for legal entity data
   String _currentFilter = 'active'; // 'all', 'blocked', 'active'
 
+  // Polling variables
+  Timer? _pollingTimer;
+  bool _isPollingEnabled = true;
+  bool _isPolling = false;
+  List<OtpModel> _lastKnownOtps = []; // Store last known state for comparison
+
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
   AppLocalizations? _localizations;
@@ -31,6 +38,13 @@ class _OtpListPageState extends State<OtpListPage> {
   void initState() {
     super.initState();
     _loadOtps();
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    _stopPolling();
+    super.dispose();
   }
 
   @override
@@ -41,8 +55,171 @@ class _OtpListPageState extends State<OtpListPage> {
     _localizations = AppLocalizations.of(context);
   }
 
+  void _startPolling() {
+    if (_pollingTimer != null) return; // Already started
+
+    debugPrint('🔄 Starting OTP polling every 5 seconds...');
+    _pollingTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (_isPollingEnabled && !_isPolling) {
+        _checkForChanges();
+      }
+    });
+  }
+
+  void _stopPolling() {
+    debugPrint('⏹️ Stopping OTP polling...');
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  void _togglePolling() {
+    setState(() {
+      _isPollingEnabled = !_isPollingEnabled;
+    });
+
+    if (_isPollingEnabled) {
+      _startPolling();
+      debugPrint('✅ OTP polling enabled');
+    } else {
+      _stopPolling();
+      debugPrint('❌ OTP polling disabled');
+    }
+  }
+
+  Future<void> _checkForChanges() async {
+    if (_isPolling || !_isPollingEnabled) return;
+
+    setState(() {
+      _isPolling = true;
+    });
+
+    try {
+      debugPrint('🔍 Checking for OTP changes...');
+
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      if (userId == null) {
+        debugPrint('⚠️ No user session, skipping polling check');
+        return;
+      }
+
+      final response = await OtpService.getUserOtps(
+        idUser: userId,
+        limit: 50,
+        offset: 0,
+      );
+
+      if (response.success && response.data != null) {
+        final newOtps = response.data!;
+
+        // Compare with last known state
+        if (_hasOtpsChanged(_lastKnownOtps, newOtps)) {
+          debugPrint('🔄 Changes detected! Reloading OTP list...');
+          debugPrint(
+              '📊 Previous count: ${_lastKnownOtps.length}, New count: ${newOtps.length}');
+
+          setState(() {
+            _otps = newOtps;
+            _lastKnownOtps = List.from(newOtps); // Deep copy
+            _isLoading = false;
+            _errorMessage = null;
+          });
+
+          // Apply current filter to the updated OTPs
+          _applyFilter();
+
+          // Show subtle notification
+          if (mounted && _scaffoldMessenger != null && _localizations != null) {
+            try {
+              _scaffoldMessenger!.showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.refresh, color: Colors.white, size: 16),
+                      SizedBox(width: 8),
+                      Text('Lista OTP aggiornata'),
+                    ],
+                  ),
+                  backgroundColor: Colors.blue.shade600,
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } catch (e) {
+              debugPrint('Error showing update notification: $e');
+            }
+          }
+        } else {
+          debugPrint('✅ No changes detected in OTP list');
+        }
+      } else {
+        debugPrint('⚠️ Failed to check for changes: ${response.error}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error during polling check: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPolling = false;
+        });
+      }
+    }
+  }
+
+  bool _hasOtpsChanged(List<OtpModel> oldOtps, List<OtpModel> newOtps) {
+    // Check if count changed
+    if (oldOtps.length != newOtps.length) {
+      debugPrint(
+          '📊 OTP count changed: ${oldOtps.length} -> ${newOtps.length}');
+      return true;
+    }
+
+    // Check if any OTP has changed (by comparing IDs and updated timestamps)
+    for (int i = 0; i < oldOtps.length; i++) {
+      if (i >= newOtps.length) return true;
+
+      final oldOtp = oldOtps[i];
+      final newOtp = newOtps[i];
+
+      // Check if ID changed (shouldn't happen, but safety check)
+      if (oldOtp.idOtp != newOtp.idOtp) {
+        debugPrint(
+            '🔄 OTP ID changed at index $i: ${oldOtp.idOtp} -> ${newOtp.idOtp}');
+        return true;
+      }
+
+      // Check if any important fields changed
+      if (oldOtp.tag != newOtp.tag ||
+          oldOtp.usedAt != newOtp.usedAt ||
+          oldOtp.burnedAt != newOtp.burnedAt ||
+          oldOtp.usedByIdUser != newOtp.usedByIdUser ||
+          oldOtp.updatedAt != newOtp.updatedAt) {
+        debugPrint('🔄 OTP ${oldOtp.idOtp} changed:');
+        debugPrint('  Tag: ${oldOtp.tag} -> ${newOtp.tag}');
+        debugPrint('  UsedAt: ${oldOtp.usedAt} -> ${newOtp.usedAt}');
+        debugPrint('  BurnedAt: ${oldOtp.burnedAt} -> ${newOtp.burnedAt}');
+        debugPrint(
+            '  UsedByIdUser: ${oldOtp.usedByIdUser} -> ${newOtp.usedByIdUser}');
+        debugPrint('  UpdatedAt: ${oldOtp.updatedAt} -> ${newOtp.updatedAt}');
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<void> _loadOtps() async {
     debugPrint('🔄 _loadOtps() called');
+
+    // Temporarily stop polling during manual load
+    final wasPollingEnabled = _isPollingEnabled;
+    if (_isPollingEnabled) {
+      setState(() {
+        _isPollingEnabled = false;
+      });
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -65,6 +242,8 @@ class _OtpListPageState extends State<OtpListPage> {
           if (response.success && response.data != null) {
             setState(() {
               _otps = response.data!;
+              _lastKnownOtps = List.from(
+                  response.data!); // Save initial state for comparison
               _isLoading = false;
               _errorMessage = null;
             });
@@ -112,6 +291,14 @@ class _OtpListPageState extends State<OtpListPage> {
           _errorMessage = 'Error loading OTPs: $e';
           _isLoading = false;
         });
+      }
+    } finally {
+      // Re-enable polling if it was enabled before
+      if (wasPollingEnabled && mounted) {
+        setState(() {
+          _isPollingEnabled = true;
+        });
+        _startPolling();
       }
     }
   }
@@ -1132,55 +1319,108 @@ class _OtpListPageState extends State<OtpListPage> {
                   ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile
-                      ? 8
-                      : isTablet
-                          ? 10
-                          : 12,
-                  vertical: isMobile
-                      ? 4
-                      : isTablet
-                          ? 5
-                          : 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.vpn_key,
-                      color: const Color(0xFF1F2937),
-                      size: isMobile
-                          ? 14
-                          : isTablet
-                              ? 16
-                              : 18,
-                    ),
-                    SizedBox(
-                        width: isMobile
-                            ? 4
-                            : isTablet
-                                ? 6
-                                : 8),
-                    Text(
-                      '${_otps.where((otp) => !_isOtpBlocked(otp)).length}',
-                      style: TextStyle(
-                        fontSize: isMobile
-                            ? 14
-                            : isTablet
-                                ? 16
-                                : 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1F2937),
+              Row(
+                children: [
+                  // Polling status indicator
+                  GestureDetector(
+                    onTap: _togglePolling,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 8 : 10,
+                        vertical: isMobile ? 4 : 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _isPollingEnabled
+                            ? Colors.green.shade100
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _isPollingEnabled
+                              ? Colors.green.shade300
+                              : Colors.grey.shade300,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isPollingEnabled
+                                ? Icons.sync
+                                : Icons.sync_disabled,
+                            color: _isPollingEnabled
+                                ? Colors.green.shade600
+                                : Colors.grey.shade600,
+                            size: isMobile ? 14 : 16,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            _isPollingEnabled ? 'Auto' : 'Man',
+                            style: TextStyle(
+                              fontSize: isMobile ? 10 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: _isPollingEnabled
+                                  ? Colors.green.shade700
+                                  : Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(width: 8),
+                  // OTP count
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile
+                          ? 8
+                          : isTablet
+                              ? 10
+                              : 12,
+                      vertical: isMobile
+                          ? 4
+                          : isTablet
+                              ? 5
+                              : 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1F2937).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.vpn_key,
+                          color: const Color(0xFF1F2937),
+                          size: isMobile
+                              ? 14
+                              : isTablet
+                                  ? 16
+                                  : 18,
+                        ),
+                        SizedBox(
+                            width: isMobile
+                                ? 4
+                                : isTablet
+                                    ? 6
+                                    : 8),
+                        Text(
+                          '${_otps.where((otp) => !_isOtpBlocked(otp)).length}',
+                          style: TextStyle(
+                            fontSize: isMobile
+                                ? 14
+                                : isTablet
+                                    ? 16
+                                    : 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1F2937),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1920,6 +2160,36 @@ class _OtpListPageState extends State<OtpListPage> {
     return otp.usedByIdUser != null;
   }
 
+  String _getLegalEntityName(Map<String, dynamic> legalEntityData) {
+    debugPrint('🔍 _getLegalEntityName called with data: $legalEntityData');
+    debugPrint('🔍 Available keys: ${legalEntityData.keys.toList()}');
+
+    // Try different possible field names for company name
+    final possibleNames = [
+      'legal_name',
+      'name',
+      'company_name',
+      'business_name',
+      'entity_name',
+      'corporate_name',
+      'trading_name',
+      'display_name',
+    ];
+
+    for (final fieldName in possibleNames) {
+      final value = legalEntityData[fieldName];
+      debugPrint('🔍 Checking field "$fieldName": $value');
+      if (value != null && value.toString().trim().isNotEmpty) {
+        debugPrint('✅ Found company name in field "$fieldName": $value');
+        return value.toString().trim();
+      }
+    }
+
+    // If no name found, show a generic message
+    debugPrint('⚠️ No company name found in legal entity data');
+    return 'Azienda';
+  }
+
   Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
     debugPrint('🔍 _buildLegalEntitySection called for OTP: ${otp.idOtp}');
     debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
@@ -2086,8 +2356,7 @@ class _OtpListPageState extends State<OtpListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      legalEntityData['legal_name'] ??
-                          AppLocalizations.of(context)!.company,
+                      _getLegalEntityName(legalEntityData),
                       style: TextStyle(
                         fontSize: isMobile ? 16 : 18,
                         fontWeight: FontWeight.bold,
