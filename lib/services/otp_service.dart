@@ -9,7 +9,8 @@ import 'package:http/http.dart' as http;
 class OtpService {
   static const String _functionName = 'otp-crud';
 
-  /// Create a new OTP
+  /// Create a new OTP via Edge Function
+  /// Expected response format: { data: {...} }
   /// Returns the created OTP with code and metadata
   static Future<EdgeFunctionResponse<OtpModel>> createOtp({
     String? idUser,
@@ -45,11 +46,13 @@ class OtpService {
       debugPrint('🔄 OtpService: Response type: ${response.runtimeType}');
       debugPrint('🔄 OtpService: Response keys: ${response.keys.toList()}');
 
-      // The function returns { ok: true, otp: {...} }
-      final bool isSuccess = response['ok'] == true;
+      // The function returns { data: {...} }
+      // Check if we have data object in the response
+      final bool hasData = response.containsKey('data') &&
+          response['data'] is Map<String, dynamic>;
 
-      if (isSuccess && response['otp'] != null) {
-        final otpData = response['otp'] as Map<String, dynamic>;
+      if (hasData) {
+        final otpData = response['data'] as Map<String, dynamic>;
         final otp = OtpModel.fromJson(otpData);
 
         debugPrint('✅ OtpService: OTP created successfully: ${otp.idOtp}');
@@ -61,11 +64,12 @@ class OtpService {
         );
       } else {
         debugPrint(
-            '❌ OtpService: Create OTP failed - ok: ${response['ok']}, error: ${response['error']}');
+            '❌ OtpService: Create OTP failed - invalid response format: ${response.keys.toList()}');
 
         return EdgeFunctionResponse<OtpModel>(
           success: false,
-          error: response['error'] as String? ?? 'Failed to create OTP',
+          error: response['error'] as String? ??
+              'Invalid response format: expected "data" object but got ${response.keys.toList()}',
         );
       }
     } catch (e) {
@@ -271,7 +275,8 @@ class OtpService {
     }
   }
 
-  /// Get all OTPs for a user
+  /// Get all OTPs for a user via Edge Function
+  /// Expected response format: { data: [...], count: number, limit: number, offset: number }
   /// Returns list of OTPs
   static Future<EdgeFunctionResponse<List<OtpModel>>> getUserOtps({
     String? idUser,
@@ -341,11 +346,13 @@ class OtpService {
       debugPrint('📋 OtpService: Response type: ${responseData.runtimeType}');
       debugPrint('📋 OtpService: Response keys: ${responseData.keys.toList()}');
 
-      // The function returns { ok: true, count: number, items: [...] }
-      final bool isSuccess = responseData['ok'] == true;
+      // The function returns { data: [...], count: number, limit: number, offset: number }
+      // Check if we have data array in the response
+      final bool hasData =
+          responseData.containsKey('data') && responseData['data'] is List;
 
-      if (isSuccess && responseData['items'] != null) {
-        final List<dynamic> items = responseData['items'] as List<dynamic>;
+      if (hasData) {
+        final List<dynamic> items = responseData['data'] as List<dynamic>;
         debugPrint(
             '📋 OtpService: Found ${items.length} OTPs via Edge Function');
 
@@ -358,21 +365,14 @@ class OtpService {
             // Check if OTP is blocked (used by another user)
             final isBlocked = otpJson['used_by_id_user'] != null;
 
-            // Add missing fields that OtpModel expects
+            // Hide sensitive data for blocked OTPs
             if (isBlocked) {
               // Hide code for blocked OTPs
               otpJson['code'] = '***'; // Don't expose actual code
-              otpJson['code_hash'] = '***'; // Don't expose hash
-            } else {
-              // Show real code for non-blocked OTPs
-              // The code should already be in the database response
-              if (otpJson['code'] == null) {
-                otpJson['code'] = '***'; // Fallback if no code in DB
-              }
-              if (otpJson['code_hash'] == null) {
-                otpJson['code_hash'] = '***'; // Fallback if no hash in DB
-              }
+              otpJson['code_hash'] = null; // Hide hash
             }
+            // For non-blocked OTPs, use data as-is from API
+            // code_hash can be null (especially for newly created OTPs)
 
             debugPrint('📋 OtpService: Processing OTP: ${otpJson['id_otp']}');
             debugPrint('📋 OtpService: isBlocked: $isBlocked');
@@ -403,10 +403,11 @@ class OtpService {
         );
       } else {
         debugPrint(
-            '❌ OtpService: Edge Function failed: ${responseData['error']}');
+            '❌ OtpService: Invalid response format or no data: ${responseData.keys.toList()}');
         return EdgeFunctionResponse<List<OtpModel>>(
           success: false,
-          error: 'Edge Function failed: ${responseData['error']}',
+          error:
+              'Invalid response format: expected "data" array but got ${responseData.keys.toList()}',
         );
       }
     } catch (e) {
@@ -502,7 +503,8 @@ class OtpService {
     }
   }
 
-  /// Update OTP tag
+  /// Update OTP tag via Edge Function
+  /// Expected response format: { data: {...} }
   /// Returns the updated OTP
   static Future<EdgeFunctionResponse<OtpModel>> updateOtpTag({
     required String idOtp,
@@ -524,11 +526,13 @@ class OtpService {
 
       debugPrint('🔄 OtpService: Update OTP tag response: $response');
 
-      // The function returns { ok: true, otp: {...} }
-      final bool isSuccess = response['ok'] == true;
+      // The function returns { data: {...} }
+      // Check if we have data object in the response
+      final bool hasData = response.containsKey('data') &&
+          response['data'] is Map<String, dynamic>;
 
-      if (isSuccess && response['otp'] != null) {
-        final otpData = response['otp'] as Map<String, dynamic>;
+      if (hasData) {
+        final otpData = response['data'] as Map<String, dynamic>;
         final otp = OtpModel.fromJson(otpData);
 
         debugPrint('✅ OtpService: OTP tag updated successfully');
@@ -540,11 +544,12 @@ class OtpService {
         );
       } else {
         debugPrint(
-            '❌ OtpService: Update OTP tag failed - ok: ${response['ok']}, error: ${response['error']}');
+            '❌ OtpService: Update OTP tag failed - invalid response format: ${response.keys.toList()}');
 
         return EdgeFunctionResponse<OtpModel>(
           success: false,
-          error: response['error'] as String? ?? 'Failed to update OTP tag',
+          error: response['error'] as String? ??
+              'Invalid response format: expected "data" object but got ${response.keys.toList()}',
         );
       }
     } catch (e) {
@@ -666,26 +671,6 @@ class OtpService {
         success: false,
         error: 'Error getting legal entity: $e',
       );
-    }
-  }
-
-  /// Test if id_legal_entity column exists in OTP table
-  /// This is a diagnostic method to verify database schema
-  static Future<bool> testLegalEntityColumn() async {
-    try {
-      debugPrint('🔍 Testing if id_legal_entity column exists in OTP table');
-
-      // Try to select id_legal_entity from a sample OTP
-      final response = await SupabaseConfig.client
-          .from('otp')
-          .select('id_legal_entity')
-          .limit(1);
-
-      debugPrint('✅ id_legal_entity column exists in OTP table');
-      return true;
-    } catch (e) {
-      debugPrint('❌ id_legal_entity column does not exist in OTP table: $e');
-      return false;
     }
   }
 

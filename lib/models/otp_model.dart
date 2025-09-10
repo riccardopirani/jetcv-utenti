@@ -3,7 +3,7 @@ class OtpModel {
   final String idOtp;
   final String idUser;
   final String code;
-  final String codeHash;
+  final String? codeHash;
   final String? tag;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -17,7 +17,7 @@ class OtpModel {
     required this.idOtp,
     required this.idUser,
     required this.code,
-    required this.codeHash,
+    this.codeHash,
     this.tag,
     required this.createdAt,
     this.updatedAt,
@@ -33,7 +33,7 @@ class OtpModel {
         idOtp: json['id_otp'] as String,
         idUser: json['id_user'] as String,
         code: json['code'] as String,
-        codeHash: json['code_hash'] as String,
+        codeHash: json['code_hash'] as String?,
         tag: json['tag'] as String?,
         createdAt: DateTime.parse(json['created_at']),
         updatedAt: json['updated_at'] != null
@@ -115,6 +115,3 @@ class OtpModel {
   @override
   int get hashCode => idOtp.hashCode;
 }
-
-
-

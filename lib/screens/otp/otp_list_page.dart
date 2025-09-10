@@ -49,10 +49,6 @@ class _OtpListPageState extends State<OtpListPage> {
     });
 
     try {
-      // Test if id_legal_entity column exists
-      final columnExists = await OtpService.testLegalEntityColumn();
-      debugPrint('🔍 id_legal_entity column exists: $columnExists');
-
       final session = SupabaseConfig.client.auth.currentSession;
       final userId = session?.user.id;
 
