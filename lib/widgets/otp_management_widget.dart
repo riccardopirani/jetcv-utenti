@@ -183,10 +183,9 @@ class _OtpManagementWidgetState extends State<OtpManagementWidget> {
       );
 
       if (response.success) {
-        setState(() {
-          _otps.removeWhere((item) => item.idOtp == otp.idOtp);
-          _isLoading = false;
-        });
+        // Reload all OTPs after successful burn
+        debugPrint('🔄 OTP burned successfully, reloading all OTPs...');
+        _loadOtps(); // Refresh the list
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

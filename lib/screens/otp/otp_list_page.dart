@@ -395,14 +395,9 @@ class _OtpListPageState extends State<OtpListPage> {
       if (!mounted) return;
 
       if (response.success) {
-        setState(() {
-          _otps.removeWhere((item) => item.idOtp == otp.idOtp);
-          // Se la lista è vuota, aggiorna lo stato
-          if (_otps.isEmpty) {
-            _isLoading = false;
-            _errorMessage = null;
-          }
-        });
+        // Reload all OTPs after successful burn
+        debugPrint('🔄 OTP burned successfully, reloading all OTPs...');
+        _loadOtps();
 
         if (mounted && _scaffoldMessenger != null && _localizations != null) {
           _scaffoldMessenger!.showSnackBar(

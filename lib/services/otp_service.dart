@@ -149,7 +149,8 @@ class OtpService {
     }
   }
 
-  /// Burn (invalidate) an OTP
+  /// Burn (invalidate) an OTP via Edge Function DELETE
+  /// Expected response: 204 No Content
   /// Returns success status
   static Future<EdgeFunctionResponse<bool>> burnOtp({
     required String idOtp,
@@ -158,36 +159,52 @@ class OtpService {
     try {
       debugPrint('🔥 OtpService: Burning OTP: $idOtp');
 
-      final response = await EdgeFunctionService.invokeFunction(
-        _functionName,
-        {
-          'id_otp': idOtp,
-          'id_user': idUser,
+      // Use HTTP DELETE request to Edge Function
+      final url =
+          '${SupabaseConfig.supabaseUrl}/functions/v1/$_functionName?id=$idOtp';
+      final session = SupabaseConfig.client.auth.currentSession;
+
+      if (session == null) {
+        throw Exception('No active session');
+      }
+
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'Content-Type': 'application/json',
         },
       );
 
-      debugPrint('🔄 OtpService: Burn OTP response: $response');
+      debugPrint('🔄 OtpService: Burn OTP HTTP status: ${response.statusCode}');
+      debugPrint('🔄 OtpService: Burn OTP response body: ${response.body}');
 
-      // The function returns { ok: true, burned: true/false }
-      final bool isSuccess = response['ok'] == true;
-
-      if (isSuccess) {
-        final burned = response['burned'] as bool? ?? false;
-
-        debugPrint('✅ OtpService: OTP burned successfully: $burned');
+      // DELETE returns 204 No Content on success
+      if (response.statusCode == 204) {
+        debugPrint('✅ OtpService: OTP burned successfully: $idOtp');
 
         return EdgeFunctionResponse<bool>(
           success: true,
-          data: burned,
+          data: true,
           message: 'OTP burned successfully',
         );
       } else {
+        String errorMessage = 'HTTP ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorData = json.decode(response.body);
+            errorMessage = errorData['error'] ?? errorMessage;
+          } catch (e) {
+            errorMessage = response.body;
+          }
+        }
+
         debugPrint(
-            '❌ OtpService: Burn OTP failed - ok: ${response['ok']}, error: ${response['error']}');
+            '❌ OtpService: Burn OTP failed - HTTP ${response.statusCode}: $errorMessage');
 
         return EdgeFunctionResponse<bool>(
           success: false,
-          error: response['error'] as String? ?? 'Failed to burn OTP',
+          error: 'Failed to burn OTP: $errorMessage',
         );
       }
     } catch (e) {
