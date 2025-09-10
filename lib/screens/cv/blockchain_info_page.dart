@@ -272,7 +272,7 @@ class BlockchainInfoPage extends StatelessWidget {
         ),
         _buildInfoRow(
           localizations.certifier,
-          certification.certification?.nomeCertificatore ?? 'JetCV',
+          certification.certification?.certifier?.displayName ?? 'JetCV',
           isMobile,
         ),
         _buildInfoRow(

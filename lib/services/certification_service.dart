@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
-import 'package:functions_client/functions_client.dart';
 import 'package:jetcv__utenti/services/edge_function_service.dart';
 import 'package:jetcv__utenti/models/certification_user_model.dart';
+import 'package:jetcv__utenti/models/location_model.dart';
+import 'package:jetcv__utenti/models/legal_entity_model.dart';
+import 'package:jetcv__utenti/models/certification_media_model.dart';
 
 /// Helper function to safely parse DateTime from JSON
 DateTime parseDateTime(dynamic dateValue) {
@@ -34,13 +36,12 @@ DateTime parseDateTime(dynamic dateValue) {
 class CertificationService {
   static final SupabaseClient _client = SupabaseConfig.client;
 
-  /// Recupera le informazioni del certificatore dal campo nomeCertificatore
-  /// che viene già calcolato dall'edge function list-user-certifications-details
+  /// Recupera le informazioni del certificatore dai dati espansi della nuova API
+  /// La nuova API include già i dati del certifier con il relativo user espanso
   static Future<CertifierInfo?> getCertifierInfo(String certifierId) async {
     try {
-      // L'edge function list-user-certifications-details già include nomeCertificatore
-      // Quindi non abbiamo bisogno di fare query separate, il nome viene già fornito
-      // nel campo certification.nomeCertificatore
+      // La nuova API list-user-certifications-details include già tutti i dati
+      // del certifier espanso con il relativo user, quindi non serve più questa funzione
       return null; // Non più necessario fare query separate
     } catch (e) {
       debugPrint('Error in getCertifierInfo: $e');
@@ -63,7 +64,7 @@ class CertificationService {
       }
 
       // Try different approaches to call the edge function
-      late final response;
+      late final FunctionResponse response;
 
       try {
         // Approach 1: No body (GET-like behavior)
@@ -101,9 +102,20 @@ class CertificationService {
 
           final certifications = certificationsData.map((item) {
             try {
+              // Debug: print the structure of first item to understand the API format
+              if (certificationsData.indexOf(item) == 0) {
+                debugPrint('🔍 First certification item structure:');
+                debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
+                if (item.containsKey('certification_user')) {
+                  debugPrint(
+                      '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
+                }
+              }
+
               return UserCertificationDetail.fromJson(item);
             } catch (e) {
               debugPrint('❌ Error parsing certification item: $e');
+              debugPrint('❌ Item data: $item');
               rethrow;
             }
           }).toList();
@@ -131,9 +143,20 @@ class CertificationService {
 
           final certifications = certificationsData.map((item) {
             try {
+              // Debug: print the structure of first item to understand the API format
+              if (certificationsData.indexOf(item) == 0) {
+                debugPrint('🔍 First certification item structure (wrapped):');
+                debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
+                if (item.containsKey('certification_user')) {
+                  debugPrint(
+                      '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
+                }
+              }
+
               return UserCertificationDetail.fromJson(item);
             } catch (e) {
               debugPrint('❌ Error parsing certification item: $e');
+              debugPrint('❌ Item data: $item');
               rethrow;
             }
           }).toList();
@@ -289,13 +312,50 @@ class UserCertificationDetail {
   });
 
   factory UserCertificationDetail.fromJson(Map<String, dynamic> json) {
-    return UserCertificationDetail(
-      certificationUser: CertificationUser.fromJson(json['certification_user']),
-      certification: json['certification'] != null
-          ? Certification.fromJson(json['certification'])
-          : null,
-      media: CertificationMedia.fromJson(json['media']),
-    );
+    try {
+      // Check if data comes from new API structure
+      if (json.containsKey('certification_user') &&
+          json['certification_user'] is Map) {
+        final certificationUserData =
+            json['certification_user'] as Map<String, dynamic>;
+
+        return UserCertificationDetail(
+          certificationUser: CertificationUser.fromJson(certificationUserData),
+          certification: certificationUserData['certification'] != null &&
+                  certificationUserData['certification'] is Map
+              ? Certification.fromJson(certificationUserData['certification']
+                  as Map<String, dynamic>)
+              : null,
+          media: json['media'] != null && json['media'] is Map
+              ? CertificationMedia.fromJson(
+                  json['media'] as Map<String, dynamic>)
+              : CertificationMedia
+                  .empty(), // Provide empty media if not present
+        );
+      }
+
+      // Fallback for old API structure
+      return UserCertificationDetail(
+        certificationUser: json['certification_user'] != null &&
+                json['certification_user'] is Map
+            ? CertificationUser.fromJson(
+                json['certification_user'] as Map<String, dynamic>)
+            : throw ArgumentError(
+                'certification_user field is required and must be a valid object'),
+        certification:
+            json['certification'] != null && json['certification'] is Map
+                ? Certification.fromJson(
+                    json['certification'] as Map<String, dynamic>)
+                : null,
+        media: json['media'] != null && json['media'] is Map
+            ? CertificationMedia.fromJson(json['media'] as Map<String, dynamic>)
+            : CertificationMedia.empty(), // Provide empty media if not present
+      );
+    } catch (e) {
+      debugPrint('❌ Error parsing UserCertificationDetail: $e');
+      debugPrint('❌ JSON data: $json');
+      rethrow;
+    }
   }
 }
 
@@ -344,6 +404,7 @@ class CertifierInfo {
   final String? firstName;
   final String? lastName;
   final String? fullName;
+  final UserInfo? user; // Expanded user data from new API
 
   CertifierInfo({
     required this.idCertifier,
@@ -351,6 +412,7 @@ class CertifierInfo {
     this.firstName,
     this.lastName,
     this.fullName,
+    this.user,
   });
 
   factory CertifierInfo.fromJson(Map<String, dynamic> json) {
@@ -360,11 +422,20 @@ class CertifierInfo {
       firstName: json['first_name']?.toString(),
       lastName: json['last_name']?.toString(),
       fullName: json['full_name']?.toString(),
+      user: json['user'] != null ? UserInfo.fromJson(json['user']) : null,
     );
   }
 
   String get displayName {
-    // Prima prova fullName se è valido
+    // First try the expanded user data from new API
+    if (user != null) {
+      final userDisplayName = user!.displayName;
+      if (userDisplayName.isNotEmpty && userDisplayName != 'Unknown User') {
+        return userDisplayName;
+      }
+    }
+
+    // Fallback to legacy fields
     if (fullName != null && fullName!.trim().isNotEmpty) {
       return fullName!.trim();
     }
@@ -397,6 +468,65 @@ class CertifierInfo {
   }
 }
 
+/// UserInfo class to handle expanded user data from the new API
+class UserInfo {
+  final String idUser;
+  final String? firstName;
+  final String? lastName;
+  final String? email;
+  final String? fullName;
+
+  UserInfo({
+    required this.idUser,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.fullName,
+  });
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) {
+    return UserInfo(
+      idUser: json['idUser']?.toString() ?? '',
+      firstName: json['first_name']?.toString(),
+      lastName: json['last_name']?.toString(),
+      email: json['email']?.toString(),
+      fullName: json['full_name']?.toString(),
+    );
+  }
+
+  String get displayName {
+    // Try fullName first if available
+    if (fullName != null && fullName!.trim().isNotEmpty) {
+      return fullName!.trim();
+    }
+
+    // Try firstName + lastName
+    final first = firstName?.trim();
+    final last = lastName?.trim();
+
+    if (first != null && first.isNotEmpty && last != null && last.isNotEmpty) {
+      return '$first $last';
+    }
+
+    // Try firstName only
+    if (first != null && first.isNotEmpty) {
+      return first;
+    }
+
+    // Try lastName only
+    if (last != null && last.isNotEmpty) {
+      return last;
+    }
+
+    // Try email if no name is available
+    if (email != null && email!.trim().isNotEmpty) {
+      return email!.trim();
+    }
+
+    return 'Unknown User';
+  }
+}
+
 class Certification {
   final String idCertification;
   final String? idCertifier;
@@ -414,7 +544,12 @@ class Certification {
   final CertificationCategory? category;
   final List<CategoryInformation> categoryInformation;
   final CertifierInfo? certifier;
-  final String? nomeCertificatore; // Campo aggiunto dall'edge function
+  final LocationModel? location; // Expanded location data from new API
+  final LegalEntityModel?
+      legalEntity; // Expanded legal entity data from new API
+  final List<CertificationMediaWithLocation>
+      certificationMedia; // Media with expanded location from new API 1.0.8
+  // nomeCertificatore removed - now use expanded certifier.user data from new API
 
   Certification({
     required this.idCertification,
@@ -433,7 +568,9 @@ class Certification {
     this.category,
     this.categoryInformation = const [],
     this.certifier,
-    this.nomeCertificatore,
+    this.location,
+    this.legalEntity,
+    this.certificationMedia = const [],
   });
 
   factory Certification.fromJson(Map<String, dynamic> json) {
@@ -456,17 +593,38 @@ class Certification {
       closedAt:
           json['closed_at'] != null ? parseDateTime(json['closed_at']) : null,
       idCertificationCategory: json['id_certification_category']?.toString(),
-      category: json['category'] != null
-          ? CertificationCategory.fromJson(json['category'])
+      category: json['certification_category'] != null
+          ? CertificationCategory.fromJson(json['certification_category'])
           : null,
-      categoryInformation: (json['category_information'] as List<dynamic>?)
-              ?.map((item) => CategoryInformation.fromJson(item))
-              .toList() ??
-          [],
+      categoryInformation: json['certification_category'] != null &&
+              json['certification_category']['certification_information']
+                  is List
+          ? (json['certification_category']['certification_information']
+                  as List<dynamic>)
+              .map((item) => CategoryInformation.fromExpandedJson(item))
+              .toList()
+          : (json['category_information'] as List<dynamic>?)
+                  ?.map((item) => CategoryInformation.fromJson(item))
+                  .toList() ??
+              [],
       certifier: json['certifier'] != null
           ? CertifierInfo.fromJson(json['certifier'])
           : null,
-      nomeCertificatore: json['nomeCertificatore']?.toString(),
+      location: json['location'] != null && json['location'] is Map
+          ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
+      legalEntity: json['legal_entity'] != null && json['legal_entity'] is Map
+          ? LegalEntityModel.fromJson(
+              json['legal_entity'] as Map<String, dynamic>)
+          : null,
+      certificationMedia: json['certification_media'] != null &&
+              json['certification_media'] is List
+          ? (json['certification_media'] as List<dynamic>)
+              .where((item) => item != null && item is Map)
+              .map((item) => CertificationMediaWithLocation.fromJson(
+                  item as Map<String, dynamic>))
+              .toList()
+          : [],
     );
   }
 }
@@ -530,6 +688,20 @@ class CategoryInformation {
               .toList() ??
           [],
       value: json['value']?.toString(),
+      label: json['label']?.toString(),
+    );
+  }
+
+  /// Factory method for the new API structure where certification_information_value is an array
+  /// directly in the certification_information object
+  factory CategoryInformation.fromExpandedJson(Map<String, dynamic> json) {
+    return CategoryInformation(
+      info: CertificationInformation.fromJson(json),
+      values: (json['certification_information_value'] as List<dynamic>?)
+              ?.map((item) => CertificationInformationValue.fromJson(item))
+              .toList() ??
+          [],
+      value: null, // Direct value not used in expanded format
       label: json['label']?.toString(),
     );
   }
@@ -614,6 +786,14 @@ class CertificationMedia {
     this.directMedia = const [],
     this.linkedMedia = const [],
   });
+
+  /// Creates an empty CertificationMedia instance
+  factory CertificationMedia.empty() {
+    return CertificationMedia(
+      directMedia: [],
+      linkedMedia: [],
+    );
+  }
 
   factory CertificationMedia.fromJson(Map<String, dynamic> json) {
     return CertificationMedia(
@@ -706,4 +886,24 @@ class CertificationApprovalResponse {
     this.error,
     this.data,
   });
+}
+
+/// Certification media with expanded location data from new API
+class CertificationMediaWithLocation {
+  final CertificationMediaModel media;
+  final LocationModel? location;
+
+  CertificationMediaWithLocation({
+    required this.media,
+    this.location,
+  });
+
+  factory CertificationMediaWithLocation.fromJson(Map<String, dynamic> json) {
+    return CertificationMediaWithLocation(
+      media: CertificationMediaModel.fromJson(json),
+      location: json['location'] != null && json['location'] is Map
+          ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
+    );
+  }
 }

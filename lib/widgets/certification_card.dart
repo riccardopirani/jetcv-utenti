@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
-import 'package:jetcv__utenti/services/legal_entity_service.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/models/location_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Reusable certification card widget to display a user certification
@@ -119,7 +119,9 @@ class _CertificationCardState extends State<CertificationCard> {
                 ],
 
                 // Title (Certification category name localized when possible)
-                if (cert.certification?.category?.name != null)
+                // Category name (certification type) - with more vertical margin
+                if (cert.certification?.category?.name != null) ...[
+                  const SizedBox(height: 12),
                   Text(
                     _getLocalizedCertificationType(
                       context,
@@ -129,19 +131,25 @@ class _CertificationCardState extends State<CertificationCard> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                ],
 
-                const SizedBox(height: 8),
+                // Legal Entity (shown first, immediately with cached data)
+                if (widget.showLegalEntityLogo) ...[
+                  _buildOrganizationRow(context),
+                  const SizedBox(height: 12),
+                ],
 
-                // Certifier display name (from edge function if present) - only show if enabled
+                // Certifier name (from expanded certifier data in new API)
                 if (widget.showCertifiedUserName &&
-                    cert.certification?.nomeCertificatore != null)
+                    cert.certification?.certifier != null) ...[
                   Row(
                     children: [
                       const Icon(Icons.person, size: 16, color: Colors.grey),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          cert.certification!.nomeCertificatore!,
+                          _getCertifierFullName(cert.certification!.certifier!),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,
@@ -151,13 +159,8 @@ class _CertificationCardState extends State<CertificationCard> {
                       ),
                     ],
                   ),
-
-                if (widget.showLegalEntityLogo) ...[
-                  const SizedBox(height: 8),
-                  _buildOrganizationRow(context),
+                  const SizedBox(height: 12),
                 ],
-
-                const SizedBox(height: 16),
 
                 // Created date
                 Row(
@@ -173,6 +176,12 @@ class _CertificationCardState extends State<CertificationCard> {
                     ),
                   ],
                 ),
+
+                // Location (if available)
+                if (cert.certification?.location != null) ...[
+                  const SizedBox(height: 12),
+                  _buildLocationRow(context, cert.certification!.location!),
+                ],
 
                 // Rejection reason if available
                 if (widget.showRejectionReason &&
@@ -326,93 +335,216 @@ class _CertificationCardState extends State<CertificationCard> {
   }
 
   Widget _buildOrganizationRow(BuildContext context) {
-    final legalEntityId = widget.certification.certification?.idLegalEntity;
-    if (legalEntityId == null) return const SizedBox.shrink();
+    final certification = widget.certification.certification;
+    if (certification == null) return const SizedBox.shrink();
 
-    return FutureBuilder<(String, String?)>(
-      future: _loadOrganization(legalEntityId),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-        final (name, logoUrl) = snapshot.data!;
-        return Row(
-          children: [
-            _buildLegalEntityLogo(logoUrl),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                'Legal Entity: $name',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w600,
-                    ),
-                overflow: TextOverflow.ellipsis,
-              ),
+    // Get the name directly from expanded legal_entity data (new API) or fallback to service call
+    String? organizationName;
+    String? legalEntityId;
+
+    if (certification.legalEntity != null) {
+      // Use expanded legal_entity data from new API - show immediately!
+      organizationName =
+          certification.legalEntity!.legalName?.trim().isNotEmpty == true
+              ? certification.legalEntity!.legalName!.trim()
+              : null;
+      legalEntityId = certification.legalEntity!.idLegalEntity;
+    } else if (certification.idLegalEntity != null) {
+      // Fallback: use legacy loading with cache
+      legalEntityId = certification.idLegalEntity!;
+      organizationName = _legalEntityIdToNameCache[legalEntityId];
+    }
+
+    if (organizationName != null && legalEntityId != null) {
+      // Show immediately with available data
+      return Row(
+        children: [
+          _buildLegalEntityLogo(
+              legalEntityId), // Logo loads asynchronously with cache
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              organizationName,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildLegalEntityLogo(String? logoUrl) {
-    if (logoUrl == null || logoUrl.isEmpty) {
-      return Icon(
-        Icons.corporate_fare,
-        size: 18,
-        color: Colors.grey.shade600,
+          ),
+        ],
       );
     }
 
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildLegalEntityLogo(String legalEntityId) {
+    // Get logo URL from expanded legal_entity data (API 1.0.8) or cache
+    String? logoUrl = _legalEntityIdToLogoCache[legalEntityId];
+
+    // If not cached, get from expanded API data and cache it
+    if (logoUrl == null) {
+      final certification = widget.certification.certification;
+      if (certification?.legalEntity?.idLegalEntity == legalEntityId) {
+        logoUrl = certification!.legalEntity!.logoPicture?.trim();
+        if (logoUrl?.isNotEmpty == true) {
+          // Cache the logo URL for future use
+          _legalEntityIdToLogoCache[legalEntityId] = logoUrl;
+        } else {
+          // Cache null to avoid repeated checks
+          _legalEntityIdToLogoCache[legalEntityId] = null;
+        }
+      } else {
+        // Cache null if legal entity doesn't match
+        _legalEntityIdToLogoCache[legalEntityId] = null;
+      }
+    }
+
+    if (logoUrl?.isNotEmpty == true) {
+      return Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 0.5,
+          ),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        logoUrl,
-        fit: BoxFit.cover,
-      ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          logoUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Icon(
+              Icons.corporate_fare,
+              size: 18,
+              color: Colors.grey.shade600,
+            );
+          },
+        ),
+      );
+    }
+
+    // Show default icon if no logo available
+    return Icon(
+      Icons.corporate_fare,
+      size: 18,
+      color: Colors.grey.shade600,
     );
   }
 
-  Future<(String, String?)> _loadOrganization(String legalEntityId) async {
-    // Name cache
-    String name;
-    if (_legalEntityIdToNameCache.containsKey(legalEntityId)) {
-      name = _legalEntityIdToNameCache[legalEntityId]!;
-    } else {
-      final legalEntity =
-          await LegalEntityService.getLegalEntityById(legalEntityId);
-      name = LegalEntityService.getCompanyName(legalEntity);
-      _legalEntityIdToNameCache[legalEntityId] = name;
+  Widget _buildLocationRow(BuildContext context, LocationModel location) {
+    final theme = Theme.of(context);
+    final locationText = _formatLocationText(location);
+
+    if (locationText.isEmpty) {
+      return const SizedBox.shrink();
     }
 
-    // Logo cache
-    String? logo;
-    if (_legalEntityIdToLogoCache.containsKey(legalEntityId)) {
-      logo = _legalEntityIdToLogoCache[legalEntityId];
-    } else {
-      final legalEntity =
-          await LegalEntityService.getLegalEntityById(legalEntityId);
-      if (legalEntity != null &&
-          legalEntity.logoPicture != null &&
-          legalEntity.logoPicture!.isNotEmpty) {
-        logo = legalEntity.logoPicture;
-      } else {
-        logo = null;
+    return Row(
+      children: [
+        const Icon(Icons.location_on, size: 16, color: Colors.grey),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            locationText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.grey[600],
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatLocationText(LocationModel location) {
+    final List<String> parts = [];
+
+    // Add name if available (e.g., "Università di Bologna")
+    if (location.name?.isNotEmpty == true) {
+      parts.add(location.name!);
+      return parts.join(', '); // If we have a name, just show that
+    }
+
+    // Otherwise build address components
+
+    // Add street (thoroughfare + subThoroughfare)
+    if (location.thoroughfare?.isNotEmpty == true) {
+      String street = location.thoroughfare!;
+      if (location.subThoroughfare?.isNotEmpty == true) {
+        street = '${location.subThoroughfare} $street';
       }
-      _legalEntityIdToLogoCache[legalEntityId] = logo;
+      parts.add(street);
     }
 
-    return (name, logo);
+    // Add locality (city)
+    if (location.locality?.isNotEmpty == true) {
+      parts.add(location.locality!);
+    }
+
+    // Add administrative area (state/region)
+    if (location.administrativeArea?.isNotEmpty == true) {
+      parts.add(location.administrativeArea!);
+    }
+
+    // Add country
+    if (location.country?.isNotEmpty == true) {
+      parts.add(location.country!);
+    }
+
+    return parts.join(', ');
+  }
+
+  String _getCertifierFullName(CertifierInfo certifier) {
+    // First try to get name from expanded user data (new API)
+    if (certifier.user != null) {
+      final user = certifier.user!;
+      final firstName = user.firstName?.trim();
+      final lastName = user.lastName?.trim();
+
+      if (firstName?.isNotEmpty == true && lastName?.isNotEmpty == true) {
+        return '$firstName $lastName';
+      }
+
+      // If only one name is available from user data
+      if (firstName?.isNotEmpty == true) {
+        return firstName!;
+      }
+      if (lastName?.isNotEmpty == true) {
+        return lastName!;
+      }
+
+      // Try fullName from user if firstName/lastName are not available
+      if (user.fullName?.trim().isNotEmpty == true) {
+        return user.fullName!.trim();
+      }
+    }
+
+    // Fallback to legacy certifier fields if user data is not available
+    final firstName = certifier.firstName?.trim();
+    final lastName = certifier.lastName?.trim();
+
+    if (firstName?.isNotEmpty == true && lastName?.isNotEmpty == true) {
+      return '$firstName $lastName';
+    }
+
+    // If only one name is available from certifier
+    if (firstName?.isNotEmpty == true) {
+      return firstName!;
+    }
+    if (lastName?.isNotEmpty == true) {
+      return lastName!;
+    }
+
+    // Try fullName from certifier if firstName/lastName are not available
+    if (certifier.fullName?.trim().isNotEmpty == true) {
+      return certifier.fullName!.trim();
+    }
+
+    return 'Certificatore'; // Final fallback
   }
 
   Widget _buildAttachedMediaSection(UserCertificationDetail cert) {
@@ -555,11 +687,11 @@ class _CertificationCardState extends State<CertificationCard> {
     BorderRadius borderRadius,
   ) {
     return SizedBox(
-      height: 35, // Match LinkedIn button height (35px)
+      height: 28, // Reduced LinkedIn button height
       width: double.infinity, // Take full available width with max constraint
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-            maxWidth: 210), // Max width like LinkedIn buttons
+            maxWidth: 180), // Reduced max width for LinkedIn buttons
         child: ElevatedButton.icon(
           onPressed: () => _createOpenBadge(context, cert),
           style: ElevatedButton.styleFrom(
@@ -569,15 +701,15 @@ class _CertificationCardState extends State<CertificationCard> {
             shadowColor: const Color(0xFF4CAF50).withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(borderRadius: borderRadius),
             padding: const EdgeInsets.symmetric(
-                horizontal: 12, vertical: 8), // Proper padding for 35px height
-            minimumSize: const Size(0, 35), // Force minimum height
+                horizontal: 10, vertical: 6), // Reduced padding for 28px height
+            minimumSize: const Size(0, 28), // Force minimum height
           ),
           icon: Icon(Icons.workspace_premium,
-              size: 16), // Proper icon size for 35px button
+              size: 14), // Reduced icon size for 28px button
           label: Text(
             AppLocalizations.of(context)!.createOpenBadge,
             style: TextStyle(
-              fontSize: 14, // Proper font size for 35px button
+              fontSize: 12, // Reduced font size for 28px button
               fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
@@ -600,16 +732,16 @@ class _CertificationCardState extends State<CertificationCard> {
     return GestureDetector(
       onTap: () => _openLinkedInForCertification(context, cert),
       child: SizedBox(
-        height: 35, // Match standard LinkedIn button height
+        height: 28, // Reduced LinkedIn button height
         width: double.infinity, // Take full available width with max constraint
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-              maxWidth: 210), // Max width like LinkedIn buttons
+              maxWidth: 180), // Reduced max width for LinkedIn buttons
           child: ClipRRect(
             borderRadius: borderRadius,
             child: Image.asset(
               linkedInButtonImage,
-              height: 35, // Match standard LinkedIn button height
+              height: 28, // Reduced LinkedIn button height
               width:
                   null, // Let width adjust automatically to maintain aspect ratio
               fit: BoxFit
@@ -617,7 +749,7 @@ class _CertificationCardState extends State<CertificationCard> {
               errorBuilder: (context, error, stackTrace) {
                 // Fallback to styled button matching the same height if image fails to load
                 return SizedBox(
-                  height: 35,
+                  height: 28,
                   child: ElevatedButton.icon(
                     onPressed: () =>
                         _openLinkedInForCertification(context, cert),
@@ -629,16 +761,16 @@ class _CertificationCardState extends State<CertificationCard> {
                           const Color(0xFF0077B5).withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(borderRadius: borderRadius),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8), // Proper padding for 35px height
-                      minimumSize: const Size(0, 35), // Force minimum height
+                          horizontal: 10,
+                          vertical: 5), // Reduced padding for 28px height
+                      minimumSize: const Size(0, 28), // Force minimum height
                     ),
                     icon: Icon(Icons.link,
-                        size: 16), // Proper icon size for 35px button
+                        size: 14), // Reduced icon size for 28px button
                     label: Text(
                       localizations.addToLinkedIn,
                       style: TextStyle(
-                        fontSize: 14, // Proper font size for 35px button
+                        fontSize: 12, // Reduced font size for 28px button
                         fontWeight: FontWeight.w600,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -737,9 +869,11 @@ class _CertificationCardState extends State<CertificationCard> {
           ? _getLocalizedCertificationType(
               context, cert.certification!.category!.name)
           : 'Certification';
-      final organizationName = await _loadOrganization(
-        cert.certification?.idLegalEntity ?? '',
-      );
+      // Get organization name directly from expanded legal_entity data
+      final organizationName =
+          cert.certification?.legalEntity?.legalName?.trim().isNotEmpty == true
+              ? cert.certification!.legalEntity!.legalName!.trim()
+              : 'Organizzazione';
       final issueDate = cert.certificationUser.createdAt;
       final certId = cert.certificationUser.idCertificationUser;
 
@@ -751,7 +885,7 @@ class _CertificationCardState extends State<CertificationCard> {
 
       final params = {
         'name': Uri.encodeComponent(certName),
-        'organizationName': Uri.encodeComponent(organizationName.$1),
+        'organizationName': Uri.encodeComponent(organizationName),
         'issueYear': issueDate.year.toString(),
         'issueMonth': issueDate.month.toString(),
         'certUrl': Uri.encodeComponent(certUrl),

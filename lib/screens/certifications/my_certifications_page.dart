@@ -240,10 +240,19 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
             onPressed: _loadCertifications,
-            child: const Text('🔄 Riprova'),
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Riprova'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),
@@ -265,9 +274,19 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: _loadCertifications,
-            child: const Text('🔄 Ricarica'),
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Ricarica'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 2,
+            ),
           ),
         ],
       ),
@@ -554,12 +573,12 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
                             decoration: BoxDecoration(
                               color: Theme.of(context)
                                   .primaryColor
-                                  .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: Theme.of(context)
                                     .primaryColor
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -645,10 +664,12 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      color:
+                          Theme.of(context).primaryColor.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),

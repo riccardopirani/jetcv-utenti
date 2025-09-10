@@ -3467,21 +3467,22 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   /// Ottiene il nome del certificatore per una certificazione
-  /// Ora utilizza il campo nomeCertificatore fornito dall'edge function
+  /// Ora utilizza i dati del certifier espanso dalla nuova API
   Future<String> _getCertifierDisplayName(UserCertificationDetail cert) async {
     // Debug: stampa le informazioni disponibili
     debugPrint('=== CERTIFIER DEBUG ===');
     debugPrint('Certification ID: ${cert.certification?.idCertification}');
     debugPrint('Certifier ID: ${cert.certification?.idCertifier}');
-    debugPrint('Nome Certificatore: ${cert.certification?.nomeCertificatore}');
+    debugPrint('Certifier Data: ${cert.certification?.certifier?.displayName}');
     debugPrint('Category name: ${cert.certification?.category?.name}');
 
-    // Prima prova il campo nomeCertificatore fornito dall'edge function
-    if (cert.certification?.nomeCertificatore != null &&
-        cert.certification!.nomeCertificatore!.isNotEmpty) {
-      debugPrint(
-          '✅ Using nomeCertificatore from edge function: ${cert.certification!.nomeCertificatore}');
-      return cert.certification!.nomeCertificatore!;
+    // Prima prova i dati del certifier espanso dalla nuova API
+    if (cert.certification?.certifier != null) {
+      final displayName = cert.certification!.certifier!.displayName;
+      if (displayName != 'Unknown Certifier') {
+        debugPrint('✅ Using certifier displayName from new API: $displayName');
+        return displayName;
+      }
     }
 
     // Fallback al nome della categoria se disponibile
