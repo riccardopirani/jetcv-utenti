@@ -184,40 +184,6 @@ class AppHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surface
-                          .withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withValues(alpha: 0.2),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.notifications_outlined,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -239,8 +205,12 @@ class HeroSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: Colors.green.shade50,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.green.shade200,
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -248,13 +218,13 @@ class HeroSection extends StatelessWidget {
                 Icon(
                   Icons.link,
                   size: 18,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Colors.green.shade700,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   AppLocalizations.of(context)!.blockchainPowered,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Colors.green.shade700,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -366,7 +336,7 @@ class FeatureSection extends StatelessWidget {
                 icon: Icons.update,
                 title: AppLocalizations.of(context)!.realTimeUpdates,
                 description: AppLocalizations.of(context)!.realTimeUpdatesDesc,
-                color: Theme.of(context).colorScheme.tertiary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),

@@ -34,4 +34,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/linkedin-add-to-profile-buttons/
   generate: true

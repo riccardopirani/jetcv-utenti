@@ -168,37 +168,14 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
 
-    // Responsive padding and sizing
-    final headerPadding = isMobile
-        ? const EdgeInsets.all(12)
-        : isTablet
-            ? const EdgeInsets.all(16)
-            : const EdgeInsets.all(20);
-
-    final iconSize = isMobile
-        ? 16.0
-        : isTablet
-            ? 18.0
-            : 20.0;
-    final folderIconSize = isMobile
-        ? 28.0
-        : isTablet
-            ? 32.0
-            : 36.0;
-    final titleFontSize = isMobile
-        ? 14.0
-        : isTablet
-            ? 16.0
-            : 18.0;
-    final subtitleFontSize = isMobile
-        ? 10.0
-        : isTablet
-            ? 12.0
-            : 14.0;
+    // Fixed padding and sizing for all devices
+    final headerPadding = const EdgeInsets.all(20);
+    final iconSize = 20.0;
+    final folderIconSize = 36.0;
+    final titleFontSize = 18.0;
+    final subtitleFontSize = 14.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +213,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                     color: Colors.grey.shade600,
                   ),
                 ),
-                SizedBox(width: isMobile ? 8 : 12),
+                const SizedBox(width: 12),
                 // Title and subtitle
                 Expanded(
                   child: Column(
@@ -251,7 +228,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                           color: Colors.grey.shade800,
                         ),
                       ),
-                      SizedBox(height: isMobile ? 1 : 2),
+                      const SizedBox(height: 2),
                       Text(
                         AppLocalizations.of(context)!
                             .documentationAndRelatedContent,
@@ -259,7 +236,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                           fontSize: subtitleFontSize,
                           color: Colors.grey.shade600,
                         ),
-                        maxLines: isMobile ? 2 : 1,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -280,15 +257,11 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
         // Expanded content
         if (_isExpanded) ...[
-          SizedBox(height: isMobile ? 12 : 16),
+          const SizedBox(height: 16),
 
           // Info box
           Container(
-            padding: EdgeInsets.all(isMobile
-                ? 10
-                : isTablet
-                    ? 12
-                    : 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
               borderRadius: BorderRadius.circular(8),
@@ -301,23 +274,15 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
               children: [
                 Icon(
                   Icons.info_outline,
-                  size: isMobile
-                      ? 14
-                      : isTablet
-                          ? 16
-                          : 18,
+                  size: 18,
                   color: Colors.blue.shade600,
                 ),
-                SizedBox(width: isMobile ? 6 : 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     AppLocalizations.of(context)!.mediaDividedInfo,
                     style: TextStyle(
-                      fontSize: isMobile
-                          ? 10
-                          : isTablet
-                              ? 12
-                              : 14,
+                      fontSize: 14,
                       color: Colors.blue.shade700,
                     ),
                   ),
@@ -326,7 +291,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
             ),
           ),
 
-          SizedBox(height: isMobile ? 12 : 16),
+          const SizedBox(height: 16),
 
           // Media sections - responsive layout
           if (isDesktop &&
@@ -349,7 +314,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                     ),
                   ),
                   if (widget.certification.media.linkedMedia.isNotEmpty)
-                    SizedBox(width: isDesktop ? 16 : 12),
+                    const SizedBox(width: 16),
                 ],
 
                 // Personal Media Section
@@ -383,7 +348,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                 mediaItems: widget.certification.media.directMedia,
                 isDesktop: false,
               ),
-              SizedBox(height: isMobile ? 12 : 16),
+              const SizedBox(height: 16),
             ],
 
             // Personal Media Section
@@ -414,30 +379,10 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     required List<CertificationMediaItem> mediaItems,
     required bool isDesktop,
   }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
-    final iconSize = isMobile
-        ? 14.0
-        : isTablet
-            ? 16.0
-            : 18.0;
-    final titleFontSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-    final subtitleFontSize = isMobile
-        ? 9.0
-        : isTablet
-            ? 11.0
-            : 13.0;
-    final spacing = isMobile
-        ? 8.0
-        : isTablet
-            ? 10.0
-            : 12.0;
+    final iconSize = 18.0;
+    final titleFontSize = 16.0;
+    final subtitleFontSize = 13.0;
+    final spacing = 12.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +395,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
               size: iconSize,
               color: Colors.grey.shade600,
             ),
-            SizedBox(width: isMobile ? 6 : 8),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,7 +414,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                       fontSize: subtitleFontSize,
                       color: Colors.grey.shade600,
                     ),
-                    maxLines: isMobile ? 2 : 1,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -545,56 +490,19 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     final icon = _getMediaIcon(media.fileType);
     final actionIcon = isRealTime ? Icons.visibility : Icons.download;
 
-    // Responsive sizing
-    final itemPadding = isMobile
-        ? const EdgeInsets.all(8)
-        : isTablet
-            ? const EdgeInsets.all(10)
-            : const EdgeInsets.all(12);
-
-    final iconSize = isMobile
-        ? 24.0
-        : isTablet
-            ? 28.0
-            : 32.0;
-    final mediaIconSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-    final titleFontSize = isMobile
-        ? 11.0
-        : isTablet
-            ? 12.0
-            : 13.0;
-    final descriptionFontSize = isMobile
-        ? 9.0
-        : isTablet
-            ? 10.0
-            : 11.0;
-    final timeFontSize = isMobile
-        ? 8.0
-        : isTablet
-            ? 9.0
-            : 10.0;
-    final statusFontSize = isMobile
-        ? 7.0
-        : isTablet
-            ? 8.0
-            : 9.0;
-    final actionIconSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-    final actionPadding = isMobile
-        ? 6.0
-        : isTablet
-            ? 7.0
-            : 8.0;
+    // Fixed sizing for all devices
+    final itemPadding = const EdgeInsets.all(12);
+    final iconSize = 32.0;
+    final mediaIconSize = 16.0;
+    final titleFontSize = 13.0;
+    final descriptionFontSize = 14.0;
+    final timeFontSize = 13.0;
+    final statusFontSize = 9.0;
+    final actionIconSize = 16.0;
+    final actionPadding = 8.0;
 
     return Container(
-      margin: EdgeInsets.only(bottom: isMobile ? 6 : 8),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: itemPadding,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -628,7 +536,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
               color: Colors.grey.shade600,
             ),
           ),
-          SizedBox(width: isMobile ? 8 : 12),
+          const SizedBox(width: 12),
 
           // Content
           Expanded(
@@ -645,14 +553,14 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade800,
                         ),
-                        maxLines: isMobile ? 1 : 2,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isMobile ? 4 : 6,
-                        vertical: isMobile ? 1 : 2,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: statusColor,
@@ -670,27 +578,27 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                   ],
                 ),
                 if (media.description != null) ...[
-                  SizedBox(height: isMobile ? 2 : 4),
+                  const SizedBox(height: 4),
                   Text(
                     media.description!,
                     style: TextStyle(
                       fontSize: descriptionFontSize,
                       color: Colors.grey.shade600,
                     ),
-                    maxLines: isMobile ? 2 : 3,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
                 if (media.capturedAt != null) ...[
-                  SizedBox(height: isMobile ? 2 : 4),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(
                         Icons.access_time,
-                        size: isMobile ? 8 : 10,
+                        size: 10,
                         color: Colors.grey.shade500,
                       ),
-                      SizedBox(width: isMobile ? 2 : 4),
+                      const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           _formatMediaDate(media.capturedAt!),
@@ -708,7 +616,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
             ),
           ),
 
-          SizedBox(width: isMobile ? 6 : 8),
+          const SizedBox(width: 8),
 
           // Action button
           GestureDetector(

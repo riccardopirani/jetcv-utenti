@@ -319,8 +319,8 @@
     }
   },
   "certifier": "Certificatore",
-  "attachedMedia": "Media Allegati",
-  "attachedMediaCount": "Media Allegati ({count})",
+  "attachedMedia": "Media",
+  "attachedMediaCount": "Media ({count})",
   "@attachedMediaCount": {
     "placeholders": {
       "count": {
@@ -468,5 +468,95 @@
   "note": "Nota (opzionale)",
   "import": "Importa",
   "cancel": "Annulla",
-  "viewAll": "Visualizza Tutti"
+  "viewAll": "Visualizza Tutti",
+  "pendingCertifications": "Certificazioni in attesa",
+  "approvedCertifications": "Certificazioni approvate",
+  "rejectedCertifications": "Certificazioni rifiutate",
+  "pendingShort": "In attesa",
+  "approvedShort": "Approvate",
+  "rejectedShort": "Rifiutate",
+  "approve": "Approva",
+  "reject": "Rifiuta",
+  "confirmRejection": "Conferma rifiuto",
+  "rejectCertificationMessage": "Sei sicuro di voler rifiutare questa certificazione?",
+  "rejectionReason": "Motivo del rifiuto (opzionale)",
+  "enterRejectionReason": "Inserisci il motivo del rifiuto...",
+  "confirmReject": "Conferma rifiuto",
+  "certificationApproved": "Certificazione approvata con successo!",
+  "certificationRejected": "Certificazione rifiutata",
+  "errorApprovingCertification": "Errore nell'approvazione della certificazione: {error}",
+  "@errorApprovingCertification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorRejectingCertification": "Errore nel rifiuto della certificazione: {error}",
+  "@errorRejectingCertification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noCertificationsFound": "Nessuna certificazione trovata",
+  "loadingCertifications": "Caricamento certificazioni...",
+  "createdOn": "Creato il",
+  "rejectedReason": "Motivo rifiuto:",
+  "noRejectionReason": "Nessun motivo specificato",
+  "blockchainCertificate": "Certificato Blockchain",
+  "verifiedOnPolygonNetwork": "Verificato su Rete Polygon",
+  "transactionInformation": "Informazioni Transazione",
+  "transactionId": "ID Transazione",
+  "network": "Rete",
+  "blockHeight": "Altezza Blocco",
+  "gasUsed": "Gas Utilizzato",
+  "nftInformation": "Informazioni NFT",
+  "tokenId": "ID Token",
+  "contractAddress": "Indirizzo Contratto",
+  "standard": "Standard",
+  "metadataUri": "URI Metadata",
+  "mintInformation": "Informazioni Conio",
+  "mintDate": "Data Conio",
+  "minterAddress": "Indirizzo Coniatore",
+  "mintPrice": "Prezzo Conio",
+  "certificateStatus": "Stato",
+  "confirmed": "Confermato",
+  "certificateDetails": "Dettagli Certificato",
+  "certificateName": "Nome Certificato",
+  "issueDate": "Data Emissione",
+  "blockchainVerified": "Verificato su Blockchain",
+  "blockchainVerificationMessage": "Questo certificato è stato verificato e archiviato sulla rete blockchain Polygon.",
+  "viewOnPolygonExplorer": "Visualizza su Polygon Explorer",
+  "polygon": "Polygon",
+  "erc721": "ERC-721",
+  "cvCreationDate": "Data creazione CV",
+  "monthJan": "Gen",
+  "monthFeb": "Feb",
+  "monthMar": "Mar",
+  "monthApr": "Apr",
+  "monthMay": "Mag",
+  "monthJun": "Giu",
+  "monthJul": "Lug",
+  "monthAug": "Ago",
+  "monthSep": "Set",
+  "monthOct": "Ott",
+  "monthNov": "Nov",
+  "monthDec": "Dic",
+  "certType_programma_certificato": "Programma certificato",
+  "certType_dottorato_di_ricerca": "Dottorato di ricerca",
+  "certType_diploma_its": "Diploma ITS",
+  "certType_workshop": "Workshop",
+  "certType_risultato_sportivo": "Risultato Sportivo",
+  "certType_corso_specifico": "Corso specifico",
+  "certType_team_builder": "Team builder",
+  "certType_corso_di_aggiornamento": "Corso di aggiornamento",
+  "certType_speech": "Speech",
+  "certType_congresso": "Congresso",
+  "certType_corso_specialistico": "Corso specialistico",
+  "certType_certificazione": "Certificazione",
+  "certType_moderatore": "Moderatore",
+  "certType_ruolo_professionale": "Ruolo professionale",
+  "certType_volontariato": "Volontariato"
 }

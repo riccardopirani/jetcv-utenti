@@ -873,11 +873,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get certifier => 'Certificatore';
 
   @override
-  String get attachedMedia => 'Media Allegati';
+  String get attachedMedia => 'Media';
 
   @override
   String attachedMediaCount(int count) {
-    return 'Media Allegati ($count)';
+    return 'Media ($count)';
   }
 
   @override
@@ -1329,7 +1329,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Errore nella creazione dell\'Open Badge';
 
   @override
-  String get issueDate => 'Data di emissione';
+  String get issueDate => 'Data Emissione';
 
   @override
   String get yourOpenBadgeCreatedSuccessfully =>
@@ -1404,4 +1404,229 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get viewAll => 'Visualizza Tutti';
+
+  @override
+  String get pendingCertifications => 'Certificazioni in attesa';
+
+  @override
+  String get approvedCertifications => 'Certificazioni approvate';
+
+  @override
+  String get rejectedCertifications => 'Certificazioni rifiutate';
+
+  @override
+  String get pendingShort => 'In attesa';
+
+  @override
+  String get approvedShort => 'Approvate';
+
+  @override
+  String get rejectedShort => 'Rifiutate';
+
+  @override
+  String get approve => 'Approva';
+
+  @override
+  String get reject => 'Rifiuta';
+
+  @override
+  String get confirmRejection => 'Conferma rifiuto';
+
+  @override
+  String get rejectCertificationMessage =>
+      'Sei sicuro di voler rifiutare questa certificazione?';
+
+  @override
+  String get rejectionReason => 'Motivo del rifiuto (opzionale)';
+
+  @override
+  String get enterRejectionReason => 'Inserisci il motivo del rifiuto...';
+
+  @override
+  String get confirmReject => 'Conferma rifiuto';
+
+  @override
+  String get certificationApproved => 'Certificazione approvata con successo!';
+
+  @override
+  String get certificationRejected => 'Certificazione rifiutata';
+
+  @override
+  String errorApprovingCertification(String error) {
+    return 'Errore nell\'approvazione della certificazione: $error';
+  }
+
+  @override
+  String errorRejectingCertification(String error) {
+    return 'Errore nel rifiuto della certificazione: $error';
+  }
+
+  @override
+  String get createdOn => 'Creato il';
+
+  @override
+  String get rejectedReason => 'Motivo rifiuto:';
+
+  @override
+  String get noRejectionReason => 'Nessun motivo specificato';
+
+  @override
+  String get blockchainCertificate => 'Certificato Blockchain';
+
+  @override
+  String get verifiedOnPolygonNetwork => 'Verificato su Rete Polygon';
+
+  @override
+  String get transactionInformation => 'Informazioni Transazione';
+
+  @override
+  String get transactionId => 'ID Transazione';
+
+  @override
+  String get network => 'Rete';
+
+  @override
+  String get blockHeight => 'Altezza Blocco';
+
+  @override
+  String get gasUsed => 'Gas Utilizzato';
+
+  @override
+  String get nftInformation => 'Informazioni NFT';
+
+  @override
+  String get tokenId => 'ID Token';
+
+  @override
+  String get contractAddress => 'Indirizzo Contratto';
+
+  @override
+  String get standard => 'Standard';
+
+  @override
+  String get metadataUri => 'URI Metadata';
+
+  @override
+  String get mintInformation => 'Informazioni Conio';
+
+  @override
+  String get mintDate => 'Data Conio';
+
+  @override
+  String get minterAddress => 'Indirizzo Coniatore';
+
+  @override
+  String get mintPrice => 'Prezzo Conio';
+
+  @override
+  String get certificateStatus => 'Stato';
+
+  @override
+  String get confirmed => 'Confermato';
+
+  @override
+  String get certificateDetails => 'Dettagli Certificato';
+
+  @override
+  String get certificateName => 'Nome Certificato';
+
+  @override
+  String get blockchainVerified => 'Verificato su Blockchain';
+
+  @override
+  String get blockchainVerificationMessage =>
+      'Questo certificato è stato verificato e archiviato sulla rete blockchain Polygon.';
+
+  @override
+  String get viewOnPolygonExplorer => 'Visualizza su Polygon Explorer';
+
+  @override
+  String get polygon => 'Polygon';
+
+  @override
+  String get erc721 => 'ERC-721';
+
+  @override
+  String get cvCreationDate => 'Data creazione CV';
+
+  @override
+  String get monthJan => 'Gen';
+
+  @override
+  String get monthFeb => 'Feb';
+
+  @override
+  String get monthMar => 'Mar';
+
+  @override
+  String get monthApr => 'Apr';
+
+  @override
+  String get monthMay => 'Mag';
+
+  @override
+  String get monthJun => 'Giu';
+
+  @override
+  String get monthJul => 'Lug';
+
+  @override
+  String get monthAug => 'Ago';
+
+  @override
+  String get monthSep => 'Set';
+
+  @override
+  String get monthOct => 'Ott';
+
+  @override
+  String get monthNov => 'Nov';
+
+  @override
+  String get monthDec => 'Dic';
+
+  @override
+  String get certType_programma_certificato => 'Programma certificato';
+
+  @override
+  String get certType_dottorato_di_ricerca => 'Dottorato di ricerca';
+
+  @override
+  String get certType_diploma_its => 'Diploma ITS';
+
+  @override
+  String get certType_workshop => 'Workshop';
+
+  @override
+  String get certType_risultato_sportivo => 'Risultato Sportivo';
+
+  @override
+  String get certType_corso_specifico => 'Corso specifico';
+
+  @override
+  String get certType_team_builder => 'Team builder';
+
+  @override
+  String get certType_corso_di_aggiornamento => 'Corso di aggiornamento';
+
+  @override
+  String get certType_speech => 'Speech';
+
+  @override
+  String get certType_congresso => 'Congresso';
+
+  @override
+  String get certType_corso_specialistico => 'Corso specialistico';
+
+  @override
+  String get certType_certificazione => 'Certificazione';
+
+  @override
+  String get certType_moderatore => 'Moderatore';
+
+  @override
+  String get certType_ruolo_professionale => 'Ruolo professionale';
+
+  @override
+  String get certType_volontariato => 'Volontariato';
 }

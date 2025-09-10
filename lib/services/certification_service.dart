@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:functions_client/functions_client.dart';
+import 'package:jetcv__utenti/services/edge_function_service.dart';
+import 'package:jetcv__utenti/models/certification_user_model.dart';
 
 /// Helper function to safely parse DateTime from JSON
 DateTime parseDateTime(dynamic dateValue) {
@@ -36,18 +38,9 @@ class CertificationService {
   /// che viene già calcolato dall'edge function list-user-certifications-details
   static Future<CertifierInfo?> getCertifierInfo(String certifierId) async {
     try {
-      debugPrint('=== FETCHING CERTIFIER INFO ===');
-      debugPrint('Certifier ID: $certifierId');
-
       // L'edge function list-user-certifications-details già include nomeCertificatore
       // Quindi non abbiamo bisogno di fare query separate, il nome viene già fornito
       // nel campo certification.nomeCertificatore
-
-      debugPrint(
-          '✅ Certifier info is already available in certification.nomeCertificatore');
-      debugPrint(
-          'This method is now deprecated - use certification.nomeCertificatore directly');
-
       return null; // Non più necessario fare query separate
     } catch (e) {
       debugPrint('Error in getCertifierInfo: $e');
@@ -69,53 +62,204 @@ class CertificationService {
         );
       }
 
-      // Call the edge function with GET method
-      final response = await _client.functions.invoke(
-        'list-user-certifications-details',
-        method: HttpMethod.get,
-        headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
-        },
-      );
+      // Try different approaches to call the edge function
+      late final response;
+
+      try {
+        // Approach 1: No body (GET-like behavior)
+        response = await _client.functions.invoke(
+          'list-user-certifications-details',
+          body: null,
+        );
+      } catch (e1) {
+        try {
+          // Approach 2: Empty body
+          response = await _client.functions.invoke(
+            'list-user-certifications-details',
+            body: {},
+          );
+        } catch (e2) {
+          try {
+            // Approach 3: With explicit method
+            response = await _client.functions.invoke(
+              'list-user-certifications-details',
+              method: HttpMethod.get,
+            );
+          } catch (e3) {
+            throw Exception(
+                'Failed to call edge function. Errors: [$e1, $e2, $e3]');
+          }
+        }
+      }
 
       if (response.status == 200) {
-        final responseData = response.data as Map<String, dynamic>;
+        // Handle different response formats
+        if (response.data is List) {
+          // Direct list response
+          final List<dynamic> certificationsData =
+              response.data as List<dynamic>;
 
-        // Parse the response data
-        final List<dynamic> certificationsData = responseData['data'] ?? [];
-        final List<String> warnings =
-            (responseData['warnings'] as List<dynamic>?)?.cast<String>() ?? [];
+          final certifications = certificationsData.map((item) {
+            try {
+              return UserCertificationDetail.fromJson(item);
+            } catch (e) {
+              debugPrint('❌ Error parsing certification item: $e');
+              rethrow;
+            }
+          }).toList();
 
-        final certifications = certificationsData.map((item) {
-          try {
-            return UserCertificationDetail.fromJson(item);
-          } catch (e) {
-            print('Error parsing certification item: $e');
-            print('Item data: $item');
-            rethrow;
+          // Debug: print only first certification and total count
+          debugPrint('✅ Loaded ${certifications.length} certifications');
+          if (certifications.isNotEmpty) {
+            final first = certifications.first;
+            debugPrint(
+                '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
           }
-        }).toList();
 
-        return CertificationResponse(
-          success: true,
-          data: certifications,
-          warnings: warnings,
-        );
+          return CertificationResponse(
+            success: true,
+            data: certifications,
+            warnings: [],
+          );
+        } else if (response.data is Map<String, dynamic>) {
+          // Wrapped response format
+          final responseData = response.data as Map<String, dynamic>;
+          final List<dynamic> certificationsData = responseData['data'] ?? [];
+          final List<String> warnings =
+              (responseData['warnings'] as List<dynamic>?)?.cast<String>() ??
+                  [];
+
+          final certifications = certificationsData.map((item) {
+            try {
+              return UserCertificationDetail.fromJson(item);
+            } catch (e) {
+              debugPrint('❌ Error parsing certification item: $e');
+              rethrow;
+            }
+          }).toList();
+
+          // Debug: print only first certification and total count
+          debugPrint('✅ Loaded ${certifications.length} certifications');
+          if (certifications.isNotEmpty) {
+            final first = certifications.first;
+            debugPrint(
+                '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
+          }
+
+          return CertificationResponse(
+            success: true,
+            data: certifications,
+            warnings: warnings,
+          );
+        } else {
+          return CertificationResponse(
+            success: false,
+            error: 'Unexpected response format: ${response.data.runtimeType}',
+            data: null,
+          );
+        }
       } else {
         final errorData = response.data as Map<String, dynamic>?;
         return CertificationResponse(
           success: false,
-          error: errorData?['error'] ?? 'Failed to fetch certifications',
+          error: errorData?['error'] ??
+              'Failed to fetch certifications (HTTP ${response.status})',
           data: null,
         );
       }
     } catch (e) {
+      debugPrint('❌ CertificationService error: $e');
       return CertificationResponse(
         success: false,
         error: 'Error calling certifications service: $e',
         data: null,
       );
     }
+  }
+
+  /// Approva o rifiuta una certificazione tramite l'edge function user-approve-certification
+  ///
+  /// [idCertificationUser] - ID della certificazione utente
+  /// [status] - 'accepted' o 'rejected'
+  /// [rejectionReason] - motivo del rifiuto (opzionale, solo per status 'rejected')
+  static Future<CertificationApprovalResponse> approveCertification({
+    required String idCertificationUser,
+    required String status, // 'accepted' o 'rejected'
+    String? rejectionReason,
+  }) async {
+    try {
+      // Validate status
+      if (status != 'accepted' && status != 'rejected') {
+        throw ArgumentError('Status must be "accepted" or "rejected"');
+      }
+
+      // Prepare request body
+      final Map<String, dynamic> requestBody = {
+        'id_certification_user': idCertificationUser,
+        'status': status,
+      };
+
+      // Add rejection reason if status is rejected and reason is provided
+      if (status == 'rejected' &&
+          rejectionReason != null &&
+          rejectionReason.trim().isNotEmpty) {
+        requestBody['rejection_reason'] = rejectionReason.trim();
+      }
+
+      debugPrint(
+          '🔄 ${status == 'accepted' ? 'Approving' : 'Rejecting'} certification: $idCertificationUser');
+
+      // Call the edge function
+      final response = await EdgeFunctionService.invokeFunction(
+        'user-approve-certification',
+        requestBody,
+      );
+
+      if (response.containsKey('data') &&
+          response['data'].containsKey('certification_user')) {
+        final certificationUserData = response['data']['certification_user'];
+        final updatedCertificationUser =
+            CertificationUserModel.fromJson(certificationUserData);
+
+        debugPrint(
+            '✅ Certification ${status == 'accepted' ? 'approved' : 'rejected'} successfully');
+
+        return CertificationApprovalResponse(
+          success: true,
+          data: updatedCertificationUser,
+        );
+      } else {
+        throw Exception('Invalid response format from edge function');
+      }
+    } catch (e) {
+      debugPrint(
+          '❌ Error ${status == 'accepted' ? 'approving' : 'rejecting'} certification: $e');
+      return CertificationApprovalResponse(
+        success: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// Approva una certificazione
+  static Future<CertificationApprovalResponse> approve(
+      String idCertificationUser) {
+    return approveCertification(
+      idCertificationUser: idCertificationUser,
+      status: 'accepted',
+    );
+  }
+
+  /// Rifiuta una certificazione
+  static Future<CertificationApprovalResponse> reject(
+    String idCertificationUser, {
+    String? rejectionReason,
+  }) {
+    return approveCertification(
+      idCertificationUser: idCertificationUser,
+      status: 'rejected',
+      rejectionReason: rejectionReason,
+    );
   }
 }
 
@@ -549,4 +693,17 @@ class LinkedMediaItem {
           : null,
     );
   }
+}
+
+/// Response class per le operazioni di approvazione/rifiuto
+class CertificationApprovalResponse {
+  final bool success;
+  final String? error;
+  final CertificationUserModel? data;
+
+  CertificationApprovalResponse({
+    required this.success,
+    this.error,
+    this.data,
+  });
 }

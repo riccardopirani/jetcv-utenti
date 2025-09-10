@@ -8,6 +8,7 @@ import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 import 'package:jetcv__utenti/screens/wallet/my_wallets_page.dart';
+import 'package:jetcv__utenti/screens/certifications/my_certifications_page.dart';
 
 class SidebarMenu extends StatefulWidget {
   final VoidCallback? onClose;
@@ -116,10 +117,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
         );
         break;
       case '/certifications':
-        // Navigate to CV page (certifications are shown there)
+        // Navigate to My Certifications page
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => CVViewPage(cvUserId: _currentUser?.idUser),
+            builder: (context) => const MyCertificationsPage(),
           ),
         );
         break;
@@ -176,10 +177,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
             ? 22.0
             : 24.0;
     final titleFontSize = isMobile
-        ? 16.0
+        ? 18.0
         : isTablet
-            ? 18.0
-            : 20.0;
+            ? 20.0
+            : 22.0;
     final iconPadding = isMobile
         ? 6.0
         : isTablet
@@ -313,10 +314,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                   style: TextStyle(
                                     color: sidebarOnColor,
                                     fontSize: isMobile
-                                        ? 14
+                                        ? 16
                                         : isTablet
-                                            ? 15
-                                            : 16,
+                                            ? 17
+                                            : 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -328,10 +329,10 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                     color:
                                         sidebarOnColor.withValues(alpha: 0.7),
                                     fontSize: isMobile
-                                        ? 10
+                                        ? 12
                                         : isTablet
-                                            ? 11
-                                            : 12,
+                                            ? 13
+                                            : 14,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -454,17 +455,17 @@ class _SidebarMenuState extends State<SidebarMenu> {
     final sidebarOnColor = colorScheme.onPrimaryContainer;
     final selectedColor = colorScheme.primary.withValues(alpha: 0.15);
 
-    // Responsive sizing
+    // Responsive sizing - increased font sizes for better mobile readability
     final iconSize = isMobile
-        ? 18.0
+        ? 20.0
         : isTablet
-            ? 19.0
-            : 20.0;
+            ? 21.0
+            : 22.0;
     final fontSize = isMobile
-        ? 13.0
+        ? 16.0
         : isTablet
-            ? 13.5
-            : 14.0;
+            ? 16.5
+            : 17.0;
     final horizontalPadding = isMobile
         ? 10.0
         : isTablet
@@ -539,17 +540,17 @@ class _SidebarMenuState extends State<SidebarMenu> {
     final sidebarOnColor = colorScheme.onPrimaryContainer;
     final destructiveColorLight = colorScheme.error.withValues(alpha: 0.7);
 
-    // Responsive sizing
+    // Responsive sizing - increased font sizes for better mobile readability
     final iconSize = isMobile
-        ? 18.0
+        ? 20.0
         : isTablet
-            ? 19.0
-            : 20.0;
+            ? 21.0
+            : 22.0;
     final fontSize = isMobile
-        ? 13.0
+        ? 16.0
         : isTablet
-            ? 13.5
-            : 14.0;
+            ? 16.5
+            : 17.0;
     final horizontalPadding = isMobile
         ? 10.0
         : isTablet

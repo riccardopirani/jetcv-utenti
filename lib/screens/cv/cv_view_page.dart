@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:jetcv__utenti/models/cv_model.dart';
 import 'package:jetcv__utenti/models/country_model.dart';
@@ -14,13 +13,14 @@ import 'package:jetcv__utenti/screens/cv/blockchain_info_page.dart';
 import 'package:jetcv__utenti/screens/cv/open_badges_page.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
-import 'package:jetcv__utenti/services/image_cache_service.dart';
-import 'package:jetcv__utenti/services/base64_image_service.dart';
+// import 'package:jetcv__utenti/services/image_cache_service.dart';
+// import 'package:jetcv__utenti/services/base64_image_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 import 'package:jetcv__utenti/widgets/open_badge_button.dart';
+import 'package:jetcv__utenti/widgets/certification_card.dart' as reusable;
 
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -454,19 +454,49 @@ class _CVViewPageState extends State<CVViewPage> {
     final normalizedType =
         originalType.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '_');
 
-    // Prova a localizzare i tipi di certificazione più comuni
+    // Prova a localizzare i tipi di certificazione
     try {
       switch (normalizedType) {
         case 'attestato_di_frequenza':
           return localizations.certType_attestato_di_frequenza;
-        case 'certificato_di_competenza':
-          return localizations.certType_certificato_di_competenza;
+        case 'programma_certificato':
+          return localizations.certType_programma_certificato;
+        case 'dottorato_di_ricerca':
+          return localizations.certType_dottorato_di_ricerca;
+        case 'diploma_its':
+          return localizations.certType_diploma_its;
+        case 'workshop':
+          return localizations.certType_workshop;
+        case 'risultato_sportivo':
+          return localizations.certType_risultato_sportivo;
+        case 'corso_specifico':
+          return localizations.certType_corso_specifico;
+        case 'team_builder':
+          return localizations.certType_team_builder;
+        case 'corso_di_aggiornamento':
+          return localizations.certType_corso_di_aggiornamento;
+        case 'speech':
+          return localizations.certType_speech;
         case 'diploma':
           return localizations.certType_diploma;
-        case 'laurea':
-          return localizations.certType_laurea;
         case 'master':
           return localizations.certType_master;
+        case 'congresso':
+          return localizations.certType_congresso;
+        case 'corso_specialistico':
+          return localizations.certType_corso_specialistico;
+        case 'certificazione':
+          return localizations.certType_certificazione;
+        case 'laurea':
+          return localizations.certType_laurea;
+        case 'moderatore':
+          return localizations.certType_moderatore;
+        case 'ruolo_professionale':
+          return localizations.certType_ruolo_professionale;
+        case 'volontariato':
+          return localizations.certType_volontariato;
+        case 'certificato_di_competenza':
+          return localizations.certType_certificato_di_competenza;
         case 'corso_di_formazione':
           return localizations.certType_corso_di_formazione;
         case 'certificazione_professionale':
@@ -627,7 +657,7 @@ class _CVViewPageState extends State<CVViewPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
-    final isDesktop = screenWidth >= 1024;
+    // final isDesktop = screenWidth >= 1024; // reserved for future responsive tweaks
 
     // Responsive padding and spacing
     final pagePadding = isMobile
@@ -1693,140 +1723,131 @@ class _CVViewPageState extends State<CVViewPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Timeline with certifications - responsive layout
-                Stack(
-                  children: [
-                    // Timeline line (background) - responsive positioning
-                    Positioned(
-                      left: isMobile
-                          ? 50
-                          : isTablet
-                              ? 55
-                              : 60, // Responsive center positioning
-                      top: 0,
-                      child: Container(
-                        width: 2,
-                        height: _certifications.length *
-                            (isMobile
-                                ? 180.0
+                // Timeline with certifications - each item aligned independently
+                Column(
+                  children: (_isMostRecentFirst
+                          ? _certifications
+                          : _certifications.reversed.toList())
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                    final index = entry.key;
+                    final cert = entry.value;
+                    final isLast = index == _certifications.length - 1;
+
+                    return IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Timeline column with date and node - fixed position
+                          SizedBox(
+                            width: isMobile
+                                ? 100
                                 : isTablet
-                                    ? 200.0
-                                    : 220.0), // Reduced height to prevent overflow
-                        color: Colors.grey.shade300,
-                      ),
-                    ),
-
-                    // Content with aligned dates and cards
-                    Column(
-                      children: (_isMostRecentFirst
-                              ? _certifications
-                              : _certifications.reversed.toList())
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        final index = entry.key;
-                        final cert = entry.value;
-                        final isLast = index == _certifications.length - 1;
-
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Timeline column with date and node
-                            SizedBox(
-                              width: isMobile
-                                  ? 100
-                                  : isTablet
-                                      ? 110
-                                      : 120, // Responsive width
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Date bubble
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: isMobile
-                                            ? 6
-                                            : isTablet
-                                                ? 8
-                                                : 10,
-                                        vertical: isMobile
-                                            ? 3
-                                            : isTablet
-                                                ? 4
-                                                : 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      _formatCertificationDate(
-                                          cert.certificationUser.createdAt),
-                                      style: TextStyle(
-                                        color: Colors.blue.shade800,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: isMobile
-                                            ? 12
-                                            : isTablet
-                                                ? 14
-                                                : 16,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                      height: isMobile
-                                          ? 4
+                                    ? 110
+                                    : 120,
+                            child: Column(
+                              children: [
+                                // Date bubble - fixed at top
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isMobile
+                                          ? 6
                                           : isTablet
-                                              ? 5
+                                              ? 8
+                                              : 10,
+                                      vertical: isMobile
+                                          ? 3
+                                          : isTablet
+                                              ? 4
                                               : 6),
-                                  // Timeline node - centered
-                                  Container(
-                                    width: isMobile
-                                        ? 8
-                                        : isTablet
-                                            ? 10
-                                            : 12,
-                                    height: isMobile
-                                        ? 8
-                                        : isTablet
-                                            ? 10
-                                            : 12,
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      shape: BoxShape.circle,
-                                    ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade100,
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                                width: isMobile
-                                    ? 12
-                                    : isTablet
-                                        ? 16
-                                        : 20),
+                                  child: Text(
+                                    _formatCertificationDate(
+                                        cert.certificationUser.createdAt),
+                                    style: TextStyle(
+                                      color: Colors.blue.shade800,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: isMobile
+                                          ? 12
+                                          : isTablet
+                                              ? 14
+                                              : 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
 
-                            // Certification card
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  _buildCertificationCard(cert),
-                                  // Add spacing between cards (except for the last one)
-                                  if (!isLast)
-                                    SizedBox(
-                                        height: isMobile
-                                            ? 16
-                                            : isTablet
-                                                ? 20
-                                                : 24),
-                                ],
-                              ),
+                                SizedBox(height: 8),
+
+                                // Timeline node - fixed position
+                                Container(
+                                  width: isMobile
+                                      ? 8
+                                      : isTablet
+                                          ? 10
+                                          : 12,
+                                  height: isMobile
+                                      ? 8
+                                      : isTablet
+                                          ? 10
+                                          : 12,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+
+                                // Vertical line below node to bottom of card
+                                Expanded(
+                                  child: Container(
+                                    width: 2,
+                                    color: Colors.grey.shade300,
+                                    margin: const EdgeInsets.only(top: 12),
+                                  ),
+                                ),
+                                // Extra spacer line to increase inter-card spacing (except for last)
+                                if (!isLast)
+                                  Container(
+                                    width: 2,
+                                    height: isMobile
+                                        ? 40
+                                        : isTablet
+                                            ? 48
+                                            : 56,
+                                    color: Colors.grey.shade300,
+                                  ),
+                              ],
                             ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                          ),
+
+                          SizedBox(
+                              width: isMobile
+                                  ? 12
+                                  : isTablet
+                                      ? 16
+                                      : 20),
+
+                          // Certification card - expands as needed
+                          Expanded(
+                            child: reusable.CertificationCard(
+                              certification: cert,
+                              showImageHeader: true,
+                              showLegalEntityLogo: true,
+                              showMediaSection: true,
+                              showOpenBadgeButton: true,
+                              showLinkedInButton: true,
+                              showCertifiedUserName:
+                                  false, // Hide certified user name in CV view
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
@@ -2025,19 +2046,20 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   String _formatCertificationDate(DateTime date) {
+    final localizations = AppLocalizations.of(context)!;
     final months = [
-      'Gen',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mag',
-      'Giu',
-      'Lug',
-      'Ago',
-      'Set',
-      'Ott',
-      'Nov',
-      'Dic'
+      localizations.monthJan,
+      localizations.monthFeb,
+      localizations.monthMar,
+      localizations.monthApr,
+      localizations.monthMay,
+      localizations.monthJun,
+      localizations.monthJul,
+      localizations.monthAug,
+      localizations.monthSep,
+      localizations.monthOct,
+      localizations.monthNov,
+      localizations.monthDec,
     ];
 
     final day = date.day.toString().padLeft(2, '0');
@@ -2047,6 +2069,8 @@ class _CVViewPageState extends State<CVViewPage> {
     return '$day $month $year';
   }
 
+  // Deprecated method removed - now using reusable.CertificationCard widget
+  /*
   Widget _buildCertificationCard(UserCertificationDetail cert) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
@@ -2537,6 +2561,7 @@ class _CVViewPageState extends State<CVViewPage> {
       ),
     );
   }
+  */
 
   Widget _buildAttachedMediaSection(UserCertificationDetail cert) {
     final totalMediaCount =
@@ -3335,7 +3360,7 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_cv!.createdAt != null) {
       infoItems.add(_buildFormalInfoItem(
         Icons.create,
-        'Data creazione CV',
+        AppLocalizations.of(context)!.cvCreationDate,
         _formatDate(_cv!.createdAt!),
       ));
     }

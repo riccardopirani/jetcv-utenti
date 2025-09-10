@@ -2731,6 +2731,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View All'**
   String get viewAll;
+
+  /// No description provided for @pendingCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Certifications'**
+  String get pendingCertifications;
+
+  /// No description provided for @approvedCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Certifications'**
+  String get approvedCertifications;
+
+  /// No description provided for @rejectedCertifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected Certifications'**
+  String get rejectedCertifications;
+
+  /// No description provided for @pendingShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingShort;
+
+  /// No description provided for @approvedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approvedShort;
+
+  /// No description provided for @rejectedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejectedShort;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @confirmRejection.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Rejection'**
+  String get confirmRejection;
+
+  /// No description provided for @rejectCertificationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reject this certification?'**
+  String get rejectCertificationMessage;
+
+  /// No description provided for @rejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection reason (optional)'**
+  String get rejectionReason;
+
+  /// No description provided for @enterRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter rejection reason...'**
+  String get enterRejectionReason;
+
+  /// No description provided for @confirmReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Reject'**
+  String get confirmReject;
+
+  /// No description provided for @certificationApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification approved successfully!'**
+  String get certificationApproved;
+
+  /// No description provided for @certificationRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification rejected'**
+  String get certificationRejected;
+
+  /// No description provided for @errorApprovingCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Error approving certification: {error}'**
+  String errorApprovingCertification(String error);
+
+  /// No description provided for @errorRejectingCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Error rejecting certification: {error}'**
+  String errorRejectingCertification(String error);
+
+  /// No description provided for @createdOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Created on'**
+  String get createdOn;
+
+  /// No description provided for @rejectedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection reason:'**
+  String get rejectedReason;
+
+  /// No description provided for @noRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason specified'**
+  String get noRejectionReason;
+
+  /// No description provided for @blockchainCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Blockchain Certificate'**
+  String get blockchainCertificate;
+
+  /// No description provided for @verifiedOnPolygonNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified on Polygon Network'**
+  String get verifiedOnPolygonNetwork;
+
+  /// No description provided for @transactionInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Information'**
+  String get transactionInformation;
+
+  /// No description provided for @transactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID'**
+  String get transactionId;
+
+  /// No description provided for @network.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get network;
+
+  /// No description provided for @blockHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Block Height'**
+  String get blockHeight;
+
+  /// No description provided for @gasUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas Used'**
+  String get gasUsed;
+
+  /// No description provided for @nftInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT Information'**
+  String get nftInformation;
+
+  /// No description provided for @tokenId.
+  ///
+  /// In en, this message translates to:
+  /// **'Token ID'**
+  String get tokenId;
+
+  /// No description provided for @contractAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract Address'**
+  String get contractAddress;
+
+  /// No description provided for @standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get standard;
+
+  /// No description provided for @metadataUri.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata URI'**
+  String get metadataUri;
+
+  /// No description provided for @mintInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint Information'**
+  String get mintInformation;
+
+  /// No description provided for @mintDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint Date'**
+  String get mintDate;
+
+  /// No description provided for @minterAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Minter Address'**
+  String get minterAddress;
+
+  /// No description provided for @mintPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint Price'**
+  String get mintPrice;
+
+  /// No description provided for @certificateStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get certificateStatus;
+
+  /// No description provided for @confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmed;
+
+  /// No description provided for @certificateDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Details'**
+  String get certificateDetails;
+
+  /// No description provided for @certificateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Name'**
+  String get certificateName;
+
+  /// No description provided for @blockchainVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Blockchain Verified'**
+  String get blockchainVerified;
+
+  /// No description provided for @blockchainVerificationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This certificate has been verified and stored on the Polygon blockchain network.'**
+  String get blockchainVerificationMessage;
+
+  /// No description provided for @viewOnPolygonExplorer.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Polygon Explorer'**
+  String get viewOnPolygonExplorer;
+
+  /// No description provided for @polygon.
+  ///
+  /// In en, this message translates to:
+  /// **'Polygon'**
+  String get polygon;
+
+  /// No description provided for @erc721.
+  ///
+  /// In en, this message translates to:
+  /// **'ERC-721'**
+  String get erc721;
+
+  /// No description provided for @cvCreationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'CV Creation Date'**
+  String get cvCreationDate;
+
+  /// No description provided for @monthJan.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get monthJan;
+
+  /// No description provided for @monthFeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get monthFeb;
+
+  /// No description provided for @monthMar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get monthMar;
+
+  /// No description provided for @monthApr.
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get monthApr;
+
+  /// No description provided for @monthMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get monthMay;
+
+  /// No description provided for @monthJun.
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get monthJun;
+
+  /// No description provided for @monthJul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get monthJul;
+
+  /// No description provided for @monthAug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get monthAug;
+
+  /// No description provided for @monthSep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get monthSep;
+
+  /// No description provided for @monthOct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get monthOct;
+
+  /// No description provided for @monthNov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get monthNov;
+
+  /// No description provided for @monthDec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get monthDec;
+
+  /// No description provided for @certType_programma_certificato.
+  ///
+  /// In en, this message translates to:
+  /// **'Certified Program'**
+  String get certType_programma_certificato;
+
+  /// No description provided for @certType_dottorato_di_ricerca.
+  ///
+  /// In en, this message translates to:
+  /// **'PhD'**
+  String get certType_dottorato_di_ricerca;
+
+  /// No description provided for @certType_diploma_its.
+  ///
+  /// In en, this message translates to:
+  /// **'ITS Diploma'**
+  String get certType_diploma_its;
+
+  /// No description provided for @certType_workshop.
+  ///
+  /// In en, this message translates to:
+  /// **'Workshop'**
+  String get certType_workshop;
+
+  /// No description provided for @certType_risultato_sportivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports Achievement'**
+  String get certType_risultato_sportivo;
+
+  /// No description provided for @certType_corso_specifico.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Course'**
+  String get certType_corso_specifico;
+
+  /// No description provided for @certType_team_builder.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Builder'**
+  String get certType_team_builder;
+
+  /// No description provided for @certType_corso_di_aggiornamento.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Course'**
+  String get certType_corso_di_aggiornamento;
+
+  /// No description provided for @certType_speech.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech'**
+  String get certType_speech;
+
+  /// No description provided for @certType_congresso.
+  ///
+  /// In en, this message translates to:
+  /// **'Congress'**
+  String get certType_congresso;
+
+  /// No description provided for @certType_corso_specialistico.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialist Course'**
+  String get certType_corso_specialistico;
+
+  /// No description provided for @certType_certificazione.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification'**
+  String get certType_certificazione;
+
+  /// No description provided for @certType_moderatore.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator'**
+  String get certType_moderatore;
+
+  /// No description provided for @certType_ruolo_professionale.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Role'**
+  String get certType_ruolo_professionale;
+
+  /// No description provided for @certType_volontariato.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteering'**
+  String get certType_volontariato;
 }
 
 class _AppLocalizationsDelegate

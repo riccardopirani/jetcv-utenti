@@ -11,7 +11,12 @@ import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 
 class AuthenticatedHomePage extends StatefulWidget {
-  const AuthenticatedHomePage({super.key});
+  final bool forceRefresh;
+
+  const AuthenticatedHomePage({
+    super.key,
+    this.forceRefresh = false,
+  });
 
   @override
   State<AuthenticatedHomePage> createState() => _AuthenticatedHomePageState();
@@ -24,10 +29,18 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
   @override
   void initState() {
     super.initState();
+    // Always load user data, but if forceRefresh is true, ensure fresh data
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
+    // Set loading state if forcing refresh
+    if (widget.forceRefresh && mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
     try {
       final currentUser = await UserService.getCurrentUser();
       if (currentUser != null) {

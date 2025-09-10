@@ -18,6 +18,7 @@ import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
+import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 
 // Lista ridotta delle nazionalità più comuni
 const Map<String, Map<String, String>> NATIONALITIES = {
@@ -1493,8 +1494,15 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
               duration: Duration(seconds: profilePictureUploadFailed ? 5 : 3),
             ),
           );
-          Navigator.of(context)
-              .pop(true); // Ritorna true per indicare il successo
+          // Navigate to authenticated home page after successful save and force refresh
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const AuthenticatedHomePage(
+                forceRefresh: true,
+              ),
+            ),
+            (route) => false,
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

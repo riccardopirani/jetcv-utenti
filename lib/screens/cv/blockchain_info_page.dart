@@ -23,7 +23,7 @@ class BlockchainInfoPage extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
-          'Blockchain Certificate',
+          localizations.blockchainCertificate,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: Colors.green.shade800,
@@ -32,17 +32,6 @@ class BlockchainInfoPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.green.shade800),
-        actions: [
-          IconButton(
-            onPressed: () {
-              // TODO: Implement share functionality
-            },
-            icon: Icon(
-              Icons.share,
-              color: Colors.green.shade700,
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
@@ -78,6 +67,8 @@ class BlockchainInfoPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 20.0 : 24.0),
@@ -120,17 +111,17 @@ class BlockchainInfoPage extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child: Icon(
-                Icons.account_balance_wallet,
-                size: isMobile ? 30 : 40,
-                color: Colors.purple.shade600,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Image.asset(
+                'assets/images/polygon-logo.png',
+                fit: BoxFit.contain,
               ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'Blockchain Certificate',
+            localizations.blockchainCertificate,
             style: TextStyle(
               fontSize: isMobile ? 24 : 28,
               fontWeight: FontWeight.bold,
@@ -140,7 +131,7 @@ class BlockchainInfoPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Verified on Polygon Network',
+            localizations.verifiedOnPolygonNetwork,
             style: TextStyle(
               fontSize: isMobile ? 14 : 16,
               color: Colors.green.shade600,
@@ -154,92 +145,105 @@ class BlockchainInfoPage extends StatelessWidget {
   }
 
   Widget _buildTransactionSection(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Extract transaction ID from URL
+    String transactionId = 'N/A';
+    if (cv.nftMintTransactionUrl != null &&
+        cv.nftMintTransactionUrl!.isNotEmpty) {
+      final uri = Uri.tryParse(cv.nftMintTransactionUrl!);
+      if (uri != null) {
+        // Extract transaction hash from URL (usually the last segment)
+        final segments = uri.pathSegments;
+        if (segments.isNotEmpty) {
+          transactionId = segments.last;
+        }
+      }
+    }
+
     return _buildInfoCard(
       context,
       isMobile,
-      'Transaction Information',
+      localizations.transactionInformation,
       Icons.receipt_long,
       [
         _buildInfoRow(
-          'Transaction ID',
-          cv.nftMintTransactionUrl ?? 'N/A',
+          localizations.transactionId,
+          transactionId,
           isMobile,
         ),
         _buildInfoRow(
-          'Network',
-          'Polygon',
+          localizations.network,
+          localizations.polygon,
           isMobile,
         ),
         _buildInfoRow(
-          'Block Height',
+          localizations.blockHeight,
           '2,847,392', // TODO: Get from actual data
           isMobile,
         ),
-        _buildInfoRow(
-          'Gas Used',
-          '45,230', // TODO: Get from actual data
-          isMobile,
-        ),
+        // Gas Used is now hidden as requested
       ],
     );
   }
 
   Widget _buildNftInfoSection(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
     return _buildInfoCard(
       context,
       isMobile,
-      'NFT Information',
+      localizations.nftInformation,
       Icons.image,
       [
         _buildInfoRow(
-          'Token ID',
-          '1,234,567', // TODO: Get from actual data
+          localizations.tokenId,
+          cv.nftTokenId ?? 'N/A',
           isMobile,
         ),
         _buildInfoRow(
-          'Contract Address',
+          localizations.contractAddress,
           '0x1234...5678', // TODO: Get from actual data
           isMobile,
         ),
         _buildInfoRow(
-          'Standard',
-          'ERC-721',
+          localizations.standard,
+          localizations.erc721,
           isMobile,
         ),
         _buildInfoRow(
-          'Metadata URI',
-          'ipfs://Qm...', // TODO: Get from actual data
+          localizations.metadataUri,
+          cv.ipfsUrl ?? 'N/A',
           isMobile,
+          isFullWidth: true, // Show full URI without truncation
         ),
       ],
     );
   }
 
   Widget _buildMintInfoSection(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
     return _buildInfoCard(
       context,
       isMobile,
-      'Mint Information',
+      localizations.mintInformation,
       Icons.add_circle,
       [
         _buildInfoRow(
-          'Mint Date',
-          _formatDate(DateTime.now()), // TODO: Get from actual data
+          localizations.mintDate,
+          _formatDate(cv.createdAt), // Use actual CV creation date
           isMobile,
         ),
         _buildInfoRow(
-          'Minter Address',
+          localizations.minterAddress,
           '0x1234...5678', // TODO: Get from actual data
           isMobile,
         ),
+        // Mint Price hidden as requested
         _buildInfoRow(
-          'Mint Price',
-          '0.01 MATIC',
-          isMobile,
-        ),
-        _buildInfoRow(
-          'Status',
-          'Confirmed',
+          localizations.certificateStatus,
+          localizations.confirmed,
           isMobile,
           valueColor: Colors.green,
         ),
@@ -248,29 +252,31 @@ class BlockchainInfoPage extends StatelessWidget {
   }
 
   Widget _buildCertificateDetailsSection(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
     return _buildInfoCard(
       context,
       isMobile,
-      'Certificate Details',
+      localizations.certificateDetails,
       Icons.verified,
       [
         _buildInfoRow(
-          'Certificate Name',
+          localizations.certificateName,
           certification.certification?.category?.name ?? 'N/A',
           isMobile,
         ),
         _buildInfoRow(
-          'Serial Number',
+          localizations.serialNumber,
           certification.certificationUser.serialNumber ?? 'N/A',
           isMobile,
         ),
         _buildInfoRow(
-          'Certifier',
-          'JetCV', // TODO: Get from actual data
+          localizations.certifier,
+          certification.certification?.nomeCertificatore ?? 'JetCV',
           isMobile,
         ),
         _buildInfoRow(
-          'Issue Date',
+          localizations.issueDate,
           _formatDate(certification.certificationUser.createdAt),
           isMobile,
         ),
@@ -279,6 +285,8 @@ class BlockchainInfoPage extends StatelessWidget {
   }
 
   Widget _buildVerificationSection(BuildContext context, bool isMobile) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 20.0 : 24.0),
@@ -312,7 +320,7 @@ class BlockchainInfoPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Blockchain Verified',
+            localizations.blockchainVerified,
             style: TextStyle(
               fontSize: isMobile ? 20 : 24,
               fontWeight: FontWeight.bold,
@@ -322,39 +330,12 @@ class BlockchainInfoPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'This certificate has been verified and stored on the Polygon blockchain network.',
+            localizations.blockchainVerificationMessage,
             style: TextStyle(
               fontSize: isMobile ? 14 : 16,
               color: Colors.green.shade700,
             ),
             textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Open blockchain explorer
-            },
-            icon: Icon(
-              Icons.open_in_new,
-              color: Colors.white,
-            ),
-            label: Text(
-              'View on Polygon Explorer',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 24 : 32,
-                vertical: isMobile ? 12 : 16,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
           ),
         ],
       ),
@@ -420,37 +401,61 @@ class BlockchainInfoPage extends StatelessWidget {
     String value,
     bool isMobile, {
     Color? valueColor,
+    bool isFullWidth = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
+      child: isFullWidth
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : 16,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(
+                  value,
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : 16,
+                    color: valueColor ?? Colors.grey.shade800,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: isMobile ? 14 : 16,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 3,
+                  child: SelectableText(
+                    value,
+                    style: TextStyle(
+                      fontSize: isMobile ? 14 : 16,
+                      color: valueColor ?? Colors.grey.shade800,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
-                color: valueColor ?? Colors.grey.shade800,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
