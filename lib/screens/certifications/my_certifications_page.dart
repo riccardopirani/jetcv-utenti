@@ -70,7 +70,6 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
         .where((cert) => cert.certificationUser.status == status)
         .toList();
   }
-
   List<UserCertificationDetail> _getPendingCertifications() {
     return _certifications
         .where((c) =>
@@ -78,7 +77,6 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
             c.certificationUser.status == 'draft')
         .toList();
   }
-
   List<UserCertificationDetail> _getApprovedCertifications() {
     return _getCertificationsByStatus('accepted');
   }
