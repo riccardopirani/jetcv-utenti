@@ -70,6 +70,36 @@ class CertificationService {
       );
 
       if (response.status == 200) {
+        // Print raw JSON response from API - one certification at a time
+        debugPrint('🔥 RAW JSON FROM API list-user-certifications-details:');
+
+        // Handle different response formats
+        if (response.data is List) {
+          // Print each certification separately for direct list response
+          final List<dynamic> rawCertifications =
+              response.data as List<dynamic>;
+          for (int i = 0; i < rawCertifications.length; i++) {
+            debugPrint('');
+            debugPrint(
+                '🔥 CERTIFICAZIONE ${i + 1}/${rawCertifications.length}:');
+            debugPrint('🔥 ${rawCertifications[i]}');
+            debugPrint('');
+          }
+        } else if (response.data is Map<String, dynamic>) {
+          // Print each certification separately for wrapped response
+          final responseData = response.data as Map<String, dynamic>;
+          final List<dynamic> rawCertifications = responseData['data'] ?? [];
+          for (int i = 0; i < rawCertifications.length; i++) {
+            debugPrint('');
+            debugPrint(
+                '🔥 CERTIFICAZIONE ${i + 1}/${rawCertifications.length}:');
+            debugPrint('🔥 ${rawCertifications[i]}');
+            debugPrint('');
+          }
+        }
+
+        debugPrint('🔥 END RAW JSON');
+
         // Handle different response formats
         if (response.data is List) {
           // Direct list response
@@ -79,30 +109,30 @@ class CertificationService {
           final certifications = certificationsData.map((item) {
             try {
               // Debug: print the structure of first item to understand the API format
-              if (certificationsData.indexOf(item) == 0) {
-                debugPrint('🔍 First certification item structure:');
-                debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
-                if (item.containsKey('certification_user')) {
-                  debugPrint(
-                      '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
-                }
-              }
+              // if (certificationsData.indexOf(item) == 0) {
+              //   debugPrint('🔍 First certification item structure:');
+              //   debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
+              //   if (item.containsKey('certification_user')) {
+              //     debugPrint(
+              //         '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
+              //   }
+              // }
 
               return UserCertificationDetail.fromJson(item);
             } catch (e) {
-              debugPrint('❌ Error parsing certification item: $e');
-              debugPrint('❌ Item data: $item');
+              // debugPrint('❌ Error parsing certification item: $e');
+              // debugPrint('❌ Item data: $item');
               rethrow;
             }
           }).toList();
 
           // Debug: print only first certification and total count
-          debugPrint('✅ Loaded ${certifications.length} certifications');
-          if (certifications.isNotEmpty) {
-            final first = certifications.first;
-            debugPrint(
-                '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
-          }
+          // debugPrint('✅ Loaded ${certifications.length} certifications');
+          // if (certifications.isNotEmpty) {
+          //   final first = certifications.first;
+          //   // debugPrint(
+          //   //     '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
+          // }
 
           return CertificationResponse(
             success: true,
@@ -120,30 +150,30 @@ class CertificationService {
           final certifications = certificationsData.map((item) {
             try {
               // Debug: print the structure of first item to understand the API format
-              if (certificationsData.indexOf(item) == 0) {
-                debugPrint('🔍 First certification item structure (wrapped):');
-                debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
-                if (item.containsKey('certification_user')) {
-                  debugPrint(
-                      '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
-                }
-              }
+              // if (certificationsData.indexOf(item) == 0) {
+              //   debugPrint('🔍 First certification item structure (wrapped):');
+              //   debugPrint('🔍 Keys: ${(item as Map).keys.toList()}');
+              //   if (item.containsKey('certification_user')) {
+              //     debugPrint(
+              //         '🔍 certification_user keys: ${(item['certification_user'] as Map?)?.keys.toList()}');
+              //   }
+              // }
 
               return UserCertificationDetail.fromJson(item);
             } catch (e) {
-              debugPrint('❌ Error parsing certification item: $e');
-              debugPrint('❌ Item data: $item');
+              // debugPrint('❌ Error parsing certification item: $e');
+              // debugPrint('❌ Item data: $item');
               rethrow;
             }
           }).toList();
 
           // Debug: print only first certification and total count
-          debugPrint('✅ Loaded ${certifications.length} certifications');
-          if (certifications.isNotEmpty) {
-            final first = certifications.first;
-            debugPrint(
-                '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
-          }
+          // debugPrint('✅ Loaded ${certifications.length} certifications');
+          // if (certifications.isNotEmpty) {
+          //   final first = certifications.first;
+          //   // debugPrint(
+          //   //     '📋 First: ${first.certification?.category?.name ?? "Unknown"} - Status: ${first.certificationUser.status}');
+          // }
 
           return CertificationResponse(
             success: true,
@@ -167,7 +197,7 @@ class CertificationService {
         );
       }
     } catch (e) {
-      debugPrint('❌ CertificationService error: $e');
+      // debugPrint('❌ CertificationService error: $e');
       return CertificationResponse(
         success: false,
         error: 'Error calling certifications service: $e',
@@ -295,6 +325,9 @@ class UserCertificationDetail {
         final certificationUserData =
             json['certification_user'] as Map<String, dynamic>;
 
+        // Parse media from certification_media array
+        final media = _parseCertificationMedia(certificationUserData);
+
         return UserCertificationDetail(
           certificationUser: CertificationUser.fromJson(certificationUserData),
           certification: certificationUserData['certification'] != null &&
@@ -302,36 +335,122 @@ class UserCertificationDetail {
               ? Certification.fromJson(certificationUserData['certification']
                   as Map<String, dynamic>)
               : null,
-          media: json['media'] != null && json['media'] is Map
-              ? CertificationMedia.fromJson(
-                  json['media'] as Map<String, dynamic>)
-              : CertificationMedia
-                  .empty(), // Provide empty media if not present
+          media: media,
         );
       }
 
       // Fallback for old API structure
+      final certificationUser = json['certification_user'] != null &&
+              json['certification_user'] is Map
+          ? CertificationUser.fromJson(
+              json['certification_user'] as Map<String, dynamic>)
+          : throw ArgumentError(
+              'certification_user field is required and must be a valid object');
+
+      // Parse media from certification_media array (same as new API)
+      final media = _parseCertificationMedia(json);
+
       return UserCertificationDetail(
-        certificationUser: json['certification_user'] != null &&
-                json['certification_user'] is Map
-            ? CertificationUser.fromJson(
-                json['certification_user'] as Map<String, dynamic>)
-            : throw ArgumentError(
-                'certification_user field is required and must be a valid object'),
+        certificationUser: certificationUser,
         certification:
             json['certification'] != null && json['certification'] is Map
                 ? Certification.fromJson(
                     json['certification'] as Map<String, dynamic>)
                 : null,
-        media: json['media'] != null && json['media'] is Map
-            ? CertificationMedia.fromJson(json['media'] as Map<String, dynamic>)
-            : CertificationMedia.empty(), // Provide empty media if not present
+        media: media,
       );
     } catch (e) {
-      debugPrint('❌ Error parsing UserCertificationDetail: $e');
-      debugPrint('❌ JSON data: $json');
+      // debugPrint('❌ Error parsing UserCertificationDetail: $e');
+      // debugPrint('❌ JSON data: $json');
       rethrow;
     }
+  }
+
+  /// Parse certification_media array from API into CertificationMedia object
+  /// Separates media into certificativi (directMedia) and di contesto (linkedMedia)
+  /// based on certification_has_media.id_certification_user
+  static CertificationMedia _parseCertificationMedia(
+      Map<String, dynamic> certificationUserData) {
+    // Look for certification_media in the certification object
+    final certification = certificationUserData['certification'];
+    if (certification == null || certification is! Map<String, dynamic>) {
+      return CertificationMedia.empty();
+    }
+
+    final certificationMediaList = certification['certification_media'];
+    if (certificationMediaList == null || certificationMediaList is! List) {
+      return CertificationMedia.empty();
+    }
+
+    // Get current certification_user ID for comparison
+    final currentCertificationUserId =
+        certificationUserData['id_certification_user']?.toString();
+
+    // Separate media into certificativi and di contesto
+    final List<CertificationMediaItem> certificativiMedia = []; // directMedia
+    final List<LinkedMediaItem> contestoMedia = []; // linkedMedia
+
+    for (final mediaItem in certificationMediaList) {
+      if (mediaItem is Map<String, dynamic>) {
+        try {
+          // Check certification_has_media.id_certification_user
+          final certHasMedia = mediaItem['certification_has_media'];
+          final hasMediaCertUserId = certHasMedia is Map<String, dynamic>
+              ? certHasMedia['id_certification_user']?.toString()
+              : null;
+
+          // Convert to CertificationMediaItem
+          final certMediaItem = CertificationMediaItem(
+            idCertificationMedia:
+                mediaItem['id_certification_media']?.toString() ?? '',
+            idMediaHash: mediaItem['id_media_hash']?.toString(),
+            idCertification: mediaItem['id_certification']?.toString(),
+            createdAt: mediaItem['created_at'] != null
+                ? DateTime.tryParse(mediaItem['created_at'].toString()) ??
+                    DateTime.now()
+                : DateTime.now(),
+            updatedAt: mediaItem['updated_at'] != null
+                ? DateTime.tryParse(mediaItem['updated_at'].toString())
+                : null,
+            name: mediaItem['name']?.toString(),
+            description: mediaItem['description']?.toString(),
+            acquisitionType: mediaItem['acquisition_type']?.toString(),
+            capturedAt: mediaItem['captured_at'] != null
+                ? DateTime.tryParse(mediaItem['captured_at'].toString())
+                : null,
+            idLocation: mediaItem['id_location']?.toString(),
+            fileType: mediaItem['file_type']?.toString(),
+          );
+
+          // Decide where to put the media based on certification_has_media.id_certification_user
+          if (hasMediaCertUserId != null &&
+              hasMediaCertUserId == currentCertificationUserId) {
+            // Media certificativo: ha id_certification_user che corrisponde al current user
+            certificativiMedia.add(certMediaItem);
+          } else {
+            // Media di contesto: id_certification_user è null o diverso dal current user
+            final linkedMediaItem = LinkedMediaItem(
+              link: certHasMedia is Map<String, dynamic>
+                  ? certHasMedia
+                  : <String, dynamic>{},
+              media: certMediaItem,
+            );
+            contestoMedia.add(linkedMediaItem);
+          }
+        } catch (e) {
+          debugPrint('⚠️ Error parsing certification media item: $e');
+          debugPrint('⚠️ Media item data: $mediaItem');
+        }
+      }
+    }
+
+    debugPrint(
+        '📱 Parsed media - Certificativi: ${certificativiMedia.length}, Contesto: ${contestoMedia.length}');
+
+    return CertificationMedia(
+      directMedia: certificativiMedia, // Media certificativi
+      linkedMedia: contestoMedia, // Media di contesto
+    );
   }
 }
 

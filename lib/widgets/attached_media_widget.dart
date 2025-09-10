@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
-import 'package:jetcv__utenti/services/media_download_service.dart';
-import 'package:http/http.dart' as http;
 
 class AttachedMediaWidget extends StatefulWidget {
   final UserCertificationDetail certification;
@@ -20,57 +18,6 @@ class AttachedMediaWidget extends StatefulWidget {
 
 class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   bool _isExpanded = false;
-
-  /// Verifica se il file esiste effettivamente sul backend
-  Future<bool> _checkFileExists(CertificationMediaItem media) async {
-    try {
-      // Costruisci l'URL del file come fa il MediaDownloadService
-      final filePath = '${media.idMediaHash}';
-      final extension = _getFileExtension(media.fileType, media);
-      final fullFilePath = '$filePath$extension';
-
-      debugPrint('🔍 Media fileType: "${media.fileType}"');
-      debugPrint('🔍 Media name: "${media.name}"');
-      debugPrint('🔍 Determined extension: "$extension"');
-      debugPrint('🔍 Full file path: "$fullFilePath"');
-
-      // URL pubblico di Supabase Storage
-      final fileUrl =
-          'https://skqsuxmdfqxbkhmselaz.supabase.co/storage/v1/object/public/certification-media/$fullFilePath';
-
-      debugPrint('🔍 Checking file existence: $fileUrl');
-
-      // Fai una richiesta HEAD per verificare se il file esiste
-      final response = await http.head(Uri.parse(fileUrl));
-
-      final exists = response.statusCode == 200;
-      debugPrint('🔍 File exists: $exists (status: ${response.statusCode})');
-      debugPrint('🔍 Response headers: ${response.headers}');
-      debugPrint('🔍 Response body: ${response.body}');
-
-      // Se il file con estensione non esiste, prova senza estensione
-      if (!exists && extension.isNotEmpty) {
-        final fallbackUrl =
-            'https://skqsuxmdfqxbkhmselaz.supabase.co/storage/v1/object/public/certification-media/$filePath';
-        debugPrint('🔍 Trying fallback URL: $fallbackUrl');
-
-        final fallbackResponse = await http.head(Uri.parse(fallbackUrl));
-        final fallbackExists = fallbackResponse.statusCode == 200;
-        debugPrint(
-            '🔍 Fallback file exists: $fallbackExists (status: ${fallbackResponse.statusCode})');
-        debugPrint('🔍 Fallback response headers: ${fallbackResponse.headers}');
-        debugPrint('🔍 Fallback response body: ${fallbackResponse.body}');
-
-        return fallbackExists;
-      }
-
-      return exists;
-    } catch (e) {
-      debugPrint('❌ Error checking file existence: $e');
-      // In caso di errore, assumiamo che il file non esista
-      return false;
-    }
-  }
 
   /// Determina l'estensione del file basata sul tipo (usa la stessa logica di MediaDownloadService)
   String _getFileExtension(String? fileType, CertificationMediaItem media) {
@@ -456,39 +403,43 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
     // Debug per vedere il valore effettivo
     debugPrint('🔍 Media acquisition_type: "${media.acquisitionType}"');
-    debugPrint(
-        '🔍 Media acquisition_type lowercase: "${media.acquisitionType?.toLowerCase()}"');
+    debugPrint('🔍 Media name: "${media.name}"');
+    debugPrint('🔍 Media fileType: "${media.fileType}"');
+    debugPrint('🔍 Media idMediaHash: "${media.idMediaHash}"');
 
-    // Usa FutureBuilder per verificare l'esistenza del file in modo asincrono
-    return FutureBuilder<bool>(
-      future: _checkFileExists(media),
-      builder: (context, snapshot) {
-        final isFilePresent = snapshot.data ?? false;
-        final isRealTime =
-            !isFilePresent; // Se il file NON esiste sul backend, è realtime
+    // Show all media from API without checking physical file existence
+    // Use placeholder status since we don't check file existence
+    const isRealTime = false; // Always show as placeholder/uploaded status
 
-        debugPrint('🔍 File present on backend: $isFilePresent');
-        debugPrint('🔍 Is realtime: $isRealTime');
+    debugPrint('🔍 Showing media from API without file existence check');
 
-        return _buildMediaItemContent(
-            media, isRealTime, isMobile, isTablet, screenWidth);
-      },
-    );
+    return _buildMediaItemContent(
+        media, isRealTime, isMobile, isTablet, screenWidth);
   }
 
   Widget _buildMediaItemContent(CertificationMediaItem media, bool isRealTime,
       bool isMobile, bool isTablet, double screenWidth) {
-    final statusText = isRealTime
-        ? AppLocalizations.of(context)!.realTime
-        : AppLocalizations.of(context)!.uploaded;
-    final statusColor = isRealTime ? Colors.green : Colors.yellow;
-    final statusTextColor = isRealTime ? Colors.white : Colors.black;
+    // Determine status based on acquisition_type
+    final String statusText;
+    final Color statusColor;
+    final Color statusTextColor = Colors.white;
 
-    debugPrint('🔍 Status text: "$statusText"');
-    debugPrint('🔍 Status color: $statusColor');
+    if (media.acquisitionType?.toLowerCase() == 'realtime') {
+      statusText = 'Real-time';
+      statusColor = Colors.green;
+    } else if (media.acquisitionType?.toLowerCase() == 'deferred') {
+      statusText = 'Caricato';
+      statusColor = Colors.orange;
+    } else {
+      // Fallback for unknown acquisition types
+      statusText = media.acquisitionType ?? 'Sconosciuto';
+      statusColor = Colors.grey.shade400;
+    }
 
     final icon = _getMediaIcon(media.fileType);
-    final actionIcon = isRealTime ? Icons.visibility : Icons.download;
+    final actionIcon = media.acquisitionType?.toLowerCase() == 'realtime'
+        ? Icons.visibility
+        : Icons.info;
 
     // Fixed sizing for all devices
     final itemPadding = const EdgeInsets.all(12);
@@ -639,37 +590,19 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     );
   }
 
-  /// Gestisce l'azione del media (download o visualizzazione)
+  /// Gestisce l'azione del media (mostra info placeholder)
   void _handleMediaAction(CertificationMediaItem media) {
-    final isRealTime = media.acquisitionType?.toLowerCase() == 'real-time';
-
-    if (isRealTime) {
-      // Per i media real-time, mostra un messaggio
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text(AppLocalizations.of(context)!.realTimeMediaNotDownloadable),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } else {
-      // Per i media caricati, avvia il download
-      if (MediaDownloadService.canDownload(media)) {
-        MediaDownloadService.downloadMedia(
-          media: media,
-          context: context,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.mediaNotAvailable),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
+    // Show placeholder info message since we don't check file existence
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Media: ${media.name ?? 'Senza nome'}\n'
+            'Tipo: ${media.fileType ?? 'Non specificato'}\n'
+            'Hash: ${media.idMediaHash ?? 'Non disponibile'}\n'
+            'Questo è un placeholder dai dati API'),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   IconData _getMediaIcon(String? fileType) {

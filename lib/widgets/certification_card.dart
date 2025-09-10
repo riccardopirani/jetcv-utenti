@@ -368,10 +368,11 @@ class _CertificationCardState extends State<CertificationCard> {
     if (organizationName != null && legalEntityId != null) {
       // Show immediately with available data
       return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildLegalEntityLogo(
               legalEntityId), // Logo loads asynchronously with cache
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               organizationName,
@@ -379,7 +380,7 @@ class _CertificationCardState extends State<CertificationCard> {
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.w600,
                   ),
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ),
         ],
@@ -413,10 +414,12 @@ class _CertificationCardState extends State<CertificationCard> {
 
     if (logoUrl?.isNotEmpty == true) {
       return Container(
-        width: 20,
-        height: 20,
+        width:
+            34, // Increased by additional 30% (26 * 1.3 = 33.8, rounded to 34)
+        height:
+            34, // Increased by additional 30% (26 * 1.3 = 33.8, rounded to 34)
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          shape: BoxShape.circle, // Changed to circular shape
           border: Border.all(
             color: Colors.grey.shade300,
             width: 0.5,
@@ -429,7 +432,8 @@ class _CertificationCardState extends State<CertificationCard> {
           errorBuilder: (context, error, stackTrace) {
             return Icon(
               Icons.corporate_fare,
-              size: 18,
+              size:
+                  30, // Increased by additional 30% (23 * 1.3 = 29.9, rounded to 30)
               color: Colors.grey.shade600,
             );
           },
@@ -438,10 +442,23 @@ class _CertificationCardState extends State<CertificationCard> {
     }
 
     // Show default icon if no logo available
-    return Icon(
-      Icons.corporate_fare,
-      size: 18,
-      color: Colors.grey.shade600,
+    return Container(
+      width: 34, // Same size as logo container
+      height: 34, // Same size as logo container
+      decoration: BoxDecoration(
+        shape: BoxShape.circle, // Changed to circular shape
+        color: Colors.grey.shade100,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 0.5,
+        ),
+      ),
+      child: Icon(
+        Icons.corporate_fare,
+        size:
+            30, // Increased by additional 30% (23 * 1.3 = 29.9, rounded to 30)
+        color: Colors.grey.shade600,
+      ),
     );
   }
 
@@ -554,7 +571,7 @@ class _CertificationCardState extends State<CertificationCard> {
       return certifier.fullName!.trim();
     }
 
-    return 'Certificatore'; // Final fallback
+    return 'Certificatore'; // Frinal fallback
   }
 
   Widget _buildAttachedMediaSection(UserCertificationDetail cert) {
