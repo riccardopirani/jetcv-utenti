@@ -9,6 +9,7 @@ class CertificationCategoryModel {
   final CertificationCategoryType type;
   final int? order;
   final String? idLegalEntity;
+  final String? pictureUrl;
 
   CertificationCategoryModel({
     required this.idCertificationCategory,
@@ -18,6 +19,7 @@ class CertificationCategoryModel {
     required this.type,
     this.order,
     this.idLegalEntity,
+    this.pictureUrl,
   });
 
   /// Create CertificationCategoryModel from JSON/Map
@@ -32,6 +34,7 @@ class CertificationCategoryModel {
         type: CertificationCategoryType.fromString(json['type']),
         order: json['order'] as int?,
         idLegalEntity: json['id_legal_entity'] as String?,
+        pictureUrl: json['picture_url'] as String?,
       );
 
   /// Convert CertificationCategoryModel to JSON/Map
@@ -43,6 +46,7 @@ class CertificationCategoryModel {
         'type': type.toDbString(),
         'order': order,
         'id_legal_entity': idLegalEntity,
+        'picture_url': pictureUrl,
       };
 
   /// Create copy with updated fields
@@ -52,6 +56,7 @@ class CertificationCategoryModel {
     CertificationCategoryType? type,
     int? order,
     String? idLegalEntity,
+    String? pictureUrl,
   }) =>
       CertificationCategoryModel(
         idCertificationCategory: idCertificationCategory,
@@ -61,6 +66,7 @@ class CertificationCategoryModel {
         type: type ?? this.type,
         order: order ?? this.order,
         idLegalEntity: idLegalEntity ?? this.idLegalEntity,
+        pictureUrl: pictureUrl ?? this.pictureUrl,
       );
 
   @override

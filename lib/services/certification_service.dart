@@ -613,6 +613,7 @@ class CertificationCategory {
   final String? idLegalEntity;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String? pictureUrl;
 
   CertificationCategory({
     required this.idCertificationCategory,
@@ -622,6 +623,7 @@ class CertificationCategory {
     this.idLegalEntity,
     required this.createdAt,
     this.updatedAt,
+    this.pictureUrl,
   });
 
   factory CertificationCategory.fromJson(Map<String, dynamic> json) {
@@ -637,6 +639,7 @@ class CertificationCategory {
       createdAt: parseDateTime(json['created_at']),
       updatedAt:
           json['updated_at'] != null ? parseDateTime(json['updated_at']) : null,
+      pictureUrl: json['picture_url']?.toString(),
     );
   }
 }

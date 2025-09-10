@@ -273,6 +273,11 @@ class _CertificationCardState extends State<CertificationCard> {
   }
 
   Widget _buildHeaderImage(BuildContext context, double height) {
+    // Get picture URL from certification category
+    final pictureUrl =
+        widget.certification.certification?.category?.pictureUrl?.trim();
+    final hasValidPictureUrl = pictureUrl?.isNotEmpty == true;
+
     return Container(
       height: height,
       width: double.infinity,
@@ -283,53 +288,58 @@ class _CertificationCardState extends State<CertificationCard> {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        // Demo image - replace with actual certification image later
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=200&fit=crop&crop=center',
-        height: height,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          // Fallback to gradient with icon if image fails to load
-          return Container(
-            height: height,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.blue.shade50, Colors.blue.shade100],
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.workspace_premium,
-                size: 32,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            height: height,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-            ),
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-                color: Colors.grey.shade400,
-              ),
-            ),
-          );
-        },
+      child: hasValidPictureUrl
+          ? Image.network(
+              pictureUrl!,
+              height: height,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                // Fallback to gradient with certification icon if image fails to load
+                return _buildFallbackHeaderImage(height);
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  height: height,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                      strokeWidth: 2,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                );
+              },
+            )
+          : _buildFallbackHeaderImage(height),
+    );
+  }
+
+  Widget _buildFallbackHeaderImage(double height) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.blue.shade50, Colors.blue.shade100],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.workspace_premium,
+          size: 48,
+          color: Colors.blue.shade400,
+        ),
       ),
     );
   }
@@ -728,20 +738,24 @@ class _CertificationCardState extends State<CertificationCard> {
     BorderRadius borderRadius,
   ) {
     final linkedInButtonImage = _getLinkedInButtonImage(context);
+    // Scale down LinkedIn image/button by 30%
+    const double linkedInScale = 0.7;
+    final double linkedInHeight = 28.0 * linkedInScale;
+    final double linkedInMaxWidth = 180.0 * linkedInScale;
 
     return GestureDetector(
       onTap: () => _openLinkedInForCertification(context, cert),
       child: SizedBox(
-        height: 28, // Reduced LinkedIn button height
+        height: linkedInHeight, // 30% smaller height
         width: double.infinity, // Take full available width with max constraint
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-              maxWidth: 180), // Reduced max width for LinkedIn buttons
+          constraints: BoxConstraints(
+              maxWidth: linkedInMaxWidth), // 30% smaller max width
           child: ClipRRect(
             borderRadius: borderRadius,
             child: Image.asset(
               linkedInButtonImage,
-              height: 28, // Reduced LinkedIn button height
+              height: linkedInHeight, // 30% smaller height
               width:
                   null, // Let width adjust automatically to maintain aspect ratio
               fit: BoxFit
@@ -749,7 +763,7 @@ class _CertificationCardState extends State<CertificationCard> {
               errorBuilder: (context, error, stackTrace) {
                 // Fallback to styled button matching the same height if image fails to load
                 return SizedBox(
-                  height: 28,
+                  height: linkedInHeight,
                   child: ElevatedButton.icon(
                     onPressed: () =>
                         _openLinkedInForCertification(context, cert),
@@ -762,8 +776,9 @@ class _CertificationCardState extends State<CertificationCard> {
                       shape: RoundedRectangleBorder(borderRadius: borderRadius),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10,
-                          vertical: 5), // Reduced padding for 28px height
-                      minimumSize: const Size(0, 28), // Force minimum height
+                          vertical: 5), // Padding retained while smaller height
+                      minimumSize:
+                          Size(0, linkedInHeight), // Force minimum height
                     ),
                     icon: Icon(Icons.link,
                         size: 14), // Reduced icon size for 28px button

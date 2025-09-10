@@ -147,9 +147,11 @@ class _CVViewPageState extends State<CVViewPage> {
           await CertificationService.getUserCertificationsDetails();
 
       if (response.success && response.data != null) {
-        // Sort certifications by date based on current sort order
-        final sortedCertifications =
+        // Filter only accepted certifications and sort by date
+        final acceptedCertifications =
             List<UserCertificationDetail>.from(response.data!)
+                .where((cert) => cert.certificationUser.status == 'accepted')
+                .toList()
               ..sort((a, b) => _isMostRecentFirst
                   ? b.certificationUser.createdAt
                       .compareTo(a.certificationUser.createdAt)
@@ -157,11 +159,11 @@ class _CVViewPageState extends State<CVViewPage> {
                       .compareTo(b.certificationUser.createdAt));
 
         setState(() {
-          _certifications = sortedCertifications;
+          _certifications = acceptedCertifications;
           _certificationsLoading = false;
         });
         debugPrint(
-            '✅ Certifications loaded successfully: ${_certifications.length} items (sorted by date)');
+            '✅ Accepted certifications loaded successfully: ${_certifications.length} items (sorted by date)');
 
         // Precarica i logo delle legal entities
         _preloadLegalEntityLogos();

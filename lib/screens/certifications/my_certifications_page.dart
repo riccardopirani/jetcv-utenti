@@ -44,6 +44,9 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
       if (response.success) {
         final certifications = response.data ?? [];
 
+        // Print complete certifications list to console
+        _printCertificationsList(certifications);
+
         setState(() {
           _certifications = certifications;
           _isLoading = false;
@@ -70,6 +73,7 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
         .where((cert) => cert.certificationUser.status == status)
         .toList();
   }
+
   List<UserCertificationDetail> _getPendingCertifications() {
     return _certifications
         .where((c) =>
@@ -77,12 +81,167 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
             c.certificationUser.status == 'draft')
         .toList();
   }
+
   List<UserCertificationDetail> _getApprovedCertifications() {
     return _getCertificationsByStatus('accepted');
   }
 
   List<UserCertificationDetail> _getRejectedCertifications() {
     return _getCertificationsByStatus('rejected');
+  }
+
+  void _printCertificationsList(List<UserCertificationDetail> certifications) {
+    print('\n' + '=' * 80);
+    print(
+        '📋 ELENCO COMPLETO CERTIFICAZIONI (${certifications.length} totali)');
+    print('=' * 80);
+
+    if (certifications.isEmpty) {
+      print('❌ Nessuna certificazione trovata');
+      print('=' * 80 + '\n');
+      return;
+    }
+
+    for (int i = 0; i < certifications.length; i++) {
+      final cert = certifications[i];
+      final certUser = cert.certificationUser;
+      final certification = cert.certification;
+      final category = certification?.category;
+      final legalEntity = certification?.legalEntity;
+      final location = certification?.location;
+      final certifier = certification?.certifier;
+
+      print('\n📄 CERTIFICAZIONE #${i + 1}');
+      print('-' * 40);
+
+      // Basic certification user info
+      print('🆔 ID Certificazione Utente: ${certUser.idCertificationUser}');
+      print('📊 Stato: ${certUser.status.toUpperCase()}');
+      print(
+          '📅 Creata il: ${certUser.createdAt.toLocal().toString().split('.')[0]}');
+      if (certUser.updatedAt != null) {
+        print(
+            '🔄 Aggiornata il: ${certUser.updatedAt!.toLocal().toString().split('.')[0]}');
+      }
+      if (certUser.serialNumber != null) {
+        print('🏷️ Numero Seriale: ${certUser.serialNumber}');
+      }
+      if (certUser.rejectionReason != null) {
+        print('❌ Motivo Rifiuto: ${certUser.rejectionReason}');
+      }
+
+      // Category information
+      if (category != null) {
+        print('\n🏷️ CATEGORIA:');
+        print('  • Nome: ${category.name}');
+        print('  • ID: ${category.idCertificationCategory}');
+        print('  • Tipo: ${category.type ?? 'N/A'}');
+        print('  • Ordine: ${category.order ?? 'N/A'}');
+        if (category.pictureUrl != null && category.pictureUrl!.isNotEmpty) {
+          print('  • 🖼️ Immagine: ${category.pictureUrl}');
+        } else {
+          print('  • 🖼️ Immagine: Non disponibile');
+        }
+      }
+
+      // Legal entity information
+      if (legalEntity != null) {
+        print('\n🏢 ENTE LEGALE:');
+        print('  • Nome: ${legalEntity.legalName ?? 'N/A'}');
+        print('  • ID: ${legalEntity.idLegalEntity}');
+        if (legalEntity.logoPicture != null &&
+            legalEntity.logoPicture!.isNotEmpty) {
+          print('  • 🖼️ Logo: ${legalEntity.logoPicture}');
+        }
+        if (legalEntity.website != null && legalEntity.website!.isNotEmpty) {
+          print('  • 🌐 Sito Web: ${legalEntity.website}');
+        }
+      }
+
+      // Certifier information
+      if (certifier != null) {
+        print('\n👤 CERTIFICATORE:');
+        print('  • Nome Completo: ${certifier.displayName}');
+        print('  • ID: ${certifier.idCertifier}');
+        if (certifier.user != null) {
+          final user = certifier.user!;
+          print('  • Email: ${user.email ?? 'N/A'}');
+          print('  • Nome: ${user.firstName ?? 'N/A'}');
+          print('  • Cognome: ${user.lastName ?? 'N/A'}');
+        }
+      }
+
+      // Location information
+      if (location != null) {
+        print('\n📍 UBICAZIONE:');
+        if (location.name != null && location.name!.isNotEmpty) {
+          print('  • Nome: ${location.name}');
+        }
+        if (location.locality != null && location.locality!.isNotEmpty) {
+          print('  • Città: ${location.locality}');
+        }
+        if (location.country != null && location.country!.isNotEmpty) {
+          print('  • Paese: ${location.country}');
+        }
+        if (location.thoroughfare != null &&
+            location.thoroughfare!.isNotEmpty) {
+          print('  • Via: ${location.thoroughfare}');
+        }
+      }
+
+      // Certification details
+      if (certification != null) {
+        print('\n📜 DETTAGLI CERTIFICAZIONE:');
+        print('  • ID Certificazione: ${certification.idCertification}');
+        print('  • Stato Certificazione: ${certification.status}');
+        if (certification.serialNumber != null) {
+          print('  • Numero Seriale: ${certification.serialNumber}');
+        }
+        if (certification.sentAt != null) {
+          print(
+              '  • Inviata il: ${certification.sentAt!.toLocal().toString().split('.')[0]}');
+        }
+        if (certification.closedAt != null) {
+          print(
+              '  • Chiusa il: ${certification.closedAt!.toLocal().toString().split('.')[0]}');
+        }
+        if (certification.nUsers != null) {
+          print('  • Numero Utenti: ${certification.nUsers}');
+        }
+      }
+
+      // Media information
+      final totalMedia =
+          cert.media.directMedia.length + cert.media.linkedMedia.length;
+      if (totalMedia > 0) {
+        print('\n🖼️ MEDIA (${totalMedia} totali):');
+        print('  • Media Diretti: ${cert.media.directMedia.length}');
+        print('  • Media Collegati: ${cert.media.linkedMedia.length}');
+      }
+
+      print('-' * 40);
+    }
+
+    // Summary statistics
+    final pendingCount = certifications
+        .where((c) =>
+            c.certificationUser.status == 'pending' ||
+            c.certificationUser.status == 'draft')
+        .length;
+    final approvedCount = certifications
+        .where((c) => c.certificationUser.status == 'accepted')
+        .length;
+    final rejectedCount = certifications
+        .where((c) => c.certificationUser.status == 'rejected')
+        .length;
+
+    print('\n📊 STATISTICHE RIASSUNTIVE:');
+    print('  • 🟡 In Attesa: $pendingCount');
+    print('  • 🟢 Approvate: $approvedCount');
+    print('  • 🔴 Rifiutate: $rejectedCount');
+    print('  • 📊 Totale: ${certifications.length}');
+
+    print('=' * 80 + '\n');
   }
 
   void _setDefaultTab() {
