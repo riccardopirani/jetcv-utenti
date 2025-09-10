@@ -51,8 +51,8 @@ class LocationModel {
         idLocation: json['id_location'] as String,
         idUser: json['id_user'] as String,
         aquiredAt: DateTime.parse(json['aquired_at']),
-        latitude: (json['latitude'] as num).toDouble(),
-        longitude: (json['longitude'] as num).toDouble(),
+        latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : 0.0,
+        longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : 0.0,
         accuracyM: json['accuracy_m'] != null
             ? (json['accuracy_m'] as num).toDouble()
             : null,

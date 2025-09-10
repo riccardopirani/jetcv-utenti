@@ -50,7 +50,7 @@ class CertificationModel {
             : null,
         serialNumber: json['serial_number'] as String,
         idLocation: json['id_location'] as String,
-        nUsers: json['n_users'] as int,
+        nUsers: json['n_users'] as int? ?? 0,
         sentAt:
             json['sent_at'] != null ? DateTime.parse(json['sent_at']) : null,
         draftAt:

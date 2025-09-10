@@ -19,7 +19,7 @@ class CertificationInformationValueModel {
           Map<String, dynamic> json) =>
       CertificationInformationValueModel(
         idCertificationInformationValue:
-            json['id_certification_information_value'] as int,
+            json['id_certification_information_value'] as int? ?? 0,
         idCertificationInformation:
             json['id_certification_information'] as String,
         value: json['value'] as String?,
