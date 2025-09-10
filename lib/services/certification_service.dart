@@ -63,35 +63,11 @@ class CertificationService {
         );
       }
 
-      // Try different approaches to call the edge function
-      late final FunctionResponse response;
-
-      try {
-        // Approach 1: No body (GET-like behavior)
-        response = await _client.functions.invoke(
-          'list-user-certifications-details',
-          body: null,
-        );
-      } catch (e1) {
-        try {
-          // Approach 2: Empty body
-          response = await _client.functions.invoke(
-            'list-user-certifications-details',
-            body: {},
-          );
-        } catch (e2) {
-          try {
-            // Approach 3: With explicit method
-            response = await _client.functions.invoke(
-              'list-user-certifications-details',
-              method: HttpMethod.get,
-            );
-          } catch (e3) {
-            throw Exception(
-                'Failed to call edge function. Errors: [$e1, $e2, $e3]');
-          }
-        }
-      }
+      // Call the edge function with explicit GET method
+      final response = await _client.functions.invoke(
+        'list-user-certifications-details',
+        method: HttpMethod.get,
+      );
 
       if (response.status == 200) {
         // Handle different response formats
