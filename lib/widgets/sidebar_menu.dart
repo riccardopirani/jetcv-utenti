@@ -5,6 +5,7 @@ import 'package:jetcv__utenti/services/user_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
+import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 import 'package:jetcv__utenti/screens/wallet/my_wallets_page.dart';
@@ -56,8 +57,11 @@ class _SidebarMenuState extends State<SidebarMenu> {
     try {
       await SupabaseConfig.client.auth.signOut();
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login',
+        // Navigate to the public home page instead of using named routes
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const HomePagePublic(),
+          ),
           (route) => false,
         );
       }
