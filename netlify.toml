@@ -1,0 +1,13 @@
+[build]
+  command = "flutter build web --release"
+  publish = "build/web"
+
+# (Facoltativo) gestisci SPA routing di Flutter web
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Plugin che installa Flutter
+[[plugins]]
+  package = "netlify-plugin-flutter"
