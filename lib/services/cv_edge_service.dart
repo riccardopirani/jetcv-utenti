@@ -57,18 +57,28 @@ class CvEdgeService {
       // Dobbiamo convertirla nel formato atteso da EdgeFunctionResponse
       final bool isSuccess = response['ok'] == true;
 
-      if (isSuccess && response['data'] != null) {
-        // Successo: parse del CV data
-        final cvData = response['data'] as Map<String, dynamic>;
-        final cv = CvModel.fromJson(cvData);
+      if (isSuccess) {
+        if (response['data'] != null) {
+          // Successo con CV: parse del CV data
+          final cvData = response['data'] as Map<String, dynamic>;
+          final cv = CvModel.fromJson(cvData);
 
-        return EdgeFunctionResponse<CvModel>(
-          success: true,
-          data: cv,
-          message: response['message'] as String?,
-        );
+          return EdgeFunctionResponse<CvModel>(
+            success: true,
+            data: cv,
+            message: response['message'] as String?,
+          );
+        } else {
+          // Successo ma nessun CV trovato: restituisci success=true con data=null
+          return EdgeFunctionResponse<CvModel>(
+            success: true,
+            data: null,
+            message: response['message'] as String? ??
+                'Nessun CV trovato per questo utente',
+          );
+        }
       } else {
-        // Errore: gestisci i vari tipi di errore
+        // Errore API: gestisci i vari tipi di errore
         return EdgeFunctionResponse<CvModel>(
           success: false,
           error: response['error'] as String? ?? 'Errore sconosciuto',

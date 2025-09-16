@@ -683,13 +683,13 @@ abstract class AppLocalizations {
   /// No description provided for @fullName.
   ///
   /// In en, this message translates to:
-  /// **'Full name'**
+  /// **'First and Last Name'**
   String get fullName;
 
   /// No description provided for @enterFullName.
   ///
   /// In en, this message translates to:
-  /// **'Enter your full name'**
+  /// **'e.g. John Smith'**
   String get enterFullName;
 
   /// No description provided for @nameMinLength.
@@ -1124,6 +1124,24 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @noCvAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No CV available'**
+  String get noCvAvailable;
+
+  /// No description provided for @errorLoadingCv.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading CV'**
+  String get errorLoadingCv;
+
+  /// No description provided for @createYourFirstCv.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first CV to get started'**
+  String get createYourFirstCv;
+
   /// No description provided for @noCertificationsFound.
   ///
   /// In en, this message translates to:
@@ -1273,66 +1291,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OTP'**
   String get otp;
-
-  /// No description provided for @myWallets.
-  ///
-  /// In en, this message translates to:
-  /// **'My Wallets'**
-  String get myWallets;
-
-  /// No description provided for @viewYourDigitalWallets.
-  ///
-  /// In en, this message translates to:
-  /// **'View your digital wallets'**
-  String get viewYourDigitalWallets;
-
-  /// No description provided for @wallet.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet'**
-  String get wallet;
-
-  /// No description provided for @walletDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Your CV is saved in this wallet on the blockchain to always guarantee its authenticity'**
-  String get walletDescription;
-
-  /// No description provided for @owner.
-  ///
-  /// In en, this message translates to:
-  /// **'Owner'**
-  String get owner;
-
-  /// No description provided for @walletAddress.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet Address'**
-  String get walletAddress;
-
-  /// No description provided for @copyAddress.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy address'**
-  String get copyAddress;
-
-  /// No description provided for @addressCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Address copied to clipboard'**
-  String get addressCopied;
-
-  /// No description provided for @noWalletFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No wallet found'**
-  String get noWalletFound;
-
-  /// No description provided for @walletNotFoundDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'You don\'t have a wallet associated with your account yet'**
-  String get walletNotFoundDescription;
 
   /// No description provided for @blockedByLegalEntity.
   ///

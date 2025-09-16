@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/widgets/otp_management_widget.dart';
 

@@ -1,5 +1,5 @@
 ---
-description: tutte le stringhe visualizzate in UI/UX devono essere i18n, mai hardcoded.
+description: tutte le stringhe visualizzate in UI/UX devono essere l10n, mai hardcoded.
 globs:
 alwaysApply: true
 ---

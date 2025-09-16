@@ -470,13 +470,11 @@ class _OtpDemoListState extends State<OtpDemoList> {
     if (difference.inMinutes < 1) {
       return l10n.createdNow;
     } else if (difference.inHours < 1) {
-      return l10n.createdMinutesAgo
-          .replaceAll('{minutes}', '${difference.inMinutes}');
+      return l10n.createdMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return l10n.createdHoursAgo
-          .replaceAll('{hours}', '${difference.inHours}');
+      return l10n.createdHoursAgo(difference.inHours);
     } else {
-      return l10n.createdDaysAgo.replaceAll('{days}', '${difference.inDays}');
+      return l10n.createdDaysAgo(difference.inDays);
     }
   }
 

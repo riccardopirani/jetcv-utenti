@@ -533,6 +533,50 @@ class DateInputFormatter extends TextInputFormatter {
   }
 }
 
+class TitleCaseInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text;
+
+    // Allow complete clearing
+    if (text.isEmpty) {
+      return TextEditingValue(
+        text: '',
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    // Apply title case formatting
+    String formattedText = _toTitleCase(text);
+
+    // Calculate cursor position after formatting
+    int cursorOffset = newValue.selection.start;
+
+    // If the text length changed due to formatting, adjust cursor position
+    if (formattedText.length != text.length) {
+      // Try to maintain cursor position relative to the text
+      cursorOffset = cursorOffset.clamp(0, formattedText.length);
+    }
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: cursorOffset),
+    );
+  }
+
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+}
+
 class PersonalInfoPage extends StatefulWidget {
   final UserModel? initialUser;
 
@@ -628,39 +672,171 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     }
   }
 
-  /// Populate form fields with user data
-  void _populateFormFields(UserModel user) {
+  /// Infer firstName and lastName from fullName if they are not set
+  Map<String, String> _inferNamesFromFullName(UserModel user) {
+    String firstName = user.firstName?.trim() ?? '';
+    String lastName = user.lastName?.trim() ?? '';
+
+    // If both firstName and lastName are empty but fullName exists, try to infer them
+    if (firstName.isEmpty &&
+        lastName.isEmpty &&
+        user.fullName != null &&
+        user.fullName!.trim().isNotEmpty) {
+      final fullName = user.fullName!.trim();
+      final nameParts =
+          fullName.split(' ').where((part) => part.isNotEmpty).toList();
+
+      if (nameParts.length >= 3) {
+        // For names with 3+ parts (e.g., "Mario Rossi Bianchi" or "Maria De Luca")
+        // Take first part as firstName and join the rest as lastName
+        firstName = nameParts.first;
+        lastName = nameParts.skip(1).join(' ');
+      } else if (nameParts.length == 2) {
+        // Standard case: "Mario Rossi"
+        firstName = nameParts.first;
+        lastName = nameParts.last;
+      } else if (nameParts.length == 1) {
+        // If only one part, use it as firstName
+        firstName = nameParts.first;
+        lastName = ''; // Keep lastName empty
+      }
+
+      // Apply title case formatting to inferred names
+      firstName = _toTitleCase(firstName);
+      lastName = _toTitleCase(lastName);
+    }
+
+    return {
+      'firstName': firstName,
+      'lastName': lastName,
+    };
+  }
+
+  /// Check if form has been modified by user
+  bool _hasFormBeenModified() {
+    if (_currentUser == null) return false;
+
+    // Check if any text field has been modified
+    final inferredNames = _inferNamesFromFullName(_currentUser!);
+
+    return _firstNameController.text != (inferredNames['firstName'] ?? '') ||
+        _lastNameController.text != (inferredNames['lastName'] ?? '') ||
+        _emailController.text != (_currentUser!.email ?? '') ||
+        _phoneController.text != (_currentUser!.phone ?? '') ||
+        _addressController.text != (_currentUser!.address ?? '') ||
+        _cityController.text != (_currentUser!.city ?? '') ||
+        _stateController.text != (_currentUser!.state ?? '') ||
+        _postalCodeController.text != (_currentUser!.postalCode ?? '') ||
+        _selectedGender != _currentUser!.gender ||
+        _selectedCountryCode != (_currentUser!.countryCode ?? 'it') ||
+        _selectedNationalities
+            .toSet()
+            .difference((_currentUser!.nationalityCodes ?? []).toSet())
+            .isNotEmpty ||
+        _selectedLanguages
+            .toSet()
+            .difference((_currentUser!.languageCodes ?? []).toSet())
+            .isNotEmpty ||
+        _selectedImage != null ||
+        _selectedImageBytes != null;
+  }
+
+  /// Check if this is the initial load (all text controllers are empty)
+  bool _isInitialLoad() {
+    return _firstNameController.text.isEmpty &&
+        _lastNameController.text.isEmpty &&
+        _emailController.text.isEmpty &&
+        _phoneController.text.isEmpty &&
+        _addressController.text.isEmpty &&
+        _cityController.text.isEmpty &&
+        _stateController.text.isEmpty &&
+        _postalCodeController.text.isEmpty &&
+        _dateOfBirthController.text.isEmpty;
+  }
+
+  /// Populate form fields with user data only if not modified by user
+  void _populateFormFields(UserModel user, {bool forceUpdate = false}) {
     if (mounted) {
+      // Always allow initial population, even if it would be considered "modified"
+      final isInitialLoad = _isInitialLoad();
+
+      // Don't overwrite user's input unless explicitly forced or it's the initial load
+      if (!forceUpdate && !isInitialLoad && _hasFormBeenModified()) {
+        // Only update non-text fields and internal state
+        setState(() {
+          _currentUser = user;
+          // Update profile picture if not changed by user
+          if (_selectedImage == null && _selectedImageBytes == null) {
+            _profilePicture = user.profilePicture;
+          }
+        });
+        return;
+      }
+
       setState(() {
-        // Basic info
-        _firstNameController.text = user.firstName ?? '';
-        _lastNameController.text = user.lastName ?? '';
-        _emailController.text = user.email ?? '';
-        _phoneController.text = user.phone ?? '';
+        // Infer names from fullName if needed
+        final inferredNames = _inferNamesFromFullName(user);
 
-        // Address info
-        _addressController.text = user.address ?? '';
-        _cityController.text = user.city ?? '';
-        _stateController.text = user.state ?? '';
-        _postalCodeController.text = user.postalCode ?? '';
+        // Basic info - update on initial load, when empty, or when forced
+        if (forceUpdate || isInitialLoad || _firstNameController.text.isEmpty) {
+          _firstNameController.text = inferredNames['firstName']!;
+        }
+        if (forceUpdate || isInitialLoad || _lastNameController.text.isEmpty) {
+          _lastNameController.text = inferredNames['lastName']!;
+        }
+        if (forceUpdate || isInitialLoad || _emailController.text.isEmpty) {
+          _emailController.text = user.email ?? '';
+        }
+        if (forceUpdate || isInitialLoad || _phoneController.text.isEmpty) {
+          _phoneController.text = user.phone ?? '';
+        }
 
-        // Other fields
-        _selectedGender = user.gender;
-        _selectedCountryCode = user.countryCode ?? 'it';
-        _dateOfBirth = user.dateOfBirth;
-        if (user.dateOfBirth != null) {
+        // Address info - update on initial load, when empty, or when forced
+        if (forceUpdate || isInitialLoad || _addressController.text.isEmpty) {
+          _addressController.text = user.address ?? '';
+        }
+        if (forceUpdate || isInitialLoad || _cityController.text.isEmpty) {
+          _cityController.text = user.city ?? '';
+        }
+        if (forceUpdate || isInitialLoad || _stateController.text.isEmpty) {
+          _stateController.text = user.state ?? '';
+        }
+        if (forceUpdate ||
+            isInitialLoad ||
+            _postalCodeController.text.isEmpty) {
+          _postalCodeController.text = user.postalCode ?? '';
+        }
+
+        // Other fields - always update these as they don't conflict with user input
+        _selectedGender = _selectedGender ?? user.gender;
+        _selectedCountryCode = _selectedCountryCode ?? user.countryCode ?? 'it';
+        _dateOfBirth = _dateOfBirth ?? user.dateOfBirth;
+
+        if ((forceUpdate ||
+                isInitialLoad ||
+                _dateOfBirthController.text.isEmpty) &&
+            user.dateOfBirth != null) {
           _dateOfBirthController.text =
               '${user.dateOfBirth!.day.toString().padLeft(2, '0')}/${user.dateOfBirth!.month.toString().padLeft(2, '0')}/${user.dateOfBirth!.year}';
         }
 
-        // Profile picture
-        _profilePicture = user.profilePicture;
+        // Profile picture - only update if user hasn't selected a new one
+        if (_selectedImage == null && _selectedImageBytes == null) {
+          _profilePicture = user.profilePicture;
+        }
 
-        // Multi-select fields
-        _selectedNationalities = user.nationalityCodes ?? [];
-        _selectedLanguages = user.languageCodes ?? [];
+        // Multi-select fields - update on initial load, when empty, or when forced
+        if (forceUpdate || isInitialLoad || _selectedNationalities.isEmpty) {
+          _selectedNationalities = user.nationalityCodes ?? [];
+        }
+        if (forceUpdate || isInitialLoad || _selectedLanguages.isEmpty) {
+          _selectedLanguages = user.languageCodes ?? [];
+        }
 
-        // Initialize filters for dropdowns
+        // Always update current user reference
+        _currentUser = user;
+
+        // Always initialize filters for dropdowns
         _initializeNationalityFilter();
         _initializeLanguageFilter();
       });
@@ -672,23 +848,65 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     await _loadCurrentUser();
   }
 
+  /// Refresh data with user confirmation if form has been modified
+  Future<void> _refreshDataWithConfirmation() async {
+    if (_hasFormBeenModified()) {
+      // Show confirmation dialog
+      final shouldRefresh = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Conferma aggiornamento'),
+            content: const Text(
+                'L\'aggiornamento cancellerà le modifiche non salvate. Continuare?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Aggiorna'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldRefresh == true) {
+        // Force update to overwrite user changes
+        final user = await UserService.getCurrentUser();
+        if (user != null && mounted) {
+          _populateFormFields(user, forceUpdate: true);
+        }
+      }
+    } else {
+      // No changes, safe to refresh
+      await _refreshData();
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    // Refresh data when app comes back to foreground
+    // Only refresh data when app comes back to foreground if user hasn't made changes
     if (state == AppLifecycleState.resumed) {
-      _refreshData();
+      // Don't refresh if user has unsaved changes
+      if (!_hasFormBeenModified()) {
+        _refreshData();
+      }
     }
   }
 
   /// Called when the app language changes to save languageCodeApp immediately
   void _onLanguageChanged() {
     _saveLanguageCodeApp();
-    // Rebuild the UI to reflect language changes
+    // Rebuild the UI to reflect language changes without resetting form data
     if (mounted) {
       setState(() {
         // This will trigger rebuild with new localized texts
+        // Form data is preserved as we only update UI labels
       });
     }
   }
@@ -1563,7 +1781,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
         },
         child: SafeArea(
           child: RefreshIndicator(
-            onRefresh: _refreshData,
+            onRefresh: _refreshDataWithConfirmation,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Form(
@@ -1757,6 +1975,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             label: AppLocalizations.of(context)!.firstName,
                             icon: Icons.person_outline,
                             textCapitalization: TextCapitalization.words,
+                            inputFormatters: [TitleCaseInputFormatter()],
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -1773,6 +1992,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             label: AppLocalizations.of(context)!.lastName,
                             icon: Icons.person_outline,
                             textCapitalization: TextCapitalization.words,
+                            inputFormatters: [TitleCaseInputFormatter()],
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -1866,6 +2086,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                       label: AppLocalizations.of(context)!.address,
                       icon: Icons.home_outlined,
                       textCapitalization: TextCapitalization.words,
+                      inputFormatters: [TitleCaseInputFormatter()],
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
                           return AppLocalizations.of(context)!.addressRequired;
@@ -1884,6 +2105,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             label: AppLocalizations.of(context)!.city,
                             icon: Icons.location_city_outlined,
                             textCapitalization: TextCapitalization.words,
+                            inputFormatters: [TitleCaseInputFormatter()],
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -1900,6 +2122,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             label: AppLocalizations.of(context)!.state,
                             icon: Icons.map_outlined,
                             textCapitalization: TextCapitalization.words,
+                            inputFormatters: [TitleCaseInputFormatter()],
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!

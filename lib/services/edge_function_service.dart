@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
-import 'package:jetcv__utenti/models/models.dart';
 
 /// Servizio base per gestire le chiamate alle Edge Functions di Supabase
 class EdgeFunctionService {
@@ -20,7 +18,6 @@ class EdgeFunctionService {
           '🏥 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}');
 
       // Per health check, facciamo una chiamata HTTP diretta GET
-      final url = '${SupabaseConfig.supabaseUrl}/functions/v1/$functionName';
       final session = _client.auth.currentSession;
 
       if (session == null) {

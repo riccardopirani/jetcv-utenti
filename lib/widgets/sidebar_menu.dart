@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
+import 'package:jetcv__utenti/models/cv_model.dart';
 import 'package:jetcv__utenti/services/user_service.dart';
+import 'package:jetcv__utenti/services/cv_edge_service.dart';
+import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/cv/cv_view_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
-import 'package:jetcv__utenti/screens/wallet/my_wallets_page.dart';
 import 'package:jetcv__utenti/screens/certifications/my_certifications_page.dart';
+import 'package:jetcv__utenti/widgets/language_selector.dart';
+import 'package:jetcv__utenti/utils/user_name_utils.dart';
 
 class SidebarMenu extends StatefulWidget {
   final VoidCallback? onClose;
@@ -27,12 +31,17 @@ class SidebarMenu extends StatefulWidget {
 
 class _SidebarMenuState extends State<SidebarMenu> {
   UserModel? _currentUser;
+  CvModel? _currentUserCv;
   bool _isLoading = true;
+  bool _isCvLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+
+    // Listen for language changes to save languageCodeApp automatically
+    LocaleService.instance.addListener(_onLanguageChanged);
   }
 
   Future<void> _loadUserData() async {
@@ -44,12 +53,85 @@ class _SidebarMenuState extends State<SidebarMenu> {
           _isLoading = false;
         });
       }
+
+      // Load CV data if user is available
+      if (user != null) {
+        _loadCvData(user.idUser);
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadCvData(String userId) async {
+    if (mounted) {
+      setState(() {
+        _isCvLoading = true;
+      });
+    }
+
+    try {
+      final cvResponse = await CvEdgeService.getUserCv(userId);
+      if (mounted) {
+        setState(() {
+          _currentUserCv = cvResponse.success ? cvResponse.data : null;
+          _isCvLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _currentUserCv = null;
+          _isCvLoading = false;
+        });
+      }
+    }
+  }
+
+  /// Called when the app language changes to save languageCodeApp immediately
+  void _onLanguageChanged() {
+    _saveLanguageCodeApp();
+    // Rebuild the UI to reflect language changes
+    if (mounted) {
+      setState(() {
+        // This will trigger rebuild with new localized texts
+      });
+    }
+  }
+
+  /// Save languageCodeApp immediately when language changes
+  Future<void> _saveLanguageCodeApp() async {
+    try {
+      final currentUser = await UserService.getCurrentUser();
+      if (currentUser == null) return;
+
+      final currentLanguageCode =
+          LocaleService.instance.currentLocale?.languageCode ?? 'en';
+
+      // Only save if the language actually changed
+      if (currentUser.languageCodeApp != currentLanguageCode) {
+        final updateData = {
+          'languageCodeApp': currentLanguageCode,
+        };
+
+        // Call the updateUserProfile Edge Function
+        final result = await UserService.updateUser(
+          currentUser.idUser,
+          updateData,
+        );
+
+        if (result['success'] == true) {
+          debugPrint('✅ Language code saved: $currentLanguageCode');
+        } else {
+          debugPrint('⚠️ Failed to save language code: ${result['message']}');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving language code: $e');
     }
   }
 
@@ -136,14 +218,6 @@ class _SidebarMenuState extends State<SidebarMenu> {
           ),
         );
         break;
-      case '/wallets':
-        // Navigate to wallets page
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const MyWalletsPage(),
-          ),
-        );
-        break;
       default:
         // Do nothing for unknown routes
         break;
@@ -210,34 +284,142 @@ class _SidebarMenuState extends State<SidebarMenu> {
           // App Header
           Container(
             padding: EdgeInsets.all(headerPadding),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.all(iconPadding),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.rocket_launch,
-                    color: colorScheme.onPrimary,
-                    size: iconSize,
-                  ),
-                ),
-                SizedBox(width: isMobile ? 8 : 12),
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(context)!.appTitle,
-                    style: TextStyle(
-                      color: sidebarOnColor,
-                      fontSize: titleFontSize,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(iconPadding),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.rocket_launch,
+                        color: colorScheme.onPrimary,
+                        size: iconSize,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    SizedBox(width: isMobile ? 8 : 12),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context)!.appTitle,
+                        style: TextStyle(
+                          color: sidebarOnColor,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // CV Serial Number (if available)
+                if (_currentUserCv != null &&
+                    _currentUserCv!.serialNumber.isNotEmpty) ...[
+                  SizedBox(height: isMobile ? 6 : 8),
+                  Padding(
+                    padding: EdgeInsets.only(left: isMobile ? 32 : 40),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 6 : 8,
+                        vertical: isMobile ? 2 : 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.fingerprint,
+                            color: accentColor,
+                            size: isMobile ? 12 : 14,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            _currentUserCv!.serialNumber,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: isMobile ? 10 : 12,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'monospace',
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                ] else if (_isCvLoading) ...[
+                  SizedBox(height: isMobile ? 6 : 8),
+                  Padding(
+                    padding: EdgeInsets.only(left: isMobile ? 32 : 40),
+                    child: SizedBox(
+                      width: isMobile ? 12 : 14,
+                      height: isMobile ? 12 : 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        color: sidebarOnColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Navigation Items
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 8),
+              children: [
+                _buildMenuItem(
+                  icon: Icons.home,
+                  title: localizations.home,
+                  route: '/home',
+                ),
+                _buildMenuItem(
+                  icon: Icons.person,
+                  title: localizations.myProfile,
+                  route: '/profile',
+                ),
+                _buildMenuItem(
+                  icon: Icons.description,
+                  title: localizations.myCV,
+                  route: '/cv',
+                ),
+                _buildMenuItem(
+                  icon: Icons.verified,
+                  title: localizations.myCertifications,
+                  route: '/certifications',
+                ),
+                _buildMenuItem(
+                  icon: Icons.key,
+                  title: localizations.otp,
+                  route: '/otp',
                 ),
               ],
             ),
+          ),
+
+          // Separator
+          Container(
+            height: 1,
+            margin: EdgeInsets.symmetric(
+                horizontal: isMobile
+                    ? 16
+                    : isTablet
+                        ? 18
+                        : 20),
+            color: sidebarOnColor.withValues(alpha: 0.2),
           ),
 
           // User Profile Section
@@ -313,8 +495,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${_currentUser!.firstName ?? ''} ${_currentUser!.lastName ?? ''}'
-                                      .trim(),
+                                  UserNameUtils.getUserDisplayName(
+                                      context, _currentUser),
                                   style: TextStyle(
                                     color: sidebarOnColor,
                                     fontSize: isMobile
@@ -361,64 +543,35 @@ class _SidebarMenuState extends State<SidebarMenu> {
                       ),
           ),
 
-          // Navigation Items
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 8),
-              children: [
-                _buildMenuItem(
-                  icon: Icons.home,
-                  title: localizations.home,
-                  route: '/home',
-                ),
-                _buildMenuItem(
-                  icon: Icons.person,
-                  title: localizations.myProfile,
-                  route: '/profile',
-                ),
-                _buildMenuItem(
-                  icon: Icons.description,
-                  title: localizations.myCV,
-                  route: '/cv',
-                ),
-                _buildMenuItem(
-                  icon: Icons.verified,
-                  title: localizations.myCertifications,
-                  route: '/certifications',
-                ),
-                _buildMenuItem(
-                  icon: Icons.key,
-                  title: localizations.otp,
-                  route: '/otp',
-                ),
-                _buildMenuItem(
-                  icon: Icons.account_balance_wallet,
-                  title: localizations.myWallets,
-                  route: '/wallets',
-                ),
-              ],
-            ),
-          ),
-
-          // Separator
+          // Language Selector Section
           Container(
-            height: 1,
-            margin: EdgeInsets.symmetric(
-                horizontal: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20),
-            color: sidebarOnColor.withValues(alpha: 0.2),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile
+                  ? 16
+                  : isTablet
+                      ? 18
+                      : 20,
+              vertical: isMobile ? 8 : 12,
+            ),
+            child: Center(
+              child: LanguageSelector(
+                showText: true,
+                iconColor: sidebarOnColor,
+                textColor: sidebarOnColor,
+              ),
+            ),
           ),
 
           // Action Items
           Padding(
-            padding: EdgeInsets.all(isMobile
-                ? 16
-                : isTablet
-                    ? 18
-                    : 20),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile
+                  ? 16
+                  : isTablet
+                      ? 18
+                      : 20,
+              vertical: isMobile ? 8 : 12,
+            ),
             child: Column(
               children: [
                 _buildActionItem(
@@ -604,5 +757,12 @@ class _SidebarMenuState extends State<SidebarMenu> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Remove language change listener
+    LocaleService.instance.removeListener(_onLanguageChanged);
+    super.dispose();
   }
 }

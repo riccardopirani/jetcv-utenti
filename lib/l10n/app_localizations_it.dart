@@ -316,10 +316,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get startJourney => 'Inizia il tuo viaggio con JetCV';
 
   @override
-  String get fullName => 'Nome completo';
+  String get fullName => 'Nome e Cognome';
 
   @override
-  String get enterFullName => 'Inserisci il tuo nome completo';
+  String get enterFullName => 'Es. Mario Rossi';
 
   @override
   String get nameMinLength => 'Il nome deve avere almeno 2 caratteri';
@@ -553,6 +553,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get retry => 'Riprova';
 
   @override
+  String get noCvAvailable => 'Nessun CV disponibile';
+
+  @override
+  String get errorLoadingCv => 'Errore nel caricamento del CV';
+
+  @override
+  String get createYourFirstCv => 'Crea il tuo primo CV per iniziare';
+
+  @override
   String get noCertificationsFound => 'Nessuna certificazione trovata';
 
   @override
@@ -631,38 +640,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get otp => 'OTP';
-
-  @override
-  String get myWallets => 'I miei Wallet';
-
-  @override
-  String get viewYourDigitalWallets => 'Visualizza i tuoi wallet digitali';
-
-  @override
-  String get wallet => 'Wallet';
-
-  @override
-  String get walletDescription =>
-      'Il tuo CV è salvato in questo wallet sulla blockchain così da garantirne sempre l\'autenticità';
-
-  @override
-  String get owner => 'Proprietario';
-
-  @override
-  String get walletAddress => 'Indirizzo Wallet';
-
-  @override
-  String get copyAddress => 'Copia indirizzo';
-
-  @override
-  String get addressCopied => 'Indirizzo copiato negli appunti';
-
-  @override
-  String get noWalletFound => 'Nessun wallet trovato';
-
-  @override
-  String get walletNotFoundDescription =>
-      'Non hai ancora un wallet associato al tuo account';
 
   @override
   String get blockedByLegalEntity => 'Bloccato da';
@@ -1406,7 +1383,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get viewAll => 'Visualizza Tutti';
 
   @override
-  String get pendingCertifications => 'Certificazioni in attesa';
+  String get pendingCertifications => 'Certificazioni in sospeso';
 
   @override
   String get approvedCertifications => 'Certificazioni approvate';
@@ -1415,7 +1392,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get rejectedCertifications => 'Certificazioni rifiutate';
 
   @override
-  String get pendingShort => 'In attesa';
+  String get pendingShort => 'In sospeso';
 
   @override
   String get approvedShort => 'Approvate';
@@ -1465,7 +1442,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get createdOn => 'Creato il';
 
   @override
-  String get rejectedReason => 'Motivo rifiuto:';
+  String get rejectedReason => 'Motivo del rifiuto:';
 
   @override
   String get noRejectionReason => 'Nessun motivo specificato';
@@ -1474,49 +1451,49 @@ class AppLocalizationsIt extends AppLocalizations {
   String get blockchainCertificate => 'Certificato Blockchain';
 
   @override
-  String get verifiedOnPolygonNetwork => 'Verificato su Rete Polygon';
+  String get verifiedOnPolygonNetwork => 'Verificato sulla rete Polygon';
 
   @override
-  String get transactionInformation => 'Informazioni Transazione';
+  String get transactionInformation => 'Informazioni transazione';
 
   @override
-  String get transactionId => 'ID Transazione';
+  String get transactionId => 'ID transazione';
 
   @override
   String get network => 'Rete';
 
   @override
-  String get blockHeight => 'Altezza Blocco';
+  String get blockHeight => 'Altezza blocco';
 
   @override
-  String get gasUsed => 'Gas Utilizzato';
+  String get gasUsed => 'Gas utilizzato';
 
   @override
   String get nftInformation => 'Informazioni NFT';
 
   @override
-  String get tokenId => 'ID Token';
+  String get tokenId => 'ID token';
 
   @override
-  String get contractAddress => 'Indirizzo Contratto';
+  String get contractAddress => 'Indirizzo contratto';
 
   @override
   String get standard => 'Standard';
 
   @override
-  String get metadataUri => 'URI Metadata';
+  String get metadataUri => 'URI metadati';
 
   @override
-  String get mintInformation => 'Informazioni Conio';
+  String get mintInformation => 'Informazioni mint';
 
   @override
-  String get mintDate => 'Data Conio';
+  String get mintDate => 'Data mint';
 
   @override
-  String get minterAddress => 'Indirizzo Coniatore';
+  String get minterAddress => 'Indirizzo minter';
 
   @override
-  String get mintPrice => 'Prezzo Conio';
+  String get mintPrice => 'Prezzo mint';
 
   @override
   String get certificateStatus => 'Stato';

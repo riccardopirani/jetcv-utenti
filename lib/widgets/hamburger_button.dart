@@ -80,6 +80,7 @@ class _HamburgerButtonState extends State<HamburgerButton>
                 size: const Size(20, 16),
                 painter: HamburgerPainter(
                   progress: _animation.value,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               );
             },
@@ -92,13 +93,17 @@ class _HamburgerButtonState extends State<HamburgerButton>
 
 class HamburgerPainter extends CustomPainter {
   final double progress;
+  final Color color;
 
-  HamburgerPainter({required this.progress});
+  HamburgerPainter({
+    required this.progress,
+    required this.color,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF6B46C1)
+      ..color = color
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
@@ -186,7 +191,7 @@ class HamburgerPainter extends CustomPainter {
       // Middle line fades out
       final middleOpacity = 1.0 - progress;
       final middlePaint = Paint()
-        ..color = const Color(0xFF6B46C1).withValues(alpha: middleOpacity)
+        ..color = color.withValues(alpha: middleOpacity)
         ..strokeWidth = 2.0
         ..strokeCap = StrokeCap.round;
 
@@ -200,6 +205,6 @@ class HamburgerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(HamburgerPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }

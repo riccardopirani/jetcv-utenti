@@ -9,6 +9,7 @@ import 'package:jetcv__utenti/screens/otp/otp_list_page.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
+import 'package:jetcv__utenti/utils/user_name_utils.dart';
 
 class AuthenticatedHomePage extends StatefulWidget {
   final bool forceRefresh;
@@ -157,12 +158,7 @@ class UserHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final supabaseUser = SupabaseAuth.currentUser;
-    final userName = user?.fullName ??
-        user?.firstName ??
-        supabaseUser?.userMetadata?['full_name'] ??
-        supabaseUser?.email?.split('@')[0] ??
-        AppLocalizations.of(context)!.user;
+    final userName = UserNameUtils.getUserDisplayName(context, user);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -185,7 +181,7 @@ class UserHeader extends StatelessWidget {
                 radius: 24,
                 backgroundColor: Colors.white.withValues(alpha: 0.2),
                 child: Text(
-                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                  UserNameUtils.getInitial(context, user),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -232,34 +228,37 @@ class UserHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.verified,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(context)!.verifiedOnBlockchain,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+
+          // Show blockchain verification badge only if user has a CV
+          if (user?.hasCv == true)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.verified,
+                    color: Colors.white,
+                    size: 20,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.verifiedOnBlockchain,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

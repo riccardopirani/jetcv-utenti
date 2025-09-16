@@ -319,10 +319,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get startJourney => 'Beginnen Sie Ihre Reise mit JetCV';
 
   @override
-  String get fullName => 'Vollständiger Name';
+  String get fullName => 'Vor- und Nachname';
 
   @override
-  String get enterFullName => 'Geben Sie Ihren vollständigen Namen ein';
+  String get enterFullName => 'z.B. Max Müller';
 
   @override
   String get nameMinLength => 'Der Name muss mindestens 2 Zeichen haben';
@@ -558,6 +558,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get retry => 'Erneut versuchen';
 
   @override
+  String get noCvAvailable => 'Kein Lebenslauf verfügbar';
+
+  @override
+  String get errorLoadingCv => 'Fehler beim Laden des Lebenslaufs';
+
+  @override
+  String get createYourFirstCv =>
+      'Erstellen Sie Ihren ersten Lebenslauf, um zu beginnen';
+
+  @override
   String get noCertificationsFound => 'Keine Zertifizierungen gefunden';
 
   @override
@@ -636,38 +646,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get otp => 'OTP';
-
-  @override
-  String get myWallets => 'Meine Wallets';
-
-  @override
-  String get viewYourDigitalWallets => 'View your digital wallets';
-
-  @override
-  String get wallet => 'Wallet';
-
-  @override
-  String get walletDescription =>
-      'Your CV is saved in this wallet on the blockchain to always guarantee its authenticity';
-
-  @override
-  String get owner => 'Owner';
-
-  @override
-  String get walletAddress => 'Wallet Address';
-
-  @override
-  String get copyAddress => 'Copy address';
-
-  @override
-  String get addressCopied => 'Address copied to clipboard';
-
-  @override
-  String get noWalletFound => 'No wallet found';
-
-  @override
-  String get walletNotFoundDescription =>
-      'You don\'t have a wallet associated with your account yet';
 
   @override
   String get blockedByLegalEntity => 'Blocked by';
@@ -1100,14 +1078,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get digitalCredentialsAndAchievements =>
-      'Digitale Zeugnisse und Erfolge';
+      'Digitale Zertifikate und Erfolge';
 
   @override
   String get importYourOpenBadges => 'Importieren Sie Ihre Open Badges';
 
   @override
   String get showcaseYourDigitalCredentials =>
-      'Zeigen Sie Ihre digitalen Zeugnisse und Erfolge';
+      'Zeigen Sie Ihre digitalen Zertifikate und Erfolge';
 
   @override
   String get languageName_en => 'Englisch';
@@ -1230,7 +1208,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get certType_attestato_di_frequenza => 'Teilnahmebescheinigung';
 
   @override
-  String get certType_certificato_di_competenza => 'Kompetenzzertifikat';
+  String get certType_certificato_di_competenza => 'Kompetenzbescheinigung';
 
   @override
   String get certType_diploma => 'Diplom';
@@ -1239,7 +1217,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get certType_laurea => 'Abschluss';
 
   @override
-  String get certType_master => 'Master';
+  String get certType_master => 'Master-Abschluss';
 
   @override
   String get certType_corso_di_formazione => 'Ausbildungskurs';
@@ -1248,10 +1226,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get certType_certificazione_professionale => 'Berufszertifizierung';
 
   @override
-  String get certType_patente => 'Führerschein';
+  String get certType_patente => 'Lizenz';
 
   @override
-  String get certType_abilitazione => 'Berechtigung';
+  String get certType_abilitazione => 'Qualifikation';
 
   @override
   String get serialNumber => 'Seriennummer';
@@ -1370,179 +1348,179 @@ class AppLocalizationsDe extends AppLocalizations {
   String get openBadges => 'Open Badges';
 
   @override
-  String get badges => 'badges';
+  String get badges => 'Abzeichen';
 
   @override
-  String get loadingOpenBadges => 'Loading Open Badges...';
+  String get loadingOpenBadges => 'Laden von Open Badges...';
 
   @override
-  String get errorLoadingOpenBadges => 'Error Loading Open Badges';
+  String get errorLoadingOpenBadges => 'Fehler beim Laden der Open Badges';
 
   @override
-  String get noOpenBadgesFound => 'No Open Badges Found';
+  String get noOpenBadgesFound => 'Keine Open Badges gefunden';
 
   @override
   String get noOpenBadgesDescription =>
-      'Import your first OpenBadge to get started';
+      'Importieren Sie Ihr erstes OpenBadge, um loszulegen';
 
   @override
-  String get importOpenBadge => 'Import OpenBadge';
+  String get importOpenBadge => 'OpenBadge importieren';
 
   @override
-  String get valid => 'Valid';
+  String get valid => 'Gültig';
 
   @override
-  String get invalid => 'Invalid';
+  String get invalid => 'Ungültig';
 
   @override
-  String get revoked => 'Revoked';
+  String get revoked => 'Widerrufen';
 
   @override
-  String get source => 'Source (optional)';
+  String get source => 'Quelle (optional)';
 
   @override
-  String get note => 'Note (optional)';
+  String get note => 'Notiz (optional)';
 
   @override
-  String get import => 'Import';
+  String get import => 'Importieren';
 
   @override
-  String get viewAll => 'View All';
+  String get viewAll => 'Alle anzeigen';
 
   @override
-  String get pendingCertifications => 'Pending Certifications';
+  String get pendingCertifications => 'Ausstehende Zertifizierungen';
 
   @override
-  String get approvedCertifications => 'Approved Certifications';
+  String get approvedCertifications => 'Genehmigte Zertifizierungen';
 
   @override
-  String get rejectedCertifications => 'Rejected Certifications';
+  String get rejectedCertifications => 'Abgelehnte Zertifizierungen';
 
   @override
-  String get pendingShort => 'Pending';
+  String get pendingShort => 'Ausstehend';
 
   @override
-  String get approvedShort => 'Approved';
+  String get approvedShort => 'Genehmigt';
 
   @override
-  String get rejectedShort => 'Rejected';
+  String get rejectedShort => 'Abgelehnt';
 
   @override
-  String get approve => 'Approve';
+  String get approve => 'Genehmigen';
 
   @override
-  String get reject => 'Reject';
+  String get reject => 'Ablehnen';
 
   @override
-  String get confirmRejection => 'Confirm Rejection';
+  String get confirmRejection => 'Ablehnung bestätigen';
 
   @override
   String get rejectCertificationMessage =>
-      'Are you sure you want to reject this certification?';
+      'Sind Sie sicher, dass Sie diese Zertifizierung ablehnen möchten?';
 
   @override
-  String get rejectionReason => 'Rejection reason (optional)';
+  String get rejectionReason => 'Ablehnungsgrund (optional)';
 
   @override
-  String get enterRejectionReason => 'Enter rejection reason...';
+  String get enterRejectionReason => 'Ablehnungsgrund eingeben...';
 
   @override
-  String get confirmReject => 'Confirm Reject';
+  String get confirmReject => 'Ablehnung bestätigen';
 
   @override
-  String get certificationApproved => 'Certification approved successfully!';
+  String get certificationApproved => 'Zertifizierung erfolgreich genehmigt!';
 
   @override
-  String get certificationRejected => 'Certification rejected';
+  String get certificationRejected => 'Zertifizierung abgelehnt';
 
   @override
   String errorApprovingCertification(String error) {
-    return 'Error approving certification: $error';
+    return 'Fehler bei der Genehmigung der Zertifizierung: $error';
   }
 
   @override
   String errorRejectingCertification(String error) {
-    return 'Error rejecting certification: $error';
+    return 'Fehler bei der Ablehnung der Zertifizierung: $error';
   }
 
   @override
-  String get createdOn => 'Created on';
+  String get createdOn => 'Erstellt am';
 
   @override
-  String get rejectedReason => 'Rejection reason:';
+  String get rejectedReason => 'Ablehnungsgrund:';
 
   @override
-  String get noRejectionReason => 'No reason specified';
+  String get noRejectionReason => 'Kein Grund angegeben';
 
   @override
-  String get blockchainCertificate => 'Blockchain Certificate';
+  String get blockchainCertificate => 'Blockchain-Zertifikat';
 
   @override
-  String get verifiedOnPolygonNetwork => 'Verified on Polygon Network';
+  String get verifiedOnPolygonNetwork => 'Verifiziert im Polygon-Netzwerk';
 
   @override
-  String get transactionInformation => 'Transaction Information';
+  String get transactionInformation => 'Transaktionsinformationen';
 
   @override
-  String get transactionId => 'Transaction ID';
+  String get transactionId => 'Transaktions-ID';
 
   @override
-  String get network => 'Network';
+  String get network => 'Netzwerk';
 
   @override
-  String get blockHeight => 'Block Height';
+  String get blockHeight => 'Blockhöhe';
 
   @override
-  String get gasUsed => 'Gas Used';
+  String get gasUsed => 'Verbrauchtes Gas';
 
   @override
-  String get nftInformation => 'NFT Information';
+  String get nftInformation => 'NFT-Informationen';
 
   @override
-  String get tokenId => 'Token ID';
+  String get tokenId => 'Token-ID';
 
   @override
-  String get contractAddress => 'Contract Address';
+  String get contractAddress => 'Vertragsadresse';
 
   @override
   String get standard => 'Standard';
 
   @override
-  String get metadataUri => 'Metadata URI';
+  String get metadataUri => 'Metadaten-URI';
 
   @override
-  String get mintInformation => 'Mint Information';
+  String get mintInformation => 'Mint-Informationen';
 
   @override
-  String get mintDate => 'Mint Date';
+  String get mintDate => 'Mint-Datum';
 
   @override
-  String get minterAddress => 'Minter Address';
+  String get minterAddress => 'Minter-Adresse';
 
   @override
-  String get mintPrice => 'Mint Price';
+  String get mintPrice => 'Mint-Preis';
 
   @override
   String get certificateStatus => 'Status';
 
   @override
-  String get confirmed => 'Confirmed';
+  String get confirmed => 'Bestätigt';
 
   @override
-  String get certificateDetails => 'Certificate Details';
+  String get certificateDetails => 'Zertifikatdetails';
 
   @override
-  String get certificateName => 'Certificate Name';
+  String get certificateName => 'Zertifikatname';
 
   @override
-  String get blockchainVerified => 'Blockchain Verified';
+  String get blockchainVerified => 'Blockchain-verifiziert';
 
   @override
   String get blockchainVerificationMessage =>
-      'This certificate has been verified and stored on the Polygon blockchain network.';
+      'Dieses Zertifikat wurde verifiziert und im Polygon-Blockchain-Netzwerk gespeichert.';
 
   @override
-  String get viewOnPolygonExplorer => 'View on Polygon Explorer';
+  String get viewOnPolygonExplorer => 'Im Polygon Explorer anzeigen';
 
   @override
   String get polygon => 'Polygon';

@@ -11,6 +11,7 @@ import 'package:jetcv__utenti/services/locale_service.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/screens/cv/blockchain_info_page.dart';
 import 'package:jetcv__utenti/screens/cv/open_badges_page.dart';
+import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
 import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
 // import 'package:jetcv__utenti/services/image_cache_service.dart';
@@ -81,12 +82,21 @@ class _CVViewPageState extends State<CVViewPage> {
       // Load CV data using CvEdgeService
       final cvResponse = await CvEdgeService.getUserCv(targetUserId);
 
-      if (cvResponse.success && cvResponse.data != null) {
-        _cv = cvResponse.data!;
-        debugPrint('✅ CV loaded successfully for user: $targetUserId');
-        debugPrint(
-            '🌍 CV countryCode: "${_cv!.countryCode}" (${_cv!.countryCode?.runtimeType})');
+      if (cvResponse.success) {
+        if (cvResponse.data != null) {
+          // CV found - load it successfully
+          _cv = cvResponse.data!;
+          debugPrint('✅ CV loaded successfully for user: $targetUserId');
+          debugPrint(
+              '🌍 CV countryCode: "${_cv!.countryCode}" (${_cv!.countryCode?.runtimeType})');
+        } else {
+          // API call successful but no CV found - show call-to-action
+          debugPrint(
+              'ℹ️ No CV found for user: $targetUserId (success but data is null)');
+          _cv = null; // Ensure _cv is null to trigger call-to-action
+        }
       } else {
+        // API call failed - show error message
         debugPrint('❌ Failed to load CV: ${cvResponse.error}');
         setState(() {
           _errorMessage =
@@ -96,8 +106,10 @@ class _CVViewPageState extends State<CVViewPage> {
         return;
       }
 
-      // Load country data if available
-      if (_cv!.countryCode != null && _cv!.countryCode!.isNotEmpty) {
+      // Load country data if CV exists and has country code
+      if (_cv != null &&
+          _cv!.countryCode != null &&
+          _cv!.countryCode!.isNotEmpty) {
         debugPrint('🔍 Loading country with code: "${_cv!.countryCode}"');
 
         final countryResponse =
@@ -115,18 +127,21 @@ class _CVViewPageState extends State<CVViewPage> {
         }
       } else {
         debugPrint(
-            '⚠️ CV countryCode is null or empty - skipping country lookup');
+            '⚠️ CV is null or countryCode is null/empty - skipping country lookup');
       }
 
       setState(() {
         _isLoading = false;
       });
 
-      // Pre-carica l'URL pubblico in background per l'anteprima
-      _getPublicCvUrl();
+      // Only load additional data if CV exists
+      if (_cv != null) {
+        // Pre-carica l'URL pubblico in background per l'anteprima
+        _getPublicCvUrl();
 
-      // Load certifications data
-      _loadCertifications();
+        // Load certifications data
+        _loadCertifications();
+      }
     } catch (e) {
       debugPrint('Error loading CV data: $e');
       setState(() {
@@ -641,16 +656,7 @@ class _CVViewPageState extends State<CVViewPage> {
       return MainLayout(
         currentRoute: '/cv',
         title: AppLocalizations.of(context)!.viewMyCV,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              _errorMessage ?? 'CV data not available', // TODO: localize
-              style: Theme.of(context).textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+        child: _buildNoCVState(),
       );
     }
 
@@ -686,11 +692,6 @@ class _CVViewPageState extends State<CVViewPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Language selector
-            _buildLanguageSelector(),
-
-            SizedBox(height: smallSpacing),
-
             // Share CV section (moved to top)
             _buildShareSection(),
 
@@ -722,88 +723,6 @@ class _CVViewPageState extends State<CVViewPage> {
             SizedBox(height: sectionSpacing),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageSelector() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
-    final cardPadding = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-    final iconSize = isMobile
-        ? 20.0
-        : isTablet
-            ? 22.0
-            : 24.0;
-    final spacing = isMobile
-        ? 8.0
-        : isTablet
-            ? 10.0
-            : 12.0;
-    final titleFontSize = isMobile
-        ? 14.0
-        : isTablet
-            ? 16.0
-            : 18.0;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(cardPadding),
-        child: isMobile
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.language,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: iconSize,
-                      ),
-                      SizedBox(width: spacing),
-                      Text(
-                        AppLocalizations.of(context)!.cvLanguage,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: titleFontSize,
-                                ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: spacing),
-                  CVLanguageDropdown(),
-                ],
-              )
-            : Row(
-                children: [
-                  Icon(
-                    Icons.language,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: iconSize,
-                  ),
-                  SizedBox(width: spacing),
-                  Text(
-                    AppLocalizations.of(context)!.cvLanguage,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: titleFontSize,
-                        ),
-                  ),
-                  const Spacer(),
-                  Expanded(
-                    child: CVLanguageDropdown(),
-                  ),
-                ],
-              ),
       ),
     );
   }
@@ -2619,8 +2538,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
   Widget _buildCertificationImage(UserCertificationDetail cert) {
     // Determine image type based on certification category
-    final categoryName =
-        cert.certification?.category?.name?.toLowerCase() ?? '';
+    final categoryName = cert.certification?.category?.name.toLowerCase() ?? '';
 
     if (categoryName.contains('project') ||
         categoryName.contains('management')) {
@@ -3359,11 +3277,11 @@ class _CVViewPageState extends State<CVViewPage> {
     }
 
     // CV Creation and Update dates
-    if (_cv!.createdAt != null) {
+    {
       infoItems.add(_buildFormalInfoItem(
         Icons.create,
         AppLocalizations.of(context)!.cvCreationDate,
-        _formatDate(_cv!.createdAt!),
+        _formatDate(_cv!.createdAt),
       ));
     }
 
@@ -4054,261 +3972,124 @@ class _CVViewPageState extends State<CVViewPage> {
       }
     }
   }
-}
 
-class CVLanguageDropdown extends StatefulWidget {
-  const CVLanguageDropdown({super.key});
+  /// Builds the empty state when no CV is available
+  Widget _buildNoCVState() {
+    final localizations = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
 
-  @override
-  State<CVLanguageDropdown> createState() => _CVLanguageDropdownState();
-}
-
-class _CVLanguageDropdownState extends State<CVLanguageDropdown> {
-  final GlobalKey _buttonKey = GlobalKey();
-  OverlayEntry? _overlayEntry;
-  bool _isDropdownOpen = false;
-
-  @override
-  void dispose() {
-    _cleanupOverlay();
-    super.dispose();
-  }
-
-  void _cleanupOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    _isDropdownOpen = false;
-  }
-
-  void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    if (mounted) {
-      setState(() {
-        _isDropdownOpen = false;
-      });
-    }
-  }
-
-  void _showDropdown() {
-    if (_isDropdownOpen) {
-      _removeOverlay();
-      return;
-    }
-
-    final renderBox =
-        _buttonKey.currentContext!.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          // Invisible barrier to detect taps outside
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _removeOverlay,
-              child: Container(
-                color: Colors.transparent,
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(isMobile ? 24 : 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon
+            Container(
+              width: isMobile ? 80 : 100,
+              height: isMobile ? 80 : 100,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.description_outlined,
+                size: isMobile ? 40 : 50,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          ),
-          // Actual dropdown menu
-          Positioned(
-            left: offset.dx,
-            top: offset.dy + size.height + 4,
-            width: size.width,
-            child: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 200),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
+
+            SizedBox(height: isMobile ? 24 : 32),
+
+            // Title
+            Text(
+              _errorMessage ?? localizations.noCvAvailable,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: LocaleService.fullyTranslatedLocales.length,
-                  itemBuilder: (context, index) {
-                    final locale = LocaleService.fullyTranslatedLocales[index];
-                    final languageName = LocaleService.instance
-                        .getLanguageName(locale.languageCode);
-                    final languageEmoji = LocaleService.instance
-                        .getLanguageEmoji(locale.languageCode);
-                    final isSelected =
-                        LocaleService.instance.currentLocale?.languageCode ==
-                            locale.languageCode;
-
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () => _selectLanguage(locale),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          child: Row(
-                            children: [
-                              if (languageEmoji != null) ...[
-                                Text(
-                                  languageEmoji,
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(width: 12),
-                              ],
-                              Expanded(
-                                child: Text(
-                                  languageName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        color: isSelected
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : null,
-                                      ),
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(
-                                  Icons.check,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 20,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
-      ),
-    );
 
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() {
-      _isDropdownOpen = true;
-    });
-  }
+            SizedBox(height: isMobile ? 12 : 16),
 
-  Future<void> _selectLanguage(Locale locale) async {
-    _removeOverlay();
-
-    try {
-      // Update the locale
-      await LocaleService.instance.setLocale(locale);
-
-      // Update user language preference if authenticated
-      final session = SupabaseConfig.client.auth.currentSession;
-      if (session != null) {
-        try {
-          final currentUser = await UserService.getCurrentUser();
-          if (currentUser != null) {
-            await UserService.updateUser(currentUser.idUser, {
-              'languageCodeApp': locale.languageCode,
-            });
-          }
-        } catch (e) {
-          debugPrint('Error updating user language preference: $e');
-          // Non-blocking - language change in UI still works
-        }
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.languageChanged),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!
-                .errorChangingLanguage(e.toString())),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final currentLocale = LocaleService.instance.currentLocale;
-    final currentLanguageName = currentLocale != null
-        ? LocaleService.instance.getLanguageName(currentLocale.languageCode)
-        : AppLocalizations.of(context)!.language;
-    final currentLanguageEmoji = currentLocale != null
-        ? LocaleService.instance.getLanguageEmoji(currentLocale.languageCode)
-        : null;
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        key: _buttonKey,
-        onTap: _showDropdown,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            // Description
+            Text(
+              _errorMessage != null
+                  ? localizations.errorLoadingCv
+                  : localizations.createYourFirstCv,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
             ),
-            borderRadius: BorderRadius.circular(8),
-            color: Theme.of(context).colorScheme.surface,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (currentLanguageEmoji != null) ...[
-                Text(
-                  currentLanguageEmoji,
-                  style: const TextStyle(fontSize: 16),
+
+            SizedBox(height: isMobile ? 32 : 40),
+
+            // Action button
+            if (_errorMessage == null && _currentUser != null)
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          PersonalInfoPage(initialUser: _currentUser),
+                    ),
+                  )
+                      .then((result) {
+                    if (result == true && mounted) {
+                      _loadData(); // Reload data if CV was created
+                    }
+                  });
+                },
+                icon: const Icon(Icons.add),
+                label: Text(localizations.createYourDigitalCV),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 24 : 32,
+                    vertical: isMobile ? 12 : 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
                 ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: Text(
-                  currentLanguageName,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                  overflow: TextOverflow.ellipsis,
+              )
+            else if (_errorMessage != null)
+              ElevatedButton.icon(
+                onPressed: () {
+                  _loadData(); // Retry loading data
+                },
+                icon: const Icon(Icons.refresh),
+                label: Text(localizations.retry),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 24 : 32,
+                    vertical: isMobile ? 12 : 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
-                _isDropdownOpen
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                size: 20,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

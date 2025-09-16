@@ -316,10 +316,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startJourney => 'Start your journey with JetCV';
 
   @override
-  String get fullName => 'Full name';
+  String get fullName => 'First and Last Name';
 
   @override
-  String get enterFullName => 'Enter your full name';
+  String get enterFullName => 'e.g. John Smith';
 
   @override
   String get nameMinLength => 'Name must be at least 2 characters';
@@ -551,6 +551,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get noCvAvailable => 'No CV available';
+
+  @override
+  String get errorLoadingCv => 'Error loading CV';
+
+  @override
+  String get createYourFirstCv => 'Create your first CV to get started';
+
+  @override
   String get noCertificationsFound => 'No certifications found';
 
   @override
@@ -628,38 +637,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otp => 'OTP';
-
-  @override
-  String get myWallets => 'My Wallets';
-
-  @override
-  String get viewYourDigitalWallets => 'View your digital wallets';
-
-  @override
-  String get wallet => 'Wallet';
-
-  @override
-  String get walletDescription =>
-      'Your CV is saved in this wallet on the blockchain to always guarantee its authenticity';
-
-  @override
-  String get owner => 'Owner';
-
-  @override
-  String get walletAddress => 'Wallet Address';
-
-  @override
-  String get copyAddress => 'Copy address';
-
-  @override
-  String get addressCopied => 'Address copied to clipboard';
-
-  @override
-  String get noWalletFound => 'No wallet found';
-
-  @override
-  String get walletNotFoundDescription =>
-      'You don\'t have a wallet associated with your account yet';
 
   @override
   String get blockedByLegalEntity => 'Blocked by';

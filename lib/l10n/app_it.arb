@@ -96,8 +96,8 @@
   "start": "Inizia",
   "createAccount": "Crea il tuo account",
   "startJourney": "Inizia il tuo viaggio con JetCV",
-  "fullName": "Nome completo",
-  "enterFullName": "Inserisci il tuo nome completo",
+  "fullName": "Nome e Cognome",
+  "enterFullName": "Es. Mario Rossi",
   "nameMinLength": "Il nome deve avere almeno 2 caratteri",
   "viewMyCV": "Visualizza il mio CV",
   "copyLink": "Copia Link",
@@ -171,6 +171,9 @@
   "loadingCertifications": "Caricamento certificazioni...",
   "errorLoadingCertifications": "Errore nel caricamento delle certificazioni",
   "retry": "Riprova",
+  "noCvAvailable": "Nessun CV disponibile",
+  "errorLoadingCv": "Errore nel caricamento del CV",
+  "createYourFirstCv": "Crea il tuo primo CV per iniziare",
   "noCertificationsFound": "Nessuna certificazione trovata",
   "yourVerifiedCertifications": "Le tue certificazioni verificate appariranno qui",
   "certification": "Certificazione",
@@ -207,16 +210,6 @@
   "myCV": "Il mio Curriculum",
   "myCertifications": "Le mie certificazioni",
   "otp": "OTP",
-  "myWallets": "I miei Wallet",
-  "viewYourDigitalWallets": "Visualizza i tuoi wallet digitali",
-  "wallet": "Wallet",
-  "walletDescription": "Il tuo CV è salvato in questo wallet sulla blockchain così da garantirne sempre l'autenticità",
-  "owner": "Proprietario",
-  "walletAddress": "Indirizzo Wallet",
-  "copyAddress": "Copia indirizzo",
-  "addressCopied": "Indirizzo copiato negli appunti",
-  "noWalletFound": "Nessun wallet trovato",
-  "walletNotFoundDescription": "Non hai ancora un wallet associato al tuo account",
   "blockedByLegalEntity": "Bloccato da",
   "legalEntity": "Entità Legale",
   "company": "Azienda",
@@ -558,5 +551,55 @@
   "certType_certificazione": "Certificazione",
   "certType_moderatore": "Moderatore",
   "certType_ruolo_professionale": "Ruolo professionale",
-  "certType_volontariato": "Volontariato"
+  "certType_volontariato": "Volontariato",
+  "pendingCertifications": "Certificazioni in sospeso",
+  "approvedCertifications": "Certificazioni approvate",
+  "rejectedCertifications": "Certificazioni rifiutate",
+  "pendingShort": "In sospeso",
+  "approvedShort": "Approvate",
+  "rejectedShort": "Rifiutate",
+  "approve": "Approva",
+  "reject": "Rifiuta",
+  "confirmRejection": "Conferma rifiuto",
+  "rejectCertificationMessage": "Sei sicuro di voler rifiutare questa certificazione?",
+  "rejectionReason": "Motivo del rifiuto (opzionale)",
+  "enterRejectionReason": "Inserisci il motivo del rifiuto...",
+  "confirmReject": "Conferma rifiuto",
+  "certificationApproved": "Certificazione approvata con successo!",
+  "certificationRejected": "Certificazione rifiutata",
+  "errorApprovingCertification": "Errore nell'approvazione della certificazione: {error}",
+  "@errorApprovingCertification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorRejectingCertification": "Errore nel rifiuto della certificazione: {error}",
+  "@errorRejectingCertification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createdOn": "Creato il",
+  "rejectedReason": "Motivo del rifiuto:",
+  "noRejectionReason": "Nessun motivo specificato",
+  "blockchainCertificate": "Certificato Blockchain",
+  "verifiedOnPolygonNetwork": "Verificato sulla rete Polygon",
+  "transactionInformation": "Informazioni transazione",
+  "transactionId": "ID transazione",
+  "network": "Rete",
+  "blockHeight": "Altezza blocco",
+  "gasUsed": "Gas utilizzato",
+  "nftInformation": "Informazioni NFT",
+  "tokenId": "ID token",
+  "contractAddress": "Indirizzo contratto",
+  "standard": "Standard",
+  "metadataUri": "URI metadati",
+  "mintInformation": "Informazioni mint",
+  "mintDate": "Data mint",
+  "minterAddress": "Indirizzo minter",
+  "mintPrice": "Prezzo mint"
 }

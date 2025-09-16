@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
+import 'package:jetcv__utenti/screens/auth/signup_page.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
+import 'package:jetcv__utenti/widgets/responsive_widgets.dart';
+import 'package:jetcv__utenti/widgets/language_selector.dart';
 
 class HomePagePublic extends StatelessWidget {
   const HomePagePublic({super.key});
@@ -183,6 +186,9 @@ class AppHeader extends StatelessWidget {
                         ),
                   ),
                 ],
+              ),
+              CompactLanguageSelector(
+                iconColor: Theme.of(context).colorScheme.onSurface,
               ),
             ],
           ),
@@ -558,8 +564,8 @@ class StatsSection extends StatelessWidget {
                     ),
                     Expanded(
                       child: StatItem(
-                        value: '99%',
-                        label: AppLocalizations.of(context)!.security,
+                        value: '2.5K+',
+                        label: AppLocalizations.of(context)!.certifications,
                       ),
                     ),
                   ],
@@ -655,63 +661,57 @@ class CallToActionSection extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          ResponsiveButton.elevated(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SignupPage(),
                 ),
-                elevation: 0,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                AppLocalizations.of(context)!.createYourCV,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
+              elevation: 0,
+            ),
+            child: Text(
+              AppLocalizations.of(context)!.createYourCV,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
+          ResponsiveButton.outlined(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const LoginPage(),
+                ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppLocalizations.of(context)!.signInToYourAccount,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
                   ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.signInToYourAccount,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
             ),
           ),
         ],
