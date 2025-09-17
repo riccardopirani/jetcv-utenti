@@ -123,35 +123,35 @@ class ResponsiveUsageExamples extends StatelessWidget {
 }
 
 /// Usage Notes:
-/// 
+///
 /// 1. ResponsivePageWrapper: Use as the main body wrapper for pages
 ///    - Automatically handles SafeArea and ScrollView
 ///    - Applies responsive padding
-/// 
+///
 /// 2. ResponsiveFormContainer: Use for forms and input sections
 ///    - Max width of 480px on desktop
 ///    - Full width on mobile with appropriate padding
-/// 
+///
 /// 3. ResponsiveButton: Use for all buttons
 ///    - .elevated() for primary buttons
 ///    - .outlined() for secondary buttons
 ///    - Full width on mobile, max 400px centered on desktop
-/// 
+///
 /// 4. ResponsiveCard: Use for card-like content
 ///    - Max width of 600px on desktop
 ///    - Full width on mobile
-/// 
+///
 /// 5. ResponsiveContainer: Use for custom responsive containers
 ///    - Configurable max width
 ///    - Automatic centering on larger screens
-/// 
+///
 /// 6. ResponsiveSpacing: Use for responsive spacing between elements
 ///    - Different spacing values for mobile vs desktop
-/// 
+///
 /// Breakpoints:
 /// - Mobile: < 768px
-/// - Tablet: 768px - 1199px  
+/// - Tablet: 768px - 1199px
 /// - Desktop: >= 1200px
-/// 
+///
 /// The system automatically detects screen size and applies appropriate
 /// constraints and styling.

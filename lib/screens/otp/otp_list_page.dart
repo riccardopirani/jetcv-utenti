@@ -87,7 +87,7 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Future<void> _checkForChanges() async {
-    if (_isPolling || !_isPollingEnabled) return;
+    if (_isPolling || !_isPollingEnabled || _isLoading) return;
 
     setState(() {
       _isPolling = true;
@@ -212,9 +212,10 @@ class _OtpListPageState extends State<OtpListPage> {
   Future<void> _loadOtps() async {
     debugPrint('🔄 _loadOtps() called');
 
-    // Temporarily stop polling during manual load
+    // Stop polling completely during manual load to prevent race conditions
     final wasPollingEnabled = _isPollingEnabled;
     if (_isPollingEnabled) {
+      _stopPolling(); // Completely stop the timer
       setState(() {
         _isPollingEnabled = false;
       });
@@ -310,8 +311,13 @@ class _OtpListPageState extends State<OtpListPage> {
         onOtpCreated: (otp) {
           debugPrint('🔄 OTP created callback called, reloading OTPs...');
           if (mounted) {
-            // Ricarica la lista completa per assicurarsi che sia aggiornata
-            _loadOtps();
+            // Add a small delay to ensure the OTP is fully created on the server
+            // and to prevent race conditions with polling
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (mounted) {
+                _loadOtps();
+              }
+            });
           }
         },
       ),
@@ -2650,25 +2656,7 @@ class _NewOtpModalState extends State<NewOtpModal> {
       debugPrint('✅ Database connection successful');
 
       // Test Edge Function accessibility
-      debugPrint('🧪 Testing Edge Function accessibility...');
-      final edgeTest = await OtpService.testEdgeFunction();
-      if (!edgeTest.success) {
-        debugPrint('❌ Edge Function test failed: ${edgeTest.error}');
-        if (mounted && _scaffoldMessenger != null && _localizations != null) {
-          try {
-            _scaffoldMessenger!.showSnackBar(
-              SnackBar(
-                content: Text(
-                    '${AppLocalizations.of(context)!.edgeFunctionNotAccessible}: ${edgeTest.error}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } catch (scaffoldError) {
-            debugPrint('ScaffoldMessenger failed: $scaffoldError');
-          }
-        }
-        return;
-      }
+
       debugPrint('✅ Edge Function accessible');
 
       final response = await OtpService.createOtp(
