@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/signup_page.dart';
-import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
+// import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
 import 'package:jetcv__utenti/screens/auth/password_reset_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
@@ -21,9 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
+  // bool _isGoogleLoading = false;
   bool _obscurePassword = true;
-  String? _googleError;
+  // String? _googleError;
 
   @override
   void dispose() {
@@ -70,34 +70,34 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    if (_isGoogleLoading) return;
-    setState(() {
-      _isGoogleLoading = true;
-      _googleError = null;
-    });
+  // Future<void> _signInWithGoogle() async {
+  //   if (_isGoogleLoading) return;
+  //   setState(() {
+  //     _isGoogleLoading = true;
+  //     _googleError = null;
+  //   });
 
-    try {
-      // Use Supabase OAuth flow for Google authentication
-      await SupabaseAuth.signInWithGoogle();
+  //   try {
+  //     // Use Supabase OAuth flow for Google authentication
+  //     await SupabaseAuth.signInWithGoogle();
 
-      // On web, this will redirect to Google and back automatically
-      // Navigation will be handled by auth state changes
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _googleError =
-              AppLocalizations.of(context)!.googleAuthError(e.toString());
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGoogleLoading = false;
-        });
-      }
-    }
-  }
+  //     // On web, this will redirect to Google and back automatically
+  //     // Navigation will be handled by auth state changes
+  //   } catch (e) {
+  //     if (mounted) {
+  //       setState(() {
+  //         _googleError =
+  //             AppLocalizations.of(context)!.googleAuthError(e.toString());
+  //       });
+  //     }
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isGoogleLoading = false;
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +292,6 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                           ),
                         ),
-                      
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -327,90 +326,90 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                             ),
                     ),
-                    const SizedBox(height: 24),
-                    ResponsiveButton.outlined(
-                      onPressed: _isGoogleLoading ? null : _signInWithGoogle,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isGoogleLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/web_light_sq_na_3x.png',
-                                  width: 24,
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .continueWithGoogle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                    ),
-                    if (_googleError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _googleError!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ],
+                    // const SizedBox(height: 24),
+                    // ResponsiveButton.outlined(
+                    //   onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                    //   style: OutlinedButton.styleFrom(
+                    //     padding: const EdgeInsets.symmetric(vertical: 14),
+                    //     side: BorderSide(
+                    //       color: Theme.of(context).colorScheme.outline,
+                    //     ),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //   ),
+                    //   child: _isGoogleLoading
+                    //       ? const SizedBox(
+                    //           height: 20,
+                    //           width: 20,
+                    //           child: CircularProgressIndicator(strokeWidth: 2),
+                    //         )
+                    //       : Row(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Image.asset(
+                    //               'assets/images/web_light_sq_na_3x.png',
+                    //               width: 24,
+                    //               height: 24,
+                    //             ),
+                    //             const SizedBox(width: 8),
+                    //             Text(
+                    //               AppLocalizations.of(context)!
+                    //                   .continueWithGoogle,
+                    //               style: Theme.of(context)
+                    //                   .textTheme
+                    //                   .titleMedium
+                    //                   ?.copyWith(fontWeight: FontWeight.w600),
+                    //             ),
+                    //           ],
+                    //         ),
+                    // ),
+                    // if (_googleError != null) ...[
+                    //   const SizedBox(height: 8),
+                    //   Text(
+                    //     _googleError!,
+                    //     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    //           color: Theme.of(context).colorScheme.error,
+                    //           fontWeight: FontWeight.w500,
+                    //         ),
+                    //   ),
+                    // ],
                     const SizedBox(height: 32),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            AppLocalizations.of(context)!.or,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       child: Divider(
+                    //         color: Theme.of(context)
+                    //             .colorScheme
+                    //             .outline
+                    //             .withValues(alpha: 0.3),
+                    //       ),
+                    //     ),
+                    //     Padding(
+                    //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                    //       child: Text(
+                    //         AppLocalizations.of(context)!.or,
+                    //         style: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium
+                    //             ?.copyWith(
+                    //               color: Theme.of(context)
+                    //                   .colorScheme
+                    //                   .onSurface
+                    //                   .withValues(alpha: 0.6),
+                    //             ),
+                    //       ),
+                    //     ),
+                    //     Expanded(
+                    //       child: Divider(
+                    //         color: Theme.of(context)
+                    //             .colorScheme
+                    //             .outline
+                    //             .withValues(alpha: 0.3),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

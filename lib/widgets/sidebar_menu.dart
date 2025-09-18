@@ -160,18 +160,18 @@ class _SidebarMenuState extends State<SidebarMenu> {
     }
   }
 
-  Future<void> _deleteAccount() async {
-    // TODO: Implement account deletion
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text(AppLocalizations.of(context)!.accountDeletionNotImplemented),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
+  // Future<void> _deleteAccount() async {
+  //   // TODO: Implement account deletion
+  //   if (mounted) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content:
+  //             Text(AppLocalizations.of(context)!.accountDeletionNotImplemented),
+  //         backgroundColor: Colors.orange,
+  //       ),
+  //     );
+  //   }
+  // }
 
   void _navigateTo(String route) {
     widget.onClose?.call();
@@ -574,13 +574,13 @@ class _SidebarMenuState extends State<SidebarMenu> {
             ),
             child: Column(
               children: [
-                _buildActionItem(
-                  icon: Icons.person_remove,
-                  title: localizations.deleteAccount,
-                  isDestructive: true,
-                  onTap: _deleteAccount,
-                ),
-                SizedBox(height: isMobile ? 6 : 8),
+                // _buildActionItem(
+                //   icon: Icons.person_remove,
+                //   title: localizations.deleteAccount,
+                //   isDestructive: true,
+                //   onTap: _deleteAccount,
+                // ),
+                // SizedBox(height: isMobile ? 6 : 8),
                 _buildActionItem(
                   icon: Icons.logout,
                   title: localizations.logout,
