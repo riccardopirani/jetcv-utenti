@@ -102,7 +102,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get genderRequired => 'Il genere è obbligatorio';
 
   @override
-  String get emailRequired => 'L\'email è obbligatoria';
+  String get emailRequired => 'Email richiesta';
 
   @override
   String get validEmailRequired => 'Inserisci un\'email valida';
@@ -1606,4 +1606,76 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get certType_volontariato => 'Volontariato';
+
+  @override
+  String get resetPassword => 'Reimposta Password';
+
+  @override
+  String get resetPasswordTitle => 'Reimposta la Tua Password';
+
+  @override
+  String get resetPasswordDescription =>
+      'Inserisci il tuo indirizzo email e conferma con la vecchia password per impostare una nuova password';
+
+  @override
+  String get enterEmailAddress => 'Inserisci Indirizzo Email';
+
+  @override
+  String get enterOldPassword => 'Inserisci Vecchia Password';
+
+  @override
+  String get enterNewPassword => 'Inserisci Nuova Password';
+
+  @override
+  String get confirmNewPassword => 'Conferma Nuova Password';
+
+  @override
+  String get updatePassword => 'Aggiorna Password';
+
+  @override
+  String get updatingPassword => 'Aggiornamento Password...';
+
+  @override
+  String get passwordUpdatedSuccessfully => 'Password aggiornata con successo!';
+
+  @override
+  String get passwordUpdateFailed => 'Impossibile aggiornare la password';
+
+  @override
+  String get passwordsDoNotMatch => 'Le password non corrispondono';
+
+  @override
+  String get oldPasswordIncorrect => 'La vecchia password non è corretta';
+
+  @override
+  String get newPasswordTooShort =>
+      'La nuova password deve essere di almeno 6 caratteri';
+
+  @override
+  String get oldPasswordRequired => 'Vecchia password richiesta';
+
+  @override
+  String get newPasswordRequired => 'Nuova password richiesta';
+
+  @override
+  String get confirmPasswordRequired => 'Conferma password richiesta';
+
+  @override
+  String get passwordUpdateSuccess =>
+      'Password aggiornata con successo. Effettua il login con la nuova password.';
+
+  @override
+  String get authenticationFailed => 'Autenticazione fallita';
+
+  @override
+  String get updateFailed => 'Aggiornamento fallito';
+
+  @override
+  String get invalidCredentials => 'Credenziali non valide';
+
+  @override
+  String get authenticationError => 'Errore di autenticazione';
+
+  @override
+  String get unexpectedError => 'Errore imprevisto';
 }

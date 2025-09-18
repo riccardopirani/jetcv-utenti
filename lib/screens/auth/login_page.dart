@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/signup_page.dart';
 import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
+import 'package:jetcv__utenti/screens/auth/password_reset_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
@@ -269,27 +270,30 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordPage(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          AppLocalizations.of(context)!.forgotPassword,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w500,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const PasswordResetPage(),
                               ),
+                            );
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.resetPassword,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
                         ),
-                      ),
+                      
+                      ],
                     ),
                     const SizedBox(height: 32),
                     ResponsiveButton.elevated(

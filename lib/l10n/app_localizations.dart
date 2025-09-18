@@ -3127,6 +3127,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Volunteering'**
   String get certType_volontariato;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Your Password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and confirm with your old password to set a new password'**
+  String get resetPasswordDescription;
+
+  /// No description provided for @enterEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Email Address'**
+  String get enterEmailAddress;
+
+  /// No description provided for @enterOldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Old Password'**
+  String get enterOldPassword;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter New Password'**
+  String get enterNewPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePassword;
+
+  /// No description provided for @updatingPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating Password...'**
+  String get updatingPassword;
+
+  /// No description provided for @passwordUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully!'**
+  String get passwordUpdatedSuccessfully;
+
+  /// No description provided for @passwordUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update password'**
+  String get passwordUpdateFailed;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @oldPasswordIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Old password is incorrect'**
+  String get oldPasswordIncorrect;
+
+  /// No description provided for @newPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be at least 6 characters'**
+  String get newPasswordTooShort;
+
+  /// No description provided for @oldPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Old password is required'**
+  String get oldPasswordRequired;
+
+  /// No description provided for @newPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'New password is required'**
+  String get newPasswordRequired;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password confirmation is required'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @passwordUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully. Please log in with your new password.'**
+  String get passwordUpdateSuccess;
+
+  /// No description provided for @authenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed'**
+  String get authenticationFailed;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get updateFailed;
+
+  /// No description provided for @invalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credentials'**
+  String get invalidCredentials;
+
+  /// No description provided for @authenticationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication error'**
+  String get authenticationError;
+
+  /// No description provided for @unexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected error'**
+  String get unexpectedError;
 }
 
 class _AppLocalizationsDelegate

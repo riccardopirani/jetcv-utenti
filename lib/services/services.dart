@@ -6,6 +6,7 @@ export 'linkedin_service.dart';
 export 'media_download_service.dart';
 export 'open_badge_service.dart';
 export 'certification_service.dart';
+export 'password_service.dart';
 
 // Edge Function Services
 export 'edge_function_service.dart';

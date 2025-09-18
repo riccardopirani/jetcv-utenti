@@ -1597,4 +1597,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get certType_volontariato => 'Volunteering';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordTitle => 'Reset Your Password';
+
+  @override
+  String get resetPasswordDescription =>
+      'Enter your email address and confirm with your old password to set a new password';
+
+  @override
+  String get enterEmailAddress => 'Enter Email Address';
+
+  @override
+  String get enterOldPassword => 'Enter Old Password';
+
+  @override
+  String get enterNewPassword => 'Enter New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get updatingPassword => 'Updating Password...';
+
+  @override
+  String get passwordUpdatedSuccessfully => 'Password updated successfully!';
+
+  @override
+  String get passwordUpdateFailed => 'Failed to update password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get oldPasswordIncorrect => 'Old password is incorrect';
+
+  @override
+  String get newPasswordTooShort =>
+      'New password must be at least 6 characters';
+
+  @override
+  String get oldPasswordRequired => 'Old password is required';
+
+  @override
+  String get newPasswordRequired => 'New password is required';
+
+  @override
+  String get confirmPasswordRequired => 'Password confirmation is required';
+
+  @override
+  String get passwordUpdateSuccess =>
+      'Password updated successfully. Please log in with your new password.';
+
+  @override
+  String get authenticationFailed => 'Authentication failed';
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String get invalidCredentials => 'Invalid credentials';
+
+  @override
+  String get authenticationError => 'Authentication error';
+
+  @override
+  String get unexpectedError => 'Unexpected error';
 }
