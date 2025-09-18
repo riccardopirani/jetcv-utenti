@@ -22,7 +22,7 @@ import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 import 'package:jetcv__utenti/widgets/open_badge_button.dart';
 import 'package:jetcv__utenti/widgets/certification_card.dart' as reusable;
 
-import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CVViewPage extends StatefulWidget {
@@ -541,82 +541,82 @@ class _CVViewPageState extends State<CVViewPage> {
     }
   }
 
-  Future<void> _shareCV() async {
-    final localizations = AppLocalizations.of(context)!;
+  // Future<void> _shareCV() async {
+  //   final localizations = AppLocalizations.of(context)!;
 
-    try {
-      // Get or generate public CV URL
-      final cvUrl = await _getPublicCvUrl();
-      if (cvUrl == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Errore nella generazione dell\'URL pubblico'), // TODO: localize
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        return;
-      }
+  //   try {
+  //     // Get or generate public CV URL
+  //     final cvUrl = await _getPublicCvUrl();
+  //     if (cvUrl == null) {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text(
+  //                 'Errore nella generazione dell\'URL pubblico'), // TODO: localize
+  //             backgroundColor: Colors.red,
+  //             behavior: SnackBarBehavior.floating,
+  //           ),
+  //         );
+  //       }
+  //       return;
+  //     }
 
-      if (kIsWeb) {
-        // Su web: copia negli appunti e mostra messaggio
-        await Clipboard.setData(ClipboardData(text: cvUrl));
+  //     if (kIsWeb) {
+  //       // Su web: copia negli appunti e mostra messaggio
+  //       await Clipboard.setData(ClipboardData(text: cvUrl));
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(AppLocalizations.of(context)!.cvLinkCopied),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      } else {
-        // Su mobile: apri la condivisione nativa
-        await Share.share(
-          cvUrl,
-          subject: localizations.shareCV,
-        );
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Row(
+  //               children: [
+  //                 Icon(
+  //                   Icons.check_circle,
+  //                   color: Colors.white,
+  //                   size: 20,
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 Expanded(
+  //                   child: Text(AppLocalizations.of(context)!.cvLinkCopied),
+  //                 ),
+  //               ],
+  //             ),
+  //             backgroundColor: Colors.green,
+  //             behavior: SnackBarBehavior.floating,
+  //             duration: const Duration(seconds: 3),
+  //           ),
+  //         );
+  //       }
+  //     } else {
+  //       // Su mobile: apri la condivisione nativa
+  //       await Share.share(
+  //         cvUrl,
+  //         subject: localizations.shareCV,
+  //       );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(localizations.cvShared),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(localizations.shareError(e.toString())),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text(localizations.cvShared),
+  //             backgroundColor: Colors.green,
+  //             behavior: SnackBarBehavior.floating,
+  //             duration: const Duration(seconds: 2),
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text(localizations.shareError(e.toString())),
+  //           backgroundColor: Colors.red,
+  //           behavior: SnackBarBehavior.floating,
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
   /// Recupera o genera l'URL pubblico del CV tramite la edge function
   Future<String?> _getPublicCvUrl() async {
@@ -684,11 +684,11 @@ class _CVViewPageState extends State<CVViewPage> {
         : isTablet
             ? 24.0
             : 32.0;
-    final smallSpacing = isMobile
-        ? 16.0
-        : isTablet
-            ? 20.0
-            : 24.0;
+    // final smallSpacing = isMobile
+    //     ? 16.0
+    //     : isTablet
+    //         ? 20.0
+    //         : 24.0;
 
     return MainLayout(
       currentRoute: '/cv',
@@ -699,9 +699,9 @@ class _CVViewPageState extends State<CVViewPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Share CV section (moved to top)
-            _buildShareSection(),
+            // _buildShareSection(),
 
-            SizedBox(height: smallSpacing),
+            // SizedBox(height: smallSpacing),
 
             // Main profile section (simplified with blockchain cert + openbadges)
             _buildMainProfileSection(country),
@@ -2569,110 +2569,110 @@ class _CVViewPageState extends State<CVViewPage> {
     }
   }
 
-  Widget _buildShareSection() {
-    return _buildStandardSectionWrapper(
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(context).colorScheme.surface,
-            border: Border.all(
-              color:
-                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Icon container
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.share,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
+  // Widget _buildShareSection() {
+  //   return _buildStandardSectionWrapper(
+  //     child: Card(
+  //       elevation: 2,
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //           borderRadius: BorderRadius.circular(12),
+  //           color: Theme.of(context).colorScheme.surface,
+  //           border: Border.all(
+  //             color:
+  //                 Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+  //           ),
+  //         ),
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(20),
+  //           child: Row(
+  //             children: [
+  //               // Icon container
+  //               Container(
+  //                 padding: const EdgeInsets.all(12),
+  //                 decoration: BoxDecoration(
+  //                   color: Theme.of(context).colorScheme.primary,
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //                 child: Icon(
+  //                   Icons.share,
+  //                   color: Colors.white,
+  //                   size: 20,
+  //                 ),
+  //               ),
 
-                const SizedBox(width: 16),
+  //               const SizedBox(width: 16),
 
-                // Text content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.shareCV,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        AppLocalizations.of(context)!.verifiedCV,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
+  //               // Text content
+  //               Expanded(
+  //                 child: Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text(
+  //                       AppLocalizations.of(context)!.shareCV,
+  //                       style: Theme.of(context)
+  //                           .textTheme
+  //                           .titleMedium
+  //                           ?.copyWith(
+  //                             fontWeight: FontWeight.w600,
+  //                             color: Theme.of(context).colorScheme.onSurface,
+  //                           ),
+  //                     ),
+  //                     const SizedBox(height: 4),
+  //                     Text(
+  //                       AppLocalizations.of(context)!.verifiedCV,
+  //                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
+  //                             color: Theme.of(context)
+  //                                 .colorScheme
+  //                                 .onSurfaceVariant,
+  //                             fontWeight: FontWeight.w500,
+  //                           ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
 
-                const SizedBox(width: 16),
+  //               const SizedBox(width: 16),
 
-                // Share button
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: ElevatedButton.icon(
-                    onPressed: _shareCV,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 1,
-                    ),
-                    icon: Icon(
-                      kIsWeb ? Icons.copy : Icons.share,
-                      size: 16,
-                    ),
-                    label: Text(
-                      kIsWeb
-                          ? AppLocalizations.of(context)!.copyLink
-                          : AppLocalizations.of(context)!.share,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //               // Share button
+  //               MouseRegion(
+  //                 cursor: SystemMouseCursors.click,
+  //                 child: ElevatedButton.icon(
+  //                   onPressed: _shareCV,
+  //                   style: ElevatedButton.styleFrom(
+  //                     backgroundColor: Theme.of(context).colorScheme.primary,
+  //                     foregroundColor: Colors.white,
+  //                     padding: const EdgeInsets.symmetric(
+  //                       horizontal: 16,
+  //                       vertical: 10,
+  //                     ),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     elevation: 1,
+  //                   ),
+  //                   icon: Icon(
+  //                     kIsWeb ? Icons.copy : Icons.share,
+  //                     size: 16,
+  //                   ),
+  //                   label: Text(
+  //                     kIsWeb
+  //                         ? AppLocalizations.of(context)!.copyLink
+  //                         : AppLocalizations.of(context)!.share,
+  //                     style: const TextStyle(
+  //                       fontWeight: FontWeight.w500,
+  //                       fontSize: 13,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // New premium design methods
 
