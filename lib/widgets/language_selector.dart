@@ -20,7 +20,7 @@ class LanguageSelector extends StatelessWidget {
       listenable: LocaleService.instance,
       builder: (context, child) {
         final currentLocale = LocaleService.instance.currentLocale;
-        final currentLanguageCode = currentLocale?.languageCode ?? 'en';
+        final currentLanguageCode = currentLocale?.languageCode ?? 'it';
 
         return PopupMenuButton<String>(
           icon: Row(

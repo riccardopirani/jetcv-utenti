@@ -110,7 +110,7 @@ class _SidebarMenuState extends State<SidebarMenu> {
       if (currentUser == null) return;
 
       final currentLanguageCode =
-          LocaleService.instance.currentLocale?.languageCode ?? 'en';
+          LocaleService.instance.currentLocale?.languageCode ?? 'it';
 
       // Only save if the language actually changed
       if (currentUser.languageCodeApp != currentLanguageCode) {

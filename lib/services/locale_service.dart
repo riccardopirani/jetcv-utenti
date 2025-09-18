@@ -215,9 +215,21 @@ class LocaleService extends ChangeNotifier {
         }
       }
 
+      // Se non abbiamo trovato nessuna lingua salvata, impostiamo l'italiano come default
+      if (_currentLocale == null) {
+        _currentLocale = const Locale('it');
+        // Salviamo anche il default nelle preferenze
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_localeKey, 'it');
+        debugPrint('✅ Lingua impostata di default: italiano');
+      }
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading saved locale: $e');
+      // In caso di errore, impostiamo comunque l'italiano come fallback
+      _currentLocale = const Locale('it');
+      notifyListeners();
     }
   }
 

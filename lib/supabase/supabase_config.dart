@@ -47,8 +47,10 @@ class SupabaseAuth {
   /// Get the app redirect URL based on platform
   static String _getRedirectUrl() {
     if (kIsWeb) {
-      // Per web, usa la URL corrente
-      return '${Uri.base.origin}/';
+      // Per web, usa la URL corrente con path specifico per auth callback
+      final origin = Uri.base.origin;
+      debugPrint('🌐 Web origin detected: $origin');
+      return '$origin/auth/callback';
     } else {
       // Per mobile, usa deep link scheme
       return 'jetcv://auth/callback';
@@ -184,7 +186,7 @@ class SupabaseAuth {
     }
   }
 
-  /// Sign in with Google
+  /// Sign in with Google using Supabase OAuth (browser redirect on web)
   static Future<void> signInWithGoogle() async {
     try {
       debugPrint('🔑 Starting Google authentication...');
@@ -214,34 +216,6 @@ class SupabaseAuth {
   /// Auth state changes stream
   static Stream<AuthState> get authStateChanges =>
       SupabaseConfig.auth.onAuthStateChange;
-
-  /// Create user profile in database (modify based on your schema)
-  static Future<void> _createUserProfile(
-    User user,
-    Map<String, dynamic>? userData,
-  ) async {
-    try {
-      // Check if profile already exists
-      final existingUser = await SupabaseConfig.client
-          .from('users')
-          .select()
-          .eq('id', user.id)
-          .maybeSingle();
-
-      if (existingUser == null) {
-        await SupabaseConfig.client.from('users').insert({
-          'id': user.id,
-          'email': user.email,
-          'full_name': userData?['full_name'],
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
-      }
-    } catch (e) {
-      debugPrint('Error creating user profile: $e');
-      // Don't throw here to avoid breaking the signup flow
-    }
-  }
 
   /// Handle authentication errors
   static String _handleAuthError(dynamic error) {

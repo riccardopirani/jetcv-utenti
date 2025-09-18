@@ -65,6 +65,13 @@
 				<string>jetcv</string>
 			</array>
 		</dict>
+		<!-- Google Sign-In URL scheme (replace with your iOS client ID) -->
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.YOUR_GOOGLE_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

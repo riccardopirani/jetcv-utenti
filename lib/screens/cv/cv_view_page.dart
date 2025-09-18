@@ -16,7 +16,6 @@ import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
 // import 'package:jetcv__utenti/services/image_cache_service.dart';
 // import 'package:jetcv__utenti/services/base64_image_service.dart';
-import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
@@ -86,13 +85,8 @@ class _CVViewPageState extends State<CVViewPage> {
         if (cvResponse.data != null) {
           // CV found - load it successfully
           _cv = cvResponse.data!;
-          debugPrint('✅ CV loaded successfully for user: $targetUserId');
-          debugPrint(
-              '🌍 CV countryCode: "${_cv!.countryCode}" (${_cv!.countryCode?.runtimeType})');
         } else {
           // API call successful but no CV found - show call-to-action
-          debugPrint(
-              'ℹ️ No CV found for user: $targetUserId (success but data is null)');
           _cv = null; // Ensure _cv is null to trigger call-to-action
         }
       } else {
@@ -110,24 +104,15 @@ class _CVViewPageState extends State<CVViewPage> {
       if (_cv != null &&
           _cv!.countryCode != null &&
           _cv!.countryCode!.isNotEmpty) {
-        debugPrint('🔍 Loading country with code: "${_cv!.countryCode}"');
-
         final countryResponse =
             await CountryService.getCountryByCode(_cv!.countryCode!);
 
         if (countryResponse.success && countryResponse.data != null) {
           _country = countryResponse.data!;
-          debugPrint(
-              '✅ Country loaded successfully: ${_country!.name} ${_country!.emoji}');
         } else {
           // Country not found, but don't fail the whole page load
           debugPrint('❌ Country not found for code: "${_cv!.countryCode}"');
-          debugPrint('❌ Country service error: ${countryResponse.error}');
-          debugPrint('❌ Country service message: ${countryResponse.message}');
         }
-      } else {
-        debugPrint(
-            '⚠️ CV is null or countryCode is null/empty - skipping country lookup');
       }
 
       setState(() {
@@ -177,9 +162,6 @@ class _CVViewPageState extends State<CVViewPage> {
           _certifications = acceptedCertifications;
           _certificationsLoading = false;
         });
-        debugPrint(
-            '✅ Accepted certifications loaded successfully: ${_certifications.length} items (sorted by date)');
-
         // Precarica i logo delle legal entities
         _preloadLegalEntityLogos();
       } else {
@@ -210,8 +192,6 @@ class _CVViewPageState extends State<CVViewPage> {
           : a.certificationUser.createdAt
               .compareTo(b.certificationUser.createdAt));
     });
-    debugPrint(
-        '🔄 Sort order changed to: ${_isMostRecentFirst ? "Most recent first" : "Least recent first"}');
   }
 
   Widget _buildSortDropdown() {
@@ -323,6 +303,35 @@ class _CVViewPageState extends State<CVViewPage> {
   String _generateCVSerial() {
     // serialNumber is now required and has a default value from the database
     return _cv!.serialNumber;
+  }
+
+  /// Builds address string avoiding duplication when city == state
+  String _buildAddressString() {
+    List<String> addressParts = [];
+
+    // Add address street
+    if (_cv!.address != null && _cv!.address!.isNotEmpty) {
+      addressParts.add(_cv!.address!);
+    }
+
+    // Add city
+    if (_cv!.city != null && _cv!.city!.isNotEmpty) {
+      addressParts.add(_cv!.city!);
+    }
+
+    // Add state only if different from city
+    if (_cv!.state != null &&
+        _cv!.state!.isNotEmpty &&
+        _cv!.state != _cv!.city) {
+      addressParts.add(_cv!.state!);
+    }
+
+    // Add postal code
+    if (_cv!.postalCode != null && _cv!.postalCode!.isNotEmpty) {
+      addressParts.add(_cv!.postalCode!);
+    }
+
+    return addressParts.join(', ');
   }
 
   String _toTitleCase(String text) {
@@ -630,12 +639,9 @@ class _CVViewPageState extends State<CVViewPage> {
 
         return _publicCvUrl;
       } else {
-        debugPrint(
-            'Errore nella generazione dell\'URL pubblico: ${response.error}');
         return null;
       }
     } catch (e) {
-      debugPrint('Errore durante la chiamata per l\'URL pubblico: $e');
       return null;
     }
   }
@@ -697,18 +703,13 @@ class _CVViewPageState extends State<CVViewPage> {
 
             SizedBox(height: smallSpacing),
 
-            // Main profile section
+            // Main profile section (simplified with blockchain cert + openbadges)
             _buildMainProfileSection(country),
 
             SizedBox(height: sectionSpacing),
 
-            // OpenBadge section
-            _buildOpenBadgeSection(),
-
-            SizedBox(height: sectionSpacing),
-
-            // Contact information section
-            _buildContactSection(),
+            // Personal information section (renamed and expanded)
+            _buildPersonalInformationSection(),
 
             SizedBox(height: sectionSpacing),
 
@@ -727,233 +728,202 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
+  /// Standard responsive wrapper for all sections
+  Widget _buildStandardSectionWrapper({
+    required Widget child,
+    EdgeInsets? customPadding,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isDesktop = screenWidth >= 1024;
+
+    // Responsive constraints
+    double? maxWidth;
+    if (isMobile) {
+      maxWidth = null; // Full width on mobile
+    } else if (isTablet) {
+      maxWidth = 750;
+    } else if (isDesktop) {
+      maxWidth = 900;
+    }
+
+    final padding = customPadding ??
+        EdgeInsets.symmetric(
+          horizontal: isMobile ? 16.0 : 24.0,
+          vertical: isMobile ? 16.0 : 20.0,
+        );
+
+    return Center(
+      child: Container(
+        width: double.infinity,
+        constraints:
+            maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
+        padding: padding,
+        child: child,
+      ),
+    );
+  }
+
   Widget _buildMainProfileSection(CountryModel? country) {
     final localizations = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    // Responsive sizing
-    final containerMargin = isMobile
-        ? 2.0
-        : isTablet
-            ? 3.0
-            : 4.0;
-    final containerPadding = isMobile
-        ? 2.0
-        : isTablet
-            ? 2.5
-            : 3.0;
-    final innerPadding = isMobile
-        ? 16.0
-        : isTablet
-            ? 20.0
-            : 24.0;
-    final contentPadding = isMobile
-        ? 16.0
-        : isTablet
-            ? 20.0
-            : 24.0;
     final spacing = isMobile
-        ? 12.0
+        ? 20.0
         : isTablet
-            ? 16.0
-            : 20.0;
+            ? 24.0
+            : 28.0;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: containerMargin),
-      child: Stack(
+    return _buildStandardSectionWrapper(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Main certificate container with enhanced blockchain-style border
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(containerMargin),
-            padding: EdgeInsets.all(containerPadding),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.green.shade100.withValues(alpha: 0.3),
-                  Colors.teal.shade50.withValues(alpha: 0.2),
-                  Colors.blue.shade50.withValues(alpha: 0.1),
-                ],
-              ),
-              border: Border.all(
-                color: Colors.green.shade300.withValues(alpha: 0.6),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.2),
-                  spreadRadius: 0,
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  spreadRadius: 0,
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context).colorScheme.surface,
-                border: Border.all(
-                  color: Colors.green.shade200.withValues(alpha: 0.4),
-                  width: 1,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
-                child: Container(
-                  padding: EdgeInsets.all(innerPadding),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(contentPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Profile picture
-                        _buildEnhancedProfilePicture(),
-                        SizedBox(height: spacing),
-                        // Name
-                        _buildNameSection(),
-                        SizedBox(height: spacing),
-                        // Personal info (address and birth date)
-                        _buildPersonalInfoSection(country, localizations),
-                        SizedBox(height: spacing),
-                        // Premium certification badge
-                        _buildPremiumBadgeWithSerial(localizations),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Blockchain certification badge with CV dates
+          _buildSimplifiedBlockchainBadge(localizations),
+
+          SizedBox(height: spacing),
+
+          // OpenBadge section integrated
+          _buildIntegratedOpenBadgeSection(),
         ],
       ),
     );
   }
 
-  Widget _buildContactSection() {
+  /// Personal Information section with profile picture, name, birth date, and contact info
+  Widget _buildPersonalInformationSection() {
     final localizations = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     final cardPadding = isMobile
-        ? 16.0
-        : isTablet
-            ? 18.0
-            : 20.0;
-    final iconSize = isMobile
         ? 20.0
         : isTablet
-            ? 22.0
-            : 24.0;
-    final spacing = isMobile
-        ? 8.0
-        : isTablet
-            ? 10.0
-            : 12.0;
-    final titleFontSize = isMobile
-        ? 16.0
-        : isTablet
-            ? 18.0
-            : 20.0;
+            ? 24.0
+            : 28.0;
     final sectionSpacing = isMobile
-        ? 16.0
+        ? 20.0
         : isTablet
-            ? 18.0
-            : 20.0;
+            ? 24.0
+            : 28.0;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(cardPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.contact_phone,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: iconSize,
+    return _buildStandardSectionWrapper(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade200.withValues(alpha: 0.5),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(cardPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Professional title without icon
+              Text(
+                "Informazioni Personali",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
                 ),
-                SizedBox(width: spacing),
-                Expanded(
-                  child: Text(
-                    localizations.contactInfo,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: titleFontSize,
-                        ),
-                  ),
+              ),
+
+              SizedBox(height: sectionSpacing),
+
+              // Profile picture and name section
+              Center(
+                child: Column(
+                  children: [
+                    // Profile picture
+                    _buildEnhancedProfilePicture(),
+
+                    SizedBox(height: 16),
+
+                    // Name and serial number
+                    Text(
+                      _toTitleCase(
+                          '${_cv!.firstName ?? ''} ${_cv!.lastName ?? ''}'
+                              .trim()),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                                letterSpacing: 0.5,
+                              ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: sectionSpacing),
+
+              // Birth date
+              if (_cv!.dateOfBirth != null) ...[
+                _buildContactItem(
+                  icon: Icons.cake,
+                  label: localizations.dateOfBirth,
+                  value: _formatFormalBirthInfo(),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Email
+              if (_cv!.email != null) ...[
+                _buildContactItem(
+                  icon: Icons.email,
+                  label: localizations.email,
+                  value: _cv!.email!,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Phone
+              if (_cv!.phone != null) ...[
+                _buildContactItem(
+                  icon: Icons.phone,
+                  label: localizations.phone,
+                  value: _cv!.phone!,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Address
+              if (_cv!.address != null) ...[
+                _buildContactItem(
+                  icon: Icons.home,
+                  label: localizations.address,
+                  value: _toTitleCase(_buildAddressString()),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Nationalities
+              if (_cv!.nationalityCodes != null &&
+                  _cv!.nationalityCodes!.isNotEmpty) ...[
+                _buildNationalitiesItem(
+                  icon: Icons.public,
+                  label: AppLocalizations.of(context)!.nationality,
+                  nationalityCodes: _cv!.nationalityCodes!,
                 ),
               ],
-            ),
-
-            SizedBox(height: sectionSpacing),
-
-            // Email
-            if (_cv!.email != null) ...[
-              _buildContactItem(
-                icon: Icons.email,
-                label: localizations.email,
-                value: _cv!.email!,
-              ),
-              const SizedBox(height: 16),
             ],
-
-            // Phone
-            if (_cv!.phone != null) ...[
-              _buildContactItem(
-                icon: Icons.phone,
-                label: localizations.phone,
-                value: _cv!.phone!,
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Address
-            if (_cv!.address != null) ...[
-              _buildContactItem(
-                icon: Icons.home,
-                label: localizations.address,
-                value: _toTitleCase([
-                  _cv!.address,
-                  _cv!.city,
-                  _cv!.state,
-                  _cv!.postalCode,
-                ]
-                    .where((element) => element != null && element.isNotEmpty)
-                    .join(', ')),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Nationalities
-            if (_cv!.nationalityCodes != null &&
-                _cv!.nationalityCodes!.isNotEmpty) ...[
-              _buildNationalitiesItem(
-                icon: Icons.public,
-                label: AppLocalizations.of(context)!.nationality,
-                nationalityCodes: _cv!.nationalityCodes!,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -1194,9 +1164,7 @@ class _CVViewPageState extends State<CVViewPage> {
         if (response.success && response.data != null) {
           countries.add(response.data!);
         }
-      } catch (e) {
-        debugPrint('Error loading nationality $code: $e');
-      }
+      } catch (e) {}
     }
 
     return countries;
@@ -1205,129 +1173,140 @@ class _CVViewPageState extends State<CVViewPage> {
   Widget _buildAutodichiarazioniSection() {
     final languageCodes = _cv?.languageCodes;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.assignment_ind,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  AppLocalizations.of(context)!.autodichiarazioni,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-              ],
+    return _buildStandardSectionWrapper(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade200.withValues(alpha: 0.5),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            const SizedBox(height: 20),
-
-            // Languages subsection
-            if (languageCodes != null && languageCodes.isNotEmpty) ...[
-              Row(
-                children: [
-                  Icon(
-                    Icons.translate,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppLocalizations.of(context)!.spokenLanguages,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Professional title without icon
+              Text(
+                AppLocalizations.of(context)!.autodichiarazioni,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: languageCodes.map((languageCode) {
-                  final languageName = _getLocalizedLanguageName(languageCode);
-                  final languageEmoji =
-                      LocaleService.languageEmojis[languageCode];
+              const SizedBox(height: 20),
 
-                  return Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
+              // Languages subsection
+              if (languageCodes != null && languageCodes.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(
+                      Icons.translate,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppLocalizations.of(context)!.spokenLanguages,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: languageCodes.map((languageCode) {
+                    final languageName =
+                        _getLocalizedLanguageName(languageCode);
+                    final languageEmoji =
+                        LocaleService.languageEmojis[languageCode];
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
-                            .primary
-                            .withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (languageEmoji != null) ...[
-                          Text(
-                            languageEmoji,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        Text(
-                          languageName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withValues(alpha: 0.3),
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ] else ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest
-                      .withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (languageEmoji != null) ...[
+                            Text(
+                              languageEmoji,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            languageName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ] else ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
                     color: Theme.of(context)
                         .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.noLanguageSpecified,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                child: Text(
-                  AppLocalizations.of(context)!.noLanguageSpecified,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -1484,7 +1463,7 @@ class _CVViewPageState extends State<CVViewPage> {
                     Text(
                       AppLocalizations.of(context)!.certifications,
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade800,
                       ),
@@ -1548,7 +1527,7 @@ class _CVViewPageState extends State<CVViewPage> {
                     Text(
                       AppLocalizations.of(context)!.certifications,
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade800,
                       ),
@@ -1597,370 +1576,187 @@ class _CVViewPageState extends State<CVViewPage> {
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color:
-                Colors.grey.shade50, // Light gray background like in the image
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with title and sort button - matching image exactly
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.certifications,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_certifications.length} ${AppLocalizations.of(context)!.verifiedCertifications}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    _buildSortDropdown(),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
-                // Timeline with certifications - each item aligned independently
-                Column(
-                  children: (_isMostRecentFirst
-                          ? _certifications
-                          : _certifications.reversed.toList())
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                    final index = entry.key;
-                    final cert = entry.value;
-                    final isLast = index == _certifications.length - 1;
-
-                    return IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Timeline column with date and node - fixed position
-                          SizedBox(
-                            width: isMobile
-                                ? 100
-                                : isTablet
-                                    ? 110
-                                    : 120,
-                            child: Column(
-                              children: [
-                                // Date bubble - fixed at top
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: isMobile
-                                          ? 6
-                                          : isTablet
-                                              ? 8
-                                              : 10,
-                                      vertical: isMobile
-                                          ? 3
-                                          : isTablet
-                                              ? 4
-                                              : 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade100,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    _formatCertificationDate(
-                                        cert.certificationUser.createdAt),
-                                    style: TextStyle(
-                                      color: Colors.blue.shade800,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: isMobile
-                                          ? 12
-                                          : isTablet
-                                              ? 14
-                                              : 16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-
-                                SizedBox(height: 8),
-
-                                // Timeline node - fixed position
-                                Container(
-                                  width: isMobile
-                                      ? 8
-                                      : isTablet
-                                          ? 10
-                                          : 12,
-                                  height: isMobile
-                                      ? 8
-                                      : isTablet
-                                          ? 10
-                                          : 12,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-
-                                // Vertical line below node to bottom of card
-                                Expanded(
-                                  child: Container(
-                                    width: 2,
-                                    color: Colors.grey.shade300,
-                                    margin: const EdgeInsets.only(top: 12),
-                                  ),
-                                ),
-                                // Extra spacer line to increase inter-card spacing (except for last)
-                                if (!isLast)
-                                  Container(
-                                    width: 2,
-                                    height: isMobile
-                                        ? 40
-                                        : isTablet
-                                            ? 48
-                                            : 56,
-                                    color: Colors.grey.shade300,
-                                  ),
-                              ],
-                            ),
-                          ),
-
-                          SizedBox(
-                              width: isMobile
-                                  ? 12
-                                  : isTablet
-                                      ? 16
-                                      : 20),
-
-                          // Certification card - expands as needed
-                          Expanded(
-                            child: reusable.CertificationCard(
-                              certification: cert,
-                              showImageHeader: true,
-                              showLegalEntityLogo: true,
-                              showMediaSection: true,
-                              showOpenBadgeButton: true,
-                              showLinkedInButton: true,
-                              showCertifiedUserName:
-                                  false, // Hide certified user name in CV view
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOpenBadgeSection() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
-    final cardPadding = isMobile
-        ? 16.0
-        : isTablet
-            ? 20.0
-            : 24.0;
-    final titleFontSize = isMobile
-        ? 20.0
-        : isTablet
-            ? 24.0
-            : 28.0;
-    final subtitleFontSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 13.0
-            : 14.0;
-    final buttonFontSize = isMobile
-        ? 10.0
-        : isTablet
-            ? 11.0
-            : 12.0;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return _buildStandardSectionWrapper(
       child: Container(
         decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.white,
-            ],
+          border: Border.all(
+            color: Colors.grey.shade200.withValues(alpha: 0.5),
+            width: 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Padding(
-          padding: EdgeInsets.all(cardPadding),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with title and view all button
+              // Header with title and sort button - matching image exactly
               Row(
                 children: [
-                  Expanded(
-                    child: Column(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.certifications,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_certifications.length} ${AppLocalizations.of(context)!.verifiedCertifications}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  _buildSortDropdown(),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Timeline with certifications - each item aligned independently
+              Column(
+                children: (_isMostRecentFirst
+                        ? _certifications
+                        : _certifications.reversed.toList())
+                    .asMap()
+                    .entries
+                    .map((entry) {
+                  final index = entry.key;
+                  final cert = entry.value;
+                  final isLast = index == _certifications.length - 1;
+
+                  return IntrinsicHeight(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          AppLocalizations.of(context)!.openBadges,
-                          style: TextStyle(
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade800,
+                        // Timeline column with date and node - fixed position
+                        SizedBox(
+                          width: isMobile
+                              ? 100
+                              : isTablet
+                                  ? 110
+                                  : 120,
+                          child: Column(
+                            children: [
+                              // Date bubble - fixed at top
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: isMobile
+                                        ? 6
+                                        : isTablet
+                                            ? 8
+                                            : 10,
+                                    vertical: isMobile
+                                        ? 3
+                                        : isTablet
+                                            ? 4
+                                            : 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  _formatCertificationDate(
+                                      cert.certificationUser.createdAt),
+                                  style: TextStyle(
+                                    color: Colors.blue.shade800,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: isMobile
+                                        ? 12
+                                        : isTablet
+                                            ? 14
+                                            : 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+
+                              SizedBox(height: 8),
+
+                              // Timeline node - fixed position
+                              Container(
+                                width: isMobile
+                                    ? 8
+                                    : isTablet
+                                        ? 10
+                                        : 12,
+                                height: isMobile
+                                    ? 8
+                                    : isTablet
+                                        ? 10
+                                        : 12,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+
+                              // Vertical line below node to bottom of card
+                              Expanded(
+                                child: Container(
+                                  width: 2,
+                                  color: Colors.grey.shade300,
+                                  margin: const EdgeInsets.only(top: 12),
+                                ),
+                              ),
+                              // Extra spacer line to increase inter-card spacing (except for last)
+                              if (!isLast)
+                                Container(
+                                  width: 2,
+                                  height: isMobile
+                                      ? 40
+                                      : isTablet
+                                          ? 48
+                                          : 56,
+                                  color: Colors.grey.shade300,
+                                ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          AppLocalizations.of(context)!
-                              .digitalCredentialsAndAchievements,
-                          style: TextStyle(
-                            fontSize: subtitleFontSize,
-                            color: Colors.grey.shade600,
+
+                        SizedBox(
+                            width: isMobile
+                                ? 12
+                                : isTablet
+                                    ? 16
+                                    : 20),
+
+                        // Certification card - expands as needed
+                        Expanded(
+                          child: reusable.CertificationCard(
+                            certification: cert,
+                            showImageHeader: true,
+                            showLegalEntityLogo: true,
+                            showMediaSection: true,
+                            showOpenBadgeButton: true,
+                            showLinkedInButton: true,
+                            showCertifiedUserName:
+                                false, // Hide certified user name in CV view
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const OpenBadgesPage(),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.workspace_premium,
-                      size: isMobile ? 16 : 18,
-                    ),
-                    label: Text(
-                      AppLocalizations.of(context)?.viewAll ?? 'View All',
-                      style: TextStyle(
-                        fontSize: buttonFontSize,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade600,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isMobile ? 12 : 16,
-                        vertical: isMobile ? 8 : 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 2,
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
-
-              SizedBox(height: 16),
-
-              // OpenBadge preview cards (show first 3)
-              _buildOpenBadgePreview(),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOpenBadgePreview() {
-    // This would typically load and show a preview of OpenBadges
-    // For now, show a placeholder that encourages users to import badges
-    return Center(
-      child: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.blue.shade200,
-            width: 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.workspace_premium,
-              size: 48,
-              color: Colors.blue.shade400,
-            ),
-            SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.importYourOpenBadges,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue.shade700,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context)!.showcaseYourDigitalCredentials,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue.shade600,
-              ),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const OpenBadgesPage(),
-                  ),
-                );
-              },
-              icon: Icon(Icons.upload_file, size: 16),
-              label: Text(
-                AppLocalizations.of(context)?.importOpenBadge ??
-                    'Import OpenBadge',
-                style: TextStyle(fontSize: 12),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -2427,8 +2223,6 @@ class _CVViewPageState extends State<CVViewPage> {
                             info.value != null &&
                             info.label!.toLowerCase().trim() != 'codice')
                         .map((info) {
-                      debugPrint(
-                          'Category info - label: ${info.label}, value: ${info.value}');
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
                         child: Text(
@@ -2776,8 +2570,7 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Widget _buildShareSection() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+    return _buildStandardSectionWrapper(
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -2920,7 +2713,7 @@ class _CVViewPageState extends State<CVViewPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                AppLocalizations.of(context)!.serialCode,
+                "Seriale",
                 style: TextStyle(
                   color: Colors.green.shade700,
                   fontWeight: FontWeight.w600,
@@ -2948,9 +2741,9 @@ class _CVViewPageState extends State<CVViewPage> {
   Widget _buildPremiumBadgeWithSerial(AppLocalizations localizations) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 300),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -2962,22 +2755,22 @@ class _CVViewPageState extends State<CVViewPage> {
                 Colors.blue.shade50,
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              width: 2,
+              width: 1.5,
               color: Colors.green.shade400,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withValues(alpha: 0.4),
+                color: Colors.green.withValues(alpha: 0.3),
                 spreadRadius: 0,
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
               BoxShadow(
-                color: Colors.teal.withValues(alpha: 0.2),
+                color: Colors.teal.withValues(alpha: 0.15),
                 spreadRadius: 0,
-                blurRadius: 8,
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -2989,7 +2782,7 @@ class _CVViewPageState extends State<CVViewPage> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -3000,9 +2793,9 @@ class _CVViewPageState extends State<CVViewPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withValues(alpha: 0.4),
+                          color: Colors.green.withValues(alpha: 0.3),
                           spreadRadius: 0,
-                          blurRadius: 8,
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -3010,23 +2803,23 @@ class _CVViewPageState extends State<CVViewPage> {
                     child: Icon(
                       Icons.verified,
                       color: Colors.white,
-                      size: 22,
+                      size: 18,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       localizations.blockchainCertified,
                       style: TextStyle(
                         color: Colors.green.shade900,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        letterSpacing: 0.5,
+                        fontSize: 15,
+                        letterSpacing: 0.3,
                         shadows: [
                           Shadow(
-                            color: Colors.green.withValues(alpha: 0.3),
+                            color: Colors.green.withValues(alpha: 0.2),
                             offset: const Offset(0, 1),
-                            blurRadius: 2,
+                            blurRadius: 1,
                           ),
                         ],
                       ),
@@ -3037,7 +2830,7 @@ class _CVViewPageState extends State<CVViewPage> {
               // NFT Link Section (only if nftMintTransactionUrl is present)
               if (_cv?.nftMintTransactionUrl != null &&
                   _cv!.nftMintTransactionUrl!.isNotEmpty) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _buildNftLinkSection(),
               ],
             ],
@@ -3056,10 +2849,10 @@ class _CVViewPageState extends State<CVViewPage> {
         GestureDetector(
           onTap: () => _openBlockchainInfo(),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.green.shade100,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(5),
               border: Border.all(
                 color: Colors.green.shade300,
                 width: 1,
@@ -3071,15 +2864,15 @@ class _CVViewPageState extends State<CVViewPage> {
                 Icon(
                   Icons.info_outline,
                   color: Colors.green.shade700,
-                  size: 16,
+                  size: 14,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 5),
                 Text(
                   AppLocalizations.of(context)!.viewBlockchainDetails,
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
               ],
@@ -3100,7 +2893,6 @@ class _CVViewPageState extends State<CVViewPage> {
           mode: LaunchMode.externalApplication,
         );
       } catch (e) {
-        debugPrint('❌ Error opening NFT link: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -3241,7 +3033,7 @@ class _CVViewPageState extends State<CVViewPage> {
           ),
           const SizedBox(width: 8),
           Text(
-            AppLocalizations.of(context)!.serialCode,
+            "Seriale",
             style: TextStyle(
               color: Colors.green.shade700,
               fontWeight: FontWeight.w600,
@@ -3259,83 +3051,6 @@ class _CVViewPageState extends State<CVViewPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPersonalInfoSection(
-      CountryModel? country, AppLocalizations localizations) {
-    final infoItems = <Widget>[];
-
-    // Birth info
-    if (_cv!.dateOfBirth != null) {
-      infoItems.add(_buildFormalInfoItem(
-        Icons.person_outline,
-        AppLocalizations.of(context)!.dateOfBirth,
-        _formatFormalBirthInfo(),
-      ));
-    }
-
-    // CV Creation and Update dates
-    {
-      infoItems.add(_buildFormalInfoItem(
-        Icons.create,
-        AppLocalizations.of(context)!.cvCreationDate,
-        _formatDate(_cv!.createdAt),
-      ));
-    }
-
-    if (_cv!.updatedAt != null) {
-      infoItems.add(_buildFormalInfoItem(
-        Icons.update,
-        AppLocalizations.of(context)!.lastUpdate,
-        _formatDate(_cv!.updatedAt!),
-      ));
-    }
-
-    if (infoItems.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.4),
-                Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.2),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.green.shade200.withValues(alpha: 0.4),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.green.withValues(alpha: 0.1),
-                spreadRadius: 0,
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: infoItems,
-          ),
-        ),
       ),
     );
   }
@@ -3389,18 +3104,10 @@ class _CVViewPageState extends State<CVViewPage> {
   /// Ottiene il nome del certificatore per una certificazione
   /// Ora utilizza i dati del certifier espanso dalla nuova API
   Future<String> _getCertifierDisplayName(UserCertificationDetail cert) async {
-    // Debug: stampa le informazioni disponibili
-    debugPrint('=== CERTIFIER DEBUG ===');
-    debugPrint('Certification ID: ${cert.certification?.idCertification}');
-    debugPrint('Certifier ID: ${cert.certification?.idCertifier}');
-    debugPrint('Certifier Data: ${cert.certification?.certifier?.displayName}');
-    debugPrint('Category name: ${cert.certification?.category?.name}');
-
     // Prima prova i dati del certifier espanso dalla nuova API
     if (cert.certification?.certifier != null) {
       final displayName = cert.certification!.certifier!.displayName;
       if (displayName != 'Unknown Certifier') {
-        debugPrint('✅ Using certifier displayName from new API: $displayName');
         return displayName;
       }
     }
@@ -3408,13 +3115,10 @@ class _CVViewPageState extends State<CVViewPage> {
     // Fallback al nome della categoria se disponibile
     if (cert.certification?.category?.name != null &&
         cert.certification!.category!.name.isNotEmpty) {
-      debugPrint(
-          'Using category name as fallback: ${cert.certification!.category!.name}');
       return _getLocalizedCertificationType(cert.certification!.category!.name);
     }
 
     // Ultimo fallback
-    debugPrint('Using default certifying body');
     return AppLocalizations.of(context)!.certifyingBody;
   }
 
@@ -3441,18 +3145,14 @@ class _CVViewPageState extends State<CVViewPage> {
 
       return organizationName;
     } catch (e) {
-      debugPrint('❌ Error getting organization name: $e');
       return 'JetCV';
     }
   }
 
   /// Precarica i logo delle legal entities per tutte le certificazioni
   Future<void> _preloadLegalEntityLogos() async {
-    debugPrint('🔄 Preloading legal entity logos...');
-
     // Svuota la cache per forzare il ricaricamento
     _legalEntityLogos.clear();
-    debugPrint('🗑️ Cleared legal entity logos cache');
 
     // Raccoglie tutti gli ID delle legal entities uniche
     final Set<String> legalEntityIds = _certifications
@@ -3461,12 +3161,9 @@ class _CVViewPageState extends State<CVViewPage> {
         .cast<String>()
         .toSet();
 
-    debugPrint('🔍 Found ${legalEntityIds.length} unique legal entity IDs');
-
     // Precarica i logo per ogni legal entity
     for (final legalEntityId in legalEntityIds) {
       try {
-        debugPrint('🔄 Preloading logo for: $legalEntityId');
         final legalEntity =
             await LegalEntityService.getLegalEntityById(legalEntityId);
 
@@ -3475,22 +3172,15 @@ class _CVViewPageState extends State<CVViewPage> {
             legalEntity.logoPicture != null &&
             legalEntity.logoPicture!.isNotEmpty) {
           logoUrl = legalEntity.logoPicture;
-          debugPrint('✅ Preloaded logo from database: $logoUrl');
-          debugPrint(
-              '🔍 Legal entity data: ${legalEntity.legalName} - ${legalEntity.logoPicture}');
         } else {
-          debugPrint('❌ No logo found for: $legalEntityId');
           logoUrl = null;
         }
 
         _legalEntityLogos[legalEntityId] = logoUrl;
       } catch (e) {
-        debugPrint('❌ Error preloading logo for $legalEntityId: $e');
         _legalEntityLogos[legalEntityId] = null;
       }
     }
-
-    debugPrint('✅ Legal entity logos preloading completed');
   }
 
   /// Costruisce il widget del logo della legal entity
@@ -3499,7 +3189,6 @@ class _CVViewPageState extends State<CVViewPage> {
     final legalEntityId = cert.certification?.idLegalEntity;
 
     if (legalEntityId == null) {
-      debugPrint('❌ No legal entity ID for certification');
       return Icon(
         Icons.corporate_fare,
         size: isMobile
@@ -3515,7 +3204,6 @@ class _CVViewPageState extends State<CVViewPage> {
     if (_legalEntityLogos.containsKey(legalEntityId) &&
         _legalEntityLogos[legalEntityId] != null) {
       final logoUrl = _legalEntityLogos[legalEntityId]!;
-      debugPrint('✅ Displaying cached logo: $logoUrl');
 
       return Container(
         width: isMobile
@@ -3565,9 +3253,6 @@ class _CVViewPageState extends State<CVViewPage> {
               );
             },
             errorBuilder: (context, error, stackTrace) {
-              debugPrint('❌ Error loading logo image: $error');
-              debugPrint('❌ Logo URL: $logoUrl');
-              debugPrint('❌ Stack trace: $stackTrace');
               return Icon(
                 Icons.corporate_fare,
                 size: isMobile
@@ -3587,11 +3272,7 @@ class _CVViewPageState extends State<CVViewPage> {
     return FutureBuilder<String?>(
       future: _getLegalEntityLogo(cert),
       builder: (context, logoSnapshot) {
-        debugPrint(
-            '🔍 Logo FutureBuilder - hasData: ${logoSnapshot.hasData}, data: ${logoSnapshot.data}');
-
         if (logoSnapshot.connectionState == ConnectionState.waiting) {
-          debugPrint('⏳ Logo FutureBuilder - Still loading...');
           return SizedBox(
             width: isMobile
                 ? 16
@@ -3613,9 +3294,6 @@ class _CVViewPageState extends State<CVViewPage> {
         if (logoSnapshot.hasData &&
             logoSnapshot.data != null &&
             logoSnapshot.data!.isNotEmpty) {
-          debugPrint(
-              '✅ Logo FutureBuilder - Displaying logo: ${logoSnapshot.data}');
-
           return Container(
             width: isMobile
                 ? 16
@@ -3971,6 +3649,383 @@ class _CVViewPageState extends State<CVViewPage> {
         );
       }
     }
+  }
+
+  /// Simplified blockchain badge with CV dates
+  Widget _buildSimplifiedBlockchainBadge(AppLocalizations localizations) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    // Responsive max width for the blockchain card itself
+    double maxWidth = isMobile
+        ? double.infinity
+        : isTablet
+            ? 500
+            : 600;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green.shade100.withValues(alpha: 0.9),
+                Colors.green.shade50.withValues(alpha: 0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              width: 1,
+              color: Colors.green.shade300,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withValues(alpha: 0.2),
+                spreadRadius: 0,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Certification header
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.green.shade400,
+                          Colors.green.shade600,
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withValues(alpha: 0.3),
+                          spreadRadius: 0,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.verified,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    localizations.blockchainCertified,
+                    style: TextStyle(
+                      color: Colors.green.shade800,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 0.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Serial number display
+              _buildSerialDisplay(),
+
+              const SizedBox(height: 16),
+
+              // CV Dates info
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Creation date
+                  _buildDateInfo(
+                    Icons.create,
+                    localizations.cvCreationDate,
+                    _formatDate(_cv!.createdAt),
+                  ),
+                  // Divider
+                  Container(
+                    height: 40,
+                    width: 1,
+                    color: Colors.green.shade300,
+                  ),
+                  // Last update
+                  if (_cv!.updatedAt != null)
+                    _buildDateInfo(
+                      Icons.update,
+                      localizations.lastUpdate,
+                      _formatDate(_cv!.updatedAt!),
+                    ),
+                ],
+              ),
+
+              // NFT Link Section (only if nftMintTransactionUrl is present)
+              if (_cv?.nftMintTransactionUrl != null &&
+                  _cv!.nftMintTransactionUrl!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildNftLinkSection(),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Helper widget for date information
+  Widget _buildDateInfo(IconData icon, String label, String date) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.green.shade700,
+            size: 16,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.green.shade600,
+            fontWeight: FontWeight.w500,
+            fontSize: 11,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 3),
+        Text(
+          date,
+          style: TextStyle(
+            color: Colors.green.shade800,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  /// Integrated OpenBadge section for the main profile section
+  Widget _buildIntegratedOpenBadgeSection() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    final subtitleFontSize = isMobile
+        ? 11.0
+        : isTablet
+            ? 12.0
+            : 13.0;
+    final buttonFontSize = isMobile
+        ? 10.0
+        : isTablet
+            ? 11.0
+            : 12.0;
+
+    // Responsive max width for the openbadges card itself
+    double maxWidth = isMobile
+        ? double.infinity
+        : isTablet
+            ? 500
+            : 600;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.grey.shade100.withValues(alpha: 0.9),
+                Colors.grey.shade50.withValues(alpha: 0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              width: 1,
+              color: Colors.grey.shade300,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                spreadRadius: 0,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Header with title and icon
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.grey.shade400,
+                          Colors.grey.shade600,
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                          spreadRadius: 0,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.workspace_premium,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.of(context)!.openBadges,
+                    style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 0.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Subtitle
+              Text(
+                AppLocalizations.of(context)!.digitalCredentialsAndAchievements,
+                style: TextStyle(
+                  fontSize: subtitleFontSize,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // OpenBadge preview content
+              _buildCompactOpenBadgePreview(),
+
+              const SizedBox(height: 16),
+
+              // Manage OpenBadges button
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OpenBadgesPage(),
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.settings,
+                  size: isMobile ? 14 : 16,
+                ),
+                label: Text(
+                  "Gestisci Open Badge",
+                  style: TextStyle(
+                    fontSize: buttonFontSize,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade600,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 12 : 16,
+                    vertical: isMobile ? 8 : 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Compact OpenBadge preview for integrated section
+  Widget _buildCompactOpenBadgePreview() {
+    return Column(
+      children: [
+        // Icon
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.upload_file,
+            size: 32,
+            color: Colors.grey.shade600,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Import text
+        Text(
+          AppLocalizations.of(context)!.importYourOpenBadges,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade700,
+          ),
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 6),
+
+        Text(
+          AppLocalizations.of(context)!.showcaseYourDigitalCredentials,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
   }
 
   /// Builds the empty state when no CV is available

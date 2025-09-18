@@ -914,7 +914,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
   /// Get localized text based on current locale
   String _getLocalizedText(String key) {
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
 
     switch (key) {
       case 'nationality_section':
@@ -1034,7 +1034,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       if (currentUser == null) return;
 
       final currentLanguageCode =
-          LocaleService.instance.currentLocale?.languageCode ?? 'en';
+          LocaleService.instance.currentLocale?.languageCode ?? 'it';
 
       // Only save if the language actually changed
       if (currentUser.languageCodeApp != currentLanguageCode) {
@@ -1143,18 +1143,18 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
 
   void _initializeNationalityFilter() {
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
     final nationalitiesForLanguage =
-        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['it']!;
     _filteredNationalities = nationalitiesForLanguage.keys.toList();
     _nationalitySearchController.clear();
   }
 
   void _filterNationalities(String query) {
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
     final nationalitiesForLanguage =
-        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['it']!;
 
     setState(() {
       if (query.isEmpty) {
@@ -1207,16 +1207,16 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
 
   void _initializeLanguageFilter() {
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
-    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['it']!;
     _filteredLanguages = languagesForLanguage.keys.toList();
     _languageSearchController.clear();
   }
 
   void _filterLanguages(String query) {
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
-    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['it']!;
 
     setState(() {
       if (query.isEmpty) {
@@ -2655,9 +2655,9 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
   Widget _buildNewNationalityDropdown() {
     // Get current language for localization
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
     final nationalitiesForLanguage =
-        NATIONALITIES[currentLanguage] ?? NATIONALITIES['en']!;
+        NATIONALITIES[currentLanguage] ?? NATIONALITIES['it']!;
 
     // Get selected nationality names
     final selectedNationalityNames = _selectedNationalities
@@ -2861,8 +2861,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
   Widget _buildNewLanguageDropdown() {
     // Get current language for localization
     final currentLanguage =
-        LocaleService.instance.currentLocale?.languageCode ?? 'en';
-    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['en']!;
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
+    final languagesForLanguage = LANGUAGES[currentLanguage] ?? LANGUAGES['it']!;
 
     // Get selected language names
     final selectedLanguageNames = _selectedLanguages

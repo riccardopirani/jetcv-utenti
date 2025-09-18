@@ -20,7 +20,9 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
+  String? _googleError;
 
   @override
   void dispose() {
@@ -62,6 +64,35 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_isGoogleLoading) return;
+    setState(() {
+      _isGoogleLoading = true;
+      _googleError = null;
+    });
+
+    try {
+      // Use Supabase OAuth flow for Google authentication
+      await SupabaseAuth.signInWithGoogle();
+
+      // On web, this will redirect to Google and back automatically
+      // Navigation will be handled by auth state changes
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _googleError =
+              AppLocalizations.of(context)!.googleAuthError(e.toString());
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
         });
       }
     }
@@ -293,6 +324,54 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                     ),
                     const SizedBox(height: 24),
+                    ResponsiveButton.outlined(
+                      onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isGoogleLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/web_light_sq_na_3x.png',
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .continueWithGoogle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                    ),
+                    if (_googleError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _googleError!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                    const SizedBox(height: 32),
                     Row(
                       children: [
                         Expanded(
