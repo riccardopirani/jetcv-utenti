@@ -719,14 +719,20 @@ abstract class AppLocalizations {
   /// No description provided for @createSecurePassword.
   ///
   /// In en, this message translates to:
-  /// **'Create a secure password'**
+  /// **'Create a secure password (8+ chars, uppercase, lowercase, number, symbol)'**
   String get createSecurePassword;
 
   /// No description provided for @passwordMinLength.
   ///
   /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
+  /// **'Password must be at least 8 characters'**
   String get passwordMinLength;
+
+  /// No description provided for @passwordComplexityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain uppercase, lowercase, number and symbol'**
+  String get passwordComplexityRequired;
 
   /// No description provided for @confirmPassword.
   ///
@@ -3235,6 +3241,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password updated successfully. Please log in with your new password.'**
   String get passwordUpdateSuccess;
+
+  /// No description provided for @passwordResetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new password. Make sure it\'s secure and easy to remember'**
+  String get passwordResetDescription;
 
   /// No description provided for @authenticationFailed.
   ///

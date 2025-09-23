@@ -349,10 +349,36 @@ class _SignupPageState extends State<SignupPage> {
                         if (value == null || value.isEmpty) {
                           return AppLocalizations.of(context)!.enterPassword;
                         }
-                        if (value.length < 6) {
+                        if (value.length < 8) {
                           return AppLocalizations.of(context)!
                               .passwordMinLength;
                         }
+
+                        // Check for uppercase letter
+                        if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                          return AppLocalizations.of(context)!
+                              .passwordComplexityRequired;
+                        }
+
+                        // Check for lowercase letter
+                        if (!RegExp(r'[a-z]').hasMatch(value)) {
+                          return AppLocalizations.of(context)!
+                              .passwordComplexityRequired;
+                        }
+
+                        // Check for number
+                        if (!RegExp(r'[0-9]').hasMatch(value)) {
+                          return AppLocalizations.of(context)!
+                              .passwordComplexityRequired;
+                        }
+
+                        // Check for symbol
+                        if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                            .hasMatch(value)) {
+                          return AppLocalizations.of(context)!
+                              .passwordComplexityRequired;
+                        }
+
                         return null;
                       },
                     ),

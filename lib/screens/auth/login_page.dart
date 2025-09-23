@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/signup_page.dart';
-// import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
-import 'package:jetcv__utenti/screens/auth/password_reset_page.dart';
+import 'package:jetcv__utenti/screens/auth/forgot_password_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
@@ -277,7 +276,8 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => const PasswordResetPage(),
+                                builder: (context) =>
+                                    const ForgotPasswordPage(),
                               ),
                             );
                           },

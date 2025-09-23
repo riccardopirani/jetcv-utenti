@@ -337,11 +337,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get share => 'Teilen';
 
   @override
-  String get createSecurePassword => 'Erstellen Sie ein sicheres Passwort';
+  String get createSecurePassword =>
+      'Erstellen Sie ein sicheres Passwort (8+ Zeichen, Groß-, Kleinbuchstabe, Zahl, Symbol)';
 
   @override
   String get passwordMinLength =>
-      'Das Passwort muss mindestens 6 Zeichen haben';
+      'Das Passwort muss mindestens 8 Zeichen haben';
+
+  @override
+  String get passwordComplexityRequired =>
+      'Das Passwort muss Groß-, Kleinbuchstabe, Zahl und Symbol enthalten';
 
   @override
   String get confirmPassword => 'Passwort bestätigen';
@@ -1668,6 +1673,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get passwordUpdateSuccess =>
       'Password updated successfully. Please log in with your new password.';
+
+  @override
+  String get passwordResetDescription =>
+      'Enter your new password. Make sure it\'s secure and easy to remember';
 
   @override
   String get authenticationFailed => 'Authentication failed';

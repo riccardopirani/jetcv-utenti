@@ -1,107 +1,143 @@
 import 'package:flutter/foundation.dart';
-import 'package:jetcv__utenti/supabase/supabase_config.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:jetcv__utenti/services/edge_function_service.dart';
 
-/// Service for password-related operations
+/// Service for handling password operations via Supabase Edge Functions
 class PasswordService {
-  static final _client = SupabaseConfig.client;
-
-  /// Update user password by verifying old password and setting new one
-  /// This method requires the user to be authenticated and know their current password
-  static Future<Map<String, dynamic>> updatePassword({
-    required String email,
-    required String oldPassword,
+  /// Reset password using a token received via email
+  ///
+  /// [token] - The reset token from the email link
+  /// [newPassword] - The new password to set
+  ///
+  /// Returns a map with success status and message
+  static Future<Map<String, dynamic>> resetPassword({
+    required String token,
     required String newPassword,
+  }) async {
+    try {
+      debugPrint('🔐 PasswordService: Starting password reset');
+
+      final response = await EdgeFunctionService.invokeFunction(
+        'reset-password',
+        {
+          'token': token,
+          'password': newPassword,
+        },
+      );
+
+      debugPrint('🔐 PasswordService: Reset password response: $response');
+
+      return response;
+    } catch (e) {
+      debugPrint('❌ PasswordService: Password reset error: $e');
+
+      // Return a structured error response
+      return {
+        'ok': false,
+        'status': 500,
+        'message': 'Errore nella reimpostazione della password: $e',
+      };
+    }
+  }
+
+  /// Validate password according to security policy
+  /// Same rules as signup: min 8 chars, uppercase, lowercase, digit, symbol
+  static String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return 'La password è obbligatoria';
+    }
+
+    if (password.length < 8) {
+      return 'La password deve essere di almeno 8 caratteri';
+    }
+
+    // Check for uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for number
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for symbol
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    return null; // Password is valid
+  }
+
+  /// Validate that passwords match
+  static String? validatePasswordConfirmation(
+      String? password, String? confirmPassword) {
+    if (confirmPassword == null || confirmPassword.isEmpty) {
+      return 'La conferma password è obbligatoria';
+    }
+
+    if (password != confirmPassword) {
+      return 'Le password non coincidono';
+    }
+
+    return null; // Passwords match
+  }
+
+  /// Send password reset email using edge function
+  ///
+  /// [email] - The user's email address
+  /// [localizedMessages] - Localized error messages for different scenarios
+  ///
+  /// Returns a map with success status and message
+  static Future<Map<String, dynamic>> sendPasswordResetEmail({
+    required String email,
     Map<String, String>? localizedMessages,
   }) async {
     try {
-      debugPrint('🔐 PasswordService: Starting password update for: $email');
+      debugPrint('🔐 PasswordService: Sending password reset email');
 
-      // First, verify the old password by attempting to sign in
-      try {
-        final signInResponse = await _client.auth.signInWithPassword(
-          email: email,
-          password: oldPassword,
-        );
+      final response = await EdgeFunctionService.invokeFunction(
+        'forgot-password', // Edge function name for sending reset emails
+        {
+          'email': email,
+        },
+      );
 
-        if (signInResponse.user == null) {
-          return {
-            'success': false,
-            'error': localizedMessages?['authenticationFailed'] ?? 'Authentication failed',
-            'message': localizedMessages?['oldPasswordIncorrect'] ?? 'Old password is incorrect',
-          };
-        }
+      debugPrint('🔐 PasswordService: Send email response: $response');
 
-        debugPrint('✅ PasswordService: Old password verified successfully');
-
-        // Now update the password
-        final updateResponse = await _client.auth.updateUser(
-          UserAttributes(password: newPassword),
-        );
-
-        if (updateResponse.user != null) {
-          debugPrint('✅ PasswordService: Password updated successfully');
-
-          // Sign out the user so they need to log in again with new password
-          await _client.auth.signOut();
-
-          return {
-            'success': true,
-            'message': localizedMessages?['passwordUpdateSuccess'] ?? 'Password updated successfully. Please log in with your new password.',
-          };
-        } else {
-          return {
-            'success': false,
-            'error': localizedMessages?['updateFailed'] ?? 'Update failed',
-            'message': localizedMessages?['passwordUpdateFailed'] ?? 'Failed to update password',
-          };
-        }
-      } on AuthException catch (e) {
-        debugPrint('❌ PasswordService: Auth error: ${e.message}');
-        
-        if (e.message.contains('Invalid login credentials') ||
-            e.message.contains('Invalid email or password')) {
-          return {
-            'success': false,
-            'error': localizedMessages?['invalidCredentials'] ?? 'Invalid credentials',
-            'message': localizedMessages?['oldPasswordIncorrect'] ?? 'Old password is incorrect',
-          };
-        }
-        
-        return {
-          'success': false,
-          'error': localizedMessages?['authenticationError'] ?? 'Authentication error',
-          'message': e.message,
-        };
-      }
+      // Map the response to expected format
+      return {
+        'success': response['ok'] == true,
+        'message': response['message'] ?? 'Email di reset inviata',
+      };
     } catch (e) {
-      debugPrint('❌ PasswordService: Unexpected error: $e');
+      debugPrint('❌ PasswordService: Send email error: $e');
+
+      // Return a structured error response
       return {
         'success': false,
-        'error': localizedMessages?['unexpectedError'] ?? 'Unexpected error',
-        'message': '${localizedMessages?['unexpectedError'] ?? 'An unexpected error occurred'}: $e',
+        'message': localizedMessages?['genericError'] ??
+            'Errore durante l\'invio dell\'email. Riprova più tardi.',
       };
     }
   }
 
-  /// Validate password strength
-  static Map<String, dynamic> validatePassword(String password) {
-    if (password.length < 6) {
-      return {
-        'valid': false,
-        'error': 'Password must be at least 6 characters long',
-      };
+  /// Extract token from browser URL
+  /// Looks for 'token' parameter in the current URL
+  static String? getTokenFromUrl() {
+    try {
+      if (kIsWeb) {
+        final uri = Uri.base;
+        return uri.queryParameters['token'];
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ PasswordService: Error extracting token from URL: $e');
+      return null;
     }
-
-    // Add more password strength checks if needed
-    return {
-      'valid': true,
-      'message': 'Password is valid',
-    };
-  }
-
-  /// Check if passwords match
-  static bool passwordsMatch(String password, String confirmPassword) {
-    return password == confirmPassword;
   }
 }
