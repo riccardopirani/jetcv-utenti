@@ -56,7 +56,12 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: LocaleService.supportedLocales,
-      home: const AppRouter(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AppRouter(),
+        // Explicit OAuth callback route like enterprise
+        '/auth/callback': (context) => const AppRouter(),
+      },
     );
   }
 }
@@ -72,12 +77,14 @@ class _AppRouterState extends State<AppRouter> {
   bool _isAuthenticated = false;
   bool _isLoading = true;
   late final StreamSubscription<AuthState> _authSubscription;
+  bool _handledInitialCallback = false;
 
   @override
   void initState() {
     super.initState();
     _setupAuthListener();
     _checkAuthStatus();
+    _handlePossibleOAuthCallback();
   }
 
   void _setupAuthListener() {
@@ -97,6 +104,32 @@ class _AppRouterState extends State<AppRouter> {
         _isLoading = false;
       });
     });
+  }
+
+  /// Handle OAuth callback on web: if the URL contains `code` and `state`,
+  /// let Supabase complete PKCE and then navigate to the right screen.
+  Future<void> _handlePossibleOAuthCallback() async {
+    try {
+      if (_handledInitialCallback) return;
+      final uri = Uri.base;
+      final hasAuthParams = uri.queryParameters.containsKey('code') ||
+          uri.queryParameters.containsKey('access_token') ||
+          uri.fragment.contains('access_token');
+      if (!hasAuthParams) return;
+
+      _handledInitialCallback = true;
+
+      // Give Supabase time to complete PKCE exchange
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      final session = SupabaseConfig.auth.currentSession;
+      if (session != null) {
+        setState(() {
+          _isAuthenticated = true;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {}
   }
 
   @override

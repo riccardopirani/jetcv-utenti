@@ -47,10 +47,11 @@ class SupabaseAuth {
   /// Get the app redirect URL based on platform
   static String _getRedirectUrl() {
     if (kIsWeb) {
-      // Per web, usa la URL corrente con path specifico per auth callback
+      // For web, use the current origin as redirect (same as enterprise)
+      // Supabase will complete the PKCE exchange and set the session.
       final origin = Uri.base.origin;
       debugPrint('🌐 Web origin detected: $origin');
-      return '$origin/auth/callback';
+      return origin;
     } else {
       // Per mobile, usa deep link scheme
       return 'jetcv://auth/callback';
