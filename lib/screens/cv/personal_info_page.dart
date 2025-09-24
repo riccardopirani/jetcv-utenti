@@ -403,6 +403,709 @@ const Map<String, Map<String, String>> LANGUAGES = {
   },
 };
 
+// Lista dei prefissi telefonici più comuni con chiavi per i18n
+const List<Map<String, String>> PHONE_PREFIXES = [
+  {'code': '+39', 'country': 'it', 'emoji': '🇮🇹'},
+  {'code': '+1', 'country': 'us', 'emoji': '🇺🇸'},
+  {'code': '+33', 'country': 'fr', 'emoji': '🇫🇷'},
+  {'code': '+49', 'country': 'de', 'emoji': '🇩🇪'},
+  {'code': '+34', 'country': 'es', 'emoji': '🇪🇸'},
+  {'code': '+351', 'country': 'pt', 'emoji': '🇵🇹'},
+  {'code': '+44', 'country': 'gb', 'emoji': '🇬🇧'},
+  {'code': '+41', 'country': 'ch', 'emoji': '🇨🇭'},
+  {'code': '+43', 'country': 'at', 'emoji': '🇦🇹'},
+  {'code': '+32', 'country': 'be', 'emoji': '🇧🇪'},
+  {'code': '+31', 'country': 'nl', 'emoji': '🇳🇱'},
+  {'code': '+45', 'country': 'dk', 'emoji': '🇩🇰'},
+  {'code': '+46', 'country': 'se', 'emoji': '🇸🇪'},
+  {'code': '+47', 'country': 'no', 'emoji': '🇳🇴'},
+  {'code': '+358', 'country': 'fi', 'emoji': '🇫🇮'},
+  {'code': '+48', 'country': 'pl', 'emoji': '🇵🇱'},
+  {'code': '+420', 'country': 'cz', 'emoji': '🇨🇿'},
+  {'code': '+421', 'country': 'sk', 'emoji': '🇸🇰'},
+  {'code': '+36', 'country': 'hu', 'emoji': '🇭🇺'},
+  {'code': '+40', 'country': 'ro', 'emoji': '🇷🇴'},
+  {'code': '+359', 'country': 'bg', 'emoji': '🇧🇬'},
+  {'code': '+385', 'country': 'hr', 'emoji': '🇭🇷'},
+  {'code': '+386', 'country': 'si', 'emoji': '🇸🇮'},
+  {'code': '+381', 'country': 'rs', 'emoji': '🇷🇸'},
+  {'code': '+30', 'country': 'gr', 'emoji': '🇬🇷'},
+  {'code': '+90', 'country': 'tr', 'emoji': '🇹🇷'},
+  {'code': '+972', 'country': 'il', 'emoji': '🇮🇱'},
+  {'code': '+7', 'country': 'ru', 'emoji': '🇷🇺'},
+  {'code': '+380', 'country': 'ua', 'emoji': '🇺🇦'},
+  {'code': '+86', 'country': 'cn', 'emoji': '🇨🇳'},
+  {'code': '+81', 'country': 'jp', 'emoji': '🇯🇵'},
+  {'code': '+82', 'country': 'kr', 'emoji': '🇰🇷'},
+  {'code': '+91', 'country': 'in', 'emoji': '🇮🇳'},
+  {'code': '+55', 'country': 'br', 'emoji': '🇧🇷'},
+  {'code': '+54', 'country': 'ar', 'emoji': '🇦🇷'},
+  {'code': '+52', 'country': 'mx', 'emoji': '🇲🇽'},
+  {'code': '+27', 'country': 'za', 'emoji': '🇿🇦'},
+  {'code': '+61', 'country': 'au', 'emoji': '🇦🇺'},
+];
+
+// Nomi localizzati dei paesi (codice ISO -> nome localizzato)
+const Map<String, Map<String, String>> LOCALIZED_COUNTRIES = {
+  'it': {
+    'ad': 'Andorra',
+    'ae': 'Emirati Arabi Uniti',
+    'af': 'Afghanistan',
+    'ag': 'Antigua e Barbuda',
+    'ai': 'Anguilla',
+    'al': 'Albania',
+    'am': 'Armenia',
+    'ao': 'Angola',
+    'aq': 'Antartide',
+    'ar': 'Argentina',
+    'as': 'Samoa Americane',
+    'at': 'Austria',
+    'au': 'Australia',
+    'aw': 'Aruba',
+    'ax': 'Isole Åland',
+    'az': 'Azerbaigian',
+    'ba': 'Bosnia ed Erzegovina',
+    'bb': 'Barbados',
+    'bd': 'Bangladesh',
+    'be': 'Belgio',
+    'bf': 'Burkina Faso',
+    'bg': 'Bulgaria',
+    'bh': 'Bahrein',
+    'bi': 'Burundi',
+    'bj': 'Benin',
+    'bl': 'Saint-Barthélemy',
+    'bm': 'Bermuda',
+    'bn': 'Brunei',
+    'bo': 'Bolivia',
+    'bq': 'Bonaire, Sint Eustatius e Saba',
+    'br': 'Brasile',
+    'bs': 'Bahamas',
+    'bt': 'Bhutan',
+    'bv': 'Isola Bouvet',
+    'bw': 'Botswana',
+    'by': 'Bielorussia',
+    'bz': 'Belize',
+    'ca': 'Canada',
+    'cc': 'Isole Cocos',
+    'cd': 'Repubblica Democratica del Congo',
+    'cf': 'Repubblica Centrafricana',
+    'cg': 'Repubblica del Congo',
+    'ch': 'Svizzera',
+    'ci': 'Costa d\'Avorio',
+    'ck': 'Isole Cook',
+    'cl': 'Cile',
+    'cm': 'Camerun',
+    'cn': 'Cina',
+    'co': 'Colombia',
+    'cr': 'Costa Rica',
+    'cu': 'Cuba',
+    'cv': 'Capo Verde',
+    'cw': 'Curaçao',
+    'cx': 'Isola Christmas',
+    'cy': 'Cipro',
+    'cz': 'Repubblica Ceca',
+    'de': 'Germania',
+    'dj': 'Gibuti',
+    'dk': 'Danimarca',
+    'dm': 'Dominica',
+    'do': 'Repubblica Dominicana',
+    'dz': 'Algeria',
+    'ec': 'Ecuador',
+    'ee': 'Estonia',
+    'eg': 'Egitto',
+    'eh': 'Sahara Occidentale',
+    'er': 'Eritrea',
+    'es': 'Spagna',
+    'et': 'Etiopia',
+    'fi': 'Finlandia',
+    'fj': 'Figi',
+    'fk': 'Isole Falkland',
+    'fm': 'Micronesia',
+    'fo': 'Isole Fær Øer',
+    'fr': 'Francia',
+    'ga': 'Gabon',
+    'gb': 'Regno Unito',
+    'gd': 'Grenada',
+    'ge': 'Georgia',
+    'gf': 'Guyana Francese',
+    'gg': 'Guernsey',
+    'gh': 'Ghana',
+    'gi': 'Gibilterra',
+    'gl': 'Groenlandia',
+    'gm': 'Gambia',
+    'gn': 'Guinea',
+    'gp': 'Guadalupa',
+    'gq': 'Guinea Equatoriale',
+    'gr': 'Grecia',
+    'gs': 'Georgia del Sud e Isole Sandwich Australi',
+    'gt': 'Guatemala',
+    'gu': 'Guam',
+    'gw': 'Guinea-Bissau',
+    'gy': 'Guyana',
+    'hk': 'Hong Kong',
+    'hm': 'Isola Heard e Isole McDonald',
+    'hn': 'Honduras',
+    'hr': 'Croazia',
+    'ht': 'Haiti',
+    'hu': 'Ungheria',
+    'id': 'Indonesia',
+    'ie': 'Irlanda',
+    'il': 'Israele',
+    'im': 'Isola di Man',
+    'in': 'India',
+    'io': 'Territorio Britannico dell\'Oceano Indiano',
+    'iq': 'Iraq',
+    'ir': 'Iran',
+    'is': 'Islanda',
+    'it': 'Italia',
+    'je': 'Jersey',
+    'jm': 'Giamaica',
+    'jo': 'Giordania',
+    'jp': 'Giappone',
+    'ke': 'Kenya',
+    'kg': 'Kirghizistan',
+    'kh': 'Cambogia',
+    'ki': 'Kiribati',
+    'km': 'Comore',
+    'kn': 'Saint Kitts e Nevis',
+    'kp': 'Corea del Nord',
+    'kr': 'Corea del Sud',
+    'kw': 'Kuwait',
+    'ky': 'Isole Cayman',
+    'kz': 'Kazakistan',
+    'la': 'Laos',
+    'lb': 'Libano',
+    'lc': 'Saint Lucia',
+    'li': 'Liechtenstein',
+    'lk': 'Sri Lanka',
+    'lr': 'Liberia',
+    'ls': 'Lesotho',
+    'lt': 'Lituania',
+    'lu': 'Lussemburgo',
+    'lv': 'Lettonia',
+    'ly': 'Libia',
+    'ma': 'Marocco',
+    'mc': 'Monaco',
+    'md': 'Moldavia',
+    'me': 'Montenegro',
+    'mf': 'Saint-Martin',
+    'mg': 'Madagascar',
+    'mh': 'Isole Marshall',
+    'mk': 'Macedonia del Nord',
+    'ml': 'Mali',
+    'mm': 'Myanmar',
+    'mn': 'Mongolia',
+    'mo': 'Macao',
+    'mp': 'Isole Marianne Settentrionali',
+    'mq': 'Martinica',
+    'mr': 'Mauritania',
+    'ms': 'Montserrat',
+    'mt': 'Malta',
+    'mu': 'Mauritius',
+    'mv': 'Maldive',
+    'mw': 'Malawi',
+    'mx': 'Messico',
+    'my': 'Malesia',
+    'mz': 'Mozambico',
+    'na': 'Namibia',
+    'nc': 'Nuova Caledonia',
+    'ne': 'Niger',
+    'nf': 'Isola Norfolk',
+    'ng': 'Nigeria',
+    'ni': 'Nicaragua',
+    'nl': 'Paesi Bassi',
+    'no': 'Norvegia',
+    'np': 'Nepal',
+    'nr': 'Nauru',
+    'nu': 'Niue',
+    'nz': 'Nuova Zelanda',
+    'om': 'Oman',
+    'pa': 'Panama',
+    'pe': 'Perù',
+    'pf': 'Polinesia Francese',
+    'pg': 'Papua Nuova Guinea',
+    'ph': 'Filippine',
+    'pk': 'Pakistan',
+    'pl': 'Polonia',
+    'pm': 'Saint-Pierre e Miquelon',
+    'pn': 'Isole Pitcairn',
+    'pr': 'Porto Rico',
+    'ps': 'Palestina',
+    'pt': 'Portogallo',
+    'pw': 'Palau',
+    'py': 'Paraguay',
+    'qa': 'Qatar',
+    're': 'Riunione',
+    'ro': 'Romania',
+    'rs': 'Serbia',
+    'ru': 'Russia',
+    'rw': 'Ruanda',
+    'sa': 'Arabia Saudita',
+    'sb': 'Isole Salomone',
+    'sc': 'Seicelle',
+    'sd': 'Sudan',
+    'se': 'Svezia',
+    'sg': 'Singapore',
+    'sh': 'Sant\'Elena, Ascensione e Tristan da Cunha',
+    'si': 'Slovenia',
+    'sj': 'Svalbard e Jan Mayen',
+    'sk': 'Slovacchia',
+    'sl': 'Sierra Leone',
+    'sm': 'San Marino',
+    'sn': 'Senegal',
+    'so': 'Somalia',
+    'sr': 'Suriname',
+    'ss': 'Sudan del Sud',
+    'st': 'São Tomé e Príncipe',
+    'sv': 'El Salvador',
+    'sx': 'Sint Maarten',
+    'sy': 'Siria',
+    'sz': 'Swaziland',
+    'tc': 'Isole Turks e Caicos',
+    'td': 'Ciad',
+    'tf': 'Terre Australi e Antartiche Francesi',
+    'tg': 'Togo',
+    'th': 'Tailandia',
+    'tj': 'Tagikistan',
+    'tk': 'Tokelau',
+    'tl': 'Timor Est',
+    'tm': 'Turkmenistan',
+    'tn': 'Tunisia',
+    'to': 'Tonga',
+    'tr': 'Turchia',
+    'tt': 'Trinidad e Tobago',
+    'tv': 'Tuvalu',
+    'tw': 'Taiwan',
+    'tz': 'Tanzania',
+    'ua': 'Ucraina',
+    'ug': 'Uganda',
+    'um': 'Isole Minori Esterne degli Stati Uniti',
+    'us': 'Stati Uniti',
+    'uy': 'Uruguay',
+    'uz': 'Uzbekistan',
+    'va': 'Città del Vaticano',
+    'vc': 'Saint Vincent e Grenadine',
+    've': 'Venezuela',
+    'vg': 'Isole Vergini Britanniche',
+    'vi': 'Isole Vergini Americane',
+    'vn': 'Vietnam',
+    'vu': 'Vanuatu',
+    'wf': 'Wallis e Futuna',
+    'ws': 'Samoa',
+    'ye': 'Yemen',
+    'yt': 'Mayotte',
+    'za': 'Sudafrica',
+    'zm': 'Zambia',
+    'zw': 'Zimbabwe',
+  },
+  'en': {
+    'ad': 'Andorra',
+    'ae': 'United Arab Emirates',
+    'af': 'Afghanistan',
+    'al': 'Albania',
+    'ar': 'Argentina',
+    'at': 'Austria',
+    'au': 'Australia',
+    'be': 'Belgium',
+    'bg': 'Bulgaria',
+    'br': 'Brazil',
+    'ca': 'Canada',
+    'ch': 'Switzerland',
+    'cn': 'China',
+    'co': 'Colombia',
+    'cr': 'Costa Rica',
+    'cz': 'Czech Republic',
+    'de': 'Germany',
+    'dk': 'Denmark',
+    'ec': 'Ecuador',
+    'ee': 'Estonia',
+    'eg': 'Egypt',
+    'es': 'Spain',
+    'et': 'Ethiopia',
+    'fi': 'Finland',
+    'fr': 'France',
+    'gb': 'United Kingdom',
+    'ge': 'Georgia',
+    'gr': 'Greece',
+    'hr': 'Croatia',
+    'hu': 'Hungary',
+    'id': 'Indonesia',
+    'ie': 'Ireland',
+    'il': 'Israel',
+    'in': 'India',
+    'ir': 'Iran',
+    'is': 'Iceland',
+    'it': 'Italy',
+    'jp': 'Japan',
+    'ke': 'Kenya',
+    'kr': 'South Korea',
+    'kw': 'Kuwait',
+    'lb': 'Lebanon',
+    'li': 'Liechtenstein',
+    'lt': 'Lithuania',
+    'lu': 'Luxembourg',
+    'lv': 'Latvia',
+    'ma': 'Morocco',
+    'mc': 'Monaco',
+    'md': 'Moldova',
+    'me': 'Montenegro',
+    'mk': 'North Macedonia',
+    'mt': 'Malta',
+    'mx': 'Mexico',
+    'my': 'Malaysia',
+    'ng': 'Nigeria',
+    'nl': 'Netherlands',
+    'no': 'Norway',
+    'nz': 'New Zealand',
+    'pe': 'Peru',
+    'ph': 'Philippines',
+    'pk': 'Pakistan',
+    'pl': 'Poland',
+    'pt': 'Portugal',
+    'qa': 'Qatar',
+    'ro': 'Romania',
+    'rs': 'Serbia',
+    'ru': 'Russia',
+    'sa': 'Saudi Arabia',
+    'se': 'Sweden',
+    'sg': 'Singapore',
+    'si': 'Slovenia',
+    'sk': 'Slovakia',
+    'th': 'Thailand',
+    'tr': 'Turkey',
+    'ua': 'Ukraine',
+    'us': 'United States',
+    've': 'Venezuela',
+    'vn': 'Vietnam',
+    'za': 'South Africa',
+  },
+  'es': {
+    'ad': 'Andorra',
+    'ae': 'Emiratos Árabes Unidos',
+    'af': 'Afganistán',
+    'al': 'Albania',
+    'ar': 'Argentina',
+    'at': 'Austria',
+    'au': 'Australia',
+    'be': 'Bélgica',
+    'bg': 'Bulgaria',
+    'br': 'Brasil',
+    'ca': 'Canadá',
+    'ch': 'Suiza',
+    'cn': 'China',
+    'co': 'Colombia',
+    'cr': 'Costa Rica',
+    'cz': 'República Checa',
+    'de': 'Alemania',
+    'dk': 'Dinamarca',
+    'ec': 'Ecuador',
+    'ee': 'Estonia',
+    'eg': 'Egipto',
+    'es': 'España',
+    'et': 'Etiopía',
+    'fi': 'Finlandia',
+    'fr': 'Francia',
+    'gb': 'Reino Unido',
+    'ge': 'Georgia',
+    'gr': 'Grecia',
+    'hr': 'Croacia',
+    'hu': 'Hungría',
+    'id': 'Indonesia',
+    'ie': 'Irlanda',
+    'il': 'Israel',
+    'in': 'India',
+    'ir': 'Irán',
+    'is': 'Islandia',
+    'it': 'Italia',
+    'jp': 'Japón',
+    'ke': 'Kenia',
+    'kr': 'Corea del Sur',
+    'kw': 'Kuwait',
+    'lb': 'Líbano',
+    'li': 'Liechtenstein',
+    'lt': 'Lituania',
+    'lu': 'Luxemburgo',
+    'lv': 'Letonia',
+    'ma': 'Marruecos',
+    'mc': 'Mónaco',
+    'md': 'Moldavia',
+    'me': 'Montenegro',
+    'mk': 'Macedonia del Norte',
+    'mt': 'Malta',
+    'mx': 'México',
+    'my': 'Malasia',
+    'ng': 'Nigeria',
+    'nl': 'Países Bajos',
+    'no': 'Noruega',
+    'nz': 'Nueva Zelanda',
+    'pe': 'Perú',
+    'ph': 'Filipinas',
+    'pk': 'Pakistán',
+    'pl': 'Polonia',
+    'pt': 'Portugal',
+    'qa': 'Qatar',
+    'ro': 'Rumania',
+    'rs': 'Serbia',
+    'ru': 'Rusia',
+    'sa': 'Arabia Saudí',
+    'se': 'Suecia',
+    'sg': 'Singapur',
+    'si': 'Eslovenia',
+    'sk': 'Eslovaquia',
+    'th': 'Tailandia',
+    'tr': 'Turquía',
+    'ua': 'Ucrania',
+    'us': 'Estados Unidos',
+    've': 'Venezuela',
+    'vn': 'Vietnam',
+    'za': 'Sudáfrica',
+  },
+  'fr': {
+    'ad': 'Andorre',
+    'ae': 'Émirats Arabes Unis',
+    'af': 'Afghanistan',
+    'al': 'Albanie',
+    'ar': 'Argentine',
+    'at': 'Autriche',
+    'au': 'Australie',
+    'be': 'Belgique',
+    'bg': 'Bulgarie',
+    'br': 'Brésil',
+    'ca': 'Canada',
+    'ch': 'Suisse',
+    'cn': 'Chine',
+    'co': 'Colombie',
+    'cr': 'Costa Rica',
+    'cz': 'République tchèque',
+    'de': 'Allemagne',
+    'dk': 'Danemark',
+    'ec': 'Équateur',
+    'ee': 'Estonie',
+    'eg': 'Égypte',
+    'es': 'Espagne',
+    'et': 'Éthiopie',
+    'fi': 'Finlande',
+    'fr': 'France',
+    'gb': 'Royaume-Uni',
+    'ge': 'Géorgie',
+    'gr': 'Grèce',
+    'hr': 'Croatie',
+    'hu': 'Hongrie',
+    'id': 'Indonésie',
+    'ie': 'Irlande',
+    'il': 'Israël',
+    'in': 'Inde',
+    'ir': 'Iran',
+    'is': 'Islande',
+    'it': 'Italie',
+    'jp': 'Japon',
+    'ke': 'Kenya',
+    'kr': 'Corée du Sud',
+    'kw': 'Koweït',
+    'lb': 'Liban',
+    'li': 'Liechtenstein',
+    'lt': 'Lituanie',
+    'lu': 'Luxembourg',
+    'lv': 'Lettonie',
+    'ma': 'Maroc',
+    'mc': 'Monaco',
+    'md': 'Moldavie',
+    'me': 'Monténégro',
+    'mk': 'Macédoine du Nord',
+    'mt': 'Malte',
+    'mx': 'Mexique',
+    'my': 'Malaisie',
+    'ng': 'Nigeria',
+    'nl': 'Pays-Bas',
+    'no': 'Norvège',
+    'nz': 'Nouvelle-Zélande',
+    'pe': 'Pérou',
+    'ph': 'Philippines',
+    'pk': 'Pakistan',
+    'pl': 'Pologne',
+    'pt': 'Portugal',
+    'qa': 'Qatar',
+    'ro': 'Roumanie',
+    'rs': 'Serbie',
+    'ru': 'Russie',
+    'sa': 'Arabie Saoudite',
+    'se': 'Suède',
+    'sg': 'Singapour',
+    'si': 'Slovénie',
+    'sk': 'Slovaquie',
+    'th': 'Thaïlande',
+    'tr': 'Turquie',
+    'ua': 'Ukraine',
+    'us': 'États-Unis',
+    've': 'Venezuela',
+    'vn': 'Vietnam',
+    'za': 'Afrique du Sud',
+  },
+  'de': {
+    'ad': 'Andorra',
+    'ae': 'Vereinigte Arabische Emirate',
+    'af': 'Afghanistan',
+    'al': 'Albanien',
+    'ar': 'Argentinien',
+    'at': 'Österreich',
+    'au': 'Australien',
+    'be': 'Belgien',
+    'bg': 'Bulgarien',
+    'br': 'Brasilien',
+    'ca': 'Kanada',
+    'ch': 'Schweiz',
+    'cn': 'China',
+    'co': 'Kolumbien',
+    'cr': 'Costa Rica',
+    'cz': 'Tschechische Republik',
+    'de': 'Deutschland',
+    'dk': 'Dänemark',
+    'ec': 'Ecuador',
+    'ee': 'Estland',
+    'eg': 'Ägypten',
+    'es': 'Spanien',
+    'et': 'Äthiopien',
+    'fi': 'Finnland',
+    'fr': 'Frankreich',
+    'gb': 'Vereinigtes Königreich',
+    'ge': 'Georgien',
+    'gr': 'Griechenland',
+    'hr': 'Kroatien',
+    'hu': 'Ungarn',
+    'id': 'Indonesien',
+    'ie': 'Irland',
+    'il': 'Israel',
+    'in': 'Indien',
+    'ir': 'Iran',
+    'is': 'Island',
+    'it': 'Italien',
+    'jp': 'Japan',
+    'ke': 'Kenia',
+    'kr': 'Südkorea',
+    'kw': 'Kuwait',
+    'lb': 'Libanon',
+    'li': 'Liechtenstein',
+    'lt': 'Litauen',
+    'lu': 'Luxemburg',
+    'lv': 'Lettland',
+    'ma': 'Marokko',
+    'mc': 'Monaco',
+    'md': 'Moldau',
+    'me': 'Montenegro',
+    'mk': 'Nordmazedonien',
+    'mt': 'Malta',
+    'mx': 'Mexiko',
+    'my': 'Malaysia',
+    'ng': 'Nigeria',
+    'nl': 'Niederlande',
+    'no': 'Norwegen',
+    'nz': 'Neuseeland',
+    'pe': 'Peru',
+    'ph': 'Philippinen',
+    'pk': 'Pakistan',
+    'pl': 'Polen',
+    'pt': 'Portugal',
+    'qa': 'Katar',
+    'ro': 'Rumänien',
+    'rs': 'Serbien',
+    'ru': 'Russland',
+    'sa': 'Saudi-Arabien',
+    'se': 'Schweden',
+    'sg': 'Singapur',
+    'si': 'Slowenien',
+    'sk': 'Slowakei',
+    'th': 'Thailand',
+    'tr': 'Türkei',
+    'ua': 'Ukraine',
+    'us': 'Vereinigte Staaten',
+    've': 'Venezuela',
+    'vn': 'Vietnam',
+    'za': 'Südafrika',
+  },
+};
+
+// Localized texts for UI components
+const Map<String, Map<String, String>> UI_TEXTS = {
+  'it': {
+    'selectPhonePrefix': 'Seleziona prefisso internazionale',
+    'searchCountryOrPrefix': 'Cerca paese o prefisso...',
+    'noPrefixFound': 'Nessun prefisso trovato',
+    'removeProfilePhoto': 'Rimuovi foto profilo',
+    'removePhotoConfirmation':
+        'Sei sicuro di voler rimuovere la tua foto profilo?',
+    'removing': 'Rimozione...',
+    'cancelSelection': 'Annulla selezione',
+    'removePhoto': 'Rimuovi foto',
+    'spokenLanguages': 'Lingue parlate',
+    'selectCountry': 'Seleziona un paese',
+  },
+  'en': {
+    'selectPhonePrefix': 'Select international prefix',
+    'searchCountryOrPrefix': 'Search country or prefix...',
+    'noPrefixFound': 'No prefix found',
+    'removeProfilePhoto': 'Remove profile photo',
+    'removePhotoConfirmation':
+        'Are you sure you want to remove your profile photo?',
+    'removing': 'Removing...',
+    'cancelSelection': 'Cancel selection',
+    'removePhoto': 'Remove photo',
+    'spokenLanguages': 'Spoken languages',
+    'selectCountry': 'Select a country',
+  },
+  'es': {
+    'selectPhonePrefix': 'Seleccionar prefijo internacional',
+    'searchCountryOrPrefix': 'Buscar país o prefijo...',
+    'noPrefixFound': 'No se encontró prefijo',
+    'removeProfilePhoto': 'Eliminar foto de perfil',
+    'removePhotoConfirmation':
+        '¿Estás seguro de que quieres eliminar tu foto de perfil?',
+    'removing': 'Eliminando...',
+    'cancelSelection': 'Cancelar selección',
+    'removePhoto': 'Eliminar foto',
+    'spokenLanguages': 'Idiomas hablados',
+    'selectCountry': 'Selecciona un país',
+  },
+  'fr': {
+    'selectPhonePrefix': 'Sélectionner le préfixe international',
+    'searchCountryOrPrefix': 'Rechercher pays ou préfixe...',
+    'noPrefixFound': 'Aucun préfixe trouvé',
+    'removeProfilePhoto': 'Supprimer la photo de profil',
+    'removePhotoConfirmation':
+        'Êtes-vous sûr de vouloir supprimer votre photo de profil ?',
+    'removing': 'Suppression...',
+    'cancelSelection': 'Annuler la sélection',
+    'removePhoto': 'Supprimer la photo',
+    'spokenLanguages': 'Langues parlées',
+    'selectCountry': 'Sélectionner un pays',
+  },
+  'de': {
+    'selectPhonePrefix': 'Internationale Vorwahl auswählen',
+    'searchCountryOrPrefix': 'Land oder Vorwahl suchen...',
+    'noPrefixFound': 'Keine Vorwahl gefunden',
+    'removeProfilePhoto': 'Profilbild entfernen',
+    'removePhotoConfirmation':
+        'Sind Sie sicher, dass Sie Ihr Profilbild entfernen möchten?',
+    'removing': 'Entfernen...',
+    'cancelSelection': 'Auswahl abbrechen',
+    'removePhoto': 'Foto entfernen',
+    'spokenLanguages': 'Gesprochene Sprachen',
+    'selectCountry': 'Land auswählen',
+  },
+};
+
+// Helper function to get localized country name
+String getLocalizedCountryName(String countryCode, String languageCode) {
+  final countries =
+      LOCALIZED_COUNTRIES[languageCode] ?? LOCALIZED_COUNTRIES['it'] ?? {};
+  return countries[countryCode.toLowerCase()] ?? countryCode.toUpperCase();
+}
+
+// Helper function to get localized text for UI components
+String getLocalizedText(String key, String languageCode) {
+  final texts = UI_TEXTS[languageCode] ?? UI_TEXTS['it'] ?? {};
+  return texts[key] ?? key;
+}
+
 class PhoneInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -419,23 +1122,12 @@ class PhoneInputFormatter extends TextInputFormatter {
       );
     }
 
-    // Allow only digits and + at the beginning
-    if (text.startsWith('+')) {
-      // Keep the + and allow only digits after it
-      String filtered =
-          '+' + text.substring(1).replaceAll(RegExp(r'[^0-9]'), '');
-      return TextEditingValue(
-        text: filtered,
-        selection: TextSelection.collapsed(offset: filtered.length),
-      );
-    } else {
-      // Allow only digits
-      String filtered = text.replaceAll(RegExp(r'[^0-9]'), '');
-      return TextEditingValue(
-        text: filtered,
-        selection: TextSelection.collapsed(offset: filtered.length),
-      );
-    }
+    // Allow only digits (prefix is handled separately)
+    String filtered = text.replaceAll(RegExp(r'[^0-9]'), '');
+    return TextEditingValue(
+      text: filtered,
+      selection: TextSelection.collapsed(offset: filtered.length),
+    );
   }
 }
 
@@ -613,6 +1305,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
   dynamic _selectedImage; // XFile on web, File on mobile
   Uint8List? _selectedImageBytes; // For web compatibility
   bool _isUploadingImage = false; // Track upload state
+  bool _isRemovingImage = false; // Track removal state
   bool _isSaving = false;
   // Paese - NEW IMPLEMENTATION
   List<CountryModel> _countries = [];
@@ -640,12 +1333,10 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
   final FocusNode _languageSearchFocusNode = FocusNode();
   List<String> _filteredLanguages = [];
 
-  // Lingua App (i18n) - NEW IMPLEMENTATION
-  bool _showLanguageAppDropdown = false;
-  final TextEditingController _languageAppSearchController =
-      TextEditingController();
-  final FocusNode _languageAppSearchFocusNode = FocusNode();
-  List<Locale> _filteredLocalesApp = [];
+  // Language App variables removed
+
+  // Phone prefix state
+  String _selectedPhonePrefix = '+39'; // Default to Italy
 
   @override
   void initState() {
@@ -788,7 +1479,30 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
           _emailController.text = user.email ?? '';
         }
         if (forceUpdate || isInitialLoad || _phoneController.text.isEmpty) {
-          _phoneController.text = user.phone ?? '';
+          final phoneNumber = user.phone ?? '';
+          if (phoneNumber.isNotEmpty) {
+            // Try to extract prefix and number from existing phone
+            final match =
+                RegExp(r'^\+(\d{1,4})\s*(.*)').firstMatch(phoneNumber);
+            if (match != null) {
+              final prefixCode = '+${match.group(1)}';
+              final number = match.group(2) ?? '';
+
+              // Check if the prefix exists in our list
+              final prefixExists =
+                  PHONE_PREFIXES.any((p) => p['code'] == prefixCode);
+              if (prefixExists) {
+                _selectedPhonePrefix = prefixCode;
+                _phoneController.text = number;
+              } else {
+                // If prefix not in our list, use the full number
+                _phoneController.text = phoneNumber;
+              }
+            } else {
+              // No prefix found, use full number
+              _phoneController.text = phoneNumber;
+            }
+          }
         }
 
         // Address info - update on initial load, when empty, or when forced
@@ -1101,8 +1815,12 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       if (query.isEmpty) {
         _filteredCountries = _countries;
       } else {
+        final currentLanguage =
+            LocaleService.instance.currentLocale?.languageCode ?? 'it';
         _filteredCountries = _countries.where((country) {
-          return country.name.toLowerCase().contains(query.toLowerCase()) ||
+          final localizedName =
+              getLocalizedCountryName(country.code, currentLanguage);
+          return localizedName.toLowerCase().contains(query.toLowerCase()) ||
               country.code.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
@@ -1247,61 +1965,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     _closeLanguageDropdown();
   }
 
-  // NEW LANGUAGE APP DROPDOWN FUNCTIONS - SINGLE SELECTION LIKE COUNTRY
-  void _toggleLanguageAppDropdown() {
-    setState(() {
-      _showLanguageAppDropdown = !_showLanguageAppDropdown;
-      if (_showLanguageAppDropdown) {
-        _initializeLanguageAppFilter();
-        // Set focus on search field when opening
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _languageAppSearchFocusNode.requestFocus();
-        });
-      }
-    });
-  }
-
-  void _closeLanguageAppDropdown() {
-    setState(() {
-      _showLanguageAppDropdown = false;
-    });
-  }
-
-  void _initializeLanguageAppFilter() {
-    _filteredLocalesApp = LocaleService.fullyTranslatedLocales;
-    _languageAppSearchController.clear();
-  }
-
-  void _filterLanguageApp(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredLocalesApp = LocaleService.fullyTranslatedLocales;
-      } else {
-        _filteredLocalesApp =
-            LocaleService.fullyTranslatedLocales.where((locale) {
-          final displayName =
-              LocaleService.instance.getLanguageName(locale.languageCode);
-          return displayName.toLowerCase().contains(query.toLowerCase()) ||
-              locale.languageCode.toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      }
-    });
-  }
-
-  void _selectLanguageApp(Locale locale) {
-    // Change the app language
-    LocaleService.instance.setLocale(locale);
-
-    setState(() {
-      // Clear search text and reset filter after selection
-      _languageAppSearchController.clear();
-      _initializeLanguageAppFilter();
-    });
-
-    // Close dropdown after selection
-    _closeLanguageAppDropdown();
-  }
-
   @override
   void dispose() {
     // Remove language change listener
@@ -1325,8 +1988,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     _nationalitySearchFocusNode.dispose();
     _languageSearchController.dispose();
     _languageSearchFocusNode.dispose();
-    _languageAppSearchController.dispose();
-    _languageAppSearchFocusNode.dispose();
     super.dispose();
   }
 
@@ -1604,10 +2265,165 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     }
   }
 
+  Future<void> _removeProfilePicture() async {
+    final localizations = AppLocalizations.of(context)!;
+
+    // If user only has a newly selected image (not saved), just clear the selection
+    if ((_selectedImage != null || _selectedImageBytes != null) &&
+        _profilePicture == null) {
+      setState(() {
+        _selectedImage = null;
+        _selectedImageBytes = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selezione foto annullata'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Show confirmation dialog for removing saved profile picture
+    final shouldRemove = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        final currentLanguage =
+            LocaleService.instance.currentLocale?.languageCode ?? 'it';
+        return AlertDialog(
+          title: Text(getLocalizedText('removeProfilePhoto', currentLanguage)),
+          content: Text(
+              getLocalizedText('removePhotoConfirmation', currentLanguage)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(localizations.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Rimuovi'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldRemove != true || !mounted) return;
+
+    setState(() {
+      _isRemovingImage = true;
+    });
+
+    try {
+      // Get authentication token
+      final session = SupabaseConfig.client.auth.currentSession;
+      if (session?.accessToken == null) {
+        throw Exception('Sessione non valida');
+      }
+
+      // Call removeUserProfilePicture Edge Function
+      final uri = Uri.parse(
+          '${SupabaseConfig.supabaseUrl}/functions/v1/removeUserProfilePicture');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer ${session!.accessToken}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+        if (data['ok'] == true) {
+          // Successfully removed - update UI
+          setState(() {
+            _profilePicture = null;
+            _selectedImage = null;
+            _selectedImageBytes = null;
+          });
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Foto profilo rimossa con successo'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        } else {
+          throw Exception(data['message'] ?? 'Errore durante la rimozione');
+        }
+      } else {
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData is Map<String, dynamic>
+            ? errorData['message'] ??
+                errorData['error'] ??
+                'Errore ${response.statusCode}'
+            : 'Errore ${response.statusCode}';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Errore durante la rimozione: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRemovingImage = false;
+        });
+      }
+    }
+  }
+
   Future<void> _savePersonalInfo() async {
     if (!_formKey.currentState!.validate()) return;
 
     final localizations = AppLocalizations.of(context)!;
+
+    // Validate multi-select dropdowns (nationality, languages) and country
+    if (_selectedNationalities.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Seleziona almeno una nazionalità'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedLanguages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Seleziona almeno una lingua parlata'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedCountryCode == null || _selectedCountryCode!.isEmpty) {
+      final currentLanguage =
+          LocaleService.instance.currentLocale?.languageCode ?? 'it';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(getLocalizedText('selectCountry', currentLanguage)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isSaving = true;
@@ -1652,7 +2468,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
         updateData['email'] = _emailController.text.trim().toLowerCase();
       }
       if (_phoneController.text.isNotEmpty) {
-        updateData['phone'] = _phoneController.text.trim();
+        updateData['phone'] =
+            '$_selectedPhonePrefix ${_phoneController.text.trim()}';
       }
       if (_addressController.text.isNotEmpty) {
         updateData['address'] = _toTitleCase(_addressController.text.trim());
@@ -1684,6 +2501,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       if (_selectedLanguages.isNotEmpty) {
         updateData['languageCodes'] = _selectedLanguages;
       }
+
+      // Include current app language code
+      final appLanguageCode =
+          LocaleService.instance.currentLocale?.languageCode ?? 'it';
+      updateData['languageCodeApp'] = appLanguageCode;
 
       // Profile picture update is handled by the Edge Function, so we don't pass it here
 
@@ -1770,7 +2592,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       ],
       child: GestureDetector(
         onTap: () {
-          // Close country dropdown when tapping outside
+          // Close dropdowns when tapping outside
           if (_showCountryDropdown) {
             setState(() {
               _showCountryDropdown = false;
@@ -1925,36 +2747,104 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             ),
                           ),
                           const SizedBox(height: 12),
-                          TextButton.icon(
-                            onPressed: _isUploadingImage
-                                ? null
-                                : _showImageSourceDialog,
-                            icon: _isUploadingImage
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
-                                  )
-                                : Icon(
-                                    _selectedImage != null ||
-                                            _profilePicture != null
-                                        ? Icons.edit
-                                        : Icons.add_a_photo,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton.icon(
+                                onPressed:
+                                    (_isUploadingImage || _isRemovingImage)
+                                        ? null
+                                        : _showImageSourceDialog,
+                                icon: _isUploadingImage
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : Icon(
+                                        _selectedImage != null ||
+                                                _profilePicture != null
+                                            ? Icons.edit
+                                            : Icons.add_a_photo,
+                                      ),
+                                label: Text(
+                                  _isUploadingImage
+                                      ? AppLocalizations.of(context)!.uploading
+                                      : _selectedImage != null ||
+                                              _profilePicture != null
+                                          ? AppLocalizations.of(context)!
+                                              .replacePhoto
+                                          : AppLocalizations.of(context)!
+                                              .addPhoto,
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                ),
+                              ),
+                              // Show remove button only if there's an existing photo
+                              if (_profilePicture != null ||
+                                  _selectedImage != null) ...[
+                                const SizedBox(width: 8),
+                                TextButton.icon(
+                                  onPressed:
+                                      (_isUploadingImage || _isRemovingImage)
+                                          ? null
+                                          : _removeProfilePicture,
+                                  icon: _isRemovingImage
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        )
+                                      : Icon(
+                                          (_profilePicture == null &&
+                                                  (_selectedImage != null ||
+                                                      _selectedImageBytes !=
+                                                          null))
+                                              ? Icons.close
+                                              : Icons.delete_outline,
+                                        ),
+                                  label: Builder(
+                                    builder: (context) {
+                                      final currentLanguage = LocaleService
+                                              .instance
+                                              .currentLocale
+                                              ?.languageCode ??
+                                          'it';
+                                      return Text(
+                                        _isRemovingImage
+                                            ? getLocalizedText(
+                                                'removing', currentLanguage)
+                                            : (_profilePicture == null &&
+                                                    (_selectedImage != null ||
+                                                        _selectedImageBytes !=
+                                                            null))
+                                                ? getLocalizedText(
+                                                    'cancelSelection',
+                                                    currentLanguage)
+                                                : getLocalizedText(
+                                                    'removePhoto',
+                                                    currentLanguage),
+                                      );
+                                    },
                                   ),
-                            label: Text(
-                              _isUploadingImage
-                                  ? AppLocalizations.of(context)!.uploading
-                                  : _selectedImage != null ||
-                                          _profilePicture != null
-                                      ? AppLocalizations.of(context)!
-                                          .replacePhoto
-                                      : AppLocalizations.of(context)!.addPhoto,
-                            ),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                            ),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: (_profilePicture == null &&
+                                            (_selectedImage != null ||
+                                                _selectedImageBytes != null))
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                        : Theme.of(context).colorScheme.error,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
@@ -1976,6 +2866,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             icon: Icons.person_outline,
                             textCapitalization: TextCapitalization.words,
                             inputFormatters: [TitleCaseInputFormatter()],
+                            isRequired: true,
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -1993,6 +2884,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             icon: Icons.person_outline,
                             textCapitalization: TextCapitalization.words,
                             inputFormatters: [TitleCaseInputFormatter()],
+                            isRequired: true,
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -2028,6 +2920,13 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
 
                     _buildNewNationalityDropdown(),
 
+                    const SizedBox(height: 32),
+
+                    // Sezione: Lingue parlate
+                    _buildSectionHeader(getLocalizedText(
+                        'spokenLanguages',
+                        LocaleService.instance.currentLocale?.languageCode ??
+                            'it')),
                     const SizedBox(height: 16),
 
                     _buildNewLanguageDropdown(),
@@ -2046,6 +2945,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                       keyboardType: TextInputType.emailAddress,
                       textCapitalization: TextCapitalization.none,
                       onChanged: _onEmailChanged,
+                      isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
                           return AppLocalizations.of(context)!.emailRequired;
@@ -2059,20 +2959,93 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                       },
                     ),
 
+                    const SizedBox(height: 32),
+
+                    // Sezione: Telefono
+                    _buildSectionHeader(
+                        '${AppLocalizations.of(context)!.phone} *'),
                     const SizedBox(height: 16),
 
-                    _buildTextFormField(
-                      controller: _phoneController,
-                      label: AppLocalizations.of(context)!.phone,
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [PhoneInputFormatter()],
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) {
-                          return AppLocalizations.of(context)!.phoneRequired;
-                        }
-                        return null;
-                      },
+                    // Phone field with prefix dropdown
+                    Container(
+                      height: 60,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Phone prefix dropdown
+                          _buildPhonePrefixDropdown(),
+                          // Phone number field
+                          Expanded(
+                            child: TextFormField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [PhoneInputFormatter()],
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) {
+                                  return AppLocalizations.of(context)!
+                                      .phoneRequired;
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                hintText: '333 123 4567',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 20,
+                                ),
+                                border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outline
+                                        .withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 2,
+                                  ),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 32),
@@ -2081,22 +3054,12 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                     _buildSectionHeader(AppLocalizations.of(context)!.address),
                     const SizedBox(height: 16),
 
-                    _buildTextFormField(
-                      controller: _addressController,
-                      label: AppLocalizations.of(context)!.address,
-                      icon: Icons.home_outlined,
-                      textCapitalization: TextCapitalization.words,
-                      inputFormatters: [TitleCaseInputFormatter()],
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) {
-                          return AppLocalizations.of(context)!.addressRequired;
-                        }
-                        return null;
-                      },
-                    ),
+                    // 1. Country (Paese)
+                    _buildNewCountryDropdown(),
 
                     const SizedBox(height: 16),
 
+                    // 2. City (Città) and 3. State (Stato/Provincia)
                     Row(
                       children: [
                         Expanded(
@@ -2106,6 +3069,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             icon: Icons.location_city_outlined,
                             textCapitalization: TextCapitalization.words,
                             inputFormatters: [TitleCaseInputFormatter()],
+                            isRequired: true,
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -2123,6 +3087,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                             icon: Icons.map_outlined,
                             textCapitalization: TextCapitalization.words,
                             inputFormatters: [TitleCaseInputFormatter()],
+                            isRequired: true,
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return AppLocalizations.of(context)!
@@ -2137,60 +3102,65 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
 
                     const SizedBox(height: 16),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _postalCodeController,
-                            keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.characters,
-                            textAlignVertical: TextAlignVertical.top,
-                            validator: (value) {
-                              if (value?.isEmpty ?? true) {
-                                return AppLocalizations.of(context)!
-                                    .postalCodeRequired;
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              labelText:
-                                  AppLocalizations.of(context)!.postalCode,
-                              prefixIcon:
-                                  const Icon(Icons.local_post_office_outlined),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outline
-                                      .withValues(alpha: 0.5),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
+                    // 4. Address (Indirizzo)
+                    _buildTextFormField(
+                      controller: _addressController,
+                      label: AppLocalizations.of(context)!.address,
+                      icon: Icons.home_outlined,
+                      textCapitalization: TextCapitalization.words,
+                      inputFormatters: [TitleCaseInputFormatter()],
+                      isRequired: true,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.addressRequired;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 5. Postal Code (Codice Postale)
+                    TextFormField(
+                      controller: _postalCodeController,
+                      keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.characters,
+                      textAlignVertical: TextAlignVertical.top,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return AppLocalizations.of(context)!
+                              .postalCodeRequired;
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText:
+                            '${AppLocalizations.of(context)!.postalCode} *',
+                        prefixIcon:
+                            const Icon(Icons.local_post_office_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.5),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildNewCountryDropdown(),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
 
                     const SizedBox(height: 40),
-
-                    // Sezione: Selezione Lingua
-                    _buildNewLanguageAppDropdown(),
 
                     const SizedBox(height: 24),
 
@@ -2265,6 +3235,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     TextCapitalization? textCapitalization,
     List<TextInputFormatter>? inputFormatters,
     void Function(String)? onChanged,
+    bool isRequired = false,
   }) {
     return TextFormField(
       controller: controller,
@@ -2274,7 +3245,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       inputFormatters: inputFormatters,
       onChanged: onChanged,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: isRequired ? '$label *' : label,
         prefixIcon: Icon(icon),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -2303,7 +3274,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       value: _selectedGender,
       isExpanded: true,
       decoration: InputDecoration(
-        labelText: localizations.gender,
+        labelText: '${localizations.gender} *',
         prefixIcon: const Icon(Icons.person_outline),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -2355,7 +3326,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
       inputFormatters: [DateInputFormatter()],
       onChanged: _onDateChanged,
       decoration: InputDecoration(
-        labelText: localizations.dateOfBirth,
+        labelText: '${localizations.dateOfBirth} *',
         hintText: 'es. 21/10/1955',
         prefixIcon: const Icon(Icons.date_range),
         border: OutlineInputBorder(
@@ -2482,7 +3453,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.country,
+                          '${AppLocalizations.of(context)!.country} *',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Theme.of(context)
@@ -2491,14 +3462,26 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                                   ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          selectedCountry?.name ??
-                              AppLocalizations.of(context)!.selectCountry,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        Builder(
+                          builder: (context) {
+                            final currentLanguage = LocaleService
+                                    .instance.currentLocale?.languageCode ??
+                                'it';
+                            return Text(
+                              selectedCountry?.code != null
+                                  ? getLocalizedCountryName(
+                                      selectedCountry!.code, currentLanguage)
+                                  : getLocalizedText(
+                                      'selectCountry', currentLanguage),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),
-                          overflow: TextOverflow.ellipsis,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -2614,16 +3597,28 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                                           const SizedBox(width: 12),
                                         ],
                                         Expanded(
-                                          child: Text(
-                                            country.name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.w600
-                                                      : FontWeight.normal,
-                                                ),
+                                          child: Builder(
+                                            builder: (context) {
+                                              final currentLanguage =
+                                                  LocaleService
+                                                          .instance
+                                                          .currentLocale
+                                                          ?.languageCode ??
+                                                      'it';
+                                              return Text(
+                                                getLocalizedCountryName(
+                                                    country.code,
+                                                    currentLanguage),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                    ),
+                                              );
+                                            },
                                           ),
                                         ),
                                         if (isSelected)
@@ -2702,7 +3697,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _getLocalizedText('nationality_label'),
+                          '${_getLocalizedText('nationality_label')} *',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Theme.of(context)
@@ -2906,14 +3901,23 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          AppLocalizations.of(context)!.languages,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                        Builder(
+                          builder: (context) {
+                            final currentLanguage = LocaleService
+                                    .instance.currentLocale?.languageCode ??
+                                'it';
+                            return Text(
+                              '${getLocalizedText('spokenLanguages', currentLanguage)} *',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
                                   ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -3061,213 +4065,78 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
     );
   }
 
-  // NEW LANGUAGE APP DROPDOWN WITH SEARCH - SINGLE SELECTION LIKE COUNTRY
-  Widget _buildNewLanguageAppDropdown() {
-    // Get current locale
-    final currentLocale = LocaleService.instance.currentLocale;
-    final currentDisplayName = currentLocale != null
-        ? LocaleService.instance.getLanguageName(currentLocale.languageCode)
-        : AppLocalizations.of(context)!.selectLanguage;
+  // PHONE PREFIX DROPDOWN WIDGET - OVERLAY VERSION
+  Widget _buildPhonePrefixDropdown() {
+    // Find selected prefix to show in button
+    final selectedPrefix = PHONE_PREFIXES.firstWhere(
+      (prefix) => prefix['code'] == _selectedPhonePrefix,
+      orElse: () => {'code': '+39', 'country': 'it', 'emoji': '🇮🇹'},
+    );
 
-    return TapRegion(
-      onTapOutside: (event) {
-        // Close dropdown when tapping outside the entire dropdown area
-        if (_showLanguageAppDropdown) {
-          _closeLanguageAppDropdown();
-        }
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Main dropdown button
-          GestureDetector(
-            onTap: _toggleLanguageAppDropdown,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.5),
-                ),
-                borderRadius: BorderRadius.circular(12),
-                color: Theme.of(context).colorScheme.surface,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.language,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.language,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          currentDisplayName,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+    return GestureDetector(
+      onTap: _showPhonePrefixOverlay,
+      child: Container(
+        width: 110, // Slightly increased width for better balance
+        height: 60, // Exact match with TextFormField height
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+          ),
+          color: Theme.of(context).colorScheme.surface,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              selectedPrefix['emoji']!,
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                selectedPrefix['code']!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    _showLanguageAppDropdown
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ],
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
             ),
-          ),
-
-          // Expandable dropdown content
-          if (_showLanguageAppDropdown) ...[
-            const SizedBox(height: 8),
-            KeyboardListener(
-              focusNode: FocusNode(),
-              onKeyEvent: (event) {
-                if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.escape) {
-                  _closeLanguageAppDropdown();
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.5),
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: Column(
-                  children: [
-                    // Search field
-                    TextField(
-                      controller: _languageAppSearchController,
-                      focusNode: _languageAppSearchFocusNode,
-                      onChanged: _filterLanguageApp,
-                      onSubmitted: (value) {
-                        // Don't close on enter, allow user to continue searching
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search language...',
-                        prefixIcon: const Icon(Icons.search, size: 20),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.3),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Language list
-                    SizedBox(
-                      height: 250, // Fixed height for scrollable area
-                      child: _filteredLocalesApp.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No language found',
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                              ),
-                            )
-                          : ListView.builder(
-                              itemCount: _filteredLocalesApp.length,
-                              itemBuilder: (context, index) {
-                                final locale = _filteredLocalesApp[index];
-                                final displayName = LocaleService.instance
-                                    .getLanguageName(locale.languageCode);
-                                final isSelected = LocaleService
-                                        .instance.currentLocale?.languageCode ==
-                                    locale.languageCode;
-
-                                return InkWell(
-                                  onTap: () => _selectLanguageApp(locale),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        // Flag emoji for language
-                                        Text(
-                                          LocaleService.instance
-                                                  .getLanguageEmoji(
-                                                      locale.languageCode) ??
-                                              '🌐',
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            displayName,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.w600
-                                                      : FontWeight.normal,
-                                                ),
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Icon(
-                                            Icons.check,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            size: 20,
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
-              ),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ],
-        ],
+        ),
       ),
     );
+  }
+
+  // Show phone prefix selection overlay
+  Future<void> _showPhonePrefixOverlay() async {
+    final currentLanguage =
+        LocaleService.instance.currentLocale?.languageCode ?? 'it';
+    final result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return _PhonePrefixDialog(
+          currentPrefix: _selectedPhonePrefix,
+          languageCode: currentLanguage,
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedPhonePrefix = result;
+      });
+    }
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
@@ -3281,6 +4150,193 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+}
+
+// Phone Prefix Selection Dialog
+class _PhonePrefixDialog extends StatefulWidget {
+  final String currentPrefix;
+  final String languageCode;
+
+  const _PhonePrefixDialog({
+    required this.currentPrefix,
+    required this.languageCode,
+  });
+
+  @override
+  State<_PhonePrefixDialog> createState() => _PhonePrefixDialogState();
+}
+
+class _PhonePrefixDialogState extends State<_PhonePrefixDialog> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, String>> _filteredPrefixes = PHONE_PREFIXES;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterPrefixes('');
+  }
+
+  void _filterPrefixes(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredPrefixes = PHONE_PREFIXES;
+      } else {
+        _filteredPrefixes = PHONE_PREFIXES.where((prefix) {
+          final localizedCountryName =
+              getLocalizedCountryName(prefix['country']!, widget.languageCode);
+          return localizedCountryName
+                  .toLowerCase()
+                  .contains(query.toLowerCase()) ||
+              prefix['code']!.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        width: 400,
+        height: 500,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Header
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    getLocalizedText('selectPhonePrefix', widget.languageCode),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Search field
+            TextField(
+              controller: _searchController,
+              onChanged: _filterPrefixes,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: getLocalizedText(
+                    'searchCountryOrPrefix', widget.languageCode),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Prefix list
+            Expanded(
+              child: _filteredPrefixes.isEmpty
+                  ? Center(
+                      child: Text(getLocalizedText(
+                          'noPrefixFound', widget.languageCode)),
+                    )
+                  : ListView.builder(
+                      itemCount: _filteredPrefixes.length,
+                      itemBuilder: (context, index) {
+                        final prefix = _filteredPrefixes[index];
+                        final isSelected =
+                            prefix['code'] == widget.currentPrefix;
+                        final localizedCountryName = getLocalizedCountryName(
+                            prefix['country']!, widget.languageCode);
+
+                        return InkWell(
+                          onTap: () =>
+                              Navigator.of(context).pop(prefix['code']),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                            child: Row(
+                              children: [
+                                Text(
+                                  prefix['emoji']!,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  prefix['code']!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : null,
+                                      ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    localizedCountryName,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    size: 20,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );
