@@ -2872,7 +2872,7 @@ class _CVViewPageState extends State<CVViewPage> {
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -3037,7 +3037,7 @@ class _CVViewPageState extends State<CVViewPage> {
             style: TextStyle(
               color: Colors.green.shade700,
               fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontSize: 16,
             ),
           ),
           const SizedBox(width: 8),
@@ -3730,7 +3730,7 @@ class _CVViewPageState extends State<CVViewPage> {
                     style: TextStyle(
                       color: Colors.green.shade800,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 22,
                       letterSpacing: 0.3,
                     ),
                     textAlign: TextAlign.center,
@@ -3806,7 +3806,7 @@ class _CVViewPageState extends State<CVViewPage> {
           style: TextStyle(
             color: Colors.green.shade600,
             fontWeight: FontWeight.w500,
-            fontSize: 11,
+            fontSize: 14,
           ),
           textAlign: TextAlign.center,
         ),
@@ -3816,7 +3816,7 @@ class _CVViewPageState extends State<CVViewPage> {
           style: TextStyle(
             color: Colors.green.shade800,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 16,
           ),
           textAlign: TextAlign.center,
         ),
@@ -3831,15 +3831,15 @@ class _CVViewPageState extends State<CVViewPage> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
     final subtitleFontSize = isMobile
-        ? 11.0
+        ? 14.0
         : isTablet
-            ? 12.0
-            : 13.0;
+            ? 15.0
+            : 16.0;
     final buttonFontSize = isMobile
-        ? 10.0
+        ? 14.0
         : isTablet
-            ? 11.0
-            : 12.0;
+            ? 15.0
+            : 16.0;
 
     // Responsive max width for the openbadges card itself
     double maxWidth = isMobile
@@ -3914,7 +3914,7 @@ class _CVViewPageState extends State<CVViewPage> {
                     style: TextStyle(
                       color: Colors.grey.shade800,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 22,
                       letterSpacing: 0.3,
                     ),
                     textAlign: TextAlign.center,
@@ -4006,7 +4006,7 @@ class _CVViewPageState extends State<CVViewPage> {
         Text(
           AppLocalizations.of(context)!.importYourOpenBadges,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.grey.shade700,
           ),
@@ -4019,7 +4019,7 @@ class _CVViewPageState extends State<CVViewPage> {
           AppLocalizations.of(context)!.showcaseYourDigitalCredentials,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 14,
             color: Colors.grey.shade600,
             fontWeight: FontWeight.w500,
           ),

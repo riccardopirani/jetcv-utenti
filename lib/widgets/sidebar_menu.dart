@@ -287,49 +287,60 @@ class _SidebarMenuState extends State<SidebarMenu> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(iconPadding),
-                      decoration: BoxDecoration(
-                        color: accentColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.rocket_launch,
-                        color: colorScheme.onPrimary,
-                        size: iconSize,
+                // JetCV Logo
+                Center(
+                  child: Container(
+                    height: titleFontSize * 2.2, // Maintain proportional height
+                    child: Image.asset(
+                      'assets/images/logo/JetCv_exp_JetCv.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          // Fallback in case the image doesn't load
+                          Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(iconPadding),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.rocket_launch,
+                              color: colorScheme.onPrimary,
+                              size: iconSize,
+                            ),
+                          ),
+                          SizedBox(width: isMobile ? 8 : 12),
+                          Text(
+                            'JetCV',
+                            style: TextStyle(
+                              color: sidebarOnColor,
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(width: isMobile ? 8 : 12),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.appTitle,
-                        style: TextStyle(
-                          color: sidebarOnColor,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
 
                 // CV Serial Number (if available)
                 if (_currentUserCv != null &&
                     _currentUserCv!.serialNumber.isNotEmpty) ...[
-                  SizedBox(height: isMobile ? 6 : 8),
-                  Padding(
-                    padding: EdgeInsets.only(left: isMobile ? 32 : 40),
+                  SizedBox(
+                      height:
+                          isMobile ? 16 : 20), // Increased spacing from logo
+                  Center(
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: isMobile ? 6 : 8,
-                        vertical: isMobile ? 2 : 4,
+                        horizontal: isMobile ? 8 : 10,
+                        vertical: isMobile ? 4 : 6,
                       ),
                       decoration: BoxDecoration(
                         color: accentColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: accentColor.withValues(alpha: 0.3),
                           width: 1,
@@ -341,14 +352,14 @@ class _SidebarMenuState extends State<SidebarMenu> {
                           Icon(
                             Icons.fingerprint,
                             color: accentColor,
-                            size: isMobile ? 12 : 14,
+                            size: isMobile ? 14 : 16,
                           ),
-                          SizedBox(width: 4),
+                          SizedBox(width: 6),
                           Text(
                             _currentUserCv!.serialNumber,
                             style: TextStyle(
                               color: accentColor,
-                              fontSize: isMobile ? 10 : 12,
+                              fontSize: isMobile ? 11 : 13,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'monospace',
                               letterSpacing: 0.5,
@@ -359,12 +370,13 @@ class _SidebarMenuState extends State<SidebarMenu> {
                     ),
                   ),
                 ] else if (_isCvLoading) ...[
-                  SizedBox(height: isMobile ? 6 : 8),
-                  Padding(
-                    padding: EdgeInsets.only(left: isMobile ? 32 : 40),
+                  SizedBox(
+                      height:
+                          isMobile ? 16 : 20), // Increased spacing from logo
+                  Center(
                     child: SizedBox(
-                      width: isMobile ? 12 : 14,
-                      height: isMobile ? 12 : 14,
+                      width: isMobile ? 14 : 16,
+                      height: isMobile ? 14 : 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 1.5,
                         color: sidebarOnColor.withValues(alpha: 0.5),
