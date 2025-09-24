@@ -146,47 +146,15 @@ class AppHeader extends StatelessWidget {
             ),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.secondary,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.account_circle,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'JetCV',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
+              Image.asset(
+                'assets/images/logo/JetCv_exp_JetCv.png',
+                height: 40,
+                fit: BoxFit.contain,
               ),
+              const Spacer(),
+              const AuthButtonsHeader(),
+              const SizedBox(width: 16),
               CompactLanguageSelector(
                 iconColor: Theme.of(context).colorScheme.onSurface,
               ),
@@ -262,39 +230,19 @@ class HeroSection extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.secondary,
-                ],
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                'https://pixabay.com/get/g12935024048ea67383d56375fdd1e8dec20623654d67c5a9e1c375db18e3a9b5572b738cbf81c3ef109207f760faa71f7795e9b9142a0c292606fe710e6f67d7_1280.jpg',
+              child: Image.asset(
+                'assets/images/home_cover.jpg',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.account_balance_wallet,
-                      color: Colors.white,
-                      size: 64,
-                    ),
-                  ),
-                ),
               ),
             ),
           ),
@@ -522,7 +470,7 @@ class StatsSection extends StatelessWidget {
                   children: [
                     Expanded(
                       child: StatItem(
-                        value: '10K+',
+                        value: '100+',
                         label: AppLocalizations.of(context)!.cvsCreated,
                       ),
                     ),
@@ -543,7 +491,7 @@ class StatsSection extends StatelessWidget {
                     ),
                     Expanded(
                       child: StatItem(
-                        value: '5K+',
+                        value: '100+',
                         label: AppLocalizations.of(context)!.activeUsers,
                       ),
                     ),
@@ -564,7 +512,7 @@ class StatsSection extends StatelessWidget {
                     ),
                     Expanded(
                       child: StatItem(
-                        value: '2.5K+',
+                        value: '100+',
                         label: AppLocalizations.of(context)!.certifications,
                       ),
                     ),
@@ -716,6 +664,65 @@ class CallToActionSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class AuthButtonsHeader extends StatelessWidget {
+  const AuthButtonsHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SignupPage(),
+              ),
+            );
+          },
+          style: TextButton.styleFrom(
+            foregroundColor:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: Text(
+            AppLocalizations.of(context)!.signUp,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+          ),
+          child: Text(
+            AppLocalizations.of(context)!.signIn,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

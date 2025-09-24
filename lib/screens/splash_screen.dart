@@ -135,10 +135,14 @@ class _SplashScreenState extends State<SplashScreen>
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        child: const Icon(
-                          Icons.account_circle,
-                          size: 80,
-                          color: Colors.white,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            'assets/images/logo/JetCv_exp_JetCv_pitto.png',
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),

@@ -3,6 +3,15 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Custom exception for authentication errors
+class AuthenticationException implements Exception {
+  final String message;
+  AuthenticationException(this.message);
+
+  @override
+  String toString() => 'AuthenticationException: $message';
+}
+
 /// Service for user-related database operations
 class UserService {
   static final _client = SupabaseConfig.client;
@@ -21,12 +30,21 @@ class UserService {
       } else if (response.status == 404) {
         // User not found
         return null;
+      } else if (response.status == 401) {
+        // Authentication error - throw specific exception
+        debugPrint('❌ UserService.getUserById: Authentication error 401');
+        throw AuthenticationException(
+            'Authentication failed - invalid or expired session');
       } else {
         throw Exception(
             'Edge Function error ${response.status}: ${response.data}');
       }
     } catch (e) {
       debugPrint('❌ UserService.getUserById error: $e');
+      // Re-throw AuthenticationException to preserve error type
+      if (e is AuthenticationException) {
+        rethrow;
+      }
       return null;
     }
   }

@@ -17,6 +17,7 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -24,10 +25,13 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
+  String? _termsError;
+  String? _signupError;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _surnameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -39,17 +43,16 @@ class _SignupPageState extends State<SignupPage> {
 
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.mustAcceptTerms),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      setState(() {
+        _termsError = AppLocalizations.of(context)!.mustAcceptTerms;
+      });
       return;
     }
 
     setState(() {
       _isLoading = true;
+      _termsError = null;
+      _signupError = null;
     });
 
     try {
@@ -58,7 +61,8 @@ class _SignupPageState extends State<SignupPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
         userData: {
-          'full_name': _nameController.text.trim(),
+          'full_name':
+              '${_nameController.text.trim()} ${_surnameController.text.trim()}',
         },
       );
 
@@ -91,28 +95,10 @@ class _SignupPageState extends State<SignupPage> {
             ),
           );
         } else if (response.user != null && response.session != null) {
-          // User registered and logged in
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text(AppLocalizations.of(context)!.registrationCompleted),
-              content: Text(
-                AppLocalizations.of(context)!.accountCreatedSuccess,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const AuthenticatedHomePage()),
-                    );
-                  },
-                  child: Text(AppLocalizations.of(context)!.start),
-                ),
-              ],
-            ),
+          // User registered and logged in - go directly to authenticated home
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+                builder: (context) => const AuthenticatedHomePage()),
           );
         }
       }
@@ -123,12 +109,9 @@ class _SignupPageState extends State<SignupPage> {
         if (errorMessage.startsWith('Exception: ')) {
           errorMessage = errorMessage.substring('Exception: '.length);
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        setState(() {
+          _signupError = errorMessage;
+        });
       }
     } finally {
       debugPrint('Signup process completed, resetting loading state...');
@@ -174,18 +157,27 @@ class _SignupPageState extends State<SignupPage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.secondary,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.person_add,
                       color: Colors.white,
-                      size: 48,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/images/logo/JetCv_exp_JetCv_pitto.png',
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -217,7 +209,7 @@ class _SignupPageState extends State<SignupPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.fullName,
+                      'Nome',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -228,7 +220,7 @@ class _SignupPageState extends State<SignupPage> {
                       textInputAction: TextInputAction.next,
                       textCapitalization: TextCapitalization.words,
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.enterFullName,
+                        hintText: 'Inserisci il tuo nome',
                         prefixIcon: const Icon(Icons.person_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -249,10 +241,52 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.enterFullName;
+                          return 'Inserisci il tuo nome';
                         }
                         if (value.length < 2) {
-                          return AppLocalizations.of(context)!.nameMinLength;
+                          return 'Il nome deve avere almeno 2 caratteri';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Cognome',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _surnameController,
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        hintText: 'Inserisci il tuo cognome',
+                        prefixIcon: const Icon(Icons.person_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Inserisci il tuo cognome';
+                        }
+                        if (value.length < 2) {
+                          return 'Il cognome deve avere almeno 2 caratteri';
                         }
                         return null;
                       },
@@ -313,8 +347,7 @@ class _SignupPageState extends State<SignupPage> {
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        hintText:
-                            AppLocalizations.of(context)!.createSecurePassword,
+                        hintText: AppLocalizations.of(context)!.enterPassword,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -381,6 +414,45 @@ class _SignupPageState extends State<SignupPage> {
 
                         return null;
                       },
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Requisiti password:',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildPasswordRequirement('Almeno 8 caratteri'),
+                          _buildPasswordRequirement(
+                              'Almeno una lettera maiuscola (A-Z)'),
+                          _buildPasswordRequirement(
+                              'Almeno una lettera minuscola (a-z)'),
+                          _buildPasswordRequirement('Almeno un numero (0-9)'),
+                          _buildPasswordRequirement(
+                              'Almeno un carattere speciale (!@#\$%^&*)'),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -489,6 +561,43 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ],
                     ),
+                    if (_termsError != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.error,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _termsError!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 32),
                     ResponsiveButton.elevated(
                       onPressed: _isLoading ? null : _signUp,
@@ -521,6 +630,43 @@ class _SignupPageState extends State<SignupPage> {
                                   ),
                             ),
                     ),
+                    if (_signupError != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.error,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _signupError!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     Row(
                       children: [
@@ -592,6 +738,33 @@ class _SignupPageState extends State<SignupPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordRequirement(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 16,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.8),
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

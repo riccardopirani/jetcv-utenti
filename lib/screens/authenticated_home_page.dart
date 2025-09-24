@@ -66,15 +66,51 @@ class _AuthenticatedHomePageState extends State<AuthenticatedHomePage> {
             });
           }
         }
+      } else {
+        // Current user is null, session might be invalid
+        debugPrint('⚠️ Current user is null - session might be invalid');
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       debugPrint('Errore nel caricamento dati utente: $e');
+
+      // Check if it's an authentication error
+      if (e is AuthenticationException) {
+        debugPrint(
+            '🔓 Authentication error detected - performing automatic logout');
+        _handleAuthenticationError();
+        return;
+      }
+
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     }
+  }
+
+  /// Handle authentication errors by performing automatic logout
+  void _handleAuthenticationError() async {
+    if (!mounted) return;
+
+    debugPrint(
+        '🚨 Session expired or invalid - redirecting to public homepage');
+
+    // Navigate immediately to public homepage
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const HomePagePublic(),
+      ),
+      (route) => false,
+    );
+
+    // Perform Supabase logout in background to clean up session
+    _performBackgroundLogout();
   }
 
   Future<void> _signOut() async {

@@ -14,7 +14,7 @@ class OtpListPage extends StatefulWidget {
   State<OtpListPage> createState() => _OtpListPageState();
 }
 
-class _OtpListPageState extends State<OtpListPage> {
+class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   List<OtpModel> _otps = [];
   List<OtpModel> _filteredOtps = []; // Filtered OTPs based on current filter
   bool _isLoading = true;
@@ -29,6 +29,7 @@ class _OtpListPageState extends State<OtpListPage> {
   bool _isPollingEnabled = true;
   bool _isPolling = false;
   List<OtpModel> _lastKnownOtps = []; // Store last known state for comparison
+  bool _isPageVisible = true; // Track if the page is currently visible
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -37,14 +38,43 @@ class _OtpListPageState extends State<OtpListPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadOtps();
     _startPolling();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _stopPolling();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        debugPrint('📱 App resumed - checking page visibility...');
+        // Verifica se la pagina è ancora quella corrente prima di riavviare il polling
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _isPageVisible) {
+            _checkPageVisibility();
+          }
+        });
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        debugPrint('📱 App paused/inactive - stopping polling...');
+        _pausePolling();
+        break;
+      case AppLifecycleState.hidden:
+        debugPrint('📱 App hidden - stopping polling...');
+        _pausePolling();
+        break;
+    }
   }
 
   @override
@@ -53,15 +83,90 @@ class _OtpListPageState extends State<OtpListPage> {
     // Salva i riferimenti per evitare errori di contesto invalidato
     _scaffoldMessenger = ScaffoldMessenger.of(context);
     _localizations = AppLocalizations.of(context);
+
+    // Controlla se la pagina è visibile
+    _checkPageVisibility();
+  }
+
+  /// Controlla se la pagina è attualmente visibile e gestisce il polling di conseguenza
+  void _checkPageVisibility() {
+    if (!mounted) return;
+
+    try {
+      final route = ModalRoute.of(context);
+      final isCurrentRoute = route?.isCurrent ?? false;
+      final wasVisible = _isPageVisible;
+
+      setState(() {
+        _isPageVisible = isCurrentRoute;
+      });
+
+      debugPrint(
+          '🔍 Page visibility check: $_isPageVisible (was: $wasVisible)');
+
+      if (_isPageVisible && !wasVisible) {
+        // Pagina tornata visibile - riprende il polling se era abilitato
+        if (_isPollingEnabled) {
+          debugPrint('✅ Page became visible - resuming polling...');
+          _resumePolling();
+        }
+      } else if (!_isPageVisible && wasVisible) {
+        // Pagina non più visibile - pausa il polling
+        debugPrint('⏸️ Page became invisible - pausing polling...');
+        _pausePolling();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error checking page visibility: $e');
+      // In caso di errore, assume che la pagina non sia visibile per sicurezza
+      if (_isPageVisible) {
+        setState(() {
+          _isPageVisible = false;
+        });
+        _pausePolling();
+      }
+    }
+  }
+
+  /// Pausa temporaneamente il polling senza disabilitarlo completamente
+  void _pausePolling() {
+    if (_pollingTimer != null) {
+      debugPrint('⏸️ Pausing OTP polling...');
+      _pollingTimer?.cancel();
+      _pollingTimer = null;
+    }
+  }
+
+  /// Riprende il polling se era abilitato
+  void _resumePolling() {
+    if (_isPollingEnabled &&
+        _pollingTimer == null &&
+        mounted &&
+        _isPageVisible) {
+      debugPrint('▶️ Resuming OTP polling...');
+      _startPolling();
+    }
   }
 
   void _startPolling() {
     if (_pollingTimer != null) return; // Already started
 
-    debugPrint('🔄 Starting OTP polling every 5 seconds...');
-    _pollingTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      if (_isPollingEnabled && !_isPolling) {
+    // Non avviare il polling se la pagina non è visibile
+    if (!_isPageVisible) {
+      debugPrint('⏸️ Not starting polling - page is not visible');
+      return;
+    }
+
+    debugPrint('🔄 Starting OTP polling every 10 seconds...');
+    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+      // Controlla se la pagina è ancora visibile prima di ogni polling
+      if (_isPollingEnabled && !_isPolling && _isPageVisible && mounted) {
         _checkForChanges();
+      } else if (!_isPageVisible || !mounted) {
+        // Se la pagina non è più visibile, ferma il polling
+        debugPrint(
+            '⏸️ Stopping polling - page no longer visible or widget disposed');
+        timer.cancel();
+        _pollingTimer = null;
       }
     });
   }
@@ -77,7 +182,7 @@ class _OtpListPageState extends State<OtpListPage> {
       _isPollingEnabled = !_isPollingEnabled;
     });
 
-    if (_isPollingEnabled) {
+    if (_isPollingEnabled && _isPageVisible) {
       _startPolling();
       debugPrint('✅ OTP polling enabled');
     } else {
@@ -87,7 +192,13 @@ class _OtpListPageState extends State<OtpListPage> {
   }
 
   Future<void> _checkForChanges() async {
-    if (_isPolling || !_isPollingEnabled || _isLoading) return;
+    if (_isPolling ||
+        !_isPollingEnabled ||
+        _isLoading ||
+        !_isPageVisible ||
+        !mounted) {
+      return;
+    }
 
     setState(() {
       _isPolling = true;
@@ -119,18 +230,24 @@ class _OtpListPageState extends State<OtpListPage> {
           debugPrint(
               '📊 Previous count: ${_lastKnownOtps.length}, New count: ${newOtps.length}');
 
-          setState(() {
-            _otps = newOtps;
-            _lastKnownOtps = List.from(newOtps); // Deep copy
-            _isLoading = false;
-            _errorMessage = null;
-          });
+          // Aggiorna lo stato solo se la pagina è ancora visibile e montata
+          if (mounted && _isPageVisible) {
+            setState(() {
+              _otps = newOtps;
+              _lastKnownOtps = List.from(newOtps); // Deep copy
+              _isLoading = false;
+              _errorMessage = null;
+            });
 
-          // Apply current filter to the updated OTPs
-          _applyFilter();
+            // Apply current filter to the updated OTPs
+            _applyFilter();
+          }
 
-          // Show subtle notification
-          if (mounted && _scaffoldMessenger != null && _localizations != null) {
+          // Show subtle notification only if page is still visible
+          if (mounted &&
+              _isPageVisible &&
+              _scaffoldMessenger != null &&
+              _localizations != null) {
             try {
               _scaffoldMessenger!.showSnackBar(
                 SnackBar(
@@ -159,10 +276,13 @@ class _OtpListPageState extends State<OtpListPage> {
     } catch (e) {
       debugPrint('❌ Error during polling check: $e');
     } finally {
-      if (mounted) {
+      if (mounted && _isPageVisible) {
         setState(() {
           _isPolling = false;
         });
+      } else if (mounted) {
+        // Se la pagina non è più visibile, imposta semplicemente _isPolling senza setState
+        _isPolling = false;
       }
     }
   }

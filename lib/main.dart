@@ -94,12 +94,23 @@ class _AppRouterState extends State<AppRouter> {
     // Ascolta i cambiamenti di stato dell'autenticazione (inclusi i deep link)
     _authSubscription = SupabaseConfig.auth.onAuthStateChange.listen((data) {
       final session = data.session;
+      final event = data.event;
       debugPrint(
-          '🔄 Auth state changed: ${session != null ? 'authenticated' : 'not authenticated'}');
+          '🔄 Auth state changed: ${session != null ? 'authenticated' : 'not authenticated'} (event: $event)');
 
       // Se l'utente si è appena autenticato tramite deep link o altro metodo
       if (session != null && !_isAuthenticated) {
         debugPrint('✅ User authenticated via deep link or OAuth callback');
+      }
+
+      // Se l'utente è stato disconnesso o la sessione è diventata null, forza logout
+      if (event == AuthChangeEvent.signedOut && session == null) {
+        debugPrint('🔓 User signed out - cleaning auth state');
+        setState(() {
+          _isAuthenticated = false;
+          _isLoading = false;
+        });
+        return;
       }
 
       setState(() {
@@ -147,12 +158,54 @@ class _AppRouterState extends State<AppRouter> {
       final session = SupabaseConfig.client.auth.currentSession;
       debugPrint('🔍 Current session exists: ${session != null}');
 
-      setState(() {
-        _isAuthenticated = session != null;
-        _isLoading = false;
-      });
+      // Se la sessione esiste ma potrebbe essere corrotta, validala
+      if (session != null) {
+        debugPrint('🔍 Validating existing session...');
+        await _validateSession();
+      } else {
+        setState(() {
+          _isAuthenticated = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       debugPrint('❌ Error checking auth status: $e');
+      setState(() {
+        _isAuthenticated = false;
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Validate if the current session is still valid
+  Future<void> _validateSession() async {
+    try {
+      // Try to refresh the session to check if it's valid
+      final refreshResult = await SupabaseConfig.auth.refreshSession();
+      if (refreshResult.session != null) {
+        debugPrint('✅ Session is valid');
+        setState(() {
+          _isAuthenticated = true;
+          _isLoading = false;
+        });
+      } else {
+        debugPrint('❌ Session validation failed - cleaning up');
+        await _clearCorruptedSession();
+      }
+    } catch (e) {
+      debugPrint('❌ Session validation error: $e - cleaning up');
+      await _clearCorruptedSession();
+    }
+  }
+
+  /// Clear corrupted session data
+  Future<void> _clearCorruptedSession() async {
+    try {
+      debugPrint('🧹 Clearing corrupted session...');
+      await SupabaseConfig.auth.signOut(scope: SignOutScope.local);
+    } catch (e) {
+      debugPrint('❌ Error clearing session: $e');
+    } finally {
       setState(() {
         _isAuthenticated = false;
         _isLoading = false;
