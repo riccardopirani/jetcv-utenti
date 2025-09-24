@@ -1079,7 +1079,7 @@ abstract class AppLocalizations {
   /// No description provided for @spokenLanguages.
   ///
   /// In en, this message translates to:
-  /// **'Spoken languages:'**
+  /// **'Spoken languages'**
   String get spokenLanguages;
 
   /// No description provided for @noLanguageSpecified.

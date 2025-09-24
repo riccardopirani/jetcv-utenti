@@ -535,7 +535,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get autodichiarazioni => 'Selbsterklärungen';
 
   @override
-  String get spokenLanguages => 'Gesprochene Sprachen:';
+  String get spokenLanguages => 'Gesprochene Sprachen';
 
   @override
   String get noLanguageSpecified => 'Keine Sprache angegeben';

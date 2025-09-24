@@ -1215,7 +1215,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       size: 20,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Text(
                       AppLocalizations.of(context)!.spokenLanguages,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -1227,56 +1227,61 @@ class _CVViewPageState extends State<CVViewPage> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: languageCodes.map((languageCode) {
-                    final languageName =
-                        _getLocalizedLanguageName(languageCode);
-                    final languageEmoji =
-                        LocaleService.languageEmojis[languageCode];
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left:
+                          32), // Allineamento con le pill delle nazionalità (icona 20px + spacing 12px)
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: languageCodes.map((languageCode) {
+                      final languageName =
+                          _getLocalizedLanguageName(languageCode);
+                      final languageEmoji =
+                          LocaleService.languageEmojis[languageCode];
 
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
                           color: Theme.of(context)
                               .colorScheme
-                              .outline
-                              .withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (languageEmoji != null) ...[
-                            Text(
-                              languageEmoji,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Text(
-                            languageName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
+                              .surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.3),
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (languageEmoji != null) ...[
+                              Text(
+                                languageEmoji,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(
+                              languageName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ] else ...[
                 Container(
@@ -3154,22 +3159,15 @@ class _CVViewPageState extends State<CVViewPage> {
     // Svuota la cache per forzare il ricaricamento
     _legalEntityLogos.clear();
 
-    // Raccoglie tutti gli ID delle legal entities uniche
-    final Set<String> legalEntityIds = _certifications
-        .map((cert) => cert.certification?.idLegalEntity)
-        .where((id) => id != null)
-        .cast<String>()
-        .toSet();
+    // Utilizza direttamente i dati legal_entity già presenti nella response
+    // invece di fare chiamate API aggiuntive
+    for (final cert in _certifications) {
+      final legalEntity = cert.certification?.legalEntity;
+      final legalEntityId = cert.certification?.idLegalEntity;
 
-    // Precarica i logo per ogni legal entity
-    for (final legalEntityId in legalEntityIds) {
-      try {
-        final legalEntity =
-            await LegalEntityService.getLegalEntityById(legalEntityId);
-
+      if (legalEntityId != null && legalEntity != null) {
         String? logoUrl;
-        if (legalEntity != null &&
-            legalEntity.logoPicture != null &&
+        if (legalEntity.logoPicture != null &&
             legalEntity.logoPicture!.isNotEmpty) {
           logoUrl = legalEntity.logoPicture;
         } else {
@@ -3177,8 +3175,6 @@ class _CVViewPageState extends State<CVViewPage> {
         }
 
         _legalEntityLogos[legalEntityId] = logoUrl;
-      } catch (e) {
-        _legalEntityLogos[legalEntityId] = null;
       }
     }
   }
