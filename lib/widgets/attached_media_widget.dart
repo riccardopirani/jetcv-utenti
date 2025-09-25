@@ -32,189 +32,208 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     final folderIconSize = 28.0;
     final titleFontSize = 14.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header - clickable to expand/collapse
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          },
-          child: Container(
-            padding: headerPadding,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.grey.shade200,
-                width: 1,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header - clickable to expand/collapse
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: headerPadding,
+              decoration: BoxDecoration(
+                borderRadius: _isExpanded
+                    ? const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      )
+                    : BorderRadius.circular(12),
               ),
-            ),
-            child: Row(
-              children: [
-                // Folder icon
-                Container(
-                  width: folderIconSize,
-                  height: folderIconSize,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    shape: BoxShape.circle,
+              child: Row(
+                children: [
+                  // Folder icon
+                  Container(
+                    width: folderIconSize,
+                    height: folderIconSize,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.perm_media,
+                      size: iconSize,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.perm_media,
-                    size: iconSize,
+                  const SizedBox(width: 12),
+                  // Title with info icon
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!
+                              .attachedMediaCount(widget.totalMediaCount),
+                          style: TextStyle(
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Tooltip(
+                          message:
+                              "Gli allegati sono suddivisi tra media di contesto e media certificativi",
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade800,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                          ),
+                          preferBelow: false,
+                          waitDuration: const Duration(milliseconds: 500),
+                          showDuration: const Duration(seconds: 3),
+                          child: Icon(
+                            Icons.info_outline,
+                            size: 16, // Increased from 12 for better visibility
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Expand/collapse icon
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: Colors.grey.shade600,
+                    size: iconSize,
                   ),
-                ),
-                const SizedBox(width: 12),
-                // Title with info icon
-                Expanded(
-                  child: Row(
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!
-                            .attachedMediaCount(widget.totalMediaCount),
-                        style: TextStyle(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Tooltip(
-                        message:
-                            "Gli allegati sono suddivisi tra media di contesto e media certificativi",
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade800,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        textStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                        preferBelow: false,
-                        waitDuration: const Duration(milliseconds: 500),
-                        showDuration: const Duration(seconds: 3),
-                        child: Icon(
-                          Icons.info_outline,
-                          size: 16, // Increased from 12 for better visibility
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Expand/collapse icon
-                Icon(
-                  _isExpanded
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: Colors.grey.shade600,
-                  size: iconSize,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
 
-        // Expanded content
-        if (_isExpanded) ...[
-          const SizedBox(height: 12),
-
-          // Grouped media container with background
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.grey.shade200,
-                width: 1,
-              ),
+          // Expanded content
+          if (_isExpanded) ...[
+            // Separator line
+            Container(
+              height: 1,
+              color: Colors.grey.shade200,
             ),
-            child: Column(
-              children: [
-                // Media sections - responsive layout
-                if (isDesktop &&
-                    (widget.certification.media.directMedia.isNotEmpty ||
-                        widget.certification.media.linkedMedia.isNotEmpty)) ...[
-                  // Desktop: side by side layout
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Generic Media Section
-                      if (widget
-                          .certification.media.directMedia.isNotEmpty) ...[
-                        Expanded(
-                          child: _buildMediaSection(
-                            title: AppLocalizations.of(context)!.genericMedia,
-                            subtitle:
-                                "Materiale pubblico inerente la certificazione",
-                            icon: Icons.description_outlined,
-                            mediaItems: widget.certification.media.directMedia,
-                            isDesktop: true,
-                          ),
-                        ),
-                        if (widget.certification.media.linkedMedia.isNotEmpty)
-                          const SizedBox(width: 16),
-                      ],
 
-                      // Personal Media Section
-                      if (widget
-                          .certification.media.linkedMedia.isNotEmpty) ...[
-                        Expanded(
-                          child: _buildMediaSection(
-                            title: AppLocalizations.of(context)!.personalMedia,
-                            subtitle:
-                                "Documenti specifici della tua certificazione",
-                            icon: Icons.person_outline,
-                            mediaItems: widget.certification.media.linkedMedia
-                                .map((linked) => linked.media)
-                                .where((media) => media != null)
-                                .cast<CertificationMediaItem>()
-                                .toList(),
-                            isDesktop: true,
+            // Media content without separate container
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Media sections - responsive layout
+                  if (isDesktop &&
+                      (widget.certification.media.directMedia.isNotEmpty ||
+                          widget
+                              .certification.media.linkedMedia.isNotEmpty)) ...[
+                    // Desktop: side by side layout
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Generic Media Section
+                        if (widget
+                            .certification.media.directMedia.isNotEmpty) ...[
+                          Expanded(
+                            child: _buildMediaSection(
+                              title: AppLocalizations.of(context)!.genericMedia,
+                              subtitle:
+                                  "Materiale pubblico inerente la certificazione",
+                              icon: Icons.description_outlined,
+                              mediaItems:
+                                  widget.certification.media.directMedia,
+                              isDesktop: true,
+                            ),
                           ),
-                        ),
+                          if (widget.certification.media.linkedMedia.isNotEmpty)
+                            const SizedBox(width: 16),
+                        ],
+
+                        // Personal Media Section
+                        if (widget
+                            .certification.media.linkedMedia.isNotEmpty) ...[
+                          Expanded(
+                            child: _buildMediaSection(
+                              title:
+                                  AppLocalizations.of(context)!.personalMedia,
+                              subtitle:
+                                  "Documenti specifici della tua certificazione",
+                              icon: Icons.person_outline,
+                              mediaItems: widget.certification.media.linkedMedia
+                                  .map((linked) => linked.media)
+                                  .where((media) => media != null)
+                                  .cast<CertificationMediaItem>()
+                                  .toList(),
+                              isDesktop: true,
+                            ),
+                          ),
+                        ],
                       ],
+                    ),
+                  ] else ...[
+                    // Mobile/Tablet: stacked layout
+                    // Generic Media Section
+                    if (widget.certification.media.directMedia.isNotEmpty) ...[
+                      _buildMediaSection(
+                        title: AppLocalizations.of(context)!.genericMedia,
+                        subtitle:
+                            "Materiale pubblico inerente la certificazione",
+                        icon: Icons.description_outlined,
+                        mediaItems: widget.certification.media.directMedia,
+                        isDesktop: false,
+                      ),
+                      const SizedBox(height: 12),
                     ],
-                  ),
-                ] else ...[
-                  // Mobile/Tablet: stacked layout
-                  // Generic Media Section
-                  if (widget.certification.media.directMedia.isNotEmpty) ...[
-                    _buildMediaSection(
-                      title: AppLocalizations.of(context)!.genericMedia,
-                      subtitle: "Materiale pubblico inerente la certificazione",
-                      icon: Icons.description_outlined,
-                      mediaItems: widget.certification.media.directMedia,
-                      isDesktop: false,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
 
-                  // Personal Media Section
-                  if (widget.certification.media.linkedMedia.isNotEmpty) ...[
-                    _buildMediaSection(
-                      title: AppLocalizations.of(context)!.personalMedia,
-                      subtitle: "Documenti specifici della tua certificazione",
-                      icon: Icons.person_outline,
-                      mediaItems: widget.certification.media.linkedMedia
-                          .map((linked) => linked.media)
-                          .where((media) => media != null)
-                          .cast<CertificationMediaItem>()
-                          .toList(),
-                      isDesktop: false,
-                    ),
+                    // Personal Media Section
+                    if (widget.certification.media.linkedMedia.isNotEmpty) ...[
+                      _buildMediaSection(
+                        title: AppLocalizations.of(context)!.personalMedia,
+                        subtitle:
+                            "Documenti specifici della tua certificazione",
+                        icon: Icons.person_outline,
+                        mediaItems: widget.certification.media.linkedMedia
+                            .map((linked) => linked.media)
+                            .where((media) => media != null)
+                            .cast<CertificationMediaItem>()
+                            .toList(),
+                        isDesktop: false,
+                      ),
+                    ],
                   ],
-                ],
-              ], // Close children of Column
-            ), // Close Container
-          ), // Close grouped media container
-        ], // Close expanded content
-      ],
+                ], // Close children of Column
+              ), // Close media content container
+            ),
+          ], // Close expanded content
+        ], // Close main Column children
+      ), // Close main Container
     );
   }
 
@@ -328,7 +347,7 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     if (media.acquisitionType?.toLowerCase() == 'realtime') {
       statusText = 'Real-time';
       statusColor = Colors.red;
-      statusIcon = Icons.live_tv;
+      statusIcon = Icons.sensors;
     } else if (media.acquisitionType?.toLowerCase() == 'deferred') {
       statusText = 'Caricato';
       statusColor = Colors.grey.shade700;
@@ -361,20 +380,13 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
       margin: const EdgeInsets.only(bottom: 6),
       padding: itemPadding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors
+            .grey.shade50, // Changed from white to light grey for contrast
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Colors.grey.shade200,
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            spreadRadius: 0,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Row(
         children: [

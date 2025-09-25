@@ -36,5 +36,6 @@ flutter:
   assets:
     - assets/images/
     - assets/images/logo/
+    - assets/images/badge_certified/
     - assets/linkedin-add-to-profile-buttons/
   generate: true

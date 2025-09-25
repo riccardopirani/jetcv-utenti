@@ -351,7 +351,8 @@ enum CertificationMediaAcquisitionType {
 enum CertificationMediaFileType {
   image,
   video,
-  document;
+  document,
+  audio;
 
   /// Convert from database string value
   static CertificationMediaFileType fromString(String value) {
@@ -362,6 +363,8 @@ enum CertificationMediaFileType {
         return CertificationMediaFileType.video;
       case 'document':
         return CertificationMediaFileType.document;
+      case 'audio':
+        return CertificationMediaFileType.audio;
       default:
         throw ArgumentError('Unknown CertificationMediaFileType: $value');
     }
@@ -379,6 +382,8 @@ enum CertificationMediaFileType {
         return 'Video';
       case CertificationMediaFileType.document:
         return 'Documento';
+      case CertificationMediaFileType.audio:
+        return 'Audio';
     }
   }
 }

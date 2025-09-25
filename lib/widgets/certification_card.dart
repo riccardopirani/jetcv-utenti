@@ -84,45 +84,6 @@ class _CertificationCardState extends State<CertificationCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Serial number badge (if available) - moved above title
-                if (widget.showSerialNumber &&
-                    cert.certificationUser.serialNumber != null) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.green.shade300,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.tag,
-                          size: 16,
-                          color: Colors.green.shade700,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${localizations.serialNumber}: ${cert.certificationUser.serialNumber}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
                 // Title (Certification category name) - now shown only in blur overlay
 
                 // Title information (from certification_information_value where name = "titolo")
@@ -166,29 +127,6 @@ class _CertificationCardState extends State<CertificationCard> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                ],
-
-                // Created date
-                if (widget.showCreatedDate)
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${localizations.createdOn} ${DateFormat('dd/MM/yyyy').format(cert.certificationUser.createdAt)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                // Location (if available)
-                if (widget.showLocation &&
-                    cert.certification?.location != null) ...[
-                  const SizedBox(height: 12),
-                  _buildLocationRow(context, cert.certification!.location!),
                 ],
 
                 // Rejection reason if available
@@ -238,7 +176,11 @@ class _CertificationCardState extends State<CertificationCard> {
                     cert.certificationUser.status == 'accepted') ...[
                   const SizedBox(height: 12),
                   _buildResponsiveActionButtons(
-                      context, cert, isMobile, isTablet),
+                    context,
+                    cert,
+                    isMobile,
+                    isTablet,
+                  ),
                 ],
 
                 // Actions (approve / reject)
@@ -254,6 +196,7 @@ class _CertificationCardState extends State<CertificationCard> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
                           ),
                         ),
                       ),
@@ -266,6 +209,7 @@ class _CertificationCardState extends State<CertificationCard> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,
                             side: const BorderSide(color: Colors.red),
+                            minimumSize: const Size(0, 48),
                           ),
                         ),
                       ),
@@ -318,9 +262,7 @@ class _CertificationCardState extends State<CertificationCard> {
                       return Container(
                         height: height,
                         width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                        ),
+                        decoration: BoxDecoration(color: Colors.grey.shade100),
                         child: Center(
                           child: CircularProgressIndicator(
                             value: loadingProgress.expectedTotalBytes != null
@@ -348,37 +290,64 @@ class _CertificationCardState extends State<CertificationCard> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.1),
+                        Colors.black.withValues(alpha: 0.3),
+                      ],
+                      stops: const [0.0, 0.3, 1.0],
+                    ),
                   ),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Certification type name
-                      Text(
-                        _getLocalizedCertificationType(
-                          context,
-                          cert.certification?.category?.name ??
-                              'Certificazione',
-                        ),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          shadows: const [
-                            Shadow(
-                              offset: Offset(0, 1),
-                              blurRadius: 2,
-                              color: Colors.black54,
+                      // Left side - certification info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Certification type name
+                            Text(
+                              _getLocalizedCertificationType(
+                                context,
+                                cert.certification?.category?.name ??
+                                    'Certificazione',
+                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: const [
+                                  Shadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                    color: Colors.black54,
+                                  ),
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            const SizedBox(height: 8),
+
+                            // Pills
+                            _buildImageOverlayPills(cert),
                           ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(width: 8),
 
-                      // Pills
-                      _buildImageOverlayPills(cert),
+                      // Right side - certified badge (centered vertically)
+                      Align(
+                        alignment: Alignment.center,
+                        child: _buildCertifiedBadge(),
+                      ),
                     ],
                   ),
                 ),
@@ -447,16 +416,9 @@ class _CertificationCardState extends State<CertificationCard> {
         children: [
           // Handle both emoji (String) and icon (IconData)
           if (icon is String)
-            Text(
-              icon,
-              style: TextStyle(fontSize: isMobile ? 12 : 14),
-            )
+            Text(icon, style: TextStyle(fontSize: isMobile ? 12 : 14))
           else if (icon is IconData)
-            Icon(
-              icon,
-              size: isMobile ? 12 : 14,
-              color: Colors.grey.shade700,
-            ),
+            Icon(icon, size: isMobile ? 12 : 14, color: Colors.grey.shade700),
           SizedBox(width: isMobile ? 4 : 6),
           Text(
             label,
@@ -605,7 +567,8 @@ class _CertificationCardState extends State<CertificationCard> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildLegalEntityLogo(
-              legalEntityId), // Logo loads asynchronously with cache
+            legalEntityId,
+          ), // Logo loads asynchronously with cache
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -654,10 +617,7 @@ class _CertificationCardState extends State<CertificationCard> {
             34, // Increased by additional 30% (26 * 1.3 = 33.8, rounded to 34)
         decoration: BoxDecoration(
           shape: BoxShape.circle, // Changed to circular shape
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 0.5,
-          ),
+          border: Border.all(color: Colors.grey.shade300, width: 0.5),
         ),
         clipBehavior: Clip.antiAlias,
         child: Image.network(
@@ -682,10 +642,7 @@ class _CertificationCardState extends State<CertificationCard> {
       decoration: BoxDecoration(
         shape: BoxShape.circle, // Changed to circular shape
         color: Colors.grey.shade100,
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
-        ),
+        border: Border.all(color: Colors.grey.shade300, width: 0.5),
       ),
       child: Icon(
         Icons.corporate_fare,
@@ -694,69 +651,6 @@ class _CertificationCardState extends State<CertificationCard> {
         color: Colors.grey.shade600,
       ),
     );
-  }
-
-  Widget _buildLocationRow(BuildContext context, LocationModel location) {
-    final theme = Theme.of(context);
-    final locationText = _formatLocationText(location);
-
-    if (locationText.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Row(
-      children: [
-        const Icon(Icons.location_on, size: 16, color: Colors.grey),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            locationText,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatLocationText(LocationModel location) {
-    final List<String> parts = [];
-
-    // Add name if available (e.g., "Università di Bologna")
-    if (location.name?.isNotEmpty == true) {
-      parts.add(location.name!);
-      return parts.join(', '); // If we have a name, just show that
-    }
-
-    // Otherwise build address components
-
-    // Add street (thoroughfare + subThoroughfare)
-    if (location.thoroughfare?.isNotEmpty == true) {
-      String street = location.thoroughfare!;
-      if (location.subThoroughfare?.isNotEmpty == true) {
-        street = '${location.subThoroughfare} $street';
-      }
-      parts.add(street);
-    }
-
-    // Add locality (city)
-    if (location.locality?.isNotEmpty == true) {
-      parts.add(location.locality!);
-    }
-
-    // Add administrative area (state/region)
-    if (location.administrativeArea?.isNotEmpty == true) {
-      parts.add(location.administrativeArea!);
-    }
-
-    // Add country
-    if (location.country?.isNotEmpty == true) {
-      parts.add(location.country!);
-    }
-
-    return parts.join(', ');
   }
 
   String _getCertifierFullName(CertifierInfo certifier) {
@@ -819,10 +713,14 @@ class _CertificationCardState extends State<CertificationCard> {
   }
 
   String _getLocalizedCertificationType(
-      BuildContext context, String originalType) {
+    BuildContext context,
+    String originalType,
+  ) {
     final localizations = AppLocalizations.of(context)!;
-    final normalizedType =
-        originalType.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '_');
+    final normalizedType = originalType.toLowerCase().trim().replaceAll(
+          RegExp(r'\s+'),
+          '_',
+        );
     switch (normalizedType) {
       case 'attestato_di_frequenza':
         return localizations.certType_attestato_di_frequenza;
@@ -895,7 +793,12 @@ class _CertificationCardState extends State<CertificationCard> {
         width: double.infinity,
         height: buttonHeight,
         child: _buildOpenBadgeButton(
-            context, cert, iconSize, fontSize, borderRadius),
+          context,
+          cert,
+          iconSize,
+          fontSize,
+          borderRadius,
+        ),
       );
     }
 
@@ -914,7 +817,8 @@ class _CertificationCardState extends State<CertificationCard> {
       width: double.infinity, // Take full available width with max constraint
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-            maxWidth: 180), // Reduced max width for LinkedIn buttons
+          maxWidth: 180,
+        ), // Reduced max width for LinkedIn buttons
         child: ElevatedButton.icon(
           onPressed: () => _createOpenBadge(context, cert),
           style: ElevatedButton.styleFrom(
@@ -924,11 +828,15 @@ class _CertificationCardState extends State<CertificationCard> {
             shadowColor: const Color(0xFF4CAF50).withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(borderRadius: borderRadius),
             padding: const EdgeInsets.symmetric(
-                horizontal: 10, vertical: 6), // Reduced padding for 28px height
+              horizontal: 10,
+              vertical: 6,
+            ), // Reduced padding for 28px height
             minimumSize: const Size(0, 28), // Force minimum height
           ),
-          icon: Icon(Icons.workspace_premium,
-              size: 14), // Reduced icon size for 28px button
+          icon: Icon(
+            Icons.workspace_premium,
+            size: 14,
+          ), // Reduced icon size for 28px button
           label: Text(
             AppLocalizations.of(context)!.createOpenBadge,
             style: TextStyle(
@@ -951,6 +859,40 @@ class _CertificationCardState extends State<CertificationCard> {
       SnackBar(
         content: Text(AppLocalizations.of(context)!.createOpenBadge),
         backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  /// Build the certified badge with white background as pill
+  Widget _buildCertifiedBadge() {
+    return Container(
+      width: 125, // Increased by 30% from 96 to 125
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(12), // Reduced rounding from 16 to 12
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: 12.0,
+            vertical: 4.0), // More horizontal, less vertical padding
+        child: Image.asset(
+          'assets/images/badge_certified/certified_expanded_yes.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            // Fallback to check icon if image fails to load
+            return Icon(Icons.verified, color: Colors.blue, size: 32);
+          },
+        ),
       ),
     );
   }

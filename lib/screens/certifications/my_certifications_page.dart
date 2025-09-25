@@ -658,6 +658,7 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
         Expanded(
           child: TabBarView(
             controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               _buildTabContent(
                 pendingCertifications,
