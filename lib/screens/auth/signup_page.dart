@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/auth/login_page.dart';
 import 'package:jetcv__utenti/screens/authenticated_home_page.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
+import 'package:jetcv__utenti/screens/privacy_policy_page.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/responsive_widgets.dart';
 import 'package:jetcv__utenti/widgets/language_selector.dart';
@@ -541,7 +543,14 @@ class _SignupPageState extends State<SignupPage> {
                                       color:
                                           Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        // TODO: Navigate to Terms and Conditions
+                                        debugPrint(
+                                            'Terms and Conditions tapped');
+                                      },
                                   ),
                                   TextSpan(
                                       text: AppLocalizations.of(context)!.and),
@@ -552,7 +561,17 @@ class _SignupPageState extends State<SignupPage> {
                                       color:
                                           Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const PrivacyPolicyPage(),
+                                          ),
+                                        );
+                                      },
                                   ),
                                 ],
                               ),

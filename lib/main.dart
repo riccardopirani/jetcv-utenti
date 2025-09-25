@@ -6,6 +6,7 @@ import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:jetcv__utenti/screens/splash_screen.dart';
 import 'package:jetcv__utenti/screens/home_page_public.dart';
 import 'package:jetcv__utenti/screens/auth/password_reset_page.dart';
+import 'package:jetcv__utenti/screens/privacy_policy_page.dart';
 import 'package:jetcv__utenti/services/locale_service.dart';
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -64,6 +65,8 @@ class _MyAppState extends State<MyApp> {
         '/auth/callback': (context) => const AppRouter(),
         // Password reset route
         '/password-reset': (context) => const AppRouter(),
+        // Privacy policy route
+        '/privacy-policy': (context) => const PrivacyPolicyPage(),
       },
     );
   }
