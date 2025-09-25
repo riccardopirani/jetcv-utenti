@@ -2988,7 +2988,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage>
                                 return null;
                               },
                               decoration: InputDecoration(
-                                hintText: '333 123 4567',
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 20,

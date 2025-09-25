@@ -951,11 +951,11 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             onTap: _showNewOtpModal,
             borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(18),
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(14),
+                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -963,10 +963,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     child: Icon(
                       Icons.add_circle_outline,
                       color: Colors.white,
-                      size: 32,
+                      size: 28,
                     ),
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -975,7 +975,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                           'Crea nuovo OTP',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 21,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1126,99 +1126,95 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Widget _buildNoOtpsYetState() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F2937).withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF1F2937).withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.security,
-                size: 40,
-                color: const Color(0xFF1F2937),
+    return Container(
+      padding: EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F2937).withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF1F2937).withValues(alpha: 0.15),
+                width: 1,
               ),
             ),
-            SizedBox(height: 24),
-            Text(
-              'Nessun OTP generato',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
-              textAlign: TextAlign.center,
+            child: Icon(
+              Icons.security,
+              size: 40,
+              color: const Color(0xFF1F2937),
             ),
-            SizedBox(height: 12),
-            Text(
-              'Crea il tuo primo OTP usando il pulsante qui sopra per iniziare',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24),
+          Text(
+            'Nessun OTP generato',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Crea il tuo primo OTP usando il pulsante qui sopra per iniziare',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildEmptyFilteredState() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.filter_list,
-                size: 45,
-                color: Colors.grey.shade600,
+    return Container(
+      padding: EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 1,
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              AppLocalizations.of(context)!.noOtpsFound,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
+            child: Icon(
+              Icons.filter_list,
+              size: 45,
+              color: Colors.grey.shade600,
             ),
-            SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.noOtpsFoundDescription,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          Text(
+            AppLocalizations.of(context)!.noOtpsFound,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            AppLocalizations.of(context)!.noOtpsFoundDescription,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -1309,19 +1305,21 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Widget _buildOtpList() {
-    return Column(
-      children: [
-        // Description Section
-        _buildDescriptionSection(),
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          // Description Section
+          _buildDescriptionSection(),
 
-        // New OTP Button
-        _buildNewOtpButton(),
+          // New OTP Button
+          _buildNewOtpButton(),
 
-        // Show filters only if there are OTPs
-        if (_otps.isNotEmpty) _buildFilterSection(),
+          // Show filters only if there are OTPs
+          if (_otps.isNotEmpty) _buildFilterSection(),
 
-        Expanded(
-          child: _otps.isEmpty
+          // Content based on state
+          _otps.isEmpty
               ? _buildNoOtpsYetState()
               : _filteredOtps.isEmpty && !_isLoading
                   ? _buildEmptyFilteredState()
@@ -1330,25 +1328,22 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         // Section description
                         _buildSectionDescription(),
 
-                        // OTP List
-                        Expanded(
-                          child: ListView.builder(
-                            key: ValueKey('otp_list_${_filteredOtps.length}'),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 6,
-                            ),
-                            itemCount: _filteredOtps.length,
-                            itemBuilder: (context, index) {
-                              final otp = _filteredOtps[index];
+                        // OTP List - replaced ListView.builder with Column
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            children: _filteredOtps.map((otp) {
                               return _buildOtpCard(otp);
-                            },
+                            }).toList(),
                           ),
                         ),
                       ],
                     ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1625,10 +1620,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                             vertical: 16,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
+                            color: Colors.orange.shade50,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.red.shade200,
+                              color: Colors.orange.shade200,
                               width: 1,
                             ),
                           ),
@@ -1636,8 +1631,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.block,
-                                color: Colors.red.shade600,
+                                Icons.how_to_reg,
+                                color: Colors.orange.shade700,
                                 size: 24,
                               ),
                               SizedBox(width: 8),
@@ -1646,7 +1641,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade600,
+                                  color: Colors.orange.shade700,
                                 ),
                               ),
                             ],
@@ -1674,45 +1669,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
                 SizedBox(height: 24),
 
-                // Action Buttons
-                if (_isOtpBlocked(otp))
-                  // Mostra solo pulsante di informazioni per OTP bloccati
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.red.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.red.shade600,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          AppLocalizations.of(context)!.otpBlockedMessage,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.red.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  // Mostra pulsanti normali per OTP non bloccati
+                // Action Buttons - Hide for engaged OTPs
+                if (!_isOtpBlocked(otp))
                   Row(
                     children: [
                       Expanded(
@@ -1766,6 +1724,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     required Color color,
     required VoidCallback onPressed,
   }) {
+    // Check if it's a mobile device
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -1785,31 +1747,36 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: 10,
+            vertical: isMobile ? 12 : 14,
+            horizontal: isMobile ? 8 : 10,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-            ),
-            SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+        child: isMobile
+            ? Icon(
+                icon,
+                size: 22,
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -1862,7 +1829,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Color _getStatusColor(OtpModel otp) {
-    if (otp.usedByIdUser != null) return Colors.red;
+    if (otp.usedByIdUser != null) return Colors.orange.shade600;
     if (otp.isBurned) return Colors.red;
     if (otp.isUsed) return Colors.orange;
     if (otp.isExpired) return Colors.grey;
@@ -1955,8 +1922,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           end: Alignment.bottomRight,
           colors: isBlocked
               ? [
-                  Colors.red.shade50,
-                  Colors.red.shade100,
+                  Colors.orange.shade50,
+                  Colors.orange.shade100,
                 ]
               : [
                   Colors.blue.shade50,
@@ -1965,7 +1932,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isBlocked ? Colors.red.shade200 : Colors.blue.shade200,
+          color: isBlocked ? Colors.orange.shade200 : Colors.blue.shade200,
           width: 1,
         ),
       ),
@@ -1981,18 +1948,18 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: Colors.red.shade100,
+                color: Colors.orange.shade100,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Colors.red.shade300,
+                  color: Colors.orange.shade300,
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
-                    Icons.block,
-                    color: Colors.red.shade700,
+                    Icons.how_to_reg,
+                    color: Colors.orange.shade700,
                     size: 18,
                   ),
                   SizedBox(width: 8),
@@ -2001,7 +1968,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.red.shade700,
+                      color: Colors.orange.shade700,
                     ),
                   ),
                 ],
@@ -2021,12 +1988,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isBlocked
-                          ? Colors.red.shade300
-                          : Colors.blue.shade300,
-                      width: 1,
-                    ),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -2036,12 +1997,12 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: isBlocked
-                              ? Colors.red.shade100
+                              ? Colors.orange.shade100
                               : Colors.blue.shade100,
                           child: Icon(
                             Icons.business,
                             color: isBlocked
-                                ? Colors.red.shade600
+                                ? Colors.orange.shade600
                                 : Colors.blue.shade600,
                             size: 24,
                           ),
@@ -2055,20 +2016,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color:
-                        isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
+                    color: isBlocked
+                        ? Colors.orange.shade100
+                        : Colors.blue.shade100,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isBlocked
-                          ? Colors.red.shade300
-                          : Colors.blue.shade300,
-                      width: 1,
-                    ),
                   ),
                   child: Icon(
                     Icons.business,
-                    color:
-                        isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+                    color: isBlocked
+                        ? Colors.orange.shade600
+                        : Colors.blue.shade600,
                     size: 24,
                   ),
                 ),
@@ -2084,7 +2041,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: isBlocked
-                            ? Colors.red.shade800
+                            ? Colors.orange.shade800
                             : Colors.blue.shade800,
                       ),
                     ),
@@ -2094,7 +2051,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         style: TextStyle(
                           fontSize: 14,
                           color: isBlocked
-                              ? Colors.red.shade600
+                              ? Colors.orange.shade600
                               : Colors.blue.shade600,
                           fontWeight: FontWeight.w500,
                         ),
@@ -2160,7 +2117,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           Icon(
             icon,
             size: 16,
-            color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
+            color: isBlocked ? Colors.orange.shade600 : Colors.blue.shade600,
           ),
           SizedBox(width: 10),
           Expanded(
@@ -2173,7 +2130,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: isBlocked
-                          ? Colors.red.shade700
+                          ? Colors.orange.shade700
                           : Colors.blue.shade700,
                     ),
                   ),
@@ -2182,7 +2139,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     style: TextStyle(
                       fontSize: 14,
                       color: isBlocked
-                          ? Colors.red.shade600
+                          ? Colors.orange.shade600
                           : Colors.blue.shade600,
                     ),
                   ),

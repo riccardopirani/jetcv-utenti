@@ -339,71 +339,101 @@ class _CVViewPageState extends State<CVViewPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline column with node - reduced width (30% smaller)
-          SizedBox(
-            width: isMobile
-                ? 70
-                : isTablet
-                    ? 77
-                    : 84,
-            child: Column(
-              children: [
-                // Timeline node with white circle background (CV creation)
-                Container(
-                  width: isMobile
-                      ? 24
-                      : isTablet
-                          ? 26
-                          : 28,
-                  height: isMobile
-                      ? 24
-                      : isTablet
-                          ? 26
-                          : 28,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+          // Timeline column with node
+          isMobile
+              ? Column(
+                  children: [
+                    // Timeline node with white circle background (CV creation)
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Colors.green.shade200,
+                          width: 2,
+                        ),
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade600,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.star,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                      ),
+                    ),
+
+                    // Vertical line below node (attached to the node)
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(
+                  width: isTablet ? 77 : 84,
+                  child: Column(
+                    children: [
+                      // Timeline node with white circle background (CV creation)
+                      Container(
+                        width: isTablet ? 26 : 28,
+                        height: isTablet ? 26 : 28,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.green.shade200,
+                            width: 2,
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade600,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.star,
+                            color: Colors.white,
+                            size: isTablet ? 11 : 12,
+                          ),
+                        ),
+                      ),
+
+                      // Vertical line below node (attached to the node)
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          color: Colors.grey.shade300,
+                        ),
                       ),
                     ],
-                    border: Border.all(
-                      color: Colors.green.shade200,
-                      width: 2,
-                    ),
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade600,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.star,
-                      color: Colors.white,
-                      size: isMobile
-                          ? 10
-                          : isTablet
-                              ? 11
-                              : 12,
-                    ),
                   ),
                 ),
-
-                // Vertical line below node (attached to the node)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: Colors.grey.shade300,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           SizedBox(
               width: isMobile
@@ -570,114 +600,92 @@ class _CVViewPageState extends State<CVViewPage> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Icon(
-            Icons.filter_list,
-            size: 20,
-            color: Colors.grey.shade600,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Filtra per tipologia:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Dropdown for type selection
-          Expanded(
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: PopupMenuButton<String>(
-                onSelected: _toggleCertificationTypeFilter,
-                offset: const Offset(0, 40),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _selectedCertificationTypes.isEmpty
-                              ? 'Seleziona tipologia'
-                              : '${_selectedCertificationTypes.length} tipologie selezionate',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: _selectedCertificationTypes.isEmpty
-                                ? Colors.grey.shade600
-                                : Colors.grey.shade800,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.grey.shade600,
-                      ),
-                    ],
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: PopupMenuButton<String>(
+          onSelected: _toggleCertificationTypeFilter,
+          offset: const Offset(0, 40),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.filter_list,
+                  size: 20,
+                  color: Colors.grey.shade600,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedCertificationTypes.isEmpty
+                        ? 'Filtra per tipologia'
+                        : '${_selectedCertificationTypes.length} tipologie selezionate',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _selectedCertificationTypes.isEmpty
+                          ? Colors.grey.shade600
+                          : Colors.grey.shade800,
+                    ),
                   ),
                 ),
-                itemBuilder: (context) => [
-                  ..._availableCertificationTypes.map((type) {
-                    final isSelected =
-                        _selectedCertificationTypes.contains(type);
-                    final localizedType = _getLocalizedCertificationType(type);
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.grey.shade600,
+                ),
+              ],
+            ),
+          ),
+          itemBuilder: (context) => [
+            ..._availableCertificationTypes.map((type) {
+              final isSelected = _selectedCertificationTypes.contains(type);
+              final localizedType = _getLocalizedCertificationType(type);
 
-                    return PopupMenuItem<String>(
-                      value: type,
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: isSelected,
-                            onChanged: (_) =>
-                                _toggleCertificationTypeFilter(type),
-                            activeColor: Colors.grey.shade700,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              localizedType,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  if (_selectedCertificationTypes.isNotEmpty) ...[
-                    const PopupMenuDivider(),
-                    PopupMenuItem<String>(
-                      value: 'clear_all',
-                      child: Row(
-                        children: [
-                          Icon(Icons.clear,
-                              size: 20, color: Colors.red.shade600),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Rimuovi tutti i filtri',
-                            style: TextStyle(
-                              color: Colors.red.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+              return PopupMenuItem<String>(
+                value: type,
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: isSelected,
+                      onChanged: (_) => _toggleCertificationTypeFilter(type),
+                      activeColor: Colors.grey.shade700,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        localizedType,
+                        style: const TextStyle(fontSize: 14),
                       ),
                     ),
                   ],
-                ],
+                ),
+              );
+            }),
+            if (_selectedCertificationTypes.isNotEmpty) ...[
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(
+                value: 'clear_all',
+                child: Row(
+                  children: [
+                    Icon(Icons.clear, size: 20, color: Colors.red.shade600),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Rimuovi tutti i filtri',
+                      style: TextStyle(
+                        color: Colors.red.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -1111,7 +1119,11 @@ class _CVViewPageState extends State<CVViewPage> {
       currentRoute: '/cv',
       title: AppLocalizations.of(context)!.viewMyCV,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(pagePadding),
+        padding: isMobile
+            ? EdgeInsets.only(
+                top: pagePadding,
+                bottom: pagePadding) // No horizontal padding on mobile
+            : EdgeInsets.all(pagePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1167,7 +1179,7 @@ class _CVViewPageState extends State<CVViewPage> {
 
     final padding = customPadding ??
         EdgeInsets.symmetric(
-          horizontal: isMobile ? 16.0 : 24.0,
+          horizontal: isMobile ? 16.0 : 24.0, // Always apply horizontal padding
           vertical: isMobile ? 16.0 : 20.0,
         );
 
@@ -1873,80 +1885,161 @@ class _CVViewPageState extends State<CVViewPage> {
       );
     }
 
-    return _buildStandardSectionWrapper(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade200.withValues(alpha: 0.5),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+    if (isMobile) {
+      return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade200.withValues(alpha: 0.5),
+              width: 1,
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with title and controls
-              Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.certifications,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
+              // Header section with padding
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 16.0 : 24.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with title and controls
+                    Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.certifications,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_filteredCertifications.length} ${_filteredCertifications.length == 1 ? 'certificazione visualizzata' : 'certificazioni visualizzate'}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_filteredCertifications.length} ${_filteredCertifications.length == 1 ? 'certificazione visualizzata' : 'certificazioni visualizzate'}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  _buildSortDropdown(),
-                ],
-              ),
-              const SizedBox(height: 20),
+                        const Spacer(),
+                        _buildSortDropdown(),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-              // Filters section
-              _buildFiltersSection(),
+                    // Filters section
+                    _buildFiltersSection(),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 8),
 
-              // Combined timeline with CV creation event and certifications
-              _buildCombinedTimeline(),
+              // Timeline section - full width on mobile, with padding on other devices
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile
+                      ? 8.0
+                      : 24.0, // Small horizontal padding on mobile for breathing room
+                  vertical: isMobile ? 0.0 : 0.0,
+                ),
+                child: _buildCombinedTimeline(),
+              ),
+
+              // Bottom padding
+              SizedBox(height: 16.0),
+            ],
+          ));
+    } else {
+      // Tablet/Desktop layout with standard wrapper
+      return _buildStandardSectionWrapper(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.grey.shade200.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with title and controls
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.certifications,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_filteredCertifications.length} ${_filteredCertifications.length == 1 ? 'certificazione visualizzata' : 'certificazioni visualizzate'}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    _buildSortDropdown(),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Filters section
+                _buildFiltersSection(),
+
+                const SizedBox(height: 8),
+
+                // Combined timeline with CV creation event and certifications
+                _buildCombinedTimeline(),
+              ],
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   // Pills are now integrated into the certification card blur overlay
 
   Widget _buildCombinedTimeline() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
     // Create combined timeline events
     List<Widget> timelineEvents = [];
 
@@ -1961,116 +2054,8 @@ class _CVViewPageState extends State<CVViewPage> {
       final cert = _filteredCertifications[i];
       final isLast = i == _filteredCertifications.length - 1;
 
-      allEvents[cert.certificationUser.createdAt] = IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Timeline column with node - reduced width (30% smaller)
-            SizedBox(
-              width: isMobile
-                  ? 70
-                  : isTablet
-                      ? 77
-                      : 84,
-              child: Column(
-                children: [
-                  // Connecting line from previous event
-                  Container(
-                    width: 2,
-                    height: 60, // Height to center node with image
-                    color: Colors.grey.shade300,
-                  ),
-
-                  // Timeline node with white circle background
-                  Container(
-                    width: isMobile
-                        ? 20
-                        : isTablet
-                            ? 22
-                            : 24,
-                    height: isMobile
-                        ? 20
-                        : isTablet
-                            ? 22
-                            : 24,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          spreadRadius: 2,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-
-                  // Vertical line below node to bottom of card (attached to the node)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  // Extra spacer line to increase inter-card spacing (except for last)
-                  if (!isLast)
-                    Container(
-                      width: 2,
-                      height: isMobile
-                          ? 100 // Increased from 60 for better card separation
-                          : isTablet
-                              ? 120 // Increased from 72 for better card separation
-                              : 140, // Increased from 84 for better card separation
-                      color: Colors.grey.shade300,
-                    ),
-                ],
-              ),
-            ),
-
-            SizedBox(
-                width: isMobile
-                    ? 8
-                    : isTablet
-                        ? 10
-                        : 12),
-
-            // Certification card with pills - expands as needed
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Certification card (pills now integrated in blur overlay)
-                  reusable.CertificationCard(
-                    certification: cert,
-                    showImageHeader: true,
-                    showLegalEntityLogo: true,
-                    showMediaSection: true,
-                    showOpenBadgeButton: true,
-                    showCertifiedUserName:
-                        false, // Hide certified user name in CV view
-                    showSerialNumber: false, // Hidden - shown in pills above
-                    showCreatedDate: false, // Hidden - shown in pills above
-                    showLocation: false, // Hidden - shown in pills above
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+      allEvents[cert.certificationUser.createdAt] =
+          _buildCertificationTimelineItem(cert, i, isLast);
     }
 
     // Sort events by date (most recent first or oldest first based on user preference)
@@ -2187,75 +2172,109 @@ class _CVViewPageState extends State<CVViewPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline column with node - reduced width (30% smaller)
-          SizedBox(
-            width: isMobile
-                ? 70
-                : isTablet
-                    ? 77
-                    : 84,
-            child: Column(
-              children: [
-                // No connecting line from previous event (this is the first item)
+          // Timeline column with node
+          isMobile
+              ? Column(
+                  children: [
+                    // No connecting line from previous event (this is the first item)
 
-                // Timeline node with white circle background
-                Container(
-                  width: isMobile
-                      ? 20
-                      : isTablet
-                          ? 22
-                          : 24,
-                  height: isMobile
-                      ? 20
-                      : isTablet
-                          ? 22
-                          : 24,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                    // Timeline node with white circle background
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
                       ),
-                    ],
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                      width: 1,
+                      child: Container(
+                        margin: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
 
-                // Vertical line below node to bottom of card
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: Colors.grey.shade300,
+                    // Vertical line below node to bottom of card
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                    // Extra spacer line to increase inter-card spacing (except for last)
+                    if (!isLast)
+                      Container(
+                        width: 2,
+                        height: 60,
+                        color: Colors.grey.shade300,
+                      ),
+                  ],
+                )
+              : SizedBox(
+                  width: isTablet ? 77 : 84,
+                  child: Column(
+                    children: [
+                      // No connecting line from previous event (this is the first item)
+
+                      // Timeline node with white circle background
+                      Container(
+                        width: isTablet ? 22 : 24,
+                        height: isTablet ? 22 : 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+
+                      // Vertical line below node to bottom of card
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                      // Extra spacer line to increase inter-card spacing (except for last)
+                      if (!isLast)
+                        Container(
+                          width: 2,
+                          height: isTablet ? 72 : 84,
+                          color: Colors.grey.shade300,
+                        ),
+                    ],
                   ),
                 ),
-                // Extra spacer line to increase inter-card spacing (except for last)
-                if (!isLast)
-                  Container(
-                    width: 2,
-                    height: isMobile
-                        ? 60
-                        : isTablet
-                            ? 72
-                            : 84,
-                    color: Colors.grey.shade300,
-                  ),
-              ],
-            ),
-          ),
 
           SizedBox(
               width: isMobile
@@ -2300,80 +2319,119 @@ class _CVViewPageState extends State<CVViewPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline column with node - reduced width (30% smaller)
-          SizedBox(
-            width: isMobile
-                ? 70
-                : isTablet
-                    ? 77
-                    : 84,
-            child: Column(
-              children: [
-                // Connecting line from previous event
-                Container(
-                  width: 2,
-                  height: 60, // Height to center node with image
-                  color: Colors.grey.shade300,
-                ),
+          // Timeline column with node
+          isMobile
+              ? Column(
+                  children: [
+                    // Connecting line from previous event
+                    Container(
+                      width: 2,
+                      height: 60, // Height to center node with image
+                      color: Colors.grey.shade300,
+                    ),
 
-                // Timeline node with white circle background
-                Container(
-                  width: isMobile
-                      ? 20
-                      : isTablet
-                          ? 22
-                          : 24,
-                  height: isMobile
-                      ? 20
-                      : isTablet
-                          ? 22
-                          : 24,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                    // Timeline node with white circle background
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
                       ),
-                    ],
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                      width: 1,
+                      child: Container(
+                        margin: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
 
-                // Vertical line below node to bottom of card
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: Colors.grey.shade300,
+                    // Vertical line below node to bottom of card
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                    // Extra spacer line to increase inter-card spacing (except for last)
+                    if (!isLast)
+                      Container(
+                        width: 2,
+                        height: 60,
+                        color: Colors.grey.shade300,
+                      ),
+                  ],
+                )
+              : SizedBox(
+                  width: isTablet ? 77 : 84,
+                  child: Column(
+                    children: [
+                      // Connecting line from previous event
+                      Container(
+                        width: 2,
+                        height: 60, // Height to center node with image
+                        color: Colors.grey.shade300,
+                      ),
+
+                      // Timeline node with white circle background
+                      Container(
+                        width: isTablet ? 22 : 24,
+                        height: isTablet ? 22 : 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+
+                      // Vertical line below node to bottom of card
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                      // Extra spacer line to increase inter-card spacing (except for last)
+                      if (!isLast)
+                        Container(
+                          width: 2,
+                          height: isTablet ? 72 : 84,
+                          color: Colors.grey.shade300,
+                        ),
+                    ],
                   ),
                 ),
-                // Extra spacer line to increase inter-card spacing (except for last)
-                if (!isLast)
-                  Container(
-                    width: 2,
-                    height: isMobile
-                        ? 60
-                        : isTablet
-                            ? 72
-                            : 84,
-                    color: Colors.grey.shade300,
-                  ),
-              ],
-            ),
-          ),
 
           SizedBox(
               width: isMobile
@@ -3461,7 +3519,7 @@ class _CVViewPageState extends State<CVViewPage> {
             offset: const Offset(0, 4),
           ),
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 0,
             blurRadius: 8,
             offset: const Offset(0, 2),

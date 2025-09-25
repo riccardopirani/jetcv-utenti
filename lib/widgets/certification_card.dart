@@ -109,7 +109,8 @@ class _CertificationCardState extends State<CertificationCard> {
 
                 // Certifier name (from expanded certifier data in new API)
                 if (widget.showCertifiedUserName &&
-                    cert.certification?.certifier != null) ...[
+                    cert.certification?.certifier?.user != null &&
+                    _hasCertifierName(cert.certification!.certifier!)) ...[
                   Row(
                     children: [
                       const Icon(Icons.person, size: 16, color: Colors.grey),
@@ -653,8 +654,18 @@ class _CertificationCardState extends State<CertificationCard> {
     );
   }
 
+  bool _hasCertifierName(CertifierInfo certifier) {
+    if (certifier.user == null) return false;
+
+    final user = certifier.user!;
+    final firstName = user.firstName?.trim();
+    final lastName = user.lastName?.trim();
+
+    return (firstName?.isNotEmpty == true) || (lastName?.isNotEmpty == true);
+  }
+
   String _getCertifierFullName(CertifierInfo certifier) {
-    // First try to get name from expanded user data (new API)
+    // Use firstName and lastName from user data only
     if (certifier.user != null) {
       final user = certifier.user!;
       final firstName = user.firstName?.trim();
@@ -671,35 +682,9 @@ class _CertificationCardState extends State<CertificationCard> {
       if (lastName?.isNotEmpty == true) {
         return lastName!;
       }
-
-      // Try fullName from user if firstName/lastName are not available
-      if (user.fullName?.trim().isNotEmpty == true) {
-        return user.fullName!.trim();
-      }
     }
 
-    // Fallback to legacy certifier fields if user data is not available
-    final firstName = certifier.firstName?.trim();
-    final lastName = certifier.lastName?.trim();
-
-    if (firstName?.isNotEmpty == true && lastName?.isNotEmpty == true) {
-      return '$firstName $lastName';
-    }
-
-    // If only one name is available from certifier
-    if (firstName?.isNotEmpty == true) {
-      return firstName!;
-    }
-    if (lastName?.isNotEmpty == true) {
-      return lastName!;
-    }
-
-    // Try fullName from certifier if firstName/lastName are not available
-    if (certifier.fullName?.trim().isNotEmpty == true) {
-      return certifier.fullName!.trim();
-    }
-
-    return 'Certificatore'; // Frinal fallback
+    return ''; // Never show fallback text
   }
 
   Widget _buildAttachedMediaSection(UserCertificationDetail cert) {

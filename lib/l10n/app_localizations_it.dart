@@ -647,7 +647,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get otp => 'OTP';
 
   @override
-  String get blockedByLegalEntity => 'Bloccato da';
+  String get blockedByLegalEntity => 'Impegnato da';
 
   @override
   String get legalEntity => 'Entità Legale';
@@ -674,7 +674,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get allOtps => 'Tutti';
 
   @override
-  String get blockedOtps => 'Bloccati';
+  String get blockedOtps => 'Impegnati';
 
   @override
   String get activeOtps => 'OTP Attivi';
@@ -835,10 +835,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Errore nell\'aggiornamento del tag OTP. Riprova.';
 
   @override
-  String get otpBlocked => 'OTP Bloccato';
+  String get otpBlocked => 'OTP Impegnato';
 
   @override
-  String get otpBlockedMessage => 'OTP bloccato - Azioni non disponibili';
+  String get otpBlockedMessage => 'OTP impegnato - Azioni non disponibili';
 
   @override
   String get userNotLoaded => 'Utente non caricato';
