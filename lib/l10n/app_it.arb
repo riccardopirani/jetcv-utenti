@@ -314,7 +314,7 @@
   },
   "certifier": "Certificatore",
   "attachedMedia": "Media",
-  "attachedMediaCount": "Media ({count})",
+  "attachedMediaCount": "Allegati ({count})",
   "@attachedMediaCount": {
     "placeholders": {
       "count": {

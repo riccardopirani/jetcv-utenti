@@ -1,10 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/models/location_model.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Reusable certification card widget to display a user certification
 ///
@@ -25,8 +25,10 @@ class CertificationCard extends StatefulWidget {
   final bool showLegalEntityLogo;
   final bool showMediaSection;
   final bool showOpenBadgeButton;
-  final bool showLinkedInButton;
   final bool showCertifiedUserName;
+  final bool showSerialNumber;
+  final bool showCreatedDate;
+  final bool showLocation;
 
   const CertificationCard({
     super.key,
@@ -39,8 +41,10 @@ class CertificationCard extends StatefulWidget {
     this.showLegalEntityLogo = false,
     this.showMediaSection = false,
     this.showOpenBadgeButton = false,
-    this.showLinkedInButton = false,
     this.showCertifiedUserName = false,
+    this.showSerialNumber = true,
+    this.showCreatedDate = true,
+    this.showLocation = true,
   });
 
   @override
@@ -65,7 +69,7 @@ class _CertificationCardState extends State<CertificationCard> {
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    final headerImageHeight = 120.0;
+    final headerImageHeight = 144.0; // Increased by 20% from 120
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -81,7 +85,8 @@ class _CertificationCardState extends State<CertificationCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Serial number badge (if available) - moved above title
-                if (cert.certificationUser.serialNumber != null) ...[
+                if (widget.showSerialNumber &&
+                    cert.certificationUser.serialNumber != null) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -118,24 +123,25 @@ class _CertificationCardState extends State<CertificationCard> {
                   const SizedBox(height: 8),
                 ],
 
-                // Title (Certification category name localized when possible)
-                // Category name (certification type) - with more vertical margin
-                if (cert.certification?.category?.name != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _getLocalizedCertificationType(
-                      context,
-                      cert.certification!.category!.name,
-                    ),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+                // Title (Certification category name) - now shown only in blur overlay
 
-                // Legal Entity (shown first, immediately with cached data)
+                // Title information (from certification_information_value where name = "titolo")
                 if (widget.showLegalEntityLogo) ...[
+                  if (_getTitleInformation() != null) ...[
+                    Text(
+                      _getTitleInformation()!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+
+                  // Legal Entity (shown first, immediately with cached data)
                   _buildOrganizationRow(context),
                   const SizedBox(height: 12),
                 ],
@@ -163,22 +169,24 @@ class _CertificationCardState extends State<CertificationCard> {
                 ],
 
                 // Created date
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today,
-                        size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${localizations.createdOn} ${DateFormat('dd/MM/yyyy').format(cert.certificationUser.createdAt)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                if (widget.showCreatedDate)
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today,
+                          size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${localizations.createdOn} ${DateFormat('dd/MM/yyyy').format(cert.certificationUser.createdAt)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
                 // Location (if available)
-                if (cert.certification?.location != null) ...[
+                if (widget.showLocation &&
+                    cert.certification?.location != null) ...[
                   const SizedBox(height: 12),
                   _buildLocationRow(context, cert.certification!.location!),
                 ],
@@ -224,9 +232,9 @@ class _CertificationCardState extends State<CertificationCard> {
                   _buildAttachedMediaSection(cert),
                 ],
 
-                // Show OpenBadge and LinkedIn buttons only if certification is accepted
-                if ((_isOpenBadgeEnabled && widget.showOpenBadgeButton ||
-                        widget.showLinkedInButton) &&
+                // Show OpenBadge button only if certification is accepted
+                if (_isOpenBadgeEnabled &&
+                    widget.showOpenBadgeButton &&
                     cert.certificationUser.status == 'accepted') ...[
                   const SizedBox(height: 12),
                   _buildResponsiveActionButtons(
@@ -277,6 +285,7 @@ class _CertificationCardState extends State<CertificationCard> {
     final pictureUrl =
         widget.certification.certification?.category?.pictureUrl?.trim();
     final hasValidPictureUrl = pictureUrl?.isNotEmpty == true;
+    final cert = widget.certification;
 
     return Container(
       height: height,
@@ -288,39 +297,264 @@ class _CertificationCardState extends State<CertificationCard> {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: hasValidPictureUrl
-          ? Image.network(
-              pictureUrl!,
-              height: height,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback to gradient with certification icon if image fails to load
-                return _buildFallbackHeaderImage(height);
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  height: height,
-                  width: double.infinity,
+      child: Stack(
+        children: [
+          // Background image
+          SizedBox(
+            height: height,
+            width: double.infinity,
+            child: hasValidPictureUrl
+                ? Image.network(
+                    pictureUrl!,
+                    height: height,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to gradient with certification icon if image fails to load
+                      return _buildFallbackHeaderImage(height);
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: height,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                            strokeWidth: 2,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : _buildFallbackHeaderImage(height),
+          ),
+
+          // Blur overlay at the bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: Colors.black.withValues(alpha: 0.3),
                   ),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                      strokeWidth: 2,
-                      color: Colors.grey.shade400,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Certification type name
+                      Text(
+                        _getLocalizedCertificationType(
+                          context,
+                          cert.certification?.category?.name ??
+                              'Certificazione',
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          shadows: const [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Pills
+                      _buildImageOverlayPills(cert),
+                    ],
                   ),
-                );
-              },
-            )
-          : _buildFallbackHeaderImage(height),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildImageOverlayPills(UserCertificationDetail cert) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        // Data pill - first
+        _buildOverlayPill(
+          icon: Icons.calendar_today,
+          label: _formatCertificationDate(cert.certificationUser.createdAt),
+          isMobile: isMobile,
+        ),
+
+        // Location pill with flag emoji or generic icon
+        if (cert.certification?.location != null)
+          _buildOverlayPill(
+            icon: _getLocationIconOrEmoji(cert.certification!.location!),
+            label: _formatLocationForOverlayPill(cert.certification!.location!),
+            isMobile: isMobile,
+          ),
+
+        // Serial pill
+        if (cert.certificationUser.serialNumber != null)
+          _buildOverlayPill(
+            icon: Icons.tag,
+            label: cert.certificationUser.serialNumber!,
+            isMobile: isMobile,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildOverlayPill({
+    required dynamic icon, // Can be IconData or String (emoji)
+    required String label,
+    required bool isMobile,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 10,
+        vertical: isMobile ? 4 : 6,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle both emoji (String) and icon (IconData)
+          if (icon is String)
+            Text(
+              icon,
+              style: TextStyle(fontSize: isMobile ? 12 : 14),
+            )
+          else if (icon is IconData)
+            Icon(
+              icon,
+              size: isMobile ? 12 : 14,
+              color: Colors.grey.shade700,
+            ),
+          SizedBox(width: isMobile ? 4 : 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isMobile ? 11 : 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatCertificationDate(DateTime date) {
+    return DateFormat('d MMM yyyy', 'it_IT').format(date);
+  }
+
+  String _formatLocationForOverlayPill(dynamic location) {
+    if (location is LocationModel) {
+      // Use name if available (e.g. "Università di Bologna")
+      if (location.name?.isNotEmpty == true) {
+        return location.name!;
+      }
+
+      // Otherwise build from locality and country
+      if (location.locality?.isNotEmpty == true &&
+          location.country?.isNotEmpty == true) {
+        return '${location.locality}, ${location.country}';
+      } else if (location.country?.isNotEmpty == true) {
+        return location.country!;
+      } else if (location.locality?.isNotEmpty == true) {
+        return location.locality!;
+      }
+    } else if (location is Map<String, dynamic>) {
+      // If it's a map, extract the values
+      final city = location['city']?.toString();
+      final country = location['country']?.toString();
+      if (city?.isNotEmpty == true && country?.isNotEmpty == true) {
+        return '$city, $country';
+      } else if (country?.isNotEmpty == true) {
+        return country!;
+      } else if (city?.isNotEmpty == true) {
+        return city!;
+      }
+    } else if (location is String) {
+      // If it's a string, return it directly
+      return location;
+    }
+
+    return 'Luogo non specificato';
+  }
+
+  /// Convert ISO country code to flag emoji
+  String _getCountryFlagEmoji(String? isoCountryCode) {
+    if (isoCountryCode == null || isoCountryCode.length != 2) {
+      return ''; // Return empty string if no valid ISO code
+    }
+
+    // Convert ISO country code to flag emoji
+    // Each flag emoji is made of two regional indicator symbols
+    final String countryCode = isoCountryCode.toUpperCase();
+    final int firstLetter = countryCode.codeUnitAt(0) - 0x41 + 0x1F1E6;
+    final int secondLetter = countryCode.codeUnitAt(1) - 0x41 + 0x1F1E6;
+
+    return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
+  }
+
+  /// Get location icon or emoji based on ISO country code
+  dynamic _getLocationIconOrEmoji(dynamic location) {
+    if (location is LocationModel &&
+        location.isoCountryCode?.isNotEmpty == true) {
+      final flagEmoji = _getCountryFlagEmoji(location.isoCountryCode);
+      if (flagEmoji.isNotEmpty) {
+        return flagEmoji; // Return emoji string
+      }
+    }
+    return Icons.location_on; // Return icon as fallback
+  }
+
+  /// Extract title information from certification_information_value where name = "titolo"
+  String? _getTitleInformation() {
+    final certification = widget.certification.certification;
+    if (certification?.categoryInformation == null) return null;
+
+    // Search for certification information with name = "titolo"
+    for (final categoryInfo in certification!.categoryInformation) {
+      final infoName = categoryInfo.info?.name;
+      if (infoName != null &&
+          infoName.toLowerCase() == 'titolo' &&
+          categoryInfo.values.isNotEmpty) {
+        // Return the first value found
+        final value = categoryInfo.values.first.value;
+        return value.isNotEmpty == true ? value : null;
+      }
+    }
+
+    return null;
   }
 
   Widget _buildFallbackHeaderImage(double height) {
@@ -649,61 +883,23 @@ class _CertificationCardState extends State<CertificationCard> {
     bool isMobile,
     bool isTablet,
   ) {
-    final localizations = AppLocalizations.of(context)!;
-
     // Fixed button styling for all devices
     final buttonHeight = 48.0;
     final iconSize = 20.0;
     final fontSize = 16.0;
     final borderRadius = BorderRadius.circular(10.0);
 
-    return isMobile
-        ? Column(
-            children: [
-              if (_isOpenBadgeEnabled && widget.showOpenBadgeButton)
-                SizedBox(
-                  width: double.infinity,
-                  height: buttonHeight,
-                  child: _buildOpenBadgeButton(
-                      context, cert, iconSize, fontSize, borderRadius),
-                ),
-              if (_isOpenBadgeEnabled &&
-                  widget.showOpenBadgeButton &&
-                  widget.showLinkedInButton)
-                const SizedBox(height: 8),
-              if (widget.showLinkedInButton)
-                SizedBox(
-                  width: double.infinity,
-                  height: buttonHeight,
-                  child: _buildLinkedInButton(context, cert, localizations,
-                      iconSize, fontSize, borderRadius),
-                ),
-            ],
-          )
-        : Row(
-            children: [
-              if (_isOpenBadgeEnabled && widget.showOpenBadgeButton)
-                Expanded(
-                  child: SizedBox(
-                    height: buttonHeight,
-                    child: _buildOpenBadgeButton(
-                        context, cert, iconSize, fontSize, borderRadius),
-                  ),
-                ),
-              if (_isOpenBadgeEnabled &&
-                  widget.showOpenBadgeButton &&
-                  widget.showLinkedInButton)
-                const SizedBox(width: 12),
-              if (widget.showLinkedInButton)
-                Expanded(
-                  child: SizedBox(
-                    height: buttonHeight,
-                    child: _buildLinkedInButton(context, cert, localizations,
-                        iconSize, fontSize, borderRadius),
-                  ),
-                ),
-            ],
-          );
+    // Only show OpenBadge button now
+    if (_isOpenBadgeEnabled && widget.showOpenBadgeButton) {
+      return SizedBox(
+        width: double.infinity,
+        height: buttonHeight,
+        child: _buildOpenBadgeButton(
+            context, cert, iconSize, fontSize, borderRadius),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildOpenBadgeButton(
@@ -746,139 +942,6 @@ class _CertificationCardState extends State<CertificationCard> {
     );
   }
 
-  Widget _buildLinkedInButton(
-    BuildContext context,
-    UserCertificationDetail cert,
-    AppLocalizations localizations,
-    double iconSize,
-    double fontSize,
-    BorderRadius borderRadius,
-  ) {
-    final linkedInButtonImage = _getLinkedInButtonImage(context);
-    // Scale down LinkedIn image/button by 30%
-    const double linkedInScale = 0.7;
-    final double linkedInHeight = 28.0 * linkedInScale;
-    final double linkedInMaxWidth = 180.0 * linkedInScale;
-
-    return GestureDetector(
-      onTap: () => _openLinkedInForCertification(context, cert),
-      child: SizedBox(
-        height: linkedInHeight, // 30% smaller height
-        width: double.infinity, // Take full available width with max constraint
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-              maxWidth: linkedInMaxWidth), // 30% smaller max width
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: Image.asset(
-              linkedInButtonImage,
-              height: linkedInHeight, // 30% smaller height
-              width:
-                  null, // Let width adjust automatically to maintain aspect ratio
-              fit: BoxFit
-                  .fitHeight, // Maintain aspect ratio while fitting height
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback to styled button matching the same height if image fails to load
-                return SizedBox(
-                  height: linkedInHeight,
-                  child: ElevatedButton.icon(
-                    onPressed: () =>
-                        _openLinkedInForCertification(context, cert),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0077B5),
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shadowColor:
-                          const Color(0xFF0077B5).withValues(alpha: 0.3),
-                      shape: RoundedRectangleBorder(borderRadius: borderRadius),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5), // Padding retained while smaller height
-                      minimumSize:
-                          Size(0, linkedInHeight), // Force minimum height
-                    ),
-                    icon: Icon(Icons.link,
-                        size: 14), // Reduced icon size for 28px button
-                    label: Text(
-                      localizations.addToLinkedIn,
-                      style: TextStyle(
-                        fontSize: 12, // Reduced font size for 28px button
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getLinkedInButtonImage(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final languageCode = locale.languageCode;
-    final countryCode = locale.countryCode;
-
-    // Create locale string in format: language_COUNTRY
-    String localeString = '';
-    if (countryCode != null) {
-      localeString = '${languageCode}_${countryCode.toUpperCase()}';
-    } else {
-      // Default country codes for languages
-      switch (languageCode) {
-        case 'it':
-          localeString = 'it_IT';
-          break;
-        case 'en':
-          localeString = 'en_US';
-          break;
-        case 'de':
-          localeString = 'de_DE';
-          break;
-        case 'es':
-          localeString = 'es_ES';
-          break;
-        case 'fr':
-          localeString = 'fr_FR';
-          break;
-        default:
-          localeString = 'en_US'; // Default fallback
-      }
-    }
-
-    // List of available LinkedIn button locales
-    const availableLocales = {
-      'cs_CZ',
-      'da_DK',
-      'de_DE',
-      'en_US',
-      'es_ES',
-      'fr_FR',
-      'in_ID',
-      'it_IT',
-      'ja_JP',
-      'ko_KR',
-      'ms_MY',
-      'nl_NL',
-      'no_NO',
-      'pt_BR',
-      'ro_RO',
-      'ru_RU',
-      'sv_SE',
-      'tr_TR',
-      'zh_TW'
-    };
-
-    // Check if the exact locale exists, otherwise fallback to en_US
-    final selectedLocale =
-        availableLocales.contains(localeString) ? localeString : 'en_US';
-
-    return 'assets/linkedin-add-to-profile-buttons/$selectedLocale.png';
-  }
-
   Future<void> _createOpenBadge(
     BuildContext context,
     UserCertificationDetail cert,
@@ -890,53 +953,5 @@ class _CertificationCardState extends State<CertificationCard> {
         backgroundColor: Colors.green,
       ),
     );
-  }
-
-  Future<void> _openLinkedInForCertification(
-    BuildContext context,
-    UserCertificationDetail cert,
-  ) async {
-    try {
-      final certName = cert.certification?.category?.name != null
-          ? _getLocalizedCertificationType(
-              context, cert.certification!.category!.name)
-          : 'Certification';
-      // Get organization name directly from expanded legal_entity data
-      final organizationName =
-          cert.certification?.legalEntity?.legalName?.trim().isNotEmpty == true
-              ? cert.certification!.legalEntity!.legalName!.trim()
-              : 'Organizzazione';
-      final issueDate = cert.certificationUser.createdAt;
-      final certId = cert.certificationUser.idCertificationUser;
-
-      final baseUrl =
-          'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME';
-      final certUrl = cert.certification?.idCertification != null
-          ? 'https://jetcv.com/certification/${cert.certification!.idCertification}'
-          : 'https://jetcv.com';
-
-      final params = {
-        'name': Uri.encodeComponent(certName),
-        'organizationName': Uri.encodeComponent(organizationName),
-        'issueYear': issueDate.year.toString(),
-        'issueMonth': issueDate.month.toString(),
-        'certUrl': Uri.encodeComponent(certUrl),
-        'certId': certId,
-      };
-
-      final expirationDate = cert.certification?.closedAt;
-      if (expirationDate != null) {
-        params['expirationYear'] = expirationDate.year.toString();
-        params['expirationMonth'] = expirationDate.month.toString();
-      }
-
-      final queryString =
-          params.entries.map((e) => '${e.key}=${e.value}').join('&');
-      final url = '$baseUrl&$queryString';
-
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (_) {
-      // Non-blocking: ignore failures silently
-    }
   }
 }

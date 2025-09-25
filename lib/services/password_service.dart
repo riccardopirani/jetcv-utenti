@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:jetcv__utenti/services/edge_function_service.dart';
+import 'package:jetcv__utenti/config/app_config.dart';
 
 /// Service for handling password operations via Supabase Edge Functions
 class PasswordService {
@@ -100,28 +101,86 @@ class PasswordService {
     try {
       debugPrint('🔐 PasswordService: Sending password reset email');
 
+      // Get the current origin for the reset link
+      String origin;
+      if (kIsWeb) {
+        origin = Uri.base.origin;
+      } else {
+        // For mobile apps, use the centralized configuration
+        origin = AppConfig.mobileOriginUrl;
+      }
+
+      debugPrint('🔐 PasswordService: Using origin: $origin');
+
       final response = await EdgeFunctionService.invokeFunction(
-        'forgot-password', // Edge function name for sending reset emails
+        'send-password-reset-email', // Correct edge function name
         {
           'email': email,
+          'origin': origin,
         },
       );
 
       debugPrint('🔐 PasswordService: Send email response: $response');
 
-      // Map the response to expected format
-      return {
-        'success': response['ok'] == true,
-        'message': response['message'] ?? 'Email di reset inviata',
-      };
+      // Handle different response formats based on status codes
+      final status = response['status'] ?? 0;
+      final isSuccess = response['ok'] == true || status == 200;
+
+      if (isSuccess) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Email di reset inviata',
+        };
+      } else {
+        // Map specific error statuses to localized messages
+        String errorMessage;
+        switch (status) {
+          case 404:
+            errorMessage = localizedMessages?['userNotFound'] ??
+                'Nessun account trovato con questo indirizzo email.';
+            break;
+          case 409:
+            errorMessage = localizedMessages?['multipleUsersFound'] ??
+                'Errore interno: più account trovati con questo email.';
+            break;
+          case 422:
+            errorMessage = localizedMessages?['validationError'] ??
+                'Indirizzo email non valido.';
+            break;
+          case 502:
+          case 503:
+            errorMessage = localizedMessages?['emailServiceError'] ??
+                'Servizio email temporaneamente non disponibile. Riprova più tardi.';
+            break;
+          default:
+            errorMessage = localizedMessages?['genericError'] ??
+                response['message'] ??
+                'Errore durante l\'invio dell\'email. Riprova più tardi.';
+        }
+
+        return {
+          'success': false,
+          'message': errorMessage,
+        };
+      }
     } catch (e) {
       debugPrint('❌ PasswordService: Send email error: $e');
 
-      // Return a structured error response
+      // Check if it's a network error
+      String errorMessage;
+      if (e.toString().contains('Network error') ||
+          e.toString().contains('Connection error') ||
+          e.toString().contains('Failed to fetch')) {
+        errorMessage = localizedMessages?['networkError'] ??
+            'Errore di connessione. Verifica la tua connessione internet e riprova.';
+      } else {
+        errorMessage = localizedMessages?['genericError'] ??
+            'Errore durante l\'invio dell\'email. Riprova più tardi.';
+      }
+
       return {
         'success': false,
-        'message': localizedMessages?['genericError'] ??
-            'Errore durante l\'invio dell\'email. Riprova più tardi.',
+        'message': errorMessage,
       };
     }
   }

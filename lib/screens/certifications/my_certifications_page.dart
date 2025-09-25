@@ -771,7 +771,6 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
                       showLegalEntityLogo: true,
                       showMediaSection: true,
                       showOpenBadgeButton: true,
-                      showLinkedInButton: true,
                       showCertifiedUserName:
                           true, // Show certified user name in certifications page
                       // Azioni solo per la tab In attesa

@@ -12,14 +12,12 @@ import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/screens/cv/blockchain_info_page.dart';
 import 'package:jetcv__utenti/screens/cv/open_badges_page.dart';
 import 'package:jetcv__utenti/screens/cv/personal_info_page.dart';
-import 'package:jetcv__utenti/services/linkedin_service.dart';
 import 'package:jetcv__utenti/services/legal_entity_service.dart';
 // import 'package:jetcv__utenti/services/image_cache_service.dart';
 // import 'package:jetcv__utenti/services/base64_image_service.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/widgets/main_layout.dart';
 import 'package:jetcv__utenti/widgets/attached_media_widget.dart';
-import 'package:jetcv__utenti/widgets/open_badge_button.dart';
 import 'package:jetcv__utenti/widgets/certification_card.dart' as reusable;
 
 // import 'package:share_plus/share_plus.dart';
@@ -45,12 +43,21 @@ class _CVViewPageState extends State<CVViewPage> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  // Certifications data
-  List<UserCertificationDetail> _certifications = [];
+  // Certifications data - OPTIMIZED FOR IN-MEMORY OPERATIONS
+  // API is called only once during initial load (_loadCertifications)
+  // All filtering and sorting operations work on the loaded data in-memory
+  List<UserCertificationDetail> _certifications = []; // Base dataset from API
+  List<UserCertificationDetail> _filteredCertifications =
+      []; // Filtered/sorted view
   bool _certificationsLoading = false;
   String? _certificationsError;
   bool _isMostRecentFirst =
       true; // true = più recenti prima, false = meno recenti prima
+
+  // Filter data - all operations are in-memory
+  Set<String> _selectedCertificationTypes = {};
+  List<String> _availableCertificationTypes =
+      []; // Extracted once from loaded data
 
   // Legal entities cache
   Map<String, String> _legalEntityNames = {};
@@ -137,32 +144,37 @@ class _CVViewPageState extends State<CVViewPage> {
   }
 
   Future<void> _loadCertifications() async {
+    // This method is called only once during initial page load
+    // All subsequent filtering and sorting happens in-memory
     setState(() {
       _certificationsLoading = true;
       _certificationsError = null;
     });
 
     try {
+      // Single API call to load all user certifications
       final response =
           await CertificationService.getUserCertificationsDetails();
 
       if (response.success && response.data != null) {
-        // Filter only accepted certifications and sort by date
+        // Filter only accepted certifications - this is the base dataset
         final acceptedCertifications =
             List<UserCertificationDetail>.from(response.data!)
                 .where((cert) => cert.certificationUser.status == 'accepted')
-                .toList()
-              ..sort((a, b) => _isMostRecentFirst
-                  ? b.certificationUser.createdAt
-                      .compareTo(a.certificationUser.createdAt)
-                  : a.certificationUser.createdAt
-                      .compareTo(b.certificationUser.createdAt));
+                .toList();
 
         setState(() {
           _certifications = acceptedCertifications;
           _certificationsLoading = false;
         });
-        // Precarica i logo delle legal entities
+
+        // Extract available certification types for filter dropdown
+        _extractAvailableCertificationTypes();
+
+        // Apply initial filters and sorting (in-memory)
+        _applyFilters();
+
+        // Preload legal entity logos for better UX
         _preloadLegalEntityLogos();
       } else {
         setState(() {
@@ -185,13 +197,66 @@ class _CVViewPageState extends State<CVViewPage> {
   void _toggleSortOrder() {
     setState(() {
       _isMostRecentFirst = !_isMostRecentFirst;
-      // Re-sort the existing certifications
-      _certifications.sort((a, b) => _isMostRecentFirst
+      // Re-apply filters with new sort order (no need to sort _certifications again)
+      _applyFilters();
+    });
+  }
+
+  void _extractAvailableCertificationTypes() {
+    // Extract unique certification types from loaded data (run once)
+    // This creates the options for the filter dropdown
+    final types = <String>{};
+    for (final cert in _certifications) {
+      if (cert.certification?.category?.name != null &&
+          cert.certification!.category!.name.isNotEmpty) {
+        types.add(cert.certification!.category!.name);
+      }
+    }
+    _availableCertificationTypes = types.toList()..sort();
+  }
+
+  void _applyFilters() {
+    // In-memory filtering and sorting - no API calls
+    setState(() {
+      // Apply filters to the base certifications list
+      if (_selectedCertificationTypes.isEmpty) {
+        // No filters selected - show all certifications
+        _filteredCertifications =
+            List<UserCertificationDetail>.from(_certifications);
+      } else {
+        // Apply certification type filters
+        _filteredCertifications = _certifications.where((cert) {
+          final certType = cert.certification?.category?.name;
+          return certType != null &&
+              _selectedCertificationTypes.contains(certType);
+        }).toList();
+      }
+
+      // Apply in-memory sorting to filtered results
+      _filteredCertifications.sort((a, b) => _isMostRecentFirst
           ? b.certificationUser.createdAt
               .compareTo(a.certificationUser.createdAt)
           : a.certificationUser.createdAt
               .compareTo(b.certificationUser.createdAt));
     });
+  }
+
+  void _toggleCertificationTypeFilter(String certType) {
+    // In-memory filter toggling - no API calls
+    if (certType == 'clear_all') {
+      // Clear all selected filters
+      _selectedCertificationTypes.clear();
+    } else {
+      // Toggle individual certification type filter
+      if (_selectedCertificationTypes.contains(certType)) {
+        _selectedCertificationTypes.remove(certType);
+      } else {
+        _selectedCertificationTypes.add(certType);
+      }
+    }
+
+    // Apply filters and update UI (in-memory only)
+    _applyFilters();
   }
 
   Widget _buildSortDropdown() {
@@ -261,6 +326,358 @@ class _CVViewPageState extends State<CVViewPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCvCreationTimelineItem() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline column with node - reduced width (30% smaller)
+          SizedBox(
+            width: isMobile
+                ? 70
+                : isTablet
+                    ? 77
+                    : 84,
+            child: Column(
+              children: [
+                // Timeline node with white circle background (CV creation)
+                Container(
+                  width: isMobile
+                      ? 24
+                      : isTablet
+                          ? 26
+                          : 28,
+                  height: isMobile
+                      ? 24
+                      : isTablet
+                          ? 26
+                          : 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.green.shade200,
+                      width: 2,
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade600,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.star,
+                      color: Colors.white,
+                      size: isMobile
+                          ? 10
+                          : isTablet
+                              ? 11
+                              : 12,
+                    ),
+                  ),
+                ),
+
+                // Vertical line below node (attached to the node)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(
+              width: isMobile
+                  ? 8
+                  : isTablet
+                      ? 10
+                      : 12),
+
+          // CV Creation card - expands as needed
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.green.shade50,
+                    Colors.green.shade100.withValues(alpha: 0.7),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.green.shade300,
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withValues(alpha: 0.2),
+                    spreadRadius: 0,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with icon
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.green.shade400,
+                                Colors.green.shade600,
+                              ],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withValues(alpha: 0.3),
+                                spreadRadius: 0,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.create,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Creazione CV',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade800,
+                                ),
+                              ),
+                              Text(
+                                'CV Digitale Certificato',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Serial number section
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.green.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.fingerprint,
+                            color: Colors.green.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Seriale: ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                          Text(
+                            _generateCVSerial(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade800,
+                              fontFamily: 'monospace',
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Description
+                    Text(
+                      'Il tuo CV digitale è stato creato e certificato sulla blockchain. Da questo momento tutte le certificazioni e le competenze aggiunte saranno verificabili e immutabili.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.green.shade700,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFiltersSection() {
+    if (_availableCertificationTypes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Icon(
+            Icons.filter_list,
+            size: 20,
+            color: Colors.grey.shade600,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Filtra per tipologia:',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Dropdown for type selection
+          Expanded(
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: PopupMenuButton<String>(
+                onSelected: _toggleCertificationTypeFilter,
+                offset: const Offset(0, 40),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _selectedCertificationTypes.isEmpty
+                              ? 'Seleziona tipologia'
+                              : '${_selectedCertificationTypes.length} tipologie selezionate',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: _selectedCertificationTypes.isEmpty
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.grey.shade600,
+                      ),
+                    ],
+                  ),
+                ),
+                itemBuilder: (context) => [
+                  ..._availableCertificationTypes.map((type) {
+                    final isSelected =
+                        _selectedCertificationTypes.contains(type);
+                    final localizedType = _getLocalizedCertificationType(type);
+
+                    return PopupMenuItem<String>(
+                      value: type,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: isSelected,
+                            onChanged: (_) =>
+                                _toggleCertificationTypeFilter(type),
+                            activeColor: Colors.grey.shade700,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              localizedType,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  if (_selectedCertificationTypes.isNotEmpty) ...[
+                    const PopupMenuDivider(),
+                    PopupMenuItem<String>(
+                      value: 'clear_all',
+                      child: Row(
+                        children: [
+                          Icon(Icons.clear,
+                              size: 20, color: Colors.red.shade600),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Rimuovi tutti i filtri',
+                            style: TextStyle(
+                              color: Colors.red.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1327,41 +1744,25 @@ class _CVViewPageState extends State<CVViewPage> {
         : isTablet
             ? 20.0
             : 24.0;
-    final titleFontSize = isMobile
-        ? 20.0
-        : isTablet
-            ? 24.0
-            : 28.0;
-    final subtitleFontSize = isMobile
-        ? 12.0
-        : isTablet
-            ? 13.0
-            : 14.0;
-    final buttonFontSize = isMobile
-        ? 10.0
-        : isTablet
-            ? 11.0
-            : 12.0;
-    final sectionSpacing = isMobile
-        ? 20.0
-        : isTablet
-            ? 24.0
-            : 32.0;
-    final smallSpacing = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
 
     // Show loading state
     if (_certificationsLoading) {
-      return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      return _buildStandardSectionWrapper(
         child: Container(
           decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            color: Colors.grey.shade50,
+            border: Border.all(
+              color: Colors.grey.shade200.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Padding(
             padding: EdgeInsets.all(cardPadding),
@@ -1373,73 +1774,23 @@ class _CVViewPageState extends State<CVViewPage> {
                       child: Text(
                         AppLocalizations.of(context)!.certifications,
                         style: TextStyle(
-                          fontSize: titleFontSize,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade800,
                         ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: isMobile
-                              ? 8
-                              : isTablet
-                                  ? 10
-                                  : 12,
-                          vertical: isMobile
-                              ? 4
-                              : isTablet
-                                  ? 5
-                                  : 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            spreadRadius: 0,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.mostRecent,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: buttonFontSize,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          SizedBox(width: isMobile ? 2 : 4),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: isMobile
-                                ? 14
-                                : isTablet
-                                    ? 15
-                                    : 16,
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildSortDropdown(),
                   ],
                 ),
-                SizedBox(height: sectionSpacing),
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                SizedBox(height: smallSpacing),
+                const SizedBox(height: 32),
+                const Center(child: CircularProgressIndicator()),
+                const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context)!.loadingCertifications,
                   style: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: subtitleFontSize,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -1451,13 +1802,22 @@ class _CVViewPageState extends State<CVViewPage> {
 
     // Show error state
     if (_certificationsError != null) {
-      return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      return _buildStandardSectionWrapper(
         child: Container(
           decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            color: Colors.grey.shade50,
+            border: Border.all(
+              color: Colors.grey.shade200.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -1513,74 +1873,6 @@ class _CVViewPageState extends State<CVViewPage> {
       );
     }
 
-    // Show empty state
-    if (_certifications.isEmpty) {
-      return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.grey.shade50,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.certifications,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                    const Spacer(),
-                    _buildSortDropdown(),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '0 ${AppLocalizations.of(context)!.verifiedCertifications}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Icon(
-                  Icons.workspace_premium_outlined,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  AppLocalizations.of(context)!.noCertificationsFound,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  AppLocalizations.of(context)!.yourVerifiedCertifications,
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return _buildStandardSectionWrapper(
       child: Container(
         decoration: BoxDecoration(
@@ -1603,7 +1895,7 @@ class _CVViewPageState extends State<CVViewPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with title and sort button - matching image exactly
+              // Header with title and controls
               Row(
                 children: [
                   Column(
@@ -1619,7 +1911,7 @@ class _CVViewPageState extends State<CVViewPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${_certifications.length} ${AppLocalizations.of(context)!.verifiedCertifications}',
+                        '${_filteredCertifications.length} ${_filteredCertifications.length == 1 ? 'certificazione visualizzata' : 'certificazioni visualizzate'}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade600,
@@ -1632,134 +1924,15 @@ class _CVViewPageState extends State<CVViewPage> {
                   _buildSortDropdown(),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
-              // Timeline with certifications - each item aligned independently
-              Column(
-                children: (_isMostRecentFirst
-                        ? _certifications
-                        : _certifications.reversed.toList())
-                    .asMap()
-                    .entries
-                    .map((entry) {
-                  final index = entry.key;
-                  final cert = entry.value;
-                  final isLast = index == _certifications.length - 1;
+              // Filters section
+              _buildFiltersSection(),
 
-                  return IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Timeline column with date and node - fixed position
-                        SizedBox(
-                          width: isMobile
-                              ? 100
-                              : isTablet
-                                  ? 110
-                                  : 120,
-                          child: Column(
-                            children: [
-                              // Date bubble - fixed at top
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: isMobile
-                                        ? 6
-                                        : isTablet
-                                            ? 8
-                                            : 10,
-                                    vertical: isMobile
-                                        ? 3
-                                        : isTablet
-                                            ? 4
-                                            : 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  _formatCertificationDate(
-                                      cert.certificationUser.createdAt),
-                                  style: TextStyle(
-                                    color: Colors.blue.shade800,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: isMobile
-                                        ? 12
-                                        : isTablet
-                                            ? 14
-                                            : 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+              const SizedBox(height: 8),
 
-                              SizedBox(height: 8),
-
-                              // Timeline node - fixed position
-                              Container(
-                                width: isMobile
-                                    ? 8
-                                    : isTablet
-                                        ? 10
-                                        : 12,
-                                height: isMobile
-                                    ? 8
-                                    : isTablet
-                                        ? 10
-                                        : 12,
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-
-                              // Vertical line below node to bottom of card
-                              Expanded(
-                                child: Container(
-                                  width: 2,
-                                  color: Colors.grey.shade300,
-                                  margin: const EdgeInsets.only(top: 12),
-                                ),
-                              ),
-                              // Extra spacer line to increase inter-card spacing (except for last)
-                              if (!isLast)
-                                Container(
-                                  width: 2,
-                                  height: isMobile
-                                      ? 40
-                                      : isTablet
-                                          ? 48
-                                          : 56,
-                                  color: Colors.grey.shade300,
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(
-                            width: isMobile
-                                ? 12
-                                : isTablet
-                                    ? 16
-                                    : 20),
-
-                        // Certification card - expands as needed
-                        Expanded(
-                          child: reusable.CertificationCard(
-                            certification: cert,
-                            showImageHeader: true,
-                            showLegalEntityLogo: true,
-                            showMediaSection: true,
-                            showOpenBadgeButton: true,
-                            showLinkedInButton: true,
-                            showCertifiedUserName:
-                                false, // Hide certified user name in CV view
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+              // Combined timeline with CV creation event and certifications
+              _buildCombinedTimeline(),
             ],
           ),
         ),
@@ -1767,28 +1940,472 @@ class _CVViewPageState extends State<CVViewPage> {
     );
   }
 
-  String _formatCertificationDate(DateTime date) {
-    final localizations = AppLocalizations.of(context)!;
-    final months = [
-      localizations.monthJan,
-      localizations.monthFeb,
-      localizations.monthMar,
-      localizations.monthApr,
-      localizations.monthMay,
-      localizations.monthJun,
-      localizations.monthJul,
-      localizations.monthAug,
-      localizations.monthSep,
-      localizations.monthOct,
-      localizations.monthNov,
-      localizations.monthDec,
-    ];
+  // Pills are now integrated into the certification card blur overlay
 
-    final day = date.day.toString().padLeft(2, '0');
-    final month = months[date.month - 1];
-    final year = date.year;
+  Widget _buildCombinedTimeline() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    return '$day $month $year';
+    // Create combined timeline events
+    List<Widget> timelineEvents = [];
+
+    // Add CV creation event and certifications based on chronological order
+    final allEvents = <DateTime, Widget>{};
+
+    // Add CV creation event
+    allEvents[_cv!.createdAt] = _buildCvCreationTimelineItem();
+
+    // Add certification events
+    for (int i = 0; i < _filteredCertifications.length; i++) {
+      final cert = _filteredCertifications[i];
+      final isLast = i == _filteredCertifications.length - 1;
+
+      allEvents[cert.certificationUser.createdAt] = IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Timeline column with node - reduced width (30% smaller)
+            SizedBox(
+              width: isMobile
+                  ? 70
+                  : isTablet
+                      ? 77
+                      : 84,
+              child: Column(
+                children: [
+                  // Connecting line from previous event
+                  Container(
+                    width: 2,
+                    height: 60, // Height to center node with image
+                    color: Colors.grey.shade300,
+                  ),
+
+                  // Timeline node with white circle background
+                  Container(
+                    width: isMobile
+                        ? 20
+                        : isTablet
+                            ? 22
+                            : 24,
+                    height: isMobile
+                        ? 20
+                        : isTablet
+                            ? 22
+                            : 24,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: Colors.grey.shade200,
+                        width: 1,
+                      ),
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+
+                  // Vertical line below node to bottom of card (attached to the node)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+                  // Extra spacer line to increase inter-card spacing (except for last)
+                  if (!isLast)
+                    Container(
+                      width: 2,
+                      height: isMobile
+                          ? 100 // Increased from 60 for better card separation
+                          : isTablet
+                              ? 120 // Increased from 72 for better card separation
+                              : 140, // Increased from 84 for better card separation
+                      color: Colors.grey.shade300,
+                    ),
+                ],
+              ),
+            ),
+
+            SizedBox(
+                width: isMobile
+                    ? 8
+                    : isTablet
+                        ? 10
+                        : 12),
+
+            // Certification card with pills - expands as needed
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Certification card (pills now integrated in blur overlay)
+                  reusable.CertificationCard(
+                    certification: cert,
+                    showImageHeader: true,
+                    showLegalEntityLogo: true,
+                    showMediaSection: true,
+                    showOpenBadgeButton: true,
+                    showCertifiedUserName:
+                        false, // Hide certified user name in CV view
+                    showSerialNumber: false, // Hidden - shown in pills above
+                    showCreatedDate: false, // Hidden - shown in pills above
+                    showLocation: false, // Hidden - shown in pills above
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Sort events by date (most recent first or oldest first based on user preference)
+    final sortedDates = allEvents.keys.toList();
+    sortedDates
+        .sort((a, b) => _isMostRecentFirst ? b.compareTo(a) : a.compareTo(b));
+
+    // Build timeline from sorted events with proper line connections
+    timelineEvents = [];
+    for (int i = 0; i < sortedDates.length; i++) {
+      final date = sortedDates[i];
+      var widget = allEvents[date]!;
+
+      // Remove top line from first timeline item if it's a certification
+      if (i == 0 && date != _cv!.createdAt) {
+        widget = _buildCertificationTimelineItemWithoutTopLine(
+          _filteredCertifications
+              .firstWhere((cert) => cert.certificationUser.createdAt == date),
+          i ==
+              sortedDates.length -
+                  1, // True if this is the last item in timeline
+        );
+      }
+
+      // Update isLast for regular certification items
+      if (date != _cv!.createdAt) {
+        // This is a certification, rebuild it with correct isLast parameter
+        if (i != 0) {
+          // Not first item, so we use the regular construction
+          final cert = _filteredCertifications
+              .firstWhere((cert) => cert.certificationUser.createdAt == date);
+          final certIndex = _filteredCertifications.indexOf(cert);
+          final originalIsLast =
+              certIndex == _filteredCertifications.length - 1;
+
+          // If this was built with wrong isLast, rebuild it
+          if (originalIsLast != (i == sortedDates.length - 1)) {
+            widget = _buildCertificationTimelineItem(
+              cert,
+              certIndex,
+              i ==
+                  sortedDates.length -
+                      1, // Corrected isLast based on timeline position
+            );
+          }
+        }
+      }
+
+      timelineEvents.add(widget);
+    }
+
+    // Show empty state if no certifications and only CV creation
+    if (_filteredCertifications.isEmpty) {
+      return Column(
+        children: [
+          // Always show CV creation event
+          _buildCvCreationTimelineItem(),
+          const SizedBox(height: 60),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.workspace_premium_outlined,
+                  size: 48,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _selectedCertificationTypes.isNotEmpty
+                      ? 'Nessuna certificazione trovata per i filtri selezionati'
+                      : AppLocalizations.of(context)!.noCertificationsFound,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _selectedCertificationTypes.isNotEmpty
+                      ? 'Prova a rimuovere alcuni filtri per visualizzare più certificazioni.'
+                      : AppLocalizations.of(context)!
+                          .yourVerifiedCertifications,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(children: timelineEvents);
+  }
+
+  Widget _buildCertificationTimelineItemWithoutTopLine(
+      UserCertificationDetail cert, bool isLast) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline column with node - reduced width (30% smaller)
+          SizedBox(
+            width: isMobile
+                ? 70
+                : isTablet
+                    ? 77
+                    : 84,
+            child: Column(
+              children: [
+                // No connecting line from previous event (this is the first item)
+
+                // Timeline node with white circle background
+                Container(
+                  width: isMobile
+                      ? 20
+                      : isTablet
+                          ? 22
+                          : 24,
+                  height: isMobile
+                      ? 20
+                      : isTablet
+                          ? 22
+                          : 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+
+                // Vertical line below node to bottom of card
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                // Extra spacer line to increase inter-card spacing (except for last)
+                if (!isLast)
+                  Container(
+                    width: 2,
+                    height: isMobile
+                        ? 60
+                        : isTablet
+                            ? 72
+                            : 84,
+                    color: Colors.grey.shade300,
+                  ),
+              ],
+            ),
+          ),
+
+          SizedBox(
+              width: isMobile
+                  ? 8
+                  : isTablet
+                      ? 10
+                      : 12),
+
+          // Certification card with pills - expands as needed
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Certification card (pills now integrated in blur overlay)
+                reusable.CertificationCard(
+                  certification: cert,
+                  showImageHeader: true,
+                  showLegalEntityLogo: true,
+                  showMediaSection: true,
+                  showOpenBadgeButton: true,
+                  showCertifiedUserName:
+                      false, // Hide certified user name in CV view
+                  showSerialNumber: false, // Hidden - shown in pills above
+                  showCreatedDate: false, // Hidden - shown in pills above
+                  showLocation: false, // Hidden - shown in pills above
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationTimelineItem(
+      UserCertificationDetail cert, int certIndex, bool isLast) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline column with node - reduced width (30% smaller)
+          SizedBox(
+            width: isMobile
+                ? 70
+                : isTablet
+                    ? 77
+                    : 84,
+            child: Column(
+              children: [
+                // Connecting line from previous event
+                Container(
+                  width: 2,
+                  height: 60, // Height to center node with image
+                  color: Colors.grey.shade300,
+                ),
+
+                // Timeline node with white circle background
+                Container(
+                  width: isMobile
+                      ? 20
+                      : isTablet
+                          ? 22
+                          : 24,
+                  height: isMobile
+                      ? 20
+                      : isTablet
+                          ? 22
+                          : 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+
+                // Vertical line below node to bottom of card
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                // Extra spacer line to increase inter-card spacing (except for last)
+                if (!isLast)
+                  Container(
+                    width: 2,
+                    height: isMobile
+                        ? 60
+                        : isTablet
+                            ? 72
+                            : 84,
+                    color: Colors.grey.shade300,
+                  ),
+              ],
+            ),
+          ),
+
+          SizedBox(
+              width: isMobile
+                  ? 8
+                  : isTablet
+                      ? 10
+                      : 12),
+
+          // Certification card with pills - expands as needed
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Certification card (pills now integrated in blur overlay)
+                reusable.CertificationCard(
+                  certification: cert,
+                  showImageHeader: true,
+                  showLegalEntityLogo: true,
+                  showMediaSection: true,
+                  showOpenBadgeButton: true,
+                  showCertifiedUserName:
+                      false, // Hide certified user name in CV view
+                  showSerialNumber: false, // Hidden - shown in pills above
+                  showCreatedDate: false, // Hidden - shown in pills above
+                  showLocation: false, // Hidden - shown in pills above
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // Deprecated method removed - now using reusable.CertificationCard widget
@@ -1908,74 +2525,9 @@ class _CVViewPageState extends State<CVViewPage> {
                                 color: Colors.grey.shade800,
                               ),
                             ),
-                          SizedBox(height: isMobile ? 8 : 12),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: isMobile
-                                    ? 8
-                                    : isTablet
-                                        ? 9
-                                        : 10,
-                                vertical: isMobile
-                                    ? 4
-                                    : isTablet
-                                        ? 5
-                                        : 6),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _formatCertificationDate(
-                                  cert.certificationUser.createdAt),
-                              style: TextStyle(
-                                color: Colors.blue.shade800,
-                                fontWeight: FontWeight.w600,
-                                fontSize: isMobile
-                                    ? 11
-                                    : isTablet
-                                        ? 12
-                                        : 13,
-                              ),
-                            ),
-                          ),
                         ],
                       )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: isMobile
-                                    ? 8
-                                    : isTablet
-                                        ? 9
-                                        : 10,
-                                vertical: isMobile
-                                    ? 4
-                                    : isTablet
-                                        ? 5
-                                        : 6),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _formatCertificationDate(
-                                  cert.certificationUser.createdAt),
-                              style: TextStyle(
-                                color: Colors.blue.shade800,
-                                fontWeight: FontWeight.w600,
-                                fontSize: isMobile
-                                    ? 11
-                                    : isTablet
-                                        ? 12
-                                        : 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    : const SizedBox.shrink(),
                 SizedBox(
                     height: isMobile
                         ? 12
@@ -2272,8 +2824,6 @@ class _CVViewPageState extends State<CVViewPage> {
                 // Attached Media Section
                 _buildAttachedMediaSection(cert),
 
-                // Open Badge Section
-                _buildOpenBadgeButtonSection(cert),
               ],
             ),
           ),
@@ -2294,44 +2844,6 @@ class _CVViewPageState extends State<CVViewPage> {
     return AttachedMediaWidget(
       certification: cert,
       totalMediaCount: totalMediaCount,
-    );
-  }
-
-  Widget _buildOpenBadgeButtonSection(UserCertificationDetail cert) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
-    final spacing = isMobile
-        ? 12.0
-        : isTablet
-            ? 14.0
-            : 16.0;
-
-    return Container(
-      margin: EdgeInsets.only(top: spacing),
-      child: Column(
-        children: [
-          // LinkedIn Integration Button - Centrato con 30% di ampiezza
-          Center(
-            child: SizedBox(
-              width: screenWidth * 0.3, // 30% della larghezza dello schermo
-              child: _buildLinkedInButton(cert),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Open Badge Button - Centrato con 30% di ampiezza
-          Center(
-            child: SizedBox(
-              width: screenWidth * 0.3, // 30% della larghezza dello schermo
-              child: OpenBadgeButton(
-                certification: cert,
-                isCompact: false,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -3415,235 +3927,6 @@ class _CVViewPageState extends State<CVViewPage> {
       // Memorizza null in cache per evitare chiamate ripetute
       _legalEntityLogos[legalEntityId] = null;
       return null;
-    }
-  }
-
-  /// Genera l'URL LinkedIn per una certificazione specifica
-  Future<String> _generateLinkedInUrl(UserCertificationDetail cert) async {
-    final certName = cert.certification?.category?.name != null
-        ? _getLocalizedCertificationType(cert.certification!.category!.name)
-        : 'Certification';
-    final organizationName = await _getOrganizationName(cert);
-    final issueDate = cert.certificationUser.createdAt;
-    final certId = cert.certificationUser.idCertificationUser;
-
-    // URL di base per aggiungere certificazioni su LinkedIn
-    final baseUrl =
-        'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME';
-
-    // Genera URL del certificato (se disponibile)
-    final certUrl = cert.certification?.idCertification != null
-        ? 'https://jetcv.com/certification/${cert.certification!.idCertification}'
-        : 'https://jetcv.com';
-
-    // Parametri della certificazione
-    final params = {
-      'name': Uri.encodeComponent(certName),
-      'organizationName': Uri.encodeComponent(organizationName),
-      'issueYear': issueDate.year.toString(),
-      'issueMonth': issueDate.month.toString(),
-      'certUrl': Uri.encodeComponent(certUrl),
-      'certId': certId,
-    };
-
-    // Aggiungi parametri di scadenza se disponibili (opzionale)
-    // LinkedIn accetta anche expirationYear e expirationMonth
-    final expirationDate = cert.certification?.closedAt;
-    if (expirationDate != null) {
-      params['expirationYear'] = expirationDate.year.toString();
-      params['expirationMonth'] = expirationDate.month.toString();
-    }
-
-    // Costruisce l'URL finale
-    final queryString =
-        params.entries.map((e) => '${e.key}=${e.value}').join('&');
-
-    return '$baseUrl&$queryString';
-  }
-
-  /// Costruisce il pulsante LinkedIn per una certificazione specifica
-  Widget _buildLinkedInButton(UserCertificationDetail cert) {
-    return ElevatedButton.icon(
-      onPressed: () => _openLinkedInForCertification(cert),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF0077B5), // LinkedIn blue
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      icon: const Icon(Icons.link, size: 20),
-      label: Text(
-        AppLocalizations.of(context)!.addToLinkedIn,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  /// Apre LinkedIn per una certificazione specifica
-  Future<void> _openLinkedInForCertification(
-      UserCertificationDetail cert) async {
-    try {
-      // Mostra un indicatore di caricamento
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text(AppLocalizations.of(context)!.preparingLinkedIn),
-              ],
-            ),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-
-      final linkedInUrl = await _generateLinkedInUrl(cert);
-      debugPrint(
-          '🔗 Opening LinkedIn for certification: ${cert.certification?.category?.name}');
-      debugPrint('🔗 LinkedIn URL: $linkedInUrl');
-
-      // Apre l'URL in una nuova finestra/tab
-      await launchUrl(Uri.parse(linkedInUrl),
-          mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint('❌ Error opening LinkedIn: $e');
-      // Mostra un messaggio di errore all'utente
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Gestisce l'aggiunta delle certificazioni a LinkedIn (metodo legacy - da rimuovere)
-  Future<void> _addCertificationsToLinkedIn() async {
-    try {
-      debugPrint('🔗 Opening LinkedIn for certifications');
-
-      // Check if certifications are available
-      if (_certifications.isEmpty) {
-        debugPrint('❌ No certifications available for LinkedIn integration');
-        return;
-      }
-
-      // Mostra un dialog di conferma con i dettagli della certificazione
-      final firstCert = _certifications.first;
-      final certName = firstCert.certification?.category?.name != null
-          ? _getLocalizedCertificationType(
-              firstCert.certification!.category!.name)
-          : 'Certification';
-      final issuer = firstCert.certification?.idCertifier ?? 'JetCV';
-      final issueDate = firstCert.certificationUser.createdAt;
-
-      final shouldProceed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context)!.linkedInIntegration),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(AppLocalizations.of(context)!
-                    .shareCertificationsOnLinkedIn),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '📜 Certification Details:',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('${AppLocalizations.of(context)!.name}: $certName'),
-                      Text('${AppLocalizations.of(context)!.issuer}: $issuer'),
-                      Text(
-                          'Issue Date: ${issueDate.day}/${issueDate.month}/${issueDate.year}'),
-                      const SizedBox(height: 8),
-                      Text(
-                        'This will copy the certification details to your clipboard and open LinkedIn. Then go to your profile → Add profile section → Licenses & certifications and paste the details.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(AppLocalizations.of(context)!.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0077B5),
-                foregroundColor: Colors.white,
-              ),
-              child: Text(AppLocalizations.of(context)!.addToLinkedIn),
-            ),
-          ],
-        ),
-      );
-
-      if (shouldProceed == true) {
-        // Apre LinkedIn per aggiungere competenze al profilo
-        await LinkedInService.addSkillsToLinkedInProfile(
-          certifications: _certifications,
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'LinkedIn opened! Certification details have been copied to your clipboard. Go to your LinkedIn profile → Add profile section → Licenses & certifications, then paste the details.'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ Error opening LinkedIn: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '${AppLocalizations.of(context)!.errorOpeningLinkedIn}: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 

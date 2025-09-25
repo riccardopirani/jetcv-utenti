@@ -99,7 +99,7 @@ class CvEdgeService {
   /// - Estrae l'utente dalla sessione corrente
   /// - Carica il CV dell'utente
   /// - Se publicId è null, genera un NanoID e aggiorna la riga
-  /// - Restituisce l'URL pubblico: https://www.jetcv.com/cv/[publicId]
+  /// - Restituisce l'URL pubblico usando AppConfig.getCvUrl(publicId)
   ///
   /// Restituisce un [EdgeFunctionResponse<Map<String, String>>] con:
   /// - success: true se l'URL è stato generato con successo

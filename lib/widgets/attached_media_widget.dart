@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 import 'package:jetcv__utenti/services/certification_service.dart';
+import 'package:jetcv__utenti/services/edge_function_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AttachedMediaWidget extends StatefulWidget {
   final UserCertificationDetail certification;
@@ -19,110 +21,16 @@ class AttachedMediaWidget extends StatefulWidget {
 class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
   bool _isExpanded = false;
 
-  /// Determina l'estensione del file basata sul tipo (usa la stessa logica di MediaDownloadService)
-  String _getFileExtension(String? fileType, CertificationMediaItem media) {
-    debugPrint('🔍 _getFileExtension called with fileType: "$fileType"');
-    debugPrint('🔍 _getFileExtension called with media.name: "${media.name}"');
-
-    if (fileType == null) {
-      debugPrint('🔍 fileType is null, returning .bin');
-      return '.bin';
-    }
-
-    final lowerFileType = fileType.toLowerCase().trim();
-    debugPrint('🔍 lowerFileType: "$lowerFileType"');
-
-    switch (lowerFileType) {
-      case 'image/jpeg':
-      case 'jpeg':
-      case 'image': // Aggiunto caso generico per 'image' dal database
-        return '.jpg';
-      case 'image/png':
-      case 'png':
-        return '.png';
-      case 'image/gif':
-      case 'gif':
-        return '.gif';
-      case 'image/webp':
-      case 'webp':
-        return '.webp';
-      case 'application/pdf':
-      case 'pdf':
-      case 'pdf ':
-      case ' pdf':
-      case 'pdf.':
-      case '.pdf':
-      case 'document': // Aggiunto caso per 'document' dal database
-        debugPrint('🔍 Matched PDF case, returning .pdf');
-        return '.pdf';
-      case 'text/plain':
-      case 'txt':
-        return '.txt';
-      case 'application/msword':
-      case 'doc':
-        return '.doc';
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-      case 'docx':
-        return '.docx';
-      case 'application/vnd.ms-excel':
-      case 'xls':
-        return '.xls';
-      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-      case 'xlsx':
-        return '.xlsx';
-      case 'application/vnd.ms-powerpoint':
-      case 'ppt':
-        return '.ppt';
-      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-      case 'pptx':
-        return '.pptx';
-      case 'video/mp4':
-      case 'mp4':
-      case 'video': // Aggiunto caso generico per 'video' dal database
-        return '.mp4';
-      case 'video/avi':
-      case 'avi':
-        return '.avi';
-      case 'video/mov':
-      case 'mov':
-        return '.mov';
-      case 'audio/mp3':
-      case 'mp3':
-        return '.mp3';
-      case 'audio/wav':
-      case 'wav':
-        return '.wav';
-      default:
-        debugPrint('🔍 No match found, trying to extract from name');
-        // Prova a estrarre l'estensione dal nome del file se disponibile
-        final extracted = _extractExtensionFromName(media.name);
-        debugPrint('🔍 Extracted from name: "$extracted"');
-        return extracted ?? '.bin';
-    }
-  }
-
-  /// Estrae l'estensione dal nome del file come fallback
-  String? _extractExtensionFromName(String? fileName) {
-    if (fileName == null || fileName.isEmpty) return null;
-
-    final lastDotIndex = fileName.lastIndexOf('.');
-    if (lastDotIndex != -1 && lastDotIndex < fileName.length - 1) {
-      return fileName.substring(lastDotIndex);
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1024;
 
-    // Fixed padding and sizing for all devices
-    final headerPadding = const EdgeInsets.all(20);
-    final iconSize = 20.0;
-    final folderIconSize = 36.0;
-    final titleFontSize = 18.0;
-    final subtitleFontSize = 14.0;
+    // Enhanced sizing for better visibility
+    final headerPadding = const EdgeInsets.all(14);
+    final iconSize = 20.0; // Increased from 16.0 for better visibility
+    final folderIconSize = 28.0;
+    final titleFontSize = 14.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,16 +63,15 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.folder_outlined,
+                    Icons.perm_media,
                     size: iconSize,
                     color: Colors.grey.shade600,
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Title and subtitle
+                // Title with info icon
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
                       Text(
                         AppLocalizations.of(context)!
@@ -175,16 +82,26 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
                           color: Colors.grey.shade800,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        AppLocalizations.of(context)!
-                            .documentationAndRelatedContent,
-                        style: TextStyle(
-                          fontSize: subtitleFontSize,
-                          color: Colors.grey.shade600,
+                      const SizedBox(width: 4),
+                      Tooltip(
+                        message:
+                            "Gli allegati sono suddivisi tra media di contesto e media certificativi",
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        textStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                        preferBelow: false,
+                        waitDuration: const Duration(milliseconds: 500),
+                        showDuration: const Duration(seconds: 3),
+                        child: Icon(
+                          Icons.info_outline,
+                          size: 16, // Increased from 12 for better visibility
+                          color: Colors.grey.shade500,
+                        ),
                       ),
                     ],
                   ),
@@ -204,117 +121,99 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
         // Expanded content
         if (_isExpanded) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Info box
+          // Grouped media container with background
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.blue.shade200,
+                color: Colors.grey.shade200,
                 width: 1,
               ),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 18,
-                  color: Colors.blue.shade600,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(context)!.mediaDividedInfo,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue.shade700,
-                    ),
+                // Media sections - responsive layout
+                if (isDesktop &&
+                    (widget.certification.media.directMedia.isNotEmpty ||
+                        widget.certification.media.linkedMedia.isNotEmpty)) ...[
+                  // Desktop: side by side layout
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Generic Media Section
+                      if (widget
+                          .certification.media.directMedia.isNotEmpty) ...[
+                        Expanded(
+                          child: _buildMediaSection(
+                            title: AppLocalizations.of(context)!.genericMedia,
+                            subtitle:
+                                "Materiale pubblico inerente la certificazione",
+                            icon: Icons.description_outlined,
+                            mediaItems: widget.certification.media.directMedia,
+                            isDesktop: true,
+                          ),
+                        ),
+                        if (widget.certification.media.linkedMedia.isNotEmpty)
+                          const SizedBox(width: 16),
+                      ],
+
+                      // Personal Media Section
+                      if (widget
+                          .certification.media.linkedMedia.isNotEmpty) ...[
+                        Expanded(
+                          child: _buildMediaSection(
+                            title: AppLocalizations.of(context)!.personalMedia,
+                            subtitle:
+                                "Documenti specifici della tua certificazione",
+                            icon: Icons.person_outline,
+                            mediaItems: widget.certification.media.linkedMedia
+                                .map((linked) => linked.media)
+                                .where((media) => media != null)
+                                .cast<CertificationMediaItem>()
+                                .toList(),
+                            isDesktop: true,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Media sections - responsive layout
-          if (isDesktop &&
-              (widget.certification.media.directMedia.isNotEmpty ||
-                  widget.certification.media.linkedMedia.isNotEmpty)) ...[
-            // Desktop: side by side layout
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Generic Media Section
-                if (widget.certification.media.directMedia.isNotEmpty) ...[
-                  Expanded(
-                    child: _buildMediaSection(
+                ] else ...[
+                  // Mobile/Tablet: stacked layout
+                  // Generic Media Section
+                  if (widget.certification.media.directMedia.isNotEmpty) ...[
+                    _buildMediaSection(
                       title: AppLocalizations.of(context)!.genericMedia,
-                      subtitle: AppLocalizations.of(context)!
-                          .didacticMaterialAndOfficialDocumentation,
+                      subtitle: "Materiale pubblico inerente la certificazione",
                       icon: Icons.description_outlined,
                       mediaItems: widget.certification.media.directMedia,
-                      isDesktop: true,
+                      isDesktop: false,
                     ),
-                  ),
-                  if (widget.certification.media.linkedMedia.isNotEmpty)
-                    const SizedBox(width: 16),
-                ],
+                    const SizedBox(height: 12),
+                  ],
 
-                // Personal Media Section
-                if (widget.certification.media.linkedMedia.isNotEmpty) ...[
-                  Expanded(
-                    child: _buildMediaSection(
+                  // Personal Media Section
+                  if (widget.certification.media.linkedMedia.isNotEmpty) ...[
+                    _buildMediaSection(
                       title: AppLocalizations.of(context)!.personalMedia,
-                      subtitle: AppLocalizations.of(context)!
-                          .documentsAndContentOfYourCertificationPath,
+                      subtitle: "Documenti specifici della tua certificazione",
                       icon: Icons.person_outline,
                       mediaItems: widget.certification.media.linkedMedia
                           .map((linked) => linked.media)
                           .where((media) => media != null)
                           .cast<CertificationMediaItem>()
                           .toList(),
-                      isDesktop: true,
+                      isDesktop: false,
                     ),
-                  ),
+                  ],
                 ],
-              ],
-            ),
-          ] else ...[
-            // Mobile/Tablet: stacked layout
-            // Generic Media Section
-            if (widget.certification.media.directMedia.isNotEmpty) ...[
-              _buildMediaSection(
-                title: AppLocalizations.of(context)!.genericMedia,
-                subtitle: AppLocalizations.of(context)!
-                    .didacticMaterialAndOfficialDocumentation,
-                icon: Icons.description_outlined,
-                mediaItems: widget.certification.media.directMedia,
-                isDesktop: false,
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Personal Media Section
-            if (widget.certification.media.linkedMedia.isNotEmpty) ...[
-              _buildMediaSection(
-                title: AppLocalizations.of(context)!.personalMedia,
-                subtitle: AppLocalizations.of(context)!
-                    .documentsAndContentOfYourCertificationPath,
-                icon: Icons.person_outline,
-                mediaItems: widget.certification.media.linkedMedia
-                    .map((linked) => linked.media)
-                    .where((media) => media != null)
-                    .cast<CertificationMediaItem>()
-                    .toList(),
-                isDesktop: false,
-              ),
-            ],
-          ],
-        ],
+              ], // Close children of Column
+            ), // Close Container
+          ), // Close grouped media container
+        ], // Close expanded content
       ],
     );
   }
@@ -326,10 +225,11 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
     required List<CertificationMediaItem> mediaItems,
     required bool isDesktop,
   }) {
-    final iconSize = 18.0;
-    final titleFontSize = 16.0;
-    final subtitleFontSize = 13.0;
-    final spacing = 12.0;
+    final iconSize =
+        20.0; // Increased from 16.0 for consistency and better visibility
+    final titleFontSize = 14.0;
+    final subtitleFontSize = 11.0;
+    final spacing = 10.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,41 +319,46 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
 
   Widget _buildMediaItemContent(CertificationMediaItem media, bool isRealTime,
       bool isMobile, bool isTablet, double screenWidth) {
-    // Determine status based on acquisition_type
+    // Determine status based on acquisition_type with icons
     final String statusText;
     final Color statusColor;
+    final IconData statusIcon;
     final Color statusTextColor = Colors.white;
 
     if (media.acquisitionType?.toLowerCase() == 'realtime') {
       statusText = 'Real-time';
-      statusColor = Colors.green;
+      statusColor = Colors.red;
+      statusIcon = Icons.live_tv;
     } else if (media.acquisitionType?.toLowerCase() == 'deferred') {
       statusText = 'Caricato';
-      statusColor = Colors.orange;
+      statusColor = Colors.grey.shade700;
+      statusIcon = Icons.cloud_upload;
     } else {
       // Fallback for unknown acquisition types
       statusText = media.acquisitionType ?? 'Sconosciuto';
       statusColor = Colors.grey.shade400;
+      statusIcon = Icons.help_outline;
     }
 
     final icon = _getMediaIcon(media.fileType);
-    final actionIcon = media.acquisitionType?.toLowerCase() == 'realtime'
-        ? Icons.visibility
-        : Icons.info;
+    const actionIcon = Icons.download;
 
-    // Fixed sizing for all devices
-    final itemPadding = const EdgeInsets.all(12);
-    final iconSize = 32.0;
-    final mediaIconSize = 16.0;
-    final titleFontSize = 13.0;
-    final descriptionFontSize = 14.0;
-    final timeFontSize = 13.0;
-    final statusFontSize = 9.0;
-    final actionIconSize = 16.0;
-    final actionPadding = 8.0;
+    // Enhanced sizing for better readability
+    final itemPadding = const EdgeInsets.all(10);
+    final iconSize = 28.0;
+    final mediaIconSize = isMobile ? 14.0 : 16.0;
+    final titleFontSize = isMobile ? 12.0 : 13.0;
+    final descriptionFontSize =
+        isMobile ? 13.0 : 14.0; // Increased for better readability
+    final timeFontSize =
+        isMobile ? 12.0 : 13.0; // Increased for better readability
+    final statusFontSize =
+        isMobile ? 10.0 : 11.0; // Increased for better readability
+    final actionIconSize = isMobile ? 14.0 : 16.0;
+    final actionPadding = 6.0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 6),
       padding: itemPadding,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -495,41 +400,85 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        media.name ?? 'Media',
-                        style: TextStyle(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: media.title?.isNotEmpty == true
+                          ? Text(
+                              media.title!,
+                              style: TextStyle(
+                                fontSize: titleFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : const SizedBox
+                              .shrink(), // Don't show anything if title is null/empty
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        statusText,
-                        style: TextStyle(
-                          fontSize: statusFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: statusTextColor,
+                    // Pill and download button aligned together
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                statusIcon,
+                                size: statusFontSize + 2,
+                                color: statusTextColor,
+                              ),
+                              const SizedBox(
+                                  width:
+                                      6), // Increased spacing between icon and text
+                              Text(
+                                statusText,
+                                style: TextStyle(
+                                  fontSize: statusFontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: statusTextColor,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        // Download button
+                        GestureDetector(
+                          onTap: () => _handleMediaAction(media),
+                          child: Container(
+                            padding: EdgeInsets.all(actionPadding),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              actionIcon,
+                              size: actionIconSize,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                if (media.description != null) ...[
-                  const SizedBox(height: 4),
+                if (media.description?.isNotEmpty == true) ...[
+                  // Only add spacing if title was shown
+                  if (media.title?.isNotEmpty == true)
+                    const SizedBox(height: 4),
                   Text(
                     media.description!,
                     style: TextStyle(
@@ -566,65 +515,129 @@ class _AttachedMediaWidgetState extends State<AttachedMediaWidget> {
               ],
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Action button
-          GestureDetector(
-            onTap: () => _handleMediaAction(media),
-            child: Container(
-              padding: EdgeInsets.all(actionPadding),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                actionIcon,
-                size: actionIconSize,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  /// Gestisce l'azione del media (mostra info placeholder)
-  void _handleMediaAction(CertificationMediaItem media) {
-    // Show placeholder info message since we don't check file existence
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Media: ${media.name ?? 'Senza nome'}\n'
-            'Tipo: ${media.fileType ?? 'Non specificato'}\n'
-            'Hash: ${media.idMediaHash ?? 'Non disponibile'}\n'
-            'Questo è un placeholder dai dati API'),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  /// Handles media download action
+  Future<void> _handleMediaAction(CertificationMediaItem media) async {
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Preparazione download...'),
+            ],
+          ),
+          backgroundColor: Colors.blue,
+        ),
+      );
+
+      // Call the download edge function
+      final response = await EdgeFunctionService.invokeFunction(
+        'download-certification-media',
+        {'id_certification_media': media.idCertificationMedia},
+      );
+
+      // Hide loading snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      if (response['ok'] == true && response['url'] != null) {
+        // Launch the download URL
+        final Uri downloadUrl = Uri.parse(response['url']);
+
+        if (await canLaunchUrl(downloadUrl)) {
+          await launchUrl(downloadUrl, mode: LaunchMode.externalApplication);
+
+          // Show success message
+          if (mounted) {
+            final displayName = media.title?.isNotEmpty == true
+                ? media.title!
+                : (media.name?.isNotEmpty == true ? media.name! : 'Media');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Download di "$displayName" avviato'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Impossibile aprire il link di download');
+        }
+      } else {
+        throw Exception(
+            response['message'] ?? 'Errore sconosciuto durante il download');
+      }
+    } catch (e) {
+      // Hide loading snackbar if still visible
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      debugPrint('❌ AttachedMediaWidget: Download error: $e');
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Errore durante il download: ${e.toString().replaceFirst('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   IconData _getMediaIcon(String? fileType) {
     if (fileType == null) return Icons.insert_drive_file;
 
     switch (fileType.toLowerCase()) {
-      case 'video':
-      case 'mp4':
-      case 'avi':
-        return Icons.play_circle_outline;
+      // Primary enum values from API
       case 'image':
+        return Icons.image_outlined;
+      case 'video':
+        return Icons.play_circle_outline;
+      case 'document':
+        return Icons.description_outlined;
+      case 'audio':
+        return Icons.audio_file_outlined;
+
+      // Legacy/specific format support
       case 'jpg':
       case 'jpeg':
       case 'png':
-        return Icons.image;
+      case 'gif':
+      case 'webp':
+        return Icons.image_outlined;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+      case 'mkv':
+        return Icons.play_circle_outline;
       case 'pdf':
-        return Icons.picture_as_pdf;
+        return Icons.picture_as_pdf_outlined;
       case 'doc':
       case 'docx':
-        return Icons.description;
+      case 'txt':
+      case 'rtf':
+        return Icons.description_outlined;
+      case 'mp3':
+      case 'wav':
+      case 'aac':
+      case 'flac':
+        return Icons.audio_file_outlined;
       default:
-        return Icons.insert_drive_file;
+        return Icons.insert_drive_file_outlined;
     }
   }
 

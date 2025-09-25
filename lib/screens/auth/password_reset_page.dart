@@ -315,6 +315,48 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                             ),
                           ),
                         ),
+                        // Password Requirements
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Requisiti password:',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildPasswordRequirement('Almeno 8 caratteri'),
+                              _buildPasswordRequirement(
+                                  'Almeno una lettera maiuscola (A-Z)'),
+                              _buildPasswordRequirement(
+                                  'Almeno una lettera minuscola (a-z)'),
+                              _buildPasswordRequirement(
+                                  'Almeno un numero (0-9)'),
+                              _buildPasswordRequirement(
+                                  'Almeno un carattere speciale (!@#\$%^&*)'),
+                            ],
+                          ),
+                        ),
                         // Password Error Message
                         if (_passwordError != null) ...[
                           const SizedBox(height: 8),
@@ -505,6 +547,33 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordRequirement(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 16,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.8),
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

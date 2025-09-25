@@ -859,7 +859,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String attachedMediaCount(int count) {
-    return 'Media ($count)';
+    return 'Allegati ($count)';
   }
 
   @override

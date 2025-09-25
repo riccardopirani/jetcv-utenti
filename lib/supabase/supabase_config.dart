@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:jetcv__utenti/config/app_config.dart';
 
 /// Supabase configuration and client code
 class SupabaseConfig {
@@ -53,8 +54,8 @@ class SupabaseAuth {
       debugPrint('🌐 Web origin detected: $origin');
       return origin;
     } else {
-      // Per mobile, usa deep link scheme
-      return 'jetcv://auth/callback';
+      // Per mobile, usa deep link scheme centralizzato
+      return AppConfig.authCallbackDeepLink;
     }
   }
 

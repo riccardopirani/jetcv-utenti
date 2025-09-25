@@ -914,6 +914,7 @@ class CertificationMediaItem {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? name;
+  final String? title;
   final String? description;
   final String? acquisitionType;
   final DateTime? capturedAt;
@@ -927,6 +928,7 @@ class CertificationMediaItem {
     required this.createdAt,
     this.updatedAt,
     this.name,
+    this.title,
     this.description,
     this.acquisitionType,
     this.capturedAt,
@@ -943,6 +945,7 @@ class CertificationMediaItem {
       updatedAt:
           json['updated_at'] != null ? parseDateTime(json['updated_at']) : null,
       name: json['name']?.toString(),
+      title: json['title']?.toString(),
       description: json['description']?.toString(),
       acquisitionType: json['acquisition_type']?.toString(),
       capturedAt: json['captured_at'] != null
