@@ -71,156 +71,160 @@ class _CertificationCardState extends State<CertificationCard> {
 
     final headerImageHeight = 144.0; // Increased by 20% from 120
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.showImageHeader)
-            _buildHeaderImage(context, headerImageHeight),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title (Certification category name) - now shown only in blur overlay
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 800),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.showImageHeader)
+              _buildHeaderImage(context, headerImageHeight),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title (Certification category name) - now shown only in blur overlay
 
-                // Title information (from certification_information_value where name = "titolo")
-                if (widget.showLegalEntityLogo) ...[
-                  if (_getTitleInformation() != null) ...[
-                    Text(
-                      _getTitleInformation()!,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                  // Title information (from certification_information_value where name = "titolo")
+                  if (widget.showLegalEntityLogo) ...[
+                    if (_getTitleInformation() != null) ...[
+                      Text(
+                        _getTitleInformation()!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade800,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
+                    ],
+
+                    // Legal Entity (shown first, immediately with cached data)
+                    _buildOrganizationRow(context),
+                    const SizedBox(height: 12),
                   ],
 
-                  // Legal Entity (shown first, immediately with cached data)
-                  _buildOrganizationRow(context),
-                  const SizedBox(height: 12),
-                ],
-
-                // Certifier name (from expanded certifier data in new API)
-                if (widget.showCertifiedUserName &&
-                    cert.certification?.certifier?.user != null &&
-                    _hasCertifierName(cert.certification!.certifier!)) ...[
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          _getCertifierFullName(cert.certification!.certifier!),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ],
-
-                // Rejection reason if available
-                if (widget.showRejectionReason &&
-                    cert.certificationUser.rejectionReason != null) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.info, size: 16, color: Colors.red),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              localizations.rejectedReason,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
+                  // Certifier name (from expanded certifier data in new API)
+                  if (widget.showCertifiedUserName &&
+                      cert.certification?.certifier?.user != null &&
+                      _hasCertifierName(cert.certification!.certifier!)) ...[
+                    Row(
+                      children: [
+                        const Icon(Icons.person, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            _getCertifierFullName(
+                                cert.certification!.certifier!),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
                             ),
-                            Text(
-                              cert.certificationUser.rejectionReason!.isEmpty
-                                  ? localizations.noRejectionReason
-                                  : cert.certificationUser.rejectionReason!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.red,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Rejection reason if available
+                  if (widget.showRejectionReason &&
+                      cert.certificationUser.rejectionReason != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.info, size: 16, color: Colors.red),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                localizations.rejectedReason,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
+                              Text(
+                                cert.certificationUser.rejectionReason!.isEmpty
+                                    ? localizations.noRejectionReason
+                                    : cert.certificationUser.rejectionReason!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // Optional content sections
+                  if (widget.showMediaSection) ...[
+                    const SizedBox(height: 12),
+                    _buildAttachedMediaSection(cert),
+                  ],
+
+                  // Show OpenBadge button only if certification is accepted
+                  if (_isOpenBadgeEnabled &&
+                      widget.showOpenBadgeButton &&
+                      cert.certificationUser.status == 'accepted') ...[
+                    const SizedBox(height: 12),
+                    _buildResponsiveActionButtons(
+                      context,
+                      cert,
+                      isMobile,
+                      isTablet,
+                    ),
+                  ],
+
+                  // Actions (approve / reject)
+                  if (widget.showActions) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: widget.onApprove,
+                            icon: const Icon(Icons.check),
+                            label: Text(localizations.approve),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(0, 48),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-
-                // Optional content sections
-                if (widget.showMediaSection) ...[
-                  const SizedBox(height: 12),
-                  _buildAttachedMediaSection(cert),
-                ],
-
-                // Show OpenBadge button only if certification is accepted
-                if (_isOpenBadgeEnabled &&
-                    widget.showOpenBadgeButton &&
-                    cert.certificationUser.status == 'accepted') ...[
-                  const SizedBox(height: 12),
-                  _buildResponsiveActionButtons(
-                    context,
-                    cert,
-                    isMobile,
-                    isTablet,
-                  ),
-                ],
-
-                // Actions (approve / reject)
-                if (widget.showActions) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: widget.onApprove,
-                          icon: const Icon(Icons.check),
-                          label: Text(localizations.approve),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(0, 48),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: widget.onReject,
-                          icon: const Icon(Icons.close),
-                          label: Text(localizations.reject),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            minimumSize: const Size(0, 48),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: widget.onReject,
+                            icon: const Icon(Icons.close),
+                            label: Text(localizations.reject),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              minimumSize: const Size(0, 48),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

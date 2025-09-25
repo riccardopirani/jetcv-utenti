@@ -763,28 +763,30 @@ class _MyCertificationsPageState extends State<MyCertificationsPage>
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final cert = certifications[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: reusable.CertificationCard(
-                      certification: cert,
-                      // Uniforma alla card standard usata in cv_view_page.dart
-                      showImageHeader: true,
-                      showLegalEntityLogo: true,
-                      showMediaSection: true,
-                      showOpenBadgeButton: true,
-                      showCertifiedUserName:
-                          true, // Show certified user name in certifications page
-                      // Azioni solo per la tab In attesa
-                      showActions: showActions,
-                      showRejectionReason: showRejectionReason,
-                      onApprove: showActions
-                          ? () => _approveCertification(
-                              cert.certificationUser.idCertificationUser)
-                          : null,
-                      onReject: showActions
-                          ? () => _showRejectionDialog(
-                              cert.certificationUser.idCertificationUser)
-                          : null,
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: reusable.CertificationCard(
+                        certification: cert,
+                        // Uniforma alla card standard usata in cv_view_page.dart
+                        showImageHeader: true,
+                        showLegalEntityLogo: true,
+                        showMediaSection: true,
+                        showOpenBadgeButton: true,
+                        showCertifiedUserName:
+                            true, // Show certified user name in certifications page
+                        // Azioni solo per la tab In attesa
+                        showActions: showActions,
+                        showRejectionReason: showRejectionReason,
+                        onApprove: showActions
+                            ? () => _approveCertification(
+                                cert.certificationUser.idCertificationUser)
+                            : null,
+                        onReject: showActions
+                            ? () => _showRejectionDialog(
+                                cert.certificationUser.idCertificationUser)
+                            : null,
+                      ),
                     ),
                   );
                 },
