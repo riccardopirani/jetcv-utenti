@@ -779,6 +779,12 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       : _buildOtpList(),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showNewOtpModal,
+        backgroundColor: const Color(0xFF1F2937),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
