@@ -41,7 +41,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadOtps();
-    _startPolling();
+    // Polling will be started only if there are OTPs after loading
   }
 
   @override
@@ -137,9 +137,9 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     }
   }
 
-  /// Riprende il polling se era abilitato
+  /// Riprende il polling se era abilitato e ci sono OTP
   void _resumePolling() {
-    if (_isPollingEnabled &&
+    if (_shouldEnablePolling() &&
         _pollingTimer == null &&
         mounted &&
         _isPageVisible) {
@@ -154,6 +154,12 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     // Non avviare il polling se la pagina non è visibile
     if (!_isPageVisible) {
       debugPrint('⏸️ Not starting polling - page is not visible');
+      return;
+    }
+
+    // Non avviare il polling se non ci sono OTP
+    if (!_shouldEnablePolling()) {
+      debugPrint('⏸️ Not starting polling - no OTPs available');
       return;
     }
 
@@ -178,6 +184,11 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     _pollingTimer = null;
   }
 
+  /// Determina se il polling dovrebbe essere attivo
+  bool _shouldEnablePolling() {
+    return _isPollingEnabled && _otps.isNotEmpty;
+  }
+
   /// Toggle polling functionality
   /// Maintained for potential future integrations (API, keyboard shortcuts, etc.)
   // ignore: unused_element
@@ -186,7 +197,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
       _isPollingEnabled = !_isPollingEnabled;
     });
 
-    if (_isPollingEnabled && _isPageVisible) {
+    if (_shouldEnablePolling() && _isPageVisible) {
       _startPolling();
       debugPrint('✅ OTP polling enabled');
     } else {
@@ -423,7 +434,14 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         setState(() {
           _isPollingEnabled = true;
         });
-        _startPolling();
+        // Start polling only if there are OTPs
+        if (_shouldEnablePolling()) {
+          _startPolling();
+          debugPrint(
+              '✅ Polling started after loading - ${_otps.length} OTPs found');
+        } else {
+          debugPrint('⏸️ Polling not started - no OTPs available');
+        }
       }
     }
   }
@@ -774,9 +792,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ? _buildLoadingState()
               : _errorMessage != null
                   ? _buildErrorState()
-                  : _otps.isEmpty
-                      ? _buildEmptyState()
-                      : _buildOtpList(),
+                  : _buildOtpList(),
         ),
       ),
     );
@@ -827,151 +843,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon container
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F2937).withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF1F2937).withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.security,
-                size: 50,
-                color: const Color(0xFF1F2937),
-              ),
-            ),
-
-            SizedBox(height: 40),
-
-            // Title
-            Text(
-              AppLocalizations.of(context)!.noOtpsYet,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            SizedBox(height: 24),
-
-            // Description
-            Text(
-              AppLocalizations.of(context)!.createYourFirstOtp,
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            SizedBox(height: 40),
-
-            // Features list
-            Container(
-              padding: EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade200,
-                    spreadRadius: 0,
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildFeatureItem(
-                    Icons.shield,
-                    AppLocalizations.of(context)!.secureAccess,
-                    AppLocalizations.of(context)!.secureAccessDescription,
-                  ),
-                  SizedBox(height: 24),
-                  _buildFeatureItem(
-                    Icons.timer,
-                    AppLocalizations.of(context)!.timeLimited,
-                    AppLocalizations.of(context)!.timeLimitedDescription,
-                  ),
-                  SizedBox(height: 24),
-                  _buildFeatureItem(
-                    Icons.qr_code,
-                    AppLocalizations.of(context)!.qrCodeSupport,
-                    AppLocalizations.of(context)!.qrCodeSupportDescription,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(
-    IconData icon,
-    String title,
-    String description,
-  ) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1F2937).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            size: 24,
-            color: const Color(0xFF1F2937),
-          ),
-        ),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -1254,6 +1125,56 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildNoOtpsYetState() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1F2937).withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF1F2937).withValues(alpha: 0.15),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.security,
+                size: 40,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Nessun OTP generato',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Crea il tuo primo OTP usando il pulsante qui sopra per iniziare',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyFilteredState() {
     return Center(
       child: SingleChildScrollView(
@@ -1295,29 +1216,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 color: Colors.grey.shade600,
               ),
               textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => _setFilter('all'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              icon: Icon(Icons.refresh, size: 18),
-              label: Text(
-                AppLocalizations.of(context)!.allOtps,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
             ),
           ],
         ),
@@ -1419,34 +1317,36 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         // New OTP Button
         _buildNewOtpButton(),
 
-        // Filter Section
-        _buildFilterSection(),
+        // Show filters only if there are OTPs
+        if (_otps.isNotEmpty) _buildFilterSection(),
 
         Expanded(
-          child: _filteredOtps.isEmpty && !_isLoading
-              ? _buildEmptyFilteredState()
-              : Column(
-                  children: [
-                    // Section description
-                    _buildSectionDescription(),
+          child: _otps.isEmpty
+              ? _buildNoOtpsYetState()
+              : _filteredOtps.isEmpty && !_isLoading
+                  ? _buildEmptyFilteredState()
+                  : Column(
+                      children: [
+                        // Section description
+                        _buildSectionDescription(),
 
-                    // OTP List
-                    Expanded(
-                      child: ListView.builder(
-                        key: ValueKey('otp_list_${_filteredOtps.length}'),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 6,
+                        // OTP List
+                        Expanded(
+                          child: ListView.builder(
+                            key: ValueKey('otp_list_${_filteredOtps.length}'),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 6,
+                            ),
+                            itemCount: _filteredOtps.length,
+                            itemBuilder: (context, index) {
+                              final otp = _filteredOtps[index];
+                              return _buildOtpCard(otp);
+                            },
+                          ),
                         ),
-                        itemCount: _filteredOtps.length,
-                        itemBuilder: (context, index) {
-                          final otp = _filteredOtps[index];
-                          return _buildOtpCard(otp);
-                        },
-                      ),
+                      ],
                     ),
-                  ],
-                ),
         ),
       ],
     );
@@ -2397,10 +2297,22 @@ class NewOtpModal extends StatefulWidget {
 class _NewOtpModalState extends State<NewOtpModal> {
   final _tagController = TextEditingController();
   bool _isGenerating = false;
+  bool _isUpdatingTag = false;
+  OtpModel? _generatedOtp;
+  String? _errorMessage;
 
   // Riferimenti salvati per evitare errori di contesto invalidato
   ScaffoldMessengerState? _scaffoldMessenger;
   AppLocalizations? _localizations;
+
+  @override
+  void initState() {
+    super.initState();
+    // Genera OTP immediatamente all'apertura della modal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateOtp();
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -2478,34 +2390,93 @@ class _NewOtpModalState extends State<NewOtpModal> {
       );
 
       if (response.success && response.data != null) {
-        debugPrint('✅ OTP created successfully, calling callback...');
-        Navigator.pop(context);
-        widget.onOtpCreated?.call(response.data!);
+        debugPrint('✅ OTP created successfully, storing in modal state...');
 
-        if (mounted && _scaffoldMessenger != null && _localizations != null) {
-          try {
-            _scaffoldMessenger!.showSnackBar(
-              SnackBar(
-                content: Text(_localizations!.otpCreatedSuccessfully),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } catch (scaffoldError) {
-            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+        setState(() {
+          _generatedOtp = response.data!;
+          _errorMessage = null;
+          // Aggiorna il controller del tag con il tag dell'OTP generato
+          if (response.data!.tag != null) {
+            _tagController.text = response.data!.tag!;
           }
-        }
+        });
+
+        // Chiama il callback per aggiornare la lista principale
+        widget.onOtpCreated?.call(response.data!);
       } else {
-        if (mounted && _scaffoldMessenger != null && _localizations != null) {
-          try {
-            _scaffoldMessenger!.showSnackBar(
-              SnackBar(
-                content:
-                    Text(response.error ?? _localizations!.otpCreationFailed),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } catch (scaffoldError) {
-            debugPrint('ScaffoldMessenger failed: $scaffoldError');
+        setState(() {
+          _errorMessage =
+              response.error ?? 'Errore durante la creazione dell\'OTP';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Errore durante la creazione dell\'OTP: $e';
+      });
+    } finally {
+      setState(() {
+        _isGenerating = false;
+      });
+    }
+  }
+
+  Future<void> _updateOtpTag() async {
+    if (_generatedOtp == null) return;
+
+    setState(() {
+      _isUpdatingTag = true;
+    });
+
+    try {
+      final session = SupabaseConfig.client.auth.currentSession;
+      final userId = session?.user.id;
+
+      if (userId != null) {
+        final response = await OtpService.updateOtpTag(
+          idOtp: _generatedOtp!.idOtp,
+          idUser: userId,
+          newTag: _tagController.text.trim().isEmpty
+              ? ''
+              : _tagController.text.trim(),
+        );
+
+        if (response.success && response.data != null) {
+          setState(() {
+            _generatedOtp = response.data!;
+            // Aggiorna il controller con il nuovo tag
+            if (response.data!.tag != null) {
+              _tagController.text = response.data!.tag!;
+            }
+          });
+
+          // Chiama il callback per aggiornare anche la lista principale
+          widget.onOtpCreated?.call(response.data!);
+
+          if (mounted && _scaffoldMessenger != null && _localizations != null) {
+            try {
+              _scaffoldMessenger!.showSnackBar(
+                SnackBar(
+                  content: Text('Tag aggiornato con successo'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            } catch (e) {
+              debugPrint('Error showing snackbar: $e');
+            }
+          }
+        } else {
+          if (mounted && _scaffoldMessenger != null && _localizations != null) {
+            try {
+              _scaffoldMessenger!.showSnackBar(
+                SnackBar(
+                  content: Text(
+                      response.error ?? 'Errore nell\'aggiornamento del tag'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            } catch (e) {
+              debugPrint('Error showing error snackbar: $e');
+            }
           }
         }
       }
@@ -2514,18 +2485,76 @@ class _NewOtpModalState extends State<NewOtpModal> {
         try {
           _scaffoldMessenger!.showSnackBar(
             SnackBar(
-              content: Text(_localizations!.otpCreationFailed),
+              content: Text('Errore nell\'aggiornamento del tag: $e'),
               backgroundColor: Colors.red,
             ),
           );
-        } catch (scaffoldError) {
-          debugPrint('ScaffoldMessenger failed: $scaffoldError');
+        } catch (e) {
+          debugPrint('Error showing error snackbar: $e');
         }
       }
     } finally {
       setState(() {
-        _isGenerating = false;
+        _isUpdatingTag = false;
       });
+    }
+  }
+
+  void _copyOtpCode() {
+    if (_generatedOtp == null) return;
+
+    Clipboard.setData(ClipboardData(text: _generatedOtp!.code));
+    if (mounted && _scaffoldMessenger != null) {
+      try {
+        _scaffoldMessenger!.showSnackBar(
+          SnackBar(
+            content: Text('Codice OTP copiato negli appunti'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        debugPrint('Error showing copy confirmation: $e');
+      }
+    }
+  }
+
+  Future<void> _saveAndClose() async {
+    if (_generatedOtp == null) {
+      // Se non c'è OTP generato, chiudi semplicemente
+      Navigator.pop(context);
+      return;
+    }
+
+    final currentTag = _tagController.text.trim();
+    final originalTag = _generatedOtp!.tag ?? '';
+
+    // Controlla se il tag è stato modificato (considera anche tag vuoto)
+    final hasChanged = currentTag != originalTag;
+    if (hasChanged) {
+      debugPrint(
+          '💾 Tag modificato: "$originalTag" -> "$currentTag", salvando...');
+
+      setState(() {
+        _isUpdatingTag = true;
+      });
+
+      try {
+        await _updateOtpTag();
+      } catch (e) {
+        debugPrint('❌ Errore durante il salvataggio del tag: $e');
+        // Anche in caso di errore, chiudi la modal
+      } finally {
+        setState(() {
+          _isUpdatingTag = false;
+        });
+      }
+    } else {
+      debugPrint('✅ Tag non modificato, nessun salvataggio necessario');
+    }
+
+    // Chiudi la modal
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -2537,91 +2566,354 @@ class _NewOtpModalState extends State<NewOtpModal> {
       ),
       child: Container(
         padding: const EdgeInsets.all(24),
+        constraints: BoxConstraints(maxWidth: 500),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              AppLocalizations.of(context)!.newOtp,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1F2937),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context)!.addOptionalTagDescription,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _tagController,
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.tagOptional,
-                prefixIcon: const Icon(
-                  Icons.tag,
-                  color: Color(0xFF6B7280),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF6B46C1)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
+            // Header
             Row(
               children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed:
-                        _isGenerating ? null : () => Navigator.pop(context),
-                    child: Text(
-                      AppLocalizations.of(context)!.cancel,
-                      style: const TextStyle(
-                        color: Color(0xFF6B46C1),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade600,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.security,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 16),
                 Expanded(
-                  child: TextButton(
-                    onPressed: _isGenerating ? null : _generateOtp,
-                    child: _isGenerating
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF6B46C1)),
-                            ),
-                          )
-                        : Text(
-                            AppLocalizations.of(context)!.generateOtp,
-                            style: const TextStyle(
-                              color: Color(0xFF6B46C1),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Nuovo OTP Creato',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      Text(
+                        _isGenerating
+                            ? 'Creazione in corso...'
+                            : _isUpdatingTag
+                                ? 'Salvataggio tag in corso...'
+                                : 'Il tuo OTP è pronto per l\'uso',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+
+            const SizedBox(height: 24),
+
+            // Contenuto principale
+            if (_isGenerating)
+              _buildLoadingSection()
+            else if (_errorMessage != null)
+              _buildErrorSection()
+            else if (_generatedOtp != null)
+              _buildOtpSection()
+            else
+              _buildInitialSection(),
+
+            const SizedBox(height: 24),
+
+            // Pulsanti
+            _buildButtons(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingSection() {
+    return Container(
+      padding: EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Generazione OTP in corso...',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.blue.shade700,
+            ),
+          ),
+          Text(
+            'Attendere prego',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.blue.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorSection() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red.shade600,
+            size: 48,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Errore nella creazione dell\'OTP',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.red.shade700,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            _errorMessage!,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.red.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtpSection() {
+    final otp = _generatedOtp!;
+
+    return Column(
+      children: [
+        // OTP Code Display
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green.shade50,
+                Colors.green.shade100,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.green.shade200),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Codice OTP',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.green.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                otp.code,
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                  letterSpacing: 2,
+                ),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _copyOtpCode,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: Icon(Icons.copy, size: 18),
+                label: Text(
+                  'Copia codice',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 20),
+
+        // Tag Section
+        Text(
+          'Tag identificativo (opzionale)',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1F2937),
+          ),
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: _tagController,
+          enabled: !_isUpdatingTag,
+          decoration: InputDecoration(
+            hintText: otp.tag ?? 'Aggiungi un tag per identificare questo OTP',
+            prefixIcon: const Icon(
+              Icons.tag,
+              color: Color(0xFF6B7280),
+            ),
+            suffixIcon: _isUpdatingTag
+                ? Container(
+                    width: 20,
+                    height: 20,
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : IconButton(
+                    onPressed: _updateOtpTag,
+                    icon: Icon(Icons.save, color: Colors.blue.shade600),
+                    tooltip: 'Salva tag',
+                  ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF6B46C1)),
+            ),
+          ),
+          onSubmitted: _isUpdatingTag ? null : (_) => _updateOtpTag(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInitialSection() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Text(
+        'Inizializzazione...',
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.grey.shade600,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildButtons() {
+    if (_isGenerating) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: null,
+          child: Text('Generazione in corso...'),
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Chiudi'),
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _errorMessage = null;
+                });
+                _generateOtp();
+              },
+              child: Text('Riprova'),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _isUpdatingTag ? null : _saveAndClose,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade600,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        icon: _isUpdatingTag
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Icon(Icons.save, size: 20),
+        label: Text(
+          _isUpdatingTag ? 'Salvando...' : 'Salva e chiudi',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

@@ -27,8 +27,10 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
+  bool _isGoogleLoading = false;
   String? _termsError;
   String? _signupError;
+  String? _googleError;
 
   @override
   void dispose() {
@@ -55,6 +57,7 @@ class _SignupPageState extends State<SignupPage> {
       _isLoading = true;
       _termsError = null;
       _signupError = null;
+      _googleError = null;
     });
 
     try {
@@ -120,6 +123,34 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signUpWithGoogle() async {
+    if (_isGoogleLoading) return;
+    setState(() {
+      _isGoogleLoading = true;
+      _googleError = null;
+    });
+
+    try {
+      // Use Supabase OAuth flow for Google authentication
+      await SupabaseAuth.signInWithGoogle();
+
+      // On web, this will redirect to Google and back automatically
+      // Navigation will be handled by auth state changes
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _googleError = e.toString();
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
         });
       }
     }
@@ -687,6 +718,81 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                     ],
                     const SizedBox(height: 24),
+                    ResponsiveButton.outlined(
+                      onPressed: _isGoogleLoading ? null : _signUpWithGoogle,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isGoogleLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/web_light_sq_na_3x.png',
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .continueWithGoogle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                    ),
+                    if (_googleError != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.error,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _googleError!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(

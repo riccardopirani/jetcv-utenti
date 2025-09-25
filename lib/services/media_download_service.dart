@@ -8,7 +8,8 @@ import 'package:jetcv__utenti/services/certification_service.dart';
 import 'package:jetcv__utenti/l10n/app_localizations.dart';
 
 // Import condizionale per web
-import 'dart:html' as html show Blob, Url, AnchorElement, document;
+import 'package:web/web.dart' as web;
+import 'dart:js_interop';
 
 /// Servizio per il download dei media dalle certificazioni
 class MediaDownloadService {
@@ -434,21 +435,22 @@ class MediaDownloadService {
       }
 
       // Crea un blob URL per il download
-      final blob = html.Blob([data]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
+      final blob = web.Blob([data.toJS].toJS);
+      final url = web.URL.createObjectURL(blob);
 
       // Crea un elemento anchor temporaneo per il download
-      final anchor = html.AnchorElement(href: url)
+      final anchor = web.HTMLAnchorElement()
+        ..href = url
         ..setAttribute('download', fileName)
         ..style.display = 'none';
 
       // Aggiungi al DOM, clicca e rimuovi
-      html.document.body?.children.add(anchor);
+      web.document.body?.appendChild(anchor);
       anchor.click();
       anchor.remove();
 
       // Pulisci l'URL del blob
-      html.Url.revokeObjectUrl(url);
+      web.URL.revokeObjectURL(url);
 
       debugPrint(
           '💾 MediaDownloadService: Web download completed for: $fileName');
