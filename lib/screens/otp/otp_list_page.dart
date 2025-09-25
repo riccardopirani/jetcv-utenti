@@ -856,56 +856,33 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 32
-                    : isTablet
-                        ? 36
-                        : 40),
+            SizedBox(height: 40),
 
             // Title
             Text(
               AppLocalizations.of(context)!.noOtpsYet,
               style: TextStyle(
-                fontSize: isMobile
-                    ? 20
-                    : isTablet
-                        ? 22
-                        : 24,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade800,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 16
-                    : isTablet
-                        ? 20
-                        : 24),
+            SizedBox(height: 24),
 
             // Description
             Text(
               AppLocalizations.of(context)!.createYourFirstOtp,
               style: TextStyle(
-                fontSize: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20,
+                fontSize: 20,
                 color: Colors.grey.shade600,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 32
-                    : isTablet
-                        ? 36
-                        : 40),
+            SizedBox(height: 40),
 
             // Features list
             Container(
@@ -929,31 +906,17 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     AppLocalizations.of(context)!.secureAccess,
                     AppLocalizations.of(context)!.secureAccessDescription,
                   ),
-                  SizedBox(
-                      height: isMobile
-                          ? 16
-                          : isTablet
-                              ? 20
-                              : 24),
+                  SizedBox(height: 24),
                   _buildFeatureItem(
                     Icons.timer,
                     AppLocalizations.of(context)!.timeLimited,
                     AppLocalizations.of(context)!.timeLimitedDescription,
-                    isMobile,
-                    isTablet,
                   ),
-                  SizedBox(
-                      height: isMobile
-                          ? 16
-                          : isTablet
-                              ? 20
-                              : 24),
+                  SizedBox(height: 24),
                   _buildFeatureItem(
                     Icons.qr_code,
                     AppLocalizations.of(context)!.qrCodeSupport,
                     AppLocalizations.of(context)!.qrCodeSupportDescription,
-                    isMobile,
-                    isTablet,
                   ),
                 ],
               ),
@@ -972,31 +935,18 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(isMobile
-              ? 8
-              : isTablet
-                  ? 10
-                  : 12),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFF1F2937).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            size: isMobile
-                ? 20
-                : isTablet
-                    ? 22
-                    : 24,
+            size: 24,
             color: const Color(0xFF1F2937),
           ),
         ),
-        SizedBox(
-            width: isMobile
-                ? 12
-                : isTablet
-                    ? 14
-                    : 16),
+        SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1004,29 +954,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: isMobile
-                      ? 14
-                      : isTablet
-                          ? 15
-                          : 16,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.grey.shade800,
                 ),
               ),
-              SizedBox(
-                  height: isMobile
-                      ? 4
-                      : isTablet
-                          ? 6
-                          : 8),
+              SizedBox(height: 8),
               Text(
                 description,
                 style: TextStyle(
-                  fontSize: isMobile
-                      ? 12
-                      : isTablet
-                          ? 13
-                          : 14,
+                  fontSize: 14,
                   color: Colors.grey.shade600,
                   height: 1.4,
                 ),
@@ -1267,7 +1204,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         onTap: () => _setFilter(filter),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 12 : 16,
+            horizontal: 16,
             vertical: 10,
           ),
           decoration: BoxDecoration(
@@ -1325,16 +1262,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: isMobile
-                  ? 100
-                  : isTablet
-                      ? 120
-                      : 140,
-              height: isMobile
-                  ? 100
-                  : isTablet
-                      ? 120
-                      : 140,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
@@ -1345,11 +1274,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
               child: Icon(
                 Icons.filter_list,
-                size: isMobile
-                    ? 35
-                    : isTablet
-                        ? 40
-                        : 45,
+                size: 45,
                 color: Colors.grey.shade600,
               ),
             ),
@@ -1362,7 +1287,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 color: Colors.grey.shade700,
               ),
             ),
-            SizedBox(height: isMobile ? 8 : 12),
+            SizedBox(height: 12),
             Text(
               AppLocalizations.of(context)!.noOtpsFoundDescription,
               style: TextStyle(
@@ -1371,21 +1296,21 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: isMobile ? 24 : 32),
+            SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () => _setFilter('all'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade600,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 24 : 32,
-                  vertical: isMobile ? 12 : 16,
+                  horizontal: 32,
+                  vertical: 16,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              icon: Icon(Icons.refresh, size: isMobile ? 16 : 18),
+              icon: Icon(Icons.refresh, size: 18),
               label: Text(
                 AppLocalizations.of(context)!.allOtps,
                 style: TextStyle(
@@ -1433,20 +1358,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     }
 
     return Container(
-      margin: EdgeInsets.fromLTRB(
-        isMobile
-            ? 16
-            : isTablet
-                ? 20
-                : 24,
-        8,
-        isMobile
-            ? 16
-            : isTablet
-                ? 20
-                : 24,
-        6,
-      ),
+      margin: EdgeInsets.fromLTRB(24, 8, 24, 6),
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -1464,7 +1376,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             ),
             child: Icon(
               icon,
-              size: isMobile ? 16 : 18,
+              size: 18,
               color: borderColor.withValues(alpha: 0.8),
             ),
           ),
@@ -1485,7 +1397,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 Text(
                   description,
                   style: TextStyle(
-                    fontSize: isMobile ? 12 : 13,
+                    fontSize: 13,
                     color: Colors.grey.shade700,
                     height: 1.4,
                   ),
@@ -1541,10 +1453,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Widget _buildErrorState() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
     return Center(
       child: SingleChildScrollView(
         padding: EdgeInsets.all(40),
@@ -1553,16 +1461,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           children: [
             // Error icon container
             Container(
-              width: isMobile
-                  ? 80
-                  : isTablet
-                      ? 90
-                      : 100,
-              height: isMobile
-                  ? 80
-                  : isTablet
-                      ? 90
-                      : 100,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
@@ -1573,43 +1473,25 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
               child: Icon(
                 Icons.error_outline,
-                size: isMobile
-                    ? 40
-                    : isTablet
-                        ? 45
-                        : 50,
+                size: 50,
                 color: Colors.red.shade600,
               ),
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 32
-                    : isTablet
-                        ? 36
-                        : 40),
+            SizedBox(height: 40),
 
             // Error title
             Text(
               AppLocalizations.of(context)!.errorOccurred,
               style: TextStyle(
-                fontSize: isMobile
-                    ? 20
-                    : isTablet
-                        ? 22
-                        : 24,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade800,
               ),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 16
-                    : isTablet
-                        ? 20
-                        : 24),
+            SizedBox(height: 24),
 
             // Error message
             Container(
@@ -1625,11 +1507,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               child: Text(
                 _errorMessage ?? AppLocalizations.of(context)!.unknownError,
                 style: TextStyle(
-                  fontSize: isMobile
-                      ? 16
-                      : isTablet
-                          ? 18
-                          : 20,
+                  fontSize: 20,
                   color: Colors.red.shade700,
                   height: 1.5,
                 ),
@@ -1637,12 +1515,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
             ),
 
-            SizedBox(
-                height: isMobile
-                    ? 32
-                    : isTablet
-                        ? 36
-                        : 40),
+            SizedBox(height: 40),
 
             // Retry button
             Container(
@@ -1664,16 +1537,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile
-                        ? 24
-                        : isTablet
-                            ? 28
-                            : 32,
-                    vertical: isMobile
-                        ? 16
-                        : isTablet
-                            ? 18
-                            : 20,
+                    horizontal: 32,
+                    vertical: 20,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -1681,20 +1546,12 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 ),
                 icon: Icon(
                   Icons.refresh,
-                  size: isMobile
-                      ? 20
-                      : isTablet
-                          ? 22
-                          : 24,
+                  size: 24,
                 ),
                 label: Text(
                   AppLocalizations.of(context)!.retry,
                   style: TextStyle(
-                    fontSize: isMobile
-                        ? 16
-                        : isTablet
-                            ? 18
-                            : 20,
+                    fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1707,9 +1564,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Widget _buildOtpCard(OtpModel otp) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isHighlighted = _highlightedOtpId == otp.idOtp;
 
     // Debug OTP data
@@ -1736,12 +1590,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     return AnimatedContainer(
       key: ValueKey('otp_card_${otp.idOtp}_${otp.tag}'),
       duration: Duration(milliseconds: 300),
-      margin: EdgeInsets.only(
-          bottom: isMobile
-              ? 12
-              : isTablet
-                  ? 14
-                  : 16),
+      margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isHighlighted ? Colors.orange.shade50 : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1766,11 +1615,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         children: [
           // Header with status indicator
           Container(
-            padding: EdgeInsets.all(isMobile
-                ? 16
-                : isTablet
-                    ? 18
-                    : 20),
+            padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: _getStatusColor(otp).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
@@ -1782,11 +1627,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.all(isMobile
-                      ? 8
-                      : isTablet
-                          ? 10
-                          : 12),
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: _getStatusColor(otp),
                     borderRadius: BorderRadius.circular(12),
@@ -1794,19 +1635,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   child: Icon(
                     _getStatusIcon(otp),
                     color: Colors.white,
-                    size: isMobile
-                        ? 18
-                        : isTablet
-                            ? 20
-                            : 22,
+                    size: 22,
                   ),
                 ),
-                SizedBox(
-                    width: isMobile
-                        ? 12
-                        : isTablet
-                            ? 14
-                            : 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1814,29 +1646,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       Text(
                         otp.tag ?? AppLocalizations.of(context)!.otpNumber(1),
                         style: TextStyle(
-                          fontSize: isMobile
-                              ? 16
-                              : isTablet
-                                  ? 18
-                                  : 20,
+                          fontSize: 20,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey.shade800,
                         ),
                       ),
-                      SizedBox(
-                          height: isMobile
-                              ? 4
-                              : isTablet
-                                  ? 6
-                                  : 8),
+                      SizedBox(height: 8),
                       Text(
                         _formatCreatedAt(otp.createdAt),
                         style: TextStyle(
-                          fontSize: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 14
-                                  : 16,
+                          fontSize: 16,
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1846,16 +1665,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile
-                        ? 12
-                        : isTablet
-                            ? 14
-                            : 16,
-                    vertical: isMobile
-                        ? 6
-                        : isTablet
-                            ? 8
-                            : 10,
+                    horizontal: 16,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(otp).withValues(alpha: 0.1),
@@ -1868,11 +1679,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   child: Text(
                     _getStatusText(otp),
                     style: TextStyle(
-                      fontSize: isMobile
-                          ? 10
-                          : isTablet
-                              ? 11
-                              : 12,
+                      fontSize: 12,
                       color: _getStatusColor(otp),
                       fontWeight: FontWeight.w600,
                     ),
@@ -1884,21 +1691,13 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
           // OTP Code Section
           Container(
-            padding: EdgeInsets.all(isMobile
-                ? 16
-                : isTablet
-                    ? 18
-                    : 20),
+            padding: EdgeInsets.all(20),
             child: Column(
               children: [
                 // OTP Code
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(isMobile
-                      ? 16
-                      : isTablet
-                          ? 18
-                          : 20),
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(12),
@@ -1912,27 +1711,18 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       Text(
                         'Codice OTP',
                         style: TextStyle(
-                          fontSize: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 14
-                                  : 16,
+                          fontSize: 16,
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(
-                          height: isMobile
-                              ? 8
-                              : isTablet
-                                  ? 10
-                                  : 12),
+                      SizedBox(height: 12),
                       if (_isOtpBlocked(otp))
                         // Mostra messaggio di blocco invece del codice
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 20,
-                            vertical: isMobile ? 12 : 16,
+                            vertical: 16,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.red.shade50,
@@ -1948,17 +1738,13 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                               Icon(
                                 Icons.block,
                                 color: Colors.red.shade600,
-                                size: isMobile ? 20 : 24,
+                                size: 24,
                               ),
                               SizedBox(width: 8),
                               Text(
                                 AppLocalizations.of(context)!.otpBlocked,
                                 style: TextStyle(
-                                  fontSize: isMobile
-                                      ? 16
-                                      : isTablet
-                                          ? 18
-                                          : 20,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red.shade600,
                                 ),
@@ -1971,11 +1757,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         Text(
                           otp.code,
                           style: TextStyle(
-                            fontSize: isMobile
-                                ? 28
-                                : isTablet
-                                    ? 32
-                                    : 36,
+                            fontSize: 36,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1F2937),
                             letterSpacing: 1.5,
@@ -1985,23 +1767,12 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   ),
                 ),
 
-                SizedBox(
-                    height: isMobile
-                        ? 20
-                        : isTablet
-                            ? 24
-                            : 28),
+                SizedBox(height: 28),
 
                 // Legal Entity Section (if available) - Always show if idLegalEntity exists
-                if (otp.idLegalEntity != null)
-                  _buildLegalEntitySection(otp, isMobile, isTablet),
+                if (otp.idLegalEntity != null) _buildLegalEntitySection(otp),
 
-                SizedBox(
-                    height: isMobile
-                        ? 16
-                        : isTablet
-                            ? 20
-                            : 24),
+                SizedBox(height: 24),
 
                 // Action Buttons
                 if (_isOtpBlocked(otp))
@@ -2010,7 +1781,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: isMobile ? 12 : 16,
+                      vertical: 16,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
@@ -2050,56 +1821,33 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                           label: AppLocalizations.of(context)!.copy,
                           color: const Color(0xFF374151),
                           onPressed: () => _copyOtpCode(otp.code),
-                          isMobile: isMobile,
-                          isTablet: isTablet,
                         ),
                       ),
-                      SizedBox(
-                          width: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 16
-                                  : 20),
+                      SizedBox(width: 20),
                       Expanded(
                         child: _buildActionButton(
                           icon: Icons.qr_code,
                           label: AppLocalizations.of(context)!.qrCode,
                           color: const Color(0xFF059669),
                           onPressed: () => _showQrCodeModal(otp),
-                          isMobile: isMobile,
-                          isTablet: isTablet,
                         ),
                       ),
-                      SizedBox(
-                          width: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 16
-                                  : 20),
+                      SizedBox(width: 20),
                       Expanded(
                         child: _buildActionButton(
                           icon: Icons.edit,
                           label: 'Modifica tag',
                           color: const Color(0xFFD97706),
                           onPressed: () => _showEditOtpModal(otp),
-                          isMobile: isMobile,
-                          isTablet: isTablet,
                         ),
                       ),
-                      SizedBox(
-                          width: isMobile
-                              ? 12
-                              : isTablet
-                                  ? 16
-                                  : 20),
+                      SizedBox(width: 20),
                       Expanded(
                         child: _buildActionButton(
                           icon: Icons.delete,
                           label: AppLocalizations.of(context)!.delete,
                           color: const Color(0xFFDC2626),
                           onPressed: () => _deleteOtp(otp),
-                          isMobile: isMobile,
-                          isTablet: isTablet,
                         ),
                       ),
                     ],
@@ -2117,8 +1865,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     required String label,
     required Color color,
     required VoidCallback onPressed,
-    required bool isMobile,
-    required bool isTablet,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -2139,16 +1885,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: EdgeInsets.symmetric(
-            vertical: isMobile
-                ? 10
-                : isTablet
-                    ? 12
-                    : 14,
-            horizontal: isMobile
-                ? 6
-                : isTablet
-                    ? 8
-                    : 10,
+            vertical: 14,
+            horizontal: 10,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -2159,26 +1897,13 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           children: [
             Icon(
               icon,
-              size: isMobile
-                  ? 16
-                  : isTablet
-                      ? 18
-                      : 20,
+              size: 20,
             ),
-            SizedBox(
-                height: isMobile
-                    ? 4
-                    : isTablet
-                        ? 6
-                        : 8),
+            SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
-                fontSize: isMobile
-                    ? 12
-                    : isTablet
-                        ? 14
-                        : 16,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -2288,7 +2013,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     return 'Azienda';
   }
 
-  Widget _buildLegalEntitySection(OtpModel otp, bool isMobile, bool isTablet) {
+  Widget _buildLegalEntitySection(OtpModel otp) {
     debugPrint('🔍 _buildLegalEntitySection called for OTP: ${otp.idOtp}');
     debugPrint('🔍 OTP idLegalEntity: ${otp.idLegalEntity}');
     debugPrint('🔍 Legal entities cache keys: ${_legalEntities.keys.toList()}');
@@ -2306,13 +2031,13 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     if (legalEntityData == null) {
       debugPrint(
           '⏳ Legal entity data not loaded yet for OTP: ${otp.idOtp}, showing loading indicator');
-      return _buildLegalEntityLoadingSection(isMobile, isTablet);
+      return _buildLegalEntityLoadingSection();
     }
 
     // If data is empty (error case), show error message
     if (legalEntityData.isEmpty) {
       debugPrint('⚠️ Legal entity data is empty for OTP: ${otp.idOtp}');
-      return _buildLegalEntityErrorSection(isMobile, isTablet);
+      return _buildLegalEntityErrorSection();
     }
 
     debugPrint('🏢 Building legal entity section for OTP: ${otp.idOtp}');
@@ -2352,7 +2077,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 12 : 16,
+                horizontal: 16,
                 vertical: 10,
               ),
               decoration: BoxDecoration(
@@ -2368,7 +2093,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   Icon(
                     Icons.block,
                     color: Colors.red.shade700,
-                    size: isMobile ? 16 : 18,
+                    size: 18,
                   ),
                   SizedBox(width: 8),
                   Text(
@@ -2383,7 +2108,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
             ),
 
-          if (isBlocked) SizedBox(height: isMobile ? 12 : 16),
+          if (isBlocked) SizedBox(height: 16),
 
           // Header with logo
           Row(
@@ -2392,8 +2117,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               // Logo
               if (legalEntityData['logo_picture'] != null)
                 Container(
-                  width: isMobile ? 40 : 50,
-                  height: isMobile ? 40 : 50,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -2418,7 +2143,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                             color: isBlocked
                                 ? Colors.red.shade600
                                 : Colors.blue.shade600,
-                            size: isMobile ? 20 : 24,
+                            size: 24,
                           ),
                         );
                       },
@@ -2427,8 +2152,8 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 )
               else
                 Container(
-                  width: isMobile ? 40 : 50,
-                  height: isMobile ? 40 : 50,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color:
                         isBlocked ? Colors.red.shade100 : Colors.blue.shade100,
@@ -2444,10 +2169,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Icons.business,
                     color:
                         isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
-                    size: isMobile ? 20 : 24,
+                    size: 24,
                   ),
                 ),
-              SizedBox(width: isMobile ? 12 : 16),
+              SizedBox(width: 16),
               // Company info
               Expanded(
                 child: Column(
@@ -2456,7 +2181,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Text(
                       _getLegalEntityName(legalEntityData),
                       style: TextStyle(
-                        fontSize: isMobile ? 16 : 18,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: isBlocked
                             ? Colors.red.shade800
@@ -2480,7 +2205,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             ],
           ),
 
-          SizedBox(height: isMobile ? 12 : 16),
+          SizedBox(height: 16),
 
           // Company details
           if (legalEntityData['operational_address'] != null ||
@@ -2495,8 +2220,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     AppLocalizations.of(context)!.address,
                     '${legalEntityData['operational_address'] ?? ''} ${legalEntityData['operational_city'] ?? ''}'
                         .trim(),
-                    isMobile,
-                    isTablet,
                     isBlocked: isBlocked,
                   ),
                 if (legalEntityData['email'] != null)
@@ -2504,8 +2227,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Icons.email,
                     AppLocalizations.of(context)!.email,
                     legalEntityData['email'],
-                    isMobile,
-                    isTablet,
                     isBlocked: isBlocked,
                   ),
                 if (legalEntityData['phone'] != null)
@@ -2513,8 +2234,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Icons.phone,
                     AppLocalizations.of(context)!.phone,
                     legalEntityData['phone'],
-                    isMobile,
-                    isTablet,
                     isBlocked: isBlocked,
                   ),
                 if (legalEntityData['website'] != null)
@@ -2522,8 +2241,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Icons.web,
                     AppLocalizations.of(context)!.website,
                     legalEntityData['website'],
-                    isMobile,
-                    isTablet,
                     isBlocked: isBlocked,
                   ),
               ],
@@ -2533,8 +2250,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildInfoRow(
-      IconData icon, String label, String value, bool isMobile, bool isTablet,
+  Widget _buildInfoRow(IconData icon, String label, String value,
       {bool isBlocked = false}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8),
@@ -2579,7 +2295,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildLegalEntityLoadingSection(bool isMobile, bool isTablet) {
+  Widget _buildLegalEntityLoadingSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
@@ -2602,14 +2318,14 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: isMobile ? 20 : 24,
-            height: isMobile ? 20 : 24,
+            width: 24,
+            height: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
             ),
           ),
-          SizedBox(width: isMobile ? 12 : 16),
+          SizedBox(width: 16),
           Expanded(
             child: Text(
               'Caricamento informazioni azienda...',
@@ -2625,7 +2341,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildLegalEntityErrorSection(bool isMobile, bool isTablet) {
+  Widget _buildLegalEntityErrorSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
@@ -2650,9 +2366,9 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           Icon(
             Icons.warning_outlined,
             color: Colors.orange.shade600,
-            size: isMobile ? 20 : 24,
+            size: 24,
           ),
-          SizedBox(width: isMobile ? 12 : 16),
+          SizedBox(width: 16),
           Expanded(
             child: Text(
               'Impossibile caricare le informazioni azienda',
@@ -3167,16 +2883,13 @@ class _EditOtpModalState extends State<EditOtpModal> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Container(
-        width: isMobile ? double.infinity : 500,
-        padding: EdgeInsets.all(isMobile ? 24 : 32),
+        width: 500,
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -3213,7 +2926,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                     child: Icon(
                       Icons.edit,
                       color: Colors.white,
-                      size: isMobile ? 24 : 28,
+                      size: 28,
                     ),
                   ),
                   SizedBox(width: 20),
@@ -3224,7 +2937,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                         Text(
                           AppLocalizations.of(context)!.editOtpTag,
                           style: TextStyle(
-                            fontSize: isMobile ? 20 : 24,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade800,
                           ),
@@ -3244,7 +2957,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
               ),
             ),
 
-            SizedBox(height: isMobile ? 24 : 32),
+            SizedBox(height: 32),
 
             // Tag Input
             TextField(
@@ -3268,7 +2981,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
               textCapitalization: TextCapitalization.words,
             ),
 
-            SizedBox(height: isMobile ? 24 : 32),
+            SizedBox(height: 32),
 
             // Action Buttons
             Row(
@@ -3281,7 +2994,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                       side: BorderSide(color: Colors.grey.shade400),
                       foregroundColor: Colors.grey.shade700,
                       padding: EdgeInsets.symmetric(
-                        vertical: isMobile ? 12 : 16,
+                        vertical: 16,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -3296,7 +3009,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                     ),
                   ),
                 ),
-                SizedBox(width: isMobile ? 12 : 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _isUpdating ? null : _updateOtpTag,
@@ -3304,7 +3017,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                       backgroundColor: Colors.orange.shade600,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
-                        vertical: isMobile ? 12 : 16,
+                        vertical: 16,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -3313,8 +3026,8 @@ class _EditOtpModalState extends State<EditOtpModal> {
                     ),
                     child: _isUpdating
                         ? SizedBox(
-                            height: isMobile ? 20 : 24,
-                            width: isMobile ? 20 : 24,
+                            height: 24,
+                            width: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor:
