@@ -5,6 +5,7 @@ import 'package:jetcv__utenti/services/otp_service.dart';
 import 'package:jetcv__utenti/models/models.dart';
 import 'package:jetcv__utenti/supabase/supabase_config.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'dart:async';
 
 class OtpListPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   String? _highlightedOtpId; // Track which OTP to highlight after update
   Map<String, Map<String, dynamic>> _legalEntities =
       {}; // Cache for legal entity data
-  String _currentFilter = 'active'; // 'all', 'blocked', 'active'
+  String _currentFilter = 'active'; // 'active', 'engaged'
 
   // Polling variables
   Timer? _pollingTimer;
@@ -177,6 +178,9 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     _pollingTimer = null;
   }
 
+  /// Toggle polling functionality
+  /// Maintained for potential future integrations (API, keyboard shortcuts, etc.)
+  // ignore: unused_element
   void _togglePolling() {
     setState(() {
       _isPollingEnabled = !_isPollingEnabled;
@@ -553,16 +557,15 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   void _applyFilter() {
     setState(() {
       switch (_currentFilter) {
-        case 'blocked':
-          _filteredOtps = _otps.where((otp) => _isOtpBlocked(otp)).toList();
-          break;
         case 'active':
-          _filteredOtps = _otps.where((otp) => !_isOtpBlocked(otp)).toList();
+          _filteredOtps = _otps.where((otp) => _isOtpActive(otp)).toList();
           break;
-        case 'all':
+        case 'engaged':
+          _filteredOtps = _otps.where((otp) => _isOtpEngaged(otp)).toList();
+          break;
         default:
-          // Mostra solo OTP non bloccati di default
-          _filteredOtps = _otps.where((otp) => !_isOtpBlocked(otp)).toList();
+          // Default to active OTPs
+          _filteredOtps = _otps.where((otp) => _isOtpActive(otp)).toList();
           break;
       }
     });
@@ -751,10 +754,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: MainLayout(
@@ -780,75 +779,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       : _buildOtpList(),
         ),
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1F2937).withValues(alpha: 0.15),
-              spreadRadius: 0,
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: _showNewOtpModal,
-          backgroundColor: const Color(0xFF1F2937),
-          elevation: 0,
-          icon: Icon(
-            Icons.add_rounded,
-            color: Colors.white,
-            size: isMobile
-                ? 18
-                : isTablet
-                    ? 20
-                    : 24,
-          ),
-          label: Text(
-            AppLocalizations.of(context)!.newOtp,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: isMobile
-                  ? 12
-                  : isTablet
-                      ? 14
-                      : 16,
-            ),
-          ),
-          extendedPadding: EdgeInsets.symmetric(
-            horizontal: isMobile
-                ? 16
-                : isTablet
-                    ? 20
-                    : 24,
-            vertical: isMobile
-                ? 12
-                : isTablet
-                    ? 14
-                    : 16,
-          ),
-        ),
-      ),
     );
   }
 
   Widget _buildLoadingState() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(isMobile
-                ? 20
-                : isTablet
-                    ? 24
-                    : 28),
+            padding: EdgeInsets.all(28),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -868,38 +808,20 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               strokeWidth: 3,
             ),
           ),
-          SizedBox(
-              height: isMobile
-                  ? 20
-                  : isTablet
-                      ? 24
-                      : 28),
+          SizedBox(height: 28),
           Text(
             'Caricamento...',
             style: TextStyle(
-              fontSize: isMobile
-                  ? 14
-                  : isTablet
-                      ? 16
-                      : 18,
+              fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Colors.grey.shade700,
             ),
           ),
-          SizedBox(
-              height: isMobile
-                  ? 8
-                  : isTablet
-                      ? 10
-                      : 12),
+          SizedBox(height: 12),
           Text(
             'Attendere prego...',
             style: TextStyle(
-              fontSize: isMobile
-                  ? 14
-                  : isTablet
-                      ? 15
-                      : 16,
+              fontSize: 16,
               color: Colors.grey.shade500,
             ),
           ),
@@ -909,32 +831,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   Widget _buildEmptyState() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
-
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile
-            ? 24
-            : isTablet
-                ? 32
-                : 40),
+        padding: EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Icon container
             Container(
-              width: isMobile
-                  ? 80
-                  : isTablet
-                      ? 90
-                      : 100,
-              height: isMobile
-                  ? 80
-                  : isTablet
-                      ? 90
-                      : 100,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 color: const Color(0xFF1F2937).withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
@@ -945,11 +851,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               ),
               child: Icon(
                 Icons.security,
-                size: isMobile
-                    ? 40
-                    : isTablet
-                        ? 45
-                        : 50,
+                size: 50,
                 color: const Color(0xFF1F2937),
               ),
             ),
@@ -1007,11 +909,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
             // Features list
             Container(
-              padding: EdgeInsets.all(isMobile
-                  ? 20
-                  : isTablet
-                      ? 24
-                      : 28),
+              padding: EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -1030,8 +928,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                     Icons.shield,
                     AppLocalizations.of(context)!.secureAccess,
                     AppLocalizations.of(context)!.secureAccessDescription,
-                    isMobile,
-                    isTablet,
                   ),
                   SizedBox(
                       height: isMobile
@@ -1072,8 +968,6 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     IconData icon,
     String title,
     String description,
-    bool isMobile,
-    bool isTablet,
   ) {
     return Row(
       children: [
@@ -1144,15 +1038,170 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildFilterSection(bool isMobile, bool isTablet) {
+  Widget _buildDescriptionSection() {
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile
-            ? 16
-            : isTablet
-                ? 24
-                : 32,
-        vertical: isMobile ? 8 : 12,
+        horizontal: 24,
+        vertical: 8,
+      ),
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blue.shade50,
+                Colors.blue.shade100,
+              ],
+            ),
+          ),
+          padding: EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with icon and title
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade600,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.info_outline,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Come funzionano gli OTP',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+
+              // Compact description
+              Text(
+                'Gli OTP permettono ai certificatori di aggiungerti tra gli utenti da certificare. Puoi assegnare un tag identificativo, comunicare il codice come preferisci o mostrare il QR code.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade700,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewOtpButton() {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 12,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF1F2937),
+              const Color(0xFF374151),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1F2937).withValues(alpha: 0.25),
+              spreadRadius: 0,
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _showNewOtpModal,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: EdgeInsets.all(24),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Crea nuovo OTP',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 21,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          'Genera un codice sicuro per il tuo certificatore',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 14,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 8,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1160,33 +1209,22 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           Text(
             AppLocalizations.of(context)!.filterOtps,
             style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.grey.shade700,
             ),
           ),
-          SizedBox(height: isMobile ? 8 : 12),
+          SizedBox(height: 8),
           Row(
             children: [
               _buildFilterButton(
-                'all',
-                AppLocalizations.of(context)!.allOtps,
-                isMobile,
-                isTablet,
-              ),
-              SizedBox(width: isMobile ? 8 : 12),
-              _buildFilterButton(
                 'active',
                 AppLocalizations.of(context)!.activeOtps,
-                isMobile,
-                isTablet,
               ),
-              SizedBox(width: isMobile ? 8 : 12),
+              SizedBox(width: 12),
               _buildFilterButton(
-                'blocked',
-                AppLocalizations.of(context)!.blockedOtps,
-                isMobile,
-                isTablet,
+                'engaged',
+                'OTP Impegnati',
               ),
             ],
           ),
@@ -1195,10 +1233,9 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildFilterButton(
-      String filter, String label, bool isMobile, bool isTablet) {
+  Widget _buildFilterButton(String filter, String label) {
     final isSelected = _currentFilter == filter;
-    final isBlocked = filter == 'blocked';
+    final isEngaged = filter == 'engaged';
     final isActive = filter == 'active';
 
     Color backgroundColor;
@@ -1206,10 +1243,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     Color borderColor;
 
     if (isSelected) {
-      if (isBlocked) {
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade800;
-        borderColor = Colors.red.shade200;
+      if (isEngaged) {
+        backgroundColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade800;
+        borderColor = Colors.orange.shade200;
       } else if (isActive) {
         backgroundColor = Colors.green.shade50;
         textColor = Colors.green.shade800;
@@ -1231,7 +1268,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: isMobile ? 12 : 16,
-            vertical: isMobile ? 8 : 10,
+            vertical: 10,
           ),
           decoration: BoxDecoration(
             color: backgroundColor,
@@ -1244,31 +1281,31 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (isBlocked)
+              if (isEngaged)
                 Icon(
-                  Icons.block,
-                  size: isMobile ? 14 : 16,
+                  Icons.how_to_reg,
+                  size: 16,
                   color: textColor,
                 ),
-              if (isBlocked) SizedBox(width: 4),
+              if (isEngaged) SizedBox(width: 4),
               if (isActive)
                 Icon(
                   Icons.check_circle,
-                  size: isMobile ? 14 : 16,
+                  size: 16,
                   color: textColor,
                 ),
               if (isActive) SizedBox(width: 4),
               if (filter == 'all')
                 Icon(
                   Icons.list,
-                  size: isMobile ? 14 : 16,
+                  size: 16,
                   color: textColor,
                 ),
               if (filter == 'all') SizedBox(width: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: isMobile ? 12 : 14,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: textColor,
                 ),
@@ -1280,14 +1317,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildEmptyFilteredState(bool isMobile, bool isTablet) {
+  Widget _buildEmptyFilteredState() {
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile
-            ? 24
-            : isTablet
-                ? 32
-                : 40),
+        padding: EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1320,11 +1353,11 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                 color: Colors.grey.shade600,
               ),
             ),
-            SizedBox(height: isMobile ? 16 : 20),
+            SizedBox(height: 20),
             Text(
               AppLocalizations.of(context)!.noOtpsFound,
               style: TextStyle(
-                fontSize: isMobile ? 18 : 20,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade700,
               ),
@@ -1333,7 +1366,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             Text(
               AppLocalizations.of(context)!.noOtpsFoundDescription,
               style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
+                fontSize: 16,
                 color: Colors.grey.shade600,
               ),
               textAlign: TextAlign.center,
@@ -1356,7 +1389,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               label: Text(
                 AppLocalizations.of(context)!.allOtps,
                 style: TextStyle(
-                  fontSize: isMobile ? 14 : 16,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1367,217 +1400,140 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildOtpList() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+  Widget _buildSectionDescription() {
+    if (_filteredOtps.isEmpty) {
+      return const SizedBox.shrink(); // Don't show description if no OTPs
+    }
 
-    return Column(
-      children: [
-        // Header Section - Compact
-        Container(
-          width: double.infinity,
-          margin: EdgeInsets.symmetric(
-            horizontal: isMobile
-                ? 16
-                : isTablet
-                    ? 20
-                    : 24,
-            vertical: isMobile
-                ? 8
-                : isTablet
-                    ? 10
-                    : 12,
-          ),
-          padding: EdgeInsets.all(isMobile
-              ? 12
-              : isTablet
-                  ? 14
-                  : 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1F2937).withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFF1F2937).withValues(alpha: 0.1),
-              width: 1,
+    String title;
+    String description;
+    Color backgroundColor;
+    Color borderColor;
+    IconData icon;
+
+    switch (_currentFilter) {
+      case 'active':
+        title = 'OTP Attivi';
+        description =
+            'Questi sono gli OTP che hai generato e che puoi comunicare al tuo certificatore';
+        backgroundColor = Colors.green.shade50;
+        borderColor = Colors.green.shade200;
+        icon = Icons.check_circle;
+        break;
+      case 'engaged':
+        title = 'OTP Impegnati';
+        description =
+            'Questi sono gli OTP che hai già comunicato al tuo certificatore e che sono stati impegnati';
+        backgroundColor = Colors.orange.shade50;
+        borderColor = Colors.orange.shade200;
+        icon = Icons.how_to_reg;
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(
+        isMobile
+            ? 16
+            : isTablet
+                ? 20
+                : 24,
+        8,
+        isMobile
+            ? 16
+            : isTablet
+                ? 20
+                : 24,
+        6,
+      ),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: borderColor.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: isMobile ? 16 : 18,
+              color: borderColor.withValues(alpha: 0.8),
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(isMobile
-                    ? 6
-                    : isTablet
-                        ? 8
-                        : 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.security,
-                  color: Colors.white,
-                  size: isMobile
-                      ? 16
-                      : isTablet
-                          ? 18
-                          : 20,
-                ),
-              ),
-              SizedBox(
-                  width: isMobile
-                      ? 8
-                      : isTablet
-                          ? 10
-                          : 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.of(context)!.myOtps,
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
                   style: TextStyle(
-                    fontSize: isMobile
-                        ? 14
-                        : isTablet
-                            ? 16
-                            : 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey.shade800,
                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  // Polling status indicator
-                  GestureDetector(
-                    onTap: _togglePolling,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isMobile ? 8 : 10,
-                        vertical: isMobile ? 4 : 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _isPollingEnabled
-                            ? Colors.green.shade100
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: _isPollingEnabled
-                              ? Colors.green.shade300
-                              : Colors.grey.shade300,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _isPollingEnabled
-                                ? Icons.sync
-                                : Icons.sync_disabled,
-                            color: _isPollingEnabled
-                                ? Colors.green.shade600
-                                : Colors.grey.shade600,
-                            size: isMobile ? 14 : 16,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            _isPollingEnabled ? 'Auto' : 'Man',
-                            style: TextStyle(
-                              fontSize: isMobile ? 10 : 12,
-                              fontWeight: FontWeight.w600,
-                              color: _isPollingEnabled
-                                  ? Colors.green.shade700
-                                  : Colors.grey.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: isMobile ? 12 : 13,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
                   ),
-                  SizedBox(width: 8),
-                  // OTP count
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobile
-                          ? 8
-                          : isTablet
-                              ? 10
-                              : 12,
-                      vertical: isMobile
-                          ? 4
-                          : isTablet
-                              ? 5
-                              : 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1F2937).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.vpn_key,
-                          color: const Color(0xFF1F2937),
-                          size: isMobile
-                              ? 14
-                              : isTablet
-                                  ? 16
-                                  : 18,
-                        ),
-                        SizedBox(
-                            width: isMobile
-                                ? 4
-                                : isTablet
-                                    ? 6
-                                    : 8),
-                        Text(
-                          '${_otps.where((otp) => !_isOtpBlocked(otp)).length}',
-                          style: TextStyle(
-                            fontSize: isMobile
-                                ? 14
-                                : isTablet
-                                    ? 16
-                                    : 18,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1F2937),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
 
-        // OTP List
+  Widget _buildOtpList() {
+    return Column(
+      children: [
+        // Description Section
+        _buildDescriptionSection(),
+
+        // New OTP Button
+        _buildNewOtpButton(),
+
         // Filter Section
-        _buildFilterSection(isMobile, isTablet),
+        _buildFilterSection(),
 
         Expanded(
           child: _filteredOtps.isEmpty && !_isLoading
-              ? _buildEmptyFilteredState(isMobile, isTablet)
-              : ListView.builder(
-                  key: ValueKey('otp_list_${_filteredOtps.length}'),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile
-                        ? 16
-                        : isTablet
-                            ? 20
-                            : 24,
-                    vertical: isMobile
-                        ? 8
-                        : isTablet
-                            ? 12
-                            : 16,
-                  ),
-                  itemCount: _filteredOtps.length,
-                  itemBuilder: (context, index) {
-                    final otp = _filteredOtps[index];
-                    return _buildOtpCard(otp);
-                  },
+              ? _buildEmptyFilteredState()
+              : Column(
+                  children: [
+                    // Section description
+                    _buildSectionDescription(),
+
+                    // OTP List
+                    Expanded(
+                      child: ListView.builder(
+                        key: ValueKey('otp_list_${_filteredOtps.length}'),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 6,
+                        ),
+                        itemCount: _filteredOtps.length,
+                        itemBuilder: (context, index) {
+                          final otp = _filteredOtps[index];
+                          return _buildOtpCard(otp);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ],
@@ -1591,11 +1547,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile
-            ? 24
-            : isTablet
-                ? 32
-                : 40),
+        padding: EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1661,11 +1613,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
             // Error message
             Container(
-              padding: EdgeInsets.all(isMobile
-                  ? 20
-                  : isTablet
-                      ? 24
-                      : 28),
+              padding: EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: Colors.red.shade50,
                 borderRadius: BorderRadius.circular(16),
@@ -1983,7 +1931,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         // Mostra messaggio di blocco invece del codice
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 16 : 20,
+                            horizontal: 20,
                             vertical: isMobile ? 12 : 16,
                           ),
                           decoration: BoxDecoration(
@@ -2061,7 +2009,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 16 : 20,
+                      horizontal: 20,
                       vertical: isMobile ? 12 : 16,
                     ),
                     decoration: BoxDecoration(
@@ -2078,13 +2026,13 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                         Icon(
                           Icons.info_outline,
                           color: Colors.red.shade600,
-                          size: isMobile ? 18 : 20,
+                          size: 20,
                         ),
                         SizedBox(width: 8),
                         Text(
                           AppLocalizations.of(context)!.otpBlockedMessage,
                           style: TextStyle(
-                            fontSize: isMobile ? 12 : 14,
+                            fontSize: 14,
                             color: Colors.red.shade600,
                             fontWeight: FontWeight.w500,
                           ),
@@ -2227,10 +2175,10 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               label,
               style: TextStyle(
                 fontSize: isMobile
-                    ? 9
+                    ? 12
                     : isTablet
-                        ? 10
-                        : 11,
+                        ? 14
+                        : 16,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -2253,15 +2201,29 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
     final now = DateTime.now();
     final difference = now.difference(createdAt);
 
+    // Format the date in Italian format (dd MMM yyyy)
+    final dateFormatter = DateFormat('dd MMM yyyy', 'it_IT');
+    final formattedDate = dateFormatter.format(createdAt);
+
+    // Calculate relative time
+    String relativeTime;
     if (difference.inMinutes < 1) {
-      return AppLocalizations.of(context)!.createdNow;
+      relativeTime = 'adesso';
     } else if (difference.inMinutes < 60) {
-      return 'Creato ${difference.inMinutes} minuti fa';
+      relativeTime =
+          '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minuto' : 'minuti'} fa';
     } else if (difference.inHours < 24) {
-      return 'Creato ${difference.inHours} ore fa';
+      relativeTime =
+          '${difference.inHours} ${difference.inHours == 1 ? 'ora' : 'ore'} fa';
+    } else if (difference.inDays < 30) {
+      relativeTime =
+          '${difference.inDays} ${difference.inDays == 1 ? 'giorno' : 'giorni'} fa';
     } else {
-      return 'Creato ${difference.inDays} giorni fa';
+      final months = (difference.inDays / 30).floor();
+      relativeTime = '$months ${months == 1 ? 'mese' : 'mesi'} fa';
     }
+
+    return '$formattedDate ($relativeTime)';
   }
 
   String _getStatusText(OtpModel otp) {
@@ -2283,6 +2245,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   }
 
   bool _isOtpBlocked(OtpModel otp) {
+    return otp.usedByIdUser != null;
+  }
+
+  /// Check if OTP is active: burned_at null, not expired, used_by_id_user null
+  bool _isOtpActive(OtpModel otp) {
+    return !otp.isBurned && !otp.isExpired && otp.usedByIdUser == null;
+  }
+
+  /// Check if OTP is engaged: used_by_id_user is set
+  bool _isOtpEngaged(OtpModel otp) {
     return otp.usedByIdUser != null;
   }
 
@@ -2351,7 +2323,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -2381,7 +2353,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
               width: double.infinity,
               padding: EdgeInsets.symmetric(
                 horizontal: isMobile ? 12 : 16,
-                vertical: isMobile ? 8 : 10,
+                vertical: 10,
               ),
               decoration: BoxDecoration(
                 color: Colors.red.shade100,
@@ -2402,7 +2374,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   Text(
                     AppLocalizations.of(context)!.blockedByLegalEntity,
                     style: TextStyle(
-                      fontSize: isMobile ? 12 : 14,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.red.shade700,
                     ),
@@ -2495,7 +2467,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                       Text(
                         '${AppLocalizations.of(context)!.vatNumber}: ${legalEntityData['identifier_code']}',
                         style: TextStyle(
-                          fontSize: isMobile ? 12 : 14,
+                          fontSize: 14,
                           color: isBlocked
                               ? Colors.red.shade600
                               : Colors.blue.shade600,
@@ -2565,16 +2537,16 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
       IconData icon, String label, String value, bool isMobile, bool isTablet,
       {bool isBlocked = false}) {
     return Padding(
-      padding: EdgeInsets.only(bottom: isMobile ? 6 : 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
             icon,
-            size: isMobile ? 14 : 16,
+            size: 16,
             color: isBlocked ? Colors.red.shade600 : Colors.blue.shade600,
           ),
-          SizedBox(width: isMobile ? 8 : 10),
+          SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -2582,7 +2554,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   TextSpan(
                     text: '$label: ',
                     style: TextStyle(
-                      fontSize: isMobile ? 12 : 14,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: isBlocked
                           ? Colors.red.shade700
@@ -2592,7 +2564,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
                   TextSpan(
                     text: value,
                     style: TextStyle(
-                      fontSize: isMobile ? 12 : 14,
+                      fontSize: 14,
                       color: isBlocked
                           ? Colors.red.shade600
                           : Colors.blue.shade600,
@@ -2610,7 +2582,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   Widget _buildLegalEntityLoadingSection(bool isMobile, bool isTablet) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -2642,7 +2614,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             child: Text(
               'Caricamento informazioni azienda...',
               style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
+                fontSize: 16,
                 color: Colors.blue.shade700,
                 fontWeight: FontWeight.w500,
               ),
@@ -2656,7 +2628,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
   Widget _buildLegalEntityErrorSection(bool isMobile, bool isTablet) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -2685,7 +2657,7 @@ class _OtpListPageState extends State<OtpListPage> with WidgetsBindingObserver {
             child: Text(
               'Impossibile caricare le informazioni azienda',
               style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
+                fontSize: 16,
                 color: Colors.orange.shade700,
                 fontWeight: FontWeight.w500,
               ),
@@ -3210,7 +3182,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
           children: [
             // Header
             Container(
-              padding: EdgeInsets.all(isMobile ? 16 : 20),
+              padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -3226,7 +3198,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(isMobile ? 12 : 14),
+                    padding: EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -3244,7 +3216,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                       size: isMobile ? 24 : 28,
                     ),
                   ),
-                  SizedBox(width: isMobile ? 16 : 20),
+                  SizedBox(width: 20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3257,11 +3229,11 @@ class _EditOtpModalState extends State<EditOtpModal> {
                             color: Colors.grey.shade800,
                           ),
                         ),
-                        SizedBox(height: isMobile ? 4 : 6),
+                        SizedBox(height: 6),
                         Text(
                           'Modifica il tag per identificare questo OTP',
                           style: TextStyle(
-                            fontSize: isMobile ? 14 : 16,
+                            fontSize: 16,
                             color: Colors.grey.shade600,
                           ),
                         ),
@@ -3318,7 +3290,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                     child: Text(
                       AppLocalizations.of(context)!.close,
                       style: TextStyle(
-                        fontSize: isMobile ? 14 : 16,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -3352,7 +3324,7 @@ class _EditOtpModalState extends State<EditOtpModal> {
                         : Text(
                             AppLocalizations.of(context)!.updateTag,
                             style: TextStyle(
-                              fontSize: isMobile ? 14 : 16,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
